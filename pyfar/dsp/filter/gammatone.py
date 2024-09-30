@@ -182,7 +182,7 @@ class GammatoneBands():
         warnings.warn((
             'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
             ' of frequency_range'),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=2)
         return self._frequency_range
 
     @property
@@ -355,7 +355,7 @@ class GammatoneBands():
 
         # iteratively find gains
         gains = np.ones((self.n_bands, 1))
-        for ii in range(100):
+        for _ii in range(100):
             h_fin = np.matmul(h, gains)
             gains /= np.abs(h_fin)
 

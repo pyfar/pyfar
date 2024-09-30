@@ -428,8 +428,8 @@ def test_coordinates_init_from_cartesian_with(x, y, z, weights, comment):
     npt.assert_allclose(coords._x, x)
     npt.assert_allclose(coords._y, y)
     npt.assert_allclose(coords._z, z)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('x', [0, 1, -1.])
@@ -460,8 +460,8 @@ def test_coordinates_init_from_spherical_colatitude_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
@@ -479,8 +479,8 @@ def test_coordinates_init_from_spherical_elevation_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('lateral', [0, np.pi/2, -np.pi/2])
@@ -498,8 +498,8 @@ def test_coordinates_init_from_spherical_side_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('frontal', [0, np.pi, -np.pi, 3*np.pi])
@@ -517,8 +517,8 @@ def test_coordinates_init_from_spherical_front_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
@@ -536,8 +536,8 @@ def test_coordinates_init_from_cylindrical_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])

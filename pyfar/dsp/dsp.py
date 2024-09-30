@@ -1046,7 +1046,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     if mode in ['before', 'after']:
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning)
+                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=2)
 
         mode = 'beginning' if mode == 'before' else 'end'
 
@@ -1333,7 +1333,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 else:
                     start_sample[idx] = np.nan
                     warnings.warn('Starting sample not found for channel '
-                                  f'{ch}')
+                                  f'{ch}', stacklevel=2)
             else:
                 start_sample[idx] = np.nan
 
@@ -1451,7 +1451,7 @@ def find_impulse_response_start(
             warnings.warn(
                 "The SNR seems lower than the specified threshold value. "
                 "Check if this is a valid impulse response with sufficient "
-                "SNR.")
+                "SNR.", stacklevel=2)
 
         start_sample = max_sample.copy()
 
@@ -1472,7 +1472,7 @@ def find_impulse_response_start(
                     start_sample[ch] = 0
                     warnings.warn(
                         'No values below threshold found found for channel '
-                        f'{ch} defaulting to 0')
+                        f'{ch} defaulting to 0', stacklevel=2)
 
         ir_start[idx] = start_sample
 
@@ -2350,7 +2350,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     if 1 in signal.cshape:
         for ax in caxis:
             if signal.cshape[ax] == 1:
-                warnings.warn(f"Averaging one dimensional caxis={caxis}.")
+                warnings.warn(
+                    f"Averaging one dimensional caxis={caxis}.", stacklevel=2)
     if not isinstance(caxis, int):
         axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
     else:
