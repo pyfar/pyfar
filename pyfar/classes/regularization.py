@@ -1,67 +1,27 @@
-#%%
 """
 Documentation for regularization class.
 """
 
-from pyfar import FrequencyData, Signal
+import pyfar as pf
 from pyfar.dsp.dsp import _cross_fade
 import numpy as np
 
 class Regularization():
-    """Class for regularization.
-    """
+    """Class for regularization."""
 
-    def __init__(self,
-                 frequency_range: np.array=np.asarray([]),
-                 regu_outside: float=None,
-                 regu_inside: float=None,
-                 regu_type: str="") -> None:
+    def __init__(self, regu_type: str="") -> None:
 
-        # Initialize empty Regularization object
-        super(Regularization, self).__init__()
-        self.frequency_range = frequency_range
-        self.regu_outside = regu_outside
-        self.regu_inside = regu_inside
-        self.regu_type = regu_type
-
-        # attributes for internal use
-        self._signal = None
-        self._regu = None
-
-
-    @property
-    def regu_data(self):
-        return self._regu
-
-    @property
-    def signal(self):
-        return self._signal
-
-    @signal.setter
-    def signal(self, signal):
-        """
-        Setter method for signal attribute.
-
-        Used to call the _get_regularization_factors method to calculate the
-        regularization factors for the given signal.
-        """
-
-        if not isinstance(signal, (FrequencyData, Signal)):
-            raise TypeError(
-                "signal must be an instance of FrequencyData or Signal")
-
-        self._signal = signal
-
-        self._regu = self._get_regularization_factors()
+        # throw error if object is instanced without classmethod
+        if regu_type == "":
+            raise RuntimeError("Regularization objects must be created "
+                             "using a classmethod.")
 
     def __repr__(self):
         return f"Regularization object with regularization "\
-            f"of type {self.regu_type}"
-
+            f"of type '{self._regu_type}'."
 
     @classmethod
-    def from_frequency_range(cls, frequency_range, regu_outside=1.,
-                             regu_inside=10**(-200/20)):
+    def from_frequency_range(cls, frequency_range, beta=1, target=None):
         """
         Regularization from frequency range.
 
@@ -74,58 +34,153 @@ class Regularization():
         regu_inside : float
             Regularization factor inside the frequency range.
         """
+        instance = cls(regu_type = "frequency range")
 
-        return cls(frequency_range, regu_outside, regu_inside,
-                   regu_type="frequency range")
+        if len(frequency_range) < 2:
+            raise ValueError(
+                "The frequency range needs to specify lower and upper limits.")
 
+        instance._frequency_range = np.asarray(frequency_range)
+        instance._target = target
+        instance._beta = beta
+        instance._regu_type = "frequency range"
 
-    def _get_regularization_factors(self):
+        return instance
+
+    @classmethod
+    def from_signal(cls, regularization, beta=1, target=None):
         """
-        Aranges the regularization factors depending on regularization type
-        and number of bins in the signal.
+        Regularization from signal.
 
-        Returns
-        -------
-        regu_final : FrequencyData
-            Regularization factors per frequency as pf.FrequencyData object.
+        Parameters
+        ----------
+        regularization : pf.Signal
+            Regularization as pyfar Signal
+        """
+        instance = cls(regu_type = "signal")
+        instance._regu = regularization
+        instance._target = target
+        instance._beta = beta
+
+        return instance
+
+    def invert(self, signal):
+        """Method to get inverse of signal"""
+        # zero pad, if target function is given
+        # if self._target and self._target.n_samples != signal.n_samples:
+        #     n_samples = max(signal.n_samples, self._target.n_samples)
+        #     signal = pf.dsp.pad_zeros(signal, (n_samples-signal.n_samples))
+        #     self._target = pf.dsp.pad_zeros(self._target,
+        #                                     (n_samples-self._target.n_samples))
+
+        # get regularization factors
+        regu = self.get_regularization(signal)
+        regu_final = regu.freq
+
+        # normalize to maximum of signal's magnitude spectrum
+        data = self._signal.freq
+
+        # calculate inverse filter
+        inverse = self._signal.copy()
+        if self._target:
+            # Norcross 2006 eq. 2.13
+            inverse.freq = np.conj(data) * regu_final / (np.conj(data) * data)
+        else:
+            regu_final *= np.max(np.abs(data)**2)
+            inverse.freq = np.conj(data) / (np.conj(data) * data + regu_final)
+
+        return inverse
+
+    def get_regularization(self, signal):
+        """
+        Method to get the regularization factors based on regularization type.
+
+        Parameters
+        ----------
+        signal : pf.Signal, optional
+            Signal object to get the regularization factors from. Depending on
+            the regularization type, a signal must be passed.
         """
 
-        if self.regu_type == "frequency range":
-            regu_inside = np.ones(self._signal.n_bins,
-                                  dtype=np.double) * self.regu_inside
-            regu_outside = np.ones(self._signal.n_bins,
-                                   dtype=np.double) * self.regu_outside
+        # zero pad, if target function is given
+        if self._target and self._target.n_samples != signal.n_samples:
+            n_samples = max(signal.n_samples, self._target.n_samples)
+            signal = pf.dsp.pad_zeros(signal, (n_samples-signal.n_samples))
+            self._target = pf.dsp.pad_zeros(self._target,
+                                            (n_samples-self._target.n_samples))
 
-            idx_xfade_lower = self._signal.find_nearest_frequency(
-                [self.frequency_range[0]/np.sqrt(2), self.frequency_range[0]])
+        # Assign signal to class attribute, so further processing methods can
+        # use zero padded signal (e.g. invert())
+        self._signal = signal
 
-            regu_final = _cross_fade(regu_outside, regu_inside,
-                                     idx_xfade_lower)
+        # Call private method to get regularization factors
+        if self._regu_type == "frequency range":
+            regu = self._get_regularization_from_frequency_range(signal)
+        elif self._regu_type == "signal":
+            regu = self._get_regularization_from_regularization_final(signal)
 
-            if self.frequency_range[1] < self._signal.sampling_rate/2:
-                idx_xfade_upper = self._signal.find_nearest_frequency([
-                    self.frequency_range[1],
-                    np.min([self.frequency_range[1]*np.sqrt(2),
-                            self._signal.sampling_rate/2])])
+        if self._target:
+            regu = self._get_regularization_with_target(signal, regu)
 
-                regu_final = _cross_fade(regu_final, regu_outside,
-                                         idx_xfade_upper)
-            return FrequencyData(regu_final, self._signal.frequencies)
+        return regu
 
+    def _get_regularization_with_target(self, signal, regu):
+        """Get regularization using a target function"""
+        # calculate target function regularization (Norcross 2006)
+        regu_abs_sq = regu.freq * np.conj(regu.freq)
+        sig_avs_sq = signal.freq * np.conj(signal.freq)
 
-#%%
-import pyfar as pf
-import matplotlib.pyplot as plt
+        A_eq = 1 / (1 + self._beta * (regu_abs_sq / sig_avs_sq))
+        A = A_eq * np.abs(self._target.freq)
 
-regu = Regularization.from_frequency_range((20, 20e3))
-
-sig = pf.signals.linear_sweep_time(512, (100, 20e3))
+        return pf.FrequencyData(A, signal.frequencies)
 
 
-regu.signal = sig
-# #regu.signal = sig.time
-plt.plot(sig.frequencies, regu.regu_data.freq[0,:])
-plt.show()
+    def _get_regularization_from_frequency_range(self, signal):
+        """Get regularization factors from frequency range."""
 
-regu
-# %%
+        if not isinstance(signal, pf.Signal):
+            raise TypeError(f"Regularization of type '{self._regu_type}' "
+                         "requires an input signal of type pyfar.Signal.")
+
+        # arrange regularization factors for inside and outside frequency range
+        regu_inside = np.zeros(signal.n_bins, dtype=np.double)
+        regu_outside = np.ones(signal.n_bins, dtype=np.double) * self._beta
+
+        # index for crossfade at lower frequency limit
+        idx_xfade_lower = signal.find_nearest_frequency(
+            [self._frequency_range[0]/np.sqrt(2), self._frequency_range[0]])
+
+        regu_final = _cross_fade(regu_outside, regu_inside, idx_xfade_lower)
+
+        # index for crossfade at upper frequency limit
+        if self._frequency_range[1] < signal.sampling_rate/2:
+            idx_xfade_upper = signal.find_nearest_frequency([
+                self._frequency_range[1],
+                np.min([self._frequency_range[1]*np.sqrt(2),
+                        signal.sampling_rate/2])])
+
+            # crossfade regularization factors at frequency limits
+            regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
+
+        if self._target is None:
+            # control amount of regularization using beta
+            regu_final *= self._beta
+
+        return pf.FrequencyData(regu_final, signal.frequencies)
+
+    def _get_regularization_from_regularization_final(self, signal):
+        """
+        Get regularization from final regularization factors.
+        """
+
+        if not isinstance(signal, pf.Signal):
+            raise TypeError(f"Regularization of type '{self._regu_type}' "
+                            "requires an input signal of type pyfar.Signal.")
+
+        if signal.n_bins != len(self._regu_final):
+            raise ValueError(
+                "The number of bins in the signal and the regularization "
+                "factors must be equal.")
+        return pf.FrequencyData(self._regu_final, signal.frequencies)
+

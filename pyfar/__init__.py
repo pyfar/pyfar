@@ -14,6 +14,7 @@ from .classes.coordinates import Coordinates
 from .classes.coordinates import (deg2rad, rad2deg)
 from .classes.orientations import Orientations
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
+from .classes.regularization import Regularization
 
 from . import plot
 from . import samplings
@@ -45,4 +46,5 @@ __all__ = [
     'io',
     'dsp',
     'signals',
-    'utils']
+    'utils',
+    'Regularization']
