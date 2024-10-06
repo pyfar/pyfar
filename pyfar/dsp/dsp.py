@@ -2703,7 +2703,7 @@ def correlate(signal_1, signal_2, mode='linear'):
         `signal_1`.
     mode : str, optional
 
-        ``'linear'```
+        ``'linear'``
             Computes the linear correlation by zero padding the input signals
             to a length of ``signal_1.n_samples + signal_2.n_samples - 1``
             before applying the Fourier transform (see equations above).
@@ -2712,10 +2712,12 @@ def correlate(signal_1, signal_2, mode='linear'):
             they are. In this case `signal_1` and `signal_2` must have the
             same number of samples (length).
 
+        The default is ``'linear'``.
+
     Returns
     -------
     correlation : numpy array
-        The correlation :math:`c[l]`. the shape of `correlation` matches the
+        The correlation :math:`c[l]`. The shape of `correlation` matches the
         shape to which `signal_1` and `signal_2` were broadcasted. The last
         dimension of the shape is given by the `lags` (see below).
     lags : numpy array
@@ -2728,11 +2730,11 @@ def correlate(signal_1, signal_2, mode='linear'):
         ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]`` if the
         signals have an odd number of samples.
     argmax : numpy array
-        The delays applied to `signal_2` which maximize the correlation between
-        the signals, i.e., :math:`\arg \max_{l} \, |c[l]|` where the absolute
-        :math:`|\cdot|` is required for complex-valued time signals. The shape
-        of `argmax` corresponds to the `cshape` to which the input signals were
-        broadcaseted.
+        The lag applied to `signal_2` which maximize the correlation between
+        the signals, i.e., :math:`\arg \max_{l} \, c[l]` for real-valued time
+        data, and :math:`\arg \max_{l} \, |c[l]|` for complex-valued time data.
+        The shape of `argmax` corresponds to the `cshape` to which the input
+        signals were broadcaseted.
 
     Examples
     --------
@@ -2830,7 +2832,10 @@ def correlate(signal_1, signal_2, mode='linear'):
     else:
         lags = np.arange(-n_samples[1] + 1, n_samples[0])
 
-    # get lag tha maximized the correlation
-    argmax = lags[np.argmax(np.abs(correlation), -1)]
+    # get the time lag that maximizes the correlation
+    if signal_1.complex:
+        argmax = lags[np.argmax(np.abs(correlation), -1)]
+    else:
+        argmax = lags[np.argmax(correlation, -1)]
 
     return correlation, lags, argmax
