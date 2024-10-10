@@ -2671,7 +2671,7 @@ def normalize(signal, reference_method='max', domain='auto',
         return normalized_signal
 
 
-def correlate(signal_1, signal_2, mode='linear'):
+def correlate(signal_1, signal_2, mode='full'):
     r"""
     Compute channel-wise correlation between signals.
 
@@ -2703,8 +2703,8 @@ def correlate(signal_1, signal_2, mode='linear'):
         `signal_1`.
     mode : str, optional
 
-        ``'linear'``
-            Computes the linear correlation by zero padding the input signals
+        ``'full'``
+            Computes the full correlation by zero padding the input signals
             to a length of ``signal_1.n_samples + signal_2.n_samples - 1``
             before applying the Fourier transform (see equations above).
         ``'cyclic'``
@@ -2712,7 +2712,7 @@ def correlate(signal_1, signal_2, mode='linear'):
             they are. In this case `signal_1` and `signal_2` must have the
             same number of samples (length).
 
-        The default is ``'linear'``.
+        The default is ``'full'``.
 
     Returns
     -------
@@ -2722,7 +2722,7 @@ def correlate(signal_1, signal_2, mode='linear'):
         dimension of the shape is given by the `lags` (see below).
     lags : numpy array
         The time lags, i.e., the delays applied to `signal_2` (see equations
-        above). In case of a linear correlation, the time lags are in the
+        above). In case of a full correlation, the time lags are in the
         interval ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]``. In case
         of the cyclic correlation, they are in the interval
         ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]`` if the
@@ -2749,7 +2749,7 @@ def correlate(signal_1, signal_2, mode='linear'):
         >>>
         >>> signal = pf.signals.linear_perfect_sweep(2**8)
         >>>
-        >>> for mode in ['linear', 'cyclic']:
+        >>> for mode in ['full', 'cyclic']:
         >>>     cor, lags, _ = pf.dsp.correlate(signal, signal, mode)
         >>>     result = pf.TimeData(cor / pf.dsp.energy(signal), lags)
         >>>     ax = pf.plot.time(result, label=mode)
@@ -2774,7 +2774,7 @@ def correlate(signal_1, signal_2, mode='linear'):
         >>> delays = np.array([[0, 1], [2, 3]], dtype=int)
         >>> signal_2 = pf.signals.impulse(5, delays)
         >>>
-        >>> _, _, argmax = pf.dsp.correlate(signal_1, signal_2, 'linear')
+        >>> _, _, argmax = pf.dsp.correlate(signal_1, signal_2, 'full')
 
     In this case the lags correspond to the negative delays:
     ``argmax = [[0, -1], [-2, -3]]``.
@@ -2789,8 +2789,8 @@ def correlate(signal_1, signal_2, mode='linear'):
         raise ValueError(("Both signals must be complex or real valued. "
                           "Mixtures are not allowed."))
 
-    if mode not in ['linear', 'cyclic']:
-        raise ValueError(f"mode is '{mode}' but must be 'linear' or 'cyclic'")
+    if mode not in ['full', 'cyclic']:
+        raise ValueError(f"mode is '{mode}' but must be 'full' or 'cyclic'")
 
     # copy input to avoid changing mutual data
     signal_1 = signal_1.copy()

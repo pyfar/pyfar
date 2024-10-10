@@ -57,7 +57,7 @@ def test_error_cyclic_mode():
 @pytest.mark.parametrize('length_2', [4, 5])
 @pytest.mark.parametrize('delay_2', [0, 1, 2])
 def test_linear_mode_1d(length_1, delay_1, length_2, delay_2):
-    """Test linear mode for different combinations of 1D signals."""
+    """Test full mode for different combinations of 1D signals."""
 
     # compute correlation
     signal_1 = pf.signals.impulse(length_1, delay_1)
@@ -112,7 +112,7 @@ def test_cyclic_mode_1d(length, delay_1, delay_2):
 
 
 def test_linear_mode_nd():
-    """Test broadcasting and n-dimensional signals in linear mode."""
+    """Test broadcasting and n-dimensional signals in full mode."""
 
     # compute correlation
     delays = np.array([[0, 1], [2, 3]], dtype=int)
