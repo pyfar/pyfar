@@ -2670,3 +2670,169 @@ def normalize(signal, reference_method='max', domain='auto',
         return normalized_signal, reference_norm
     else:
         return normalized_signal
+
+
+def correlate(signal_1, signal_2, mode='full'):
+    r"""
+    Compute channel-wise correlation between signals.
+
+    The correlation between the time signals :math:`x_1[n]` and :math:`x_2[n]`
+    is given by
+
+    .. math:: c[l] = \sum_n x_1[n] x_2[n-l]
+
+    with the index :math:`n` and time lag :math:`l` in samples. The computation
+    is realized in the frequency domain using the corresponding spectra
+    :math:`X_1[k]` and :math:`X_2[k]`
+
+    .. math:: c = \mathrm{IFFT\{X_1 X_2^-\}}
+
+    with the inverse fourier transform denoted by IFFT and :math:`X^-` denoting
+    the spectrum of a time-reversed and complex conjugated time signal, i.e.,
+    ``X_minus = fft(conj(x[::-1]))`` where the conjugate is required if the
+    input has complex-valued time data.
+
+    Parameters
+    ----------
+    signal_1 : Signal
+        The first input signal. It must have the same sample rate as
+        `signal_2` and its ``cshape`` must be broadcastable to that of
+        `signal_2`.
+    signal_2 : Signal
+        The second input signal. It must have the same sample rate as
+        `signal_1` and its ``cshape`` must be broadcastable to that of
+        `signal_1`.
+    mode : str, optional
+
+        ``'full'``
+            Computes the full correlation by zero padding the input signals
+            to a length of ``signal_1.n_samples + signal_2.n_samples - 1``
+            before applying the Fourier transform (see equations above).
+        ``'cyclic'``
+            Computes the cyclic correlation, which uses the input signals as
+            they are. In this case `signal_1` and `signal_2` must have the
+            same number of samples (length).
+
+        The default is ``'full'``.
+
+    Returns
+    -------
+    correlation : TimeData
+        The correlation :math:`c[l]` is contained in ``correlation.time`` and
+        the lags, i.e., the delays applied to `signal_2` (see equations above)
+        are contained in ``correlation.times``. The cshape of `correlation`
+        matches the cshape to which `signal_1` and `signal_2` were broadcasted.
+        The time lags are given in seconds and can be converted to samples by
+        multiplication with ``signal_1.sampling_rate``. In this case, they are
+        in the interval ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]``
+        if the full correlation was computed. In case of the cyclic
+        correlation, they are in the interval
+        ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]``
+        if the signals have an even number of samples, and in the interval
+        ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]``
+        if the signals have an odd number of samples.
+
+    Examples
+    --------
+
+    Linear and cyclic auto-correlation of a perfect sequence. Perfect sequences
+    have unit auto-correlation for :math:`l=0` and zero auto-correlation
+    otherwise
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.linear_perfect_sweep(2**8)
+        >>>
+        >>> for mode in ['full', 'cyclic']:
+        >>>     cor = pf.dsp.correlate(signal, signal, mode)
+        >>>     ax = pf.plot.time(cor / pf.dsp.energy(signal), label=mode)
+        >>>
+        >>> ax.set_xlabel('time lags in seconds')
+        >>> ax.set_ylabel('auto correlation')
+        >>> ax.legend()
+
+    Compute the lags (delay) that are required to maximize the
+    cross-correlation between a one and multi-dimensional signal
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>>
+        >>> # one-dimensional signal: impulse with zero delay
+        >>> signal_1 = pf.signals.impulse(5, 0)
+        >>>
+        >>> # multi-dimension signal with cshape = (2, 2):
+        >>> # impulses with non-zero delays
+        >>> delays = np.array([[0, 1], [2, 3]], dtype=int)
+        >>> signal_2 = pf.signals.impulse(5, delays)
+        >>>
+        >>> cor = pf.dsp.correlate(signal_1, signal_2, 'full')
+        >>>
+        >>> # cimpute the lags in samples
+        >>> argmax = cor.times[np.argmax(cor.time, axis=-1)]
+        >>> argmax *= signal_1.sampling_rate
+
+    In this case the lags correspond to the negative delays:
+    ``argmax = [[0, -1], [-2, -3]]``.
+    """  # noqa: E501
+
+    # check input
+    if type(signal_1) is not pyfar.Signal or \
+            type(signal_2) is not pyfar.Signal:
+        raise TypeError("signal_1 and signal_2 must be pyfar.Signal objects")
+
+    if signal_1.complex != signal_2.complex:
+        raise ValueError(("Both signals must be complex or real valued. "
+                          "Mixtures are not allowed."))
+
+    if signal_1.sampling_rate != signal_2.sampling_rate:
+        raise ValueError("Both signals must have the same sampling rate.")
+
+    if mode not in ['full', 'cyclic']:
+        raise ValueError(f"mode is '{mode}' but must be 'full' or 'cyclic'")
+
+    # copy input to avoid changing mutual data
+    signal_1 = signal_1.copy()
+    signal_2 = signal_2.copy()
+
+    # determine signal length for the FFT
+    n_samples = np.array([signal_1.n_samples, signal_2.n_samples], dtype=int)
+    if mode == 'cyclic':
+        if n_samples[0] != n_samples[1]:
+            raise ValueError(("signal_1 and signal_2 must be of the same "
+                              "length in 'cyclic' mode"))
+        n_fft = n_samples[0]
+    else:
+        n_fft = np.sum(n_samples) - 1
+
+        # zero pad signals to match lengths
+        if signal_1.n_samples < n_fft:
+            signal_1 = pyfar.dsp.pad_zeros(
+                signal_1, n_fft - signal_1.n_samples, 'end')
+        if signal_2.n_samples < n_fft:
+            signal_2 = pyfar.dsp.pad_zeros(
+                signal_2, n_fft - signal_2.n_samples, 'beginning')
+
+    # compute correlation as frequency domain convolution
+    # with time flipped and conjugate values for second signal
+    signal_2.time = signal_2.time.copy()[..., ::-1].conj()
+    correlation = signal_1 * signal_2
+    correlation = correlation.time
+
+    # compute lags, i.e., times that the second signal was shifted
+    # with respect to the first
+    if mode == 'cyclic':
+        roll = n_fft // 2
+        correlation = np.roll(correlation, -roll, -1)
+        if n_fft % 2:
+            lags = np.arange(-roll, roll + 1)
+        else:
+            lags = np.arange(-roll + 1, roll + 1)
+    else:
+        lags = np.arange(-n_samples[1] + 1, n_samples[0])
+
+    return pyfar.TimeData(correlation, lags / signal_1.sampling_rate,
+                          is_complex=signal_1.complex)
