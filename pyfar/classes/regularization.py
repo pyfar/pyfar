@@ -40,6 +40,10 @@ class Regularization():
             raise ValueError(
                 "The frequency range needs to specify lower and upper limits.")
 
+        if target and not isinstance(target, pf.Signal):
+            raise ValueError(
+                "Target function must be a pyfar.Signal object.")
+
         instance._frequency_range = np.asarray(frequency_range)
         instance._target = target
         instance._beta = beta
@@ -57,6 +61,14 @@ class Regularization():
         regularization : pf.Signal
             Regularization as pyfar Signal
         """
+        if not isinstance(regularization, pf.Signal):
+            raise ValueError(
+                "Regularization must be a pyfar.Signal object.")
+
+        if target and not isinstance(target, pf.Signal):
+            raise ValueError(
+                "Target function must be a pyfar.Signal object.")
+
         instance = cls(regu_type = "signal")
         instance._regu = regularization
         instance._target = target
@@ -66,18 +78,11 @@ class Regularization():
 
     def invert(self, signal):
         """Method to get inverse of signal"""
-        # zero pad, if target function is given
-        # if self._target and self._target.n_samples != signal.n_samples:
-        #     n_samples = max(signal.n_samples, self._target.n_samples)
-        #     signal = pf.dsp.pad_zeros(signal, (n_samples-signal.n_samples))
-        #     self._target = pf.dsp.pad_zeros(self._target,
-        #                                     (n_samples-self._target.n_samples))
 
         # get regularization factors
         regu = self.get_regularization(signal)
         regu_final = regu.freq
 
-        # normalize to maximum of signal's magnitude spectrum
         data = self._signal.freq
 
         # calculate inverse filter
@@ -86,6 +91,7 @@ class Regularization():
             # Norcross 2006 eq. 2.13
             inverse.freq = np.conj(data) * regu_final / (np.conj(data) * data)
         else:
+            # normalize to maximum of signal's magnitude spectrum
             regu_final *= np.max(np.abs(data)**2)
             inverse.freq = np.conj(data) / (np.conj(data) * data + regu_final)
 
