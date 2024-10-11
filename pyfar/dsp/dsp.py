@@ -2716,25 +2716,20 @@ def correlate(signal_1, signal_2, mode='full'):
 
     Returns
     -------
-    correlation : numpy array
-        The correlation :math:`c[l]`. The shape of `correlation` matches the
-        shape to which `signal_1` and `signal_2` were broadcasted. The last
-        dimension of the shape is given by the `lags` (see below).
-    lags : numpy array
-        The time lags, i.e., the delays applied to `signal_2` (see equations
-        above). In case of a full correlation, the time lags are in the
-        interval ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]``. In case
-        of the cyclic correlation, they are in the interval
-        ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]`` if the
-        signals have an even number of samples, and in the interval
-        ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]`` if the
-        signals have an odd number of samples.
-    argmax : numpy array
-        The lag applied to `signal_2` which maximize the correlation between
-        the signals, i.e., :math:`\arg \max_{l} \, c[l]` for real-valued time
-        data, and :math:`\arg \max_{l} \, |c[l]|` for complex-valued time data.
-        The shape of `argmax` corresponds to the `cshape` to which the input
-        signals were broadcaseted.
+    correlation : TimeData
+        The correlation :math:`c[l]` is contained in ``correlation.time`` and
+        the lags, i.e., the delays applied to `signal_2` (see equations above)
+        are contained in ``correlation.times``. The cshape of `correlation`
+        matches the cshape to which `signal_1` and `signal_2` were broadcasted.
+        The time lags are given in seconds and can be converted to samples by
+        multiplication with ``signal_1.sampling_rate``. In this case, they are
+        in the interval ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]``
+        if the full correlation was computed. In case of the cyclic
+        correlation, they are in the interval
+        ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]``
+        if the signals have an even number of samples, and in the interval
+        ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]``
+        if the signals have an odd number of samples.
 
     Examples
     --------
@@ -2750,11 +2745,10 @@ def correlate(signal_1, signal_2, mode='full'):
         >>> signal = pf.signals.linear_perfect_sweep(2**8)
         >>>
         >>> for mode in ['full', 'cyclic']:
-        >>>     cor, lags, _ = pf.dsp.correlate(signal, signal, mode)
-        >>>     result = pf.TimeData(cor / pf.dsp.energy(signal), lags)
-        >>>     ax = pf.plot.time(result, label=mode)
+        >>>     cor = pf.dsp.correlate(signal, signal, mode)
+        >>>     ax = pf.plot.time(cor / pf.dsp.energy(signal), label=mode)
         >>>
-        >>> ax.set_xlabel('time lag in samples')
+        >>> ax.set_xlabel('time lags in seconds')
         >>> ax.set_ylabel('auto correlation')
         >>> ax.legend()
 
@@ -2774,11 +2768,15 @@ def correlate(signal_1, signal_2, mode='full'):
         >>> delays = np.array([[0, 1], [2, 3]], dtype=int)
         >>> signal_2 = pf.signals.impulse(5, delays)
         >>>
-        >>> _, _, argmax = pf.dsp.correlate(signal_1, signal_2, 'full')
+        >>> cor = pf.dsp.correlate(signal_1, signal_2, 'full')
+        >>>
+        >>> # compute the lags in samples
+        >>> argmax = cor.times[np.argmax(cor.time, axis=-1)]
+        >>> argmax *= signal_1.sampling_rate
 
     In this case the lags correspond to the negative delays:
     ``argmax = [[0, -1], [-2, -3]]``.
-    """
+    """  # noqa: E501
 
     # check input
     if type(signal_1) is not pyfar.Signal or \
@@ -2788,6 +2786,9 @@ def correlate(signal_1, signal_2, mode='full'):
     if signal_1.complex != signal_2.complex:
         raise ValueError(("Both signals must be complex or real valued. "
                           "Mixtures are not allowed."))
+
+    if signal_1.sampling_rate != signal_2.sampling_rate:
+        raise ValueError("Both signals must have the same sampling rate.")
 
     if mode not in ['full', 'cyclic']:
         raise ValueError(f"mode is '{mode}' but must be 'full' or 'cyclic'")
@@ -2832,10 +2833,5 @@ def correlate(signal_1, signal_2, mode='full'):
     else:
         lags = np.arange(-n_samples[1] + 1, n_samples[0])
 
-    # get the time lag that maximizes the correlation
-    if signal_1.complex:
-        argmax = lags[np.argmax(np.abs(correlation), -1)]
-    else:
-        argmax = lags[np.argmax(correlation, -1)]
-
-    return correlation, lags, argmax
+    return pyfar.TimeData(correlation, lags / signal_1.sampling_rate,
+                          is_complex=signal_1.complex)
