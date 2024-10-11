@@ -30,6 +30,16 @@ def test_error_complex_and_real_signals():
         correlate(signal_1, signal_2)
 
 
+def test_error_different_sampling_rates():
+    """Test if signals with different sampling rates raise an error."""
+
+    signal_1 = pf.Signal(1, 1)
+    signal_2 = pf.Signal(1, 2)
+
+    with pytest.raises(ValueError, match="same sampling rate"):
+        correlate(signal_1, signal_2)
+
+
 def test_error_mode_string():
     """Test if a ValueError is raised for invalid mode values."""
 
@@ -56,27 +66,28 @@ def test_error_cyclic_mode():
 @pytest.mark.parametrize('delay_1', [0, 1, 2])
 @pytest.mark.parametrize('length_2', [4, 5])
 @pytest.mark.parametrize('delay_2', [0, 1, 2])
-def test_linear_mode_1d(length_1, delay_1, length_2, delay_2):
+def test_full_mode_1d(length_1, delay_1, length_2, delay_2):
     """Test full mode for different combinations of 1D signals."""
 
     # compute correlation
-    signal_1 = pf.signals.impulse(length_1, delay_1)
-    signal_2 = pf.signals.impulse(length_2, delay_2)
+    signal_1 = pf.signals.impulse(length_1, delay_1, sampling_rate=1)
+    signal_2 = pf.signals.impulse(length_2, delay_2, sampling_rate=1)
 
-    correlation, lags, argmax = correlate(signal_1, signal_2)
+    correlation = correlate(signal_1, signal_2)
 
-    # test output shapes
-    assert correlation.shape == (1, length_1 + length_2 - 1)
-    assert lags.shape == (length_1 + length_2 - 1, )
-    assert argmax.shape == (1, )
+    # test output format
+    assert type(correlation) == pf.TimeData
+    assert correlation.time.shape == (1, length_1 + length_2 - 1)
+    assert correlation.times.shape == (length_1 + length_2 - 1, )
 
     # test lag that maximizes the correlation
-    lag = delay_1 - delay_2
-    assert argmax == lag
+    lag = (delay_1 - delay_2)
 
     # test correlation and lags
-    npt.assert_almost_equal(correlation[0, lags==lag], 1., 10)
-    npt.assert_almost_equal(correlation[0, lags!=lag], 0., 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times==lag], 1., 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times!=lag], 0., 10)
 
 
 @pytest.mark.parametrize('length', [4, 5])
@@ -86,15 +97,15 @@ def test_cyclic_mode_1d(length, delay_1, delay_2):
     """Test cyclic mode for different combinations of 1D signals."""
 
     # compute correlation
-    signal_1 = pf.signals.impulse(length, delay_1)
-    signal_2 = pf.signals.impulse(length, delay_2)
+    signal_1 = pf.signals.impulse(length, delay_1, sampling_rate=1)
+    signal_2 = pf.signals.impulse(length, delay_2, sampling_rate=1)
 
-    correlation, lags, argmax = correlate(signal_1, signal_2, mode='cyclic')
+    correlation = correlate(signal_1, signal_2, mode='cyclic')
 
-    # test output shapes
-    assert correlation.shape == (1, length)
-    assert lags.shape == (length, )
-    assert argmax.shape == (1, )
+    # test output format
+    assert type(correlation) == pf.TimeData
+    assert correlation.time.shape == (1, length)
+    assert correlation.times.shape == (length, )
 
     # test lag that maximizes the correlation
     # (lag must be adjusted to cyclic case)
@@ -104,38 +115,39 @@ def test_cyclic_mode_1d(length, delay_1, delay_2):
     if not length % 2 and lag <= -(length//2):
         lag = length + lag
 
-    assert argmax == lag
-
     # test correlation and lags
-    npt.assert_almost_equal(correlation[0, lags==lag], 1., 10)
-    npt.assert_almost_equal(correlation[0, lags!=lag], 0., 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times==lag], 1., 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times!=lag], 0., 10)
 
 
-def test_linear_mode_nd():
+def test_full_mode_nd():
     """Test broadcasting and n-dimensional signals in full mode."""
 
     # compute correlation
     delays = np.array([[0, 1], [2, 3]], dtype=int)
-    signal_1 = pf.signals.impulse(5, 0)
-    signal_2 = pf.signals.impulse(5, delays)
+    signal_1 = pf.signals.impulse(5, 0, sampling_rate=1)
+    signal_2 = pf.signals.impulse(5, delays, sampling_rate=1)
 
-    correlation, lags, argmax = correlate(signal_1, signal_2)
+    correlation = correlate(signal_1, signal_2)
 
     # test output shapes
-    assert correlation.shape == (2, 2, 9)
-    assert lags.shape == (9, )
-    assert argmax.shape == (2, 2)
-
-    # test lag that maximizes the correlation
-    npt.assert_equal(argmax, -delays)
+    assert type(correlation) == pf.TimeData
+    assert correlation.time.shape == (2, 2, 9)
+    assert correlation.times.shape == (9, )
 
     # test correlation and lags
     for dim_1 in range(2):
         for dim_2 in range(2):
             npt.assert_almost_equal(
-                correlation[dim_1, dim_2, lags==-delays[dim_1, dim_2]], 1., 10)
+                correlation.time[dim_1, dim_2,
+                                 correlation.times==-delays[dim_1, dim_2]],
+                1., 10)
             npt.assert_almost_equal(
-                correlation[dim_1, dim_2, lags!=-delays[dim_1, dim_2]], 0., 10)
+                correlation.time[dim_1, dim_2,
+                                 correlation.times!=-delays[dim_1, dim_2]],
+                0., 10)
 
 
 def test_complex_signals():
@@ -144,12 +156,11 @@ def test_complex_signals():
     signal_1 = pf.Signal([0, 0, 1+0j], 1, is_complex=True)
     signal_2 = pf.Signal([0+1j, 0, 0], 1, is_complex=True)
 
-    correlation, lags, argmax = correlate(signal_1, signal_2)
+    correlation = correlate(signal_1, signal_2)
 
-    # test lag that maximizes the correlation
+    # test correlation values
     lag = 2
-    assert argmax == lag
-
-    # test correlation and lags
-    npt.assert_almost_equal(correlation[0, lags==lag], 0-1j, 10)
-    npt.assert_almost_equal(correlation[0, lags!=lag], 0+0j, 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times==lag], 0-1j, 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times!=lag], 0+0j, 10)

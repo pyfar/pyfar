@@ -650,14 +650,10 @@ def linear_perfect_sweep(
         >>> sweep = pf.signals.linear_perfect_sweep(2**8)
         >>>
         >>> # compute auto-correlation
-        >>> auto_correlation, lags, _ = pf.dsp.correlate(
-        ...     sweep, sweep, 'cyclic')
+        >>> auto_correlation = pf.dsp.correlate(sweep, sweep, 'cyclic')
         >>>
-        >>> auto_correlation = pf.TimeData(
-        ...     auto_correlation / pf.dsp.energy(sweep), lags)
-        >>>
-        >>> ax = pf.plot.time(auto_correlation)
-        >>> ax.set_xlabel('time lag in samples')
+        >>> ax = pf.plot.time(auto_correlation / pf.dsp.energy(sweep))
+        >>> ax.set_xlabel('time lags in seconds')
         >>> ax.set_ylabel('auto correlation')
     """
 
