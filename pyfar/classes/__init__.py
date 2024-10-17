@@ -11,5 +11,7 @@ __all__ = [
     'coordinates',
     'orientations',
     'filter',
-    'warnings'
+    'transmission_matrix',
+    'warnings',
+    'regularization',
 ]

@@ -43,9 +43,13 @@ __all__ = [
     'FilterIIR',
     'FilterSOS',
     'TransmissionMatrix',
+    'Regularization',
     'plot',
     'samplings',
     'io',
     'dsp',
     'signals',
-    'utils']
+    'utils',
+    'dot',
+    'cross',
+    ]
