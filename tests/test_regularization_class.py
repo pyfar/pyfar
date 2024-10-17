@@ -26,7 +26,7 @@ def test_regularization_errors():
         assert pf.Regularization.from_signal(1)
 
 
-@pytest.mark.parametrize("beta, expected", ([1, 0.5], [0.5, 2/3], [0, 1]))
+@pytest.mark.parametrize(("beta", "expected"), [(1, 0.5), (0.5, 2/3), (0, 1)])
 def test_regularization_frequency_range(impulse, beta, expected):
     """Test Regularization from a frequency range using different beta
     values."""
