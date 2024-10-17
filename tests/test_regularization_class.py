@@ -40,6 +40,15 @@ def test_regularization_frequency_range(impulse, beta, expected):
     npt.assert_allclose(inv.freq[:, -1], expected)
 
 
+def test_regularization_compare_to_dsp(impulse):
+    """Compare result to dsp.regularized_spectrum_inversion."""
+    res_dsp = pf.dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
+    Regu = pf.Regularization.from_frequency_range((200, 10e3))
+    res_regu = Regu.invert(impulse * 2)
+
+    npt.assert_allclose(res_dsp.freq, res_regu.freq)
+
+
 def test_regularization_target(impulse):
     """Test Regularization from a frequency range using a bandpass filter
     target function."""
