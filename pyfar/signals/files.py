@@ -496,7 +496,7 @@ def _load_files(data):
         except OSError as error:
             if 'Read-only' in str(error):
                 raise OSError((f'{data} can not be loaded because the file '
-                               'system is read-only.'))
+                               'system is read-only.')) from error
             else:
                 raise error
 

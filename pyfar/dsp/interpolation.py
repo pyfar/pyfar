@@ -10,12 +10,12 @@ from decimal import Decimal
 import warnings
 
 
-def _weighted_moving_average(input, output, weights):
+def _weighted_moving_average(input_data, output, weights):
     """Moving average filter of length N and arbitrary.
 
     Parameters
     ----------
-    input : numpy.ndarray
+    input_data : numpy.ndarray
         The input array
     output : numpy.ndarray
         The output buffer
@@ -35,8 +35,8 @@ def _weighted_moving_average(input, output, weights):
 
     """
     strided = np.lib.stride_tricks.as_strided(
-        input, strides=input.strides*2,
-        shape=(weights.size, input.size - (weights.size-1)))
+        input_data, strides=input_data.strides*2,
+        shape=(weights.size, input_data.size - (weights.size-1)))
     output[:] = np.average(strided, weights=weights, axis=0)
 
 
@@ -52,6 +52,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     2. Smooth the spectrum by convolution with a smoothing window
     3. Interpolate the spectrum to the original linear frequency scale
 
+    Smoothing of complex-valued time data is not implemented.
 
     Parameters
     ----------
@@ -155,6 +156,10 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     if not isinstance(signal, pf.Signal):
         raise TypeError("Input signal has to be of type pyfar.Signal")
 
+    if type(signal) is not pf.FrequencyData and signal.complex:
+        raise TypeError(("Fractional octave smoothing for complex-valued "
+                         "time data is not implemented."))
+
     if mode in ["magnitude_zerophase", "magnitude"]:
         data = [np.atleast_2d(np.abs(signal.freq_raw))]
     elif mode == "complex":
@@ -173,7 +178,7 @@ def smooth_fractional_octave(signal, num_fractions, mode="magnitude_zerophase",
     n_log = N**(n_lin/(N-1))
 
     # frequency bin spacing in octaves: log2(n_log[n]/n_log[n-1])
-    # Note: n_log[0] = 1
+    # Note: n_log[0] -> 1
     delta_n = np.log2(n_log[1])
 
     # width of the window in logarithmically spaced samples
@@ -588,7 +593,7 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
             'cause a infinite loop in `scipy.resample_poly`. If this occurs, '
             'interrupt and choose different sampling rates or decrease '
             'frac_limit. However, this can cause an error in the target '
-            'sampling rate realisation.'))
+            'sampling rate realisation.'), stacklevel=2)
     # give the numerator and denomitor of the fraction for factor L
     if frac_limit is None:
         frac = Fraction(Decimal(L)).limit_denominator()
@@ -602,11 +607,11 @@ def resample(signal, sampling_rate, match_amplitude="auto", frac_limit=None,
             f'The target sampling rate was realized with an error of {error}.'
             f'The error might be decreased by setting `frac_limit` to a value '
             f'larger than {down} (This warning is not shown, if the target '
-            'sampling rate can exactly be realized).'))
+            'sampling rate can exactly be realized).'), stacklevel=2)
     # resample data with scipy resampe_poly function
     data = sgn.resample_poly(signal.time, up, down, axis=-1)
     data = pf.Signal(data * gain, sampling_rate, fft_norm=signal.fft_norm,
-                     comment=signal.comment)
+                     comment=signal.comment, is_complex=signal.complex)
 
     if post_filter and L > 1:
 
@@ -694,7 +699,7 @@ class InterpolateSpectrum():
     -------
     interpolator : :py:class:`InterpolateSpectrum`
         The interpolator can be called to interpolate the data (see examples
-        below). It returns a :py:class:`~pyfar.classes.audio.Signal` and has
+        below). It returns a :py:class:`~pyfar.Signal` and has
         the following parameters
 
         `n_samples` : int

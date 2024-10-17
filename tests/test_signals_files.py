@@ -10,9 +10,9 @@ import pyfar as pf
     pf.signals.files.guitar,
     pf.signals.files.binaural_room_impulse_response,
     pf.signals.files.room_impulse_response,
-    pf.signals.files.headphone_impulse_responses
+    pf.signals.files.headphone_impulse_responses,
 ])
-@pytest.mark.parametrize('sampling_rate', (44100, 48000))
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_files(function, sampling_rate):
     """Test all files that only have the sampling rate as parameter"""
 
@@ -23,7 +23,7 @@ def test_files(function, sampling_rate):
     assert signal.sampling_rate == sampling_rate
 
 
-@pytest.mark.parametrize('sampling_rate', (44100, 48000))
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_speech(sampling_rate):
 
     # load data
@@ -51,7 +51,7 @@ def test_speech(sampling_rate):
         np.sum(np.abs(female.freq_raw[:f_id]))
 
 
-@pytest.mark.parametrize('position,convention,first,second', [
+@pytest.mark.parametrize(('position', 'convention', 'first', 'second'), [
     ([[0, 20]], 'spherical_elevation', [0], [20]),
     ([[0, 20], [10, 0]], 'spherical_elevation', [0, 10], [20, 0]),
     ([[90, 0], [0, 0]], 'spherical_elevation', [90, 0], [0, 0]),
@@ -87,7 +87,7 @@ def test_hrirs_diffuse_field_compensation():
     assert dtfs.comment.startswith("Diffuse field compensated data from")
 
 
-@pytest.mark.parametrize('sampling_rate', (44100, 48000))
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_hrirs_sampling_rate(sampling_rate):
     """Test getting HRIRs in different sampling rates"""
 

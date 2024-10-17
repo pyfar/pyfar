@@ -50,7 +50,7 @@ class LogLocatorITAToolbox(LogLocator):
         self,
         base=10.0,
         subs=(0.2, 0.4, 0.6, 1),
-        numticks=None
+        numticks=None,
     ):
         super().__init__(
             base=base,
@@ -68,7 +68,7 @@ class LogFormatterITAToolbox(LogFormatter):
         base=10.0,
         labelOnlyBase=False,
         minor_thresholds=None,
-        linthresh=None
+        linthresh=None,
     ):
         super().__init__(
             base=base,
@@ -90,7 +90,7 @@ class LogFormatterITAToolbox(LogFormatter):
                 s = self.pprint_val(x, vmax - vmin)
         return s
 
-    def __call__(self, x, pos=None):
+    def __call__(self, x, pos=None):  # noqa: ARG002
         """
         Return the format for tick val *x*.
         """
@@ -136,7 +136,7 @@ class MultipleFractionFormatter(Formatter):
             nom, denom = denom, nom % denom
         return nom
 
-    def __call__(self, x, pos=None):
+    def __call__(self, x, pos=None):  # noqa: ARG002
         den = self._denominator
         num = int(np.rint(den*x/self._base))
         com = self._gcd(num, den)

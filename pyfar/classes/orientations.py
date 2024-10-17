@@ -9,8 +9,8 @@ else:
     from numpy.exceptions import VisibleDeprecationWarning
 
 # this warning needs to be caught and appears if numpy array are generated
-# from nested lists containing lists of unequal lengths, e.g.,
-#  [[1, 0, 0], [1, 0]]
+# from nested lists containing lists of unequal lengths,
+#  e.g., [[1, 0, 0], [1, 0]]
 warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 
@@ -62,7 +62,7 @@ class Orientations(Rotation):
     def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy, **kwargs)
+        super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
     def from_view_up(cls, views, ups):
@@ -97,8 +97,9 @@ class Orientations(Rotation):
         try:
             views = np.atleast_2d(views).astype(np.float64)
             ups = np.atleast_2d(ups).astype(np.float64)
-        except VisibleDeprecationWarning:
-            raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
+        except VisibleDeprecationWarning as exc:
+            raise ValueError(
+                "Expected `views` and `ups` to have shape (N, 3)") from exc
 
         # check views and ups
         if (views.ndim > 2 or views.shape[-1] != 3 or

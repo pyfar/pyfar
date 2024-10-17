@@ -183,12 +183,13 @@ def test_impulse_func_value_error():
     # Delay too large
     cshape = (1,)
     delay = n_samples
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Delay is larger than number"):
         stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
     # Inconsistent input shape
     cshape = (2, 2)
     delay = [1, 1]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+            ValueError, match="Shape of delay needs to equal cshape"):
         stub_utils.impulse_func(delay, n_samples, fft_norm, cshape)
 
 
@@ -363,7 +364,7 @@ def test_sine_func_value_error():
     cshape = (1,)
     sampling_rate = 4
     frequency_in = 2
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Frequency is larger than Nyquist"):
         stub_utils.sine_func(
             frequency_in,
             sampling_rate,
@@ -375,7 +376,8 @@ def test_sine_func_value_error():
     cshape = (2, 2)
     sampling_rate = 4
     frequency_in = [1, 1]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+            ValueError, match="Shape of frequency needs to equal cshape"):
         stub_utils.sine_func(
             frequency_in,
             sampling_rate,

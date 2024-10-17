@@ -2,9 +2,78 @@
 History
 =======
 
+0.7.0 (2024-09-20)
+------------------
+* Features
+
+  * Signals and TimeData objects can now have complex time data. This is specified by the `complex` flag. In the case of Signal objects, this results in both sided spectra (PR #504, #396, #462, #464, #505, #510, #513, #547, #646, #655, #668, #704)
+    * Functions in the dsp module can now handle complex valued time data or raise an error (PR #459, #460, #461, #525, #546, #566, #567, #573, #592, #594, #598, #601, #677)
+    * All plot functions can now handle complex valued time data and both sided spectra via the options `side` and `mode`  (PR #615, #652, #656, #671, #672, #702)
+  * Added TransmissionMatrix Class, which is a convenient representations for two-ports / quadrupoles. These can represent systems from various fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission lines (PR #636).
+  * Added frequency domain sweep synthesis (PR #199)
+  * Added spectral soft limiting (PR #325)
+  * Added arithmetic operations for Coordinate class (PR #680)
+  * Added transpose method to audio classes (PR #481)
+  * Added allpass filters (PR #571)
+  * Added `cdim` property to audio classes (PR #619)
+
+* Enhancements
+
+  * The sampling_rate property of Signal Objects is enforced to be a scalar. (PR #534)
+  * The ticks in phase plots adjust better to the range of the data shown in the plot (PR #559)
+  * Replaced scipy's legacy spectrogram with new short-time Fourier transform implementation (PR #682)
+  * Deprecated Python 3.8 (PR #683)
+
+* Bugfixes
+
+  * Removed phase for FFT normalizations 'power' and 'psd' (PR #557)
+  * Fix unit string in group delay plot (PR #703)
+  * Rename and deprecate shelve/shelf, shelve_type/shelf_type due to a typo in the function names (PR #643)
+
+* Documentation
+
+  * Improve docstring for pyfar.signals.exponential_sweep_time (PR #514)
+  * Show paths of classes as imported in pyfar (PR #684)
+
+* Automation and testing
+
+  * replace flake8 by ruff (PR #526, #611, #686, #687, #688, #689, #690, #691, #702, #699, #697)
+  * remove environment files which are no longer required (PR #626)
+  * Harmonize class documentation (PR #631)
+  * wait for test_deprecation_warnings before release (PR #696)
+
+0.6.10 (2024-09-23)
+-------------------
+* Fix bug in compress parameter in pyfar.io.write. Previously files were compressed if `compress=False` (PR #707)
+* Automation and testing: wait for test deprecations before release (PR #696)
+
+0.6.9 (2024-09-13)
+------------------
+* Documentation
+
+  * Improve the layout of the main page of the documentation (PR #653, #679)
+  * Improve documentation of pyfar.dsp.filter.high_shelve_cascade and pyfar.dsp.filter.low_shelve_cascade (PR #648)
+  * Correct erroneous description of default value for the *num_fractions* parameter in pyfar.dsp.filter.fractional_octave_bands
+  * Fix broken link to python-soundfile documentation (PR #651)
+
+* Bugfixes and enhancements
+
+  * Slicing on pyfar audio objects (e.g., signal[0]) now always gives entire channels and en error is raised if slicing of signal objects would return a subset of the samples or frequencies. This must now be done using *signal.time* and *signal.freq* directly (e.g., signal.time[..., 0:5], PR #674)
+  * The Coordinates class now only raises a deprecation warning, if the parameter *sh_order* is set with a number (e.g., coordinates.sh_order = 1) but not if it is None (PR #694)
+  * All dsp and filter functions now maintain the *shape* and *cshape* of the input data (PR #676, #658, #659, #663, #664, #666, #678)
+  * Fix deprecation warnings from Matlab and Numpy (PR #640, #670)
+  * Change default value for *domain* parameter in pyfar.dsp.normalize to work for pyfar.FrequencyData objects (PR #649)
+  * Use numpy functions for broadcasting input of pyfar.Coordinates (PR #665)
+
+* Automation and testing
+
+  * Pull request now require version labels (PR #622)
+  * Added test for deprecation warnings (PR #644)
+  * Limit to sphinx version <8 to avoid failing builds on readthedocs (PR #662)
+
 0.6.8 (2024-06-27)
 ------------------
-* Make compatibile for scipy 1.14 (PR #638)
+* Make compatible for scipy 1.14 (PR #638)
 * Fix previous page title on pyfar main page (#637)
 * Enhance user warning for writing clipped audio files (#624)
 * Improve documentation (#634)

@@ -14,7 +14,7 @@ from pyfar import Signal, TimeData, FrequencyData
 from pyfar.io import _codec
 
 
-def signal_stub(time, freq, sampling_rate, fft_norm):
+def signal_stub(time, freq, sampling_rate, fft_norm, is_complex=False):
     """Function to generate stub of pyfar Signal class based on MagicMock.
     The properties of the signal are set without any further check.
 
@@ -28,6 +28,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         Sampling rate
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentation of pyfar.fft.normalization.
+    is_complex : bool
+        Specifies if the underlying time domain data are complex
+        real-valued.
 
     Returns
     -------
@@ -38,9 +41,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(signal.time[slice])
-        freq = np.atleast_2d(signal.freq[slice])
+    def getitem(slice_idx):
+        time = np.atleast_2d(signal.time[slice_idx])
+        freq = np.atleast_2d(signal.freq[slice_idx])
         item = signal_stub(
             time,
             freq,
@@ -55,17 +58,19 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         return samples
 
     def find_nearest_frequency(freqs):
-        bin = np.zeros(len(freqs), dtype=int)
+        bins = np.zeros(len(freqs), dtype=int)
         for idx, freq in enumerate(freqs):
-            bin[idx] = np.argmin(np.abs(signal.frequencies-freq))
-        return bin
+            bins[idx] = np.argmin(np.abs(signal.frequencies-freq))
+        return bins
 
     signal = mock.MagicMock(
-        spec_set=Signal(time, sampling_rate, domain='time'))
+        spec_set=Signal(time, sampling_rate, domain='time',
+                        is_complex=is_complex))
     signal.time = np.atleast_2d(time)
     signal.freq = np.atleast_2d(freq)
     signal.sampling_rate = sampling_rate
     signal.fft_norm = fft_norm
+    signal._complex = is_complex
     signal.n_samples = signal.time.shape[-1]
     signal.n_bins = signal.freq.shape[-1]
     signal.cshape = signal.time.shape[:-1]
@@ -100,8 +105,8 @@ def time_data_stub(time, times):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(time_data.time[slice])
+    def getitem(slice_idx):
+        time = np.atleast_2d(time_data.time[slice_idx])
         item = time_data_stub(time, time_data.times)
         return item
 
@@ -110,6 +115,7 @@ def time_data_stub(time, times):
     time_data.time = np.atleast_2d(time)
     time_data.times = np.atleast_1d(times)
     time_data.domain = 'time'
+    time_data._complex = False
     time_data.n_samples = time_data.time.shape[-1]
     time_data.cshape = time_data.time.shape[:-1]
     time_data.__getitem__.side_effect = getitem
@@ -138,8 +144,8 @@ def frequency_data_stub(freq, frequencies):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        freq = np.atleast_2d(frequency_data.freq[slice])
+    def getitem(slice_idx):
+        freq = np.atleast_2d(frequency_data.freq[slice_idx])
         item = frequency_data_stub(freq, frequency_data.frequencies)
         return item
 
@@ -182,7 +188,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     if np.shape(delay) != cshape:
         raise ValueError("Shape of delay needs to equal cshape.")
     if delay.max() >= n_samples:
-        raise ValueError("Delay is larger than number of samples,"
+        raise ValueError("Delay is larger than number of samples, "
                          f"which is {n_samples}")
 
     # Time vector
@@ -274,9 +280,9 @@ def noise_func(sigma, n_samples, cshape):
         Spectrum
 
     """
-    np.random.seed(1000)
     # Time vector
-    time = np.random.normal(0, sigma, (cshape + (n_samples,)))
+    rng = np.random.default_rng(1000)
+    time = sigma * rng.standard_normal((cshape + (n_samples,)))
     freq = np.fft.rfft(time)
     norm = 1 / n_samples / np.sqrt(2) * 2
     freq *= norm
@@ -410,7 +416,7 @@ class NestedData:
         self._complex = 3 + 4j
         print('foo')
         self._tuple = (1, 2, 3)
-        self._set = set(('a', 1, 2))
+        self._set = {'a', 1, 2}
         self._frozenset = frozenset(('a', 1, 2))
 
     @classmethod
@@ -427,7 +433,7 @@ class NestedData:
             'subobject': FlatData(-1),
             'complex-number': 3 + 4j,
             'a tuple': (1, 2, 3),
-            'a set': set(('a', 1, 2)),
+            'a set': {'a', 1, 2},
             'a frozenset': frozenset(('a', 1, 2))}
         return NestedData(
             n, comment, matrix, subobj, mylist, mydict)
@@ -468,7 +474,7 @@ def stub_str_to_type():
                 'NoEncodeClass': type(NoEncodeClass()),
                 'NoDecodeClass': type(NoDecodeClass()),
                 'FlatData': type(FlatData()),
-                'NestedData': type(NestedData.create())
+                'NestedData': type(NestedData.create()),
                 }.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 

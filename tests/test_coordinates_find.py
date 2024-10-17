@@ -17,11 +17,11 @@ def test_find_nearest_simple():
     assert d == 0
 
 
-@pytest.mark.parametrize('azimuth,distance_measure,distance', [
+@pytest.mark.parametrize(('azimuth', 'distance_measure', 'distance'), [
     (0, 'spherical_radians', 0),                        # radians match
     (np.pi / 16, 'spherical_radians', np.pi / 16),      # radians no match
     (0, 'spherical_meter', 0),                          # meters match
-    (np.pi / 16, 'spherical_meter', np.pi / 16 * 1.1)   # meters no match
+    (np.pi / 16, 'spherical_meter', np.pi / 16 * 1.1),   # meters no match
 ])
 def test_find_nearest_simple_spherical_distance(
         azimuth, distance_measure, distance):
@@ -96,19 +96,23 @@ def test_find_nearest_error():
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
-    with pytest.raises(ValueError):
+    match = 'k must be an integer > 0 and <= self.csize'
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, -1)
 
     # test Coordinate object as input
-    with pytest.raises(ValueError):
+    match = 'find must be an pf.Coordinates object.'
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(5, 1)
 
     # test wrong string for distance measure
-    with pytest.raises(ValueError):
+    match = 'distance_measure needs to be in '
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, 1, 'bla')
 
     # test wrong type for distance measure
-    with pytest.raises(ValueError):
+    match = 'distance_measure needs to be in '
+    with pytest.raises(ValueError, match=match):
         coords.find_nearest(find, 1, 5)
 
     # test negative radius_tol
@@ -168,36 +172,44 @@ def test_find_within_error():
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
-    with pytest.raises(ValueError):
+    match = 'distance must be a non negative number'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, -1, 'euclidean')
 
     # test Coordinate object as input
-    with pytest.raises(ValueError):
+    match = 'coords must be an pf.Coordinates object.'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(5, 1)
 
     # test wrong string for distance measure
-    with pytest.raises(ValueError):
+    match = 'distance_measure needs to be in '
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, 'bla')
 
     # test wrong type for distance measure
-    with pytest.raises(ValueError):
+    match = 'distance_measure needs to be in '
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, 5)
 
-    with pytest.raises(ValueError):
+    match = 'atol must be a non negative number.'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, atol=-1)
 
-    with pytest.raises(ValueError):
+    match = 'atol must be a non negative number.'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, atol='h')
 
-    with pytest.raises(ValueError):
+    match = 'radius_tol must be a non negative number.'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, radius_tol='h')
 
-    with pytest.raises(ValueError):
+    match = 'return_sorted must be a bool.'
+    with pytest.raises(ValueError, match=match):
         coords.find_within(find, 1, return_sorted=-1)
 
 
 @pytest.mark.parametrize('distance_measure', [
-     'spherical_radians', 'spherical_meter'
+     'spherical_radians', 'spherical_meter',
 ])
 @pytest.mark.parametrize('radius', [.5, 1, 2])
 def test_find_within_spherical(distance_measure, radius):

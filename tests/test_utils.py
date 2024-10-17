@@ -25,7 +25,7 @@ def test_broadcast_cshape_assertions():
         pf.utils.broadcast_cshape([1, 2, 3], (1, ))
 
 
-@pytest.mark.parametrize("cshape,reference", [
+@pytest.mark.parametrize(("cshape", "reference"), [
     (None, (2,)), ((2, 2), (2, 2))])
 def test_broadcast_cshapes(cshape, reference):
     """Test broadcasting multiple signals with all audio classes"""
@@ -76,7 +76,7 @@ def test_broadcast_cdim_assertions():
         pf.utils.broadcast_cdim(pf.Signal(1, 44100), 0)
 
 
-@pytest.mark.parametrize("cdim,reference", [
+@pytest.mark.parametrize(("cdim", "reference"), [
     (None, 2), (3, 3)])
 def test_broadcast_cdims(cdim, reference):
     """Test broadcasting multiple signals with all audio classes"""
@@ -146,6 +146,22 @@ def test_pyfar_object_types(signals):
     conc = pf.utils.concatenate_channels(signals)
     ideal = [[1, 2, 3], [4, 5, 6]]
     npt.assert_equal(conc._data, ideal)
+
+
+def test_concatenate_channels_complex_signals():
+    # Test concanation for complex signals
+    s = pf.Signal([1, 2, 3], 44100)
+    s_complex = pf.Signal([1, 2, 3], 44100, is_complex=True)
+
+    s_conc = pf.utils.concatenate_channels((s, s_complex))
+    assert s_conc.complex
+    desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
+    npt.assert_equal(s_conc._data, desired)
+
+    s_conc = pf.utils.concatenate_channels((s_complex, s))
+    assert s_conc.complex
+    desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
+    npt.assert_equal(s_conc._data, desired)
 
 
 def test_concatenate_assertions():

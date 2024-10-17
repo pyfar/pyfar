@@ -34,7 +34,7 @@ from . import _codec as codec
 import pyfar.classes.filter as fo
 
 
-def read_sofa(filename, verify=True):
+def read_sofa(filename, verify=True, verbose=True):
     """
     Import a SOFA file as pyfar object.
 
@@ -46,6 +46,9 @@ def read_sofa(filename, verify=True):
         Verify if the data contained in the SOFA file agrees with the AES69
         standard (see references). If the verification fails, the SOFA file
         can be loaded by setting ``verify=False``. The default is ``True``
+    verbose : bool, optional
+        Print the names of detected custom variables and attributes.
+        The default is True.
 
     Returns
     -------
@@ -53,10 +56,10 @@ def read_sofa(filename, verify=True):
         The audio object that is returned depends on the DataType of the SOFA
         object:
 
-        - :py:class:`~pyfar.classes.audio.Signal`
+        - :py:class:`~pyfar.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
             ``'FIR-E'``, or ``'FIRE'``.
-        - :py:class:`~pyfar.classes.audio.FrequencyData`
+        - :py:class:`~pyfar.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
             ``'TF-E'``, or ``'TFE'``.
 
@@ -69,7 +72,7 @@ def read_sofa(filename, verify=True):
         automatically matched.
     receiver_coordinates : Coordinates
         Coordinates object containing the data stored in
-        `SOFA_object.RecevierPosition`. The domain, convention and unit are
+        `SOFA_object.ReceiverPosition`. The domain, convention and unit are
         automatically matched.
 
     Notes
@@ -85,7 +88,7 @@ def read_sofa(filename, verify=True):
 
     """
 
-    sofa = sf.read_sofa(filename, verify)
+    sofa = sf.read_sofa(filename, verify, verbose)
     return convert_sofa(sofa)
 
 
@@ -104,13 +107,13 @@ def convert_sofa(sofa):
         The audio object that is returned depends on the DataType of the SOFA
         object:
 
-        - :py:class:`~pyfar.classes.audio.Signal`
+        - :py:class:`~pyfar.Signal`
             A Signal object is returned is the DataType is ``'FIR'``,
             ``'FIR-E'``, or ``'FIRE'``. In case of ``'FIR-E'``, the time data
             is returned with the `cshape` EMRN (samples are in the last
             dimension) and not MRNE as in the SOFA standard (emitters are in
             the last dimension).
-        - :py:class:`~pyfar.classes.audio.FrequencyData`
+        - :py:class:`~pyfar.FrequencyData`
             A FrequencyData object is returned is the DataType is ``'TF'``,
             ``'TF-E'``, or ``'TFE'``. In case of ``'TF-E'``, the frequency data
             is returned with the `cshape` EMRN (frequencies are in the last
@@ -183,13 +186,13 @@ def _sofa_pos(pos_type, coordinates):
         return Coordinates.from_spherical_elevation(
             coordinates[:, 0] * np.pi / 180,
             coordinates[:, 1] * np.pi / 180,
-            coordinates[:, 2]
+            coordinates[:, 2],
         )
     elif pos_type == 'cartesian':
         return Coordinates(
             coordinates[:, 0],
             coordinates[:, 1],
-            coordinates[:, 2]
+            coordinates[:, 2],
         )
     else:
         raise ValueError("Position:Type {pos_type} is not supported.")
@@ -271,7 +274,7 @@ def read(filename):
                     raise TypeError((
                         f"'{name}' object in {filename} was written with "
                         f"pyfar {pyfar_version} and could not be read with "
-                        f"pyfar {pf.__version__}."))
+                        f"pyfar {pf.__version__}.")) from e
 
         if 'builtin_wrapper' in collection:
             for key, value in collection['builtin_wrapper'].items():
@@ -316,7 +319,7 @@ def write(filename, compress=False, **objs):
     """
     # Check for .far file extension
     filename = pathlib.Path(filename).with_suffix('.far')
-    compression = zipfile.ZIP_STORED if compress else zipfile.ZIP_DEFLATED
+    compression = zipfile.ZIP_DEFLATED if compress else zipfile.ZIP_STORED
     zip_buffer = io.BytesIO()
     builtin_wrapper = codec.BuiltinsWrapper()
     with zipfile.ZipFile(zip_buffer, "a", compression) as zip_file:
@@ -347,7 +350,7 @@ def write(filename, compress=False, **objs):
 
 def read_audio(filename, dtype='float64', **kwargs):
     """
-    Import an audio file as :py:class:`~pyfar.classes.audio.Signal` object.
+    Import an audio file as :py:class:`~pyfar.Signal` object.
 
     Reads 'wav', 'aiff', 'ogg', 'flac', and 'mp3' files among others. For a
     complete list see :py:func:`audio_formats`.
@@ -371,7 +374,7 @@ def read_audio(filename, dtype='float64', **kwargs):
     Returns
     -------
     signal : Signal
-        :py:class:`~pyfar.classes.audio.Signal` object containing the audio
+        :py:class:`~pyfar.Signal` object containing the audio
         data.
 
     Notes
@@ -382,7 +385,7 @@ def read_audio(filename, dtype='float64', **kwargs):
       you will read ``np.array([43], dtype='int32')`` for ``dtype='int32'``.
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=2)
         return
 
     data, sampling_rate = soundfile.read(
@@ -393,7 +396,7 @@ def read_audio(filename, dtype='float64', **kwargs):
 
 def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     """
-    Write a :py:class:`~pyfar.classes.audio.Signal` object as an audio file to
+    Write a :py:class:`~pyfar.Signal` object as an audio file to
     disk.
 
     Writes 'wav', 'aiff', 'ogg', 'flac' and 'mp3' files among others. For a
@@ -428,7 +431,7 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=2)
         return
 
     sampling_rate = signal.sampling_rate
@@ -447,7 +450,8 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     # Reshape to 2D
     data = data.reshape(-1, data.shape[-1])
     if len(signal.cshape) != 1:
-        warnings.warn(f"Signal flattened to {data.shape[0]} channels.")
+        warnings.warn(
+            f"Signal flattened to {data.shape[0]} channels.", stacklevel=2)
 
     # Check if file exists and for overwrite
     if overwrite is False and os.path.isfile(filename):
@@ -457,17 +461,18 @@ def write_audio(signal, filename, subtype=None, overwrite=True, **kwargs):
     else:
         # Only the subtypes FLOAT, DOUBLE, VORBIS are not clipped,
         # see _clipped_audio_subtypes()
-        format = pathlib.Path(filename).suffix[1:]
+        format_type = pathlib.Path(filename).suffix[1:]
         if subtype is None:
-            subtype = default_audio_subtype(format)
+            subtype = default_audio_subtype(format_type)
         if (np.any(data > 1.) and
                 subtype.upper() not in ['FLOAT', 'DOUBLE', 'VORBIS']):
             warnings.warn(
-                (f'{format}-files of subtype {subtype} are clipped to +/- 1. '
+                (f'{format_type}-files of subtype {subtype} '
+                 'are clipped to +/- 1. '
                  'Normalize your audio with pyfar.dsp.normalize to 1-LSB, with'
                  ' LSB being the least significant bit (e.g. 2**-15 for '
                  "16 bit) or use non-clipping subtypes 'FLOAT', 'DOUBLE', or "
-                 "'VORBIS' (see pyfar.io.audio_subtypes)"))
+                 "'VORBIS' (see pyfar.io.audio_subtypes)"), stacklevel=2)
         soundfile.write(
             file=filename, data=data.T, samplerate=sampling_rate,
             subtype=subtype, **kwargs)
@@ -495,18 +500,22 @@ def audio_formats():
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=2)
         return
 
     return soundfile.available_formats()
 
 
-def audio_subtypes(format=None):
+@pf._utils.rename_arg(
+        {"format" : "audio_format"},
+        "'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'")
+def audio_subtypes(audio_format=None):
     """Return a dictionary of available audio subtypes.
 
     Parameters
     ----------
-    format : str
+    audio_format : str
         If given, only compatible subtypes are returned.
 
     Notes
@@ -523,14 +532,23 @@ def audio_subtypes(format=None):
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=2)
         return
 
-    return soundfile.available_subtypes(format=format)
+    return soundfile.available_subtypes(format=audio_format)
 
 
-def default_audio_subtype(format):
+@pf._utils.rename_arg(
+        {"format" : "audio_format"},
+        "'format' will be deprecated in "
+        "pyfar 0.9.0 in favor of 'audio_format'")
+def default_audio_subtype(audio_format):
     """Return the default subtype for a given format.
+
+    Parameters
+    ----------
+    audio_format : str
+        If given, only compatible subtypes are returned.
 
     Notes
     -----
@@ -546,10 +564,10 @@ def default_audio_subtype(format):
 
     """
     if not soundfile_imported:
-        warnings.warn(soundfile_warning)
+        warnings.warn(soundfile_warning, stacklevel=2)
         return
 
-    return soundfile.default_subtype(format)
+    return soundfile.default_subtype(audio_format)
 
 
 def read_comsol(filename, expressions=None, parameters=None):
@@ -665,7 +683,8 @@ def read_comsol(filename, expressions=None, parameters=None):
         warnings.warn(
             r'The data contains values in dB. Consider to use de-logarithmize '
             r'data, such as sound pressure, if possible. otherwise any '
-            r'further processing of the data might lead to erroneous results.')
+            r'further processing of the data might lead to erroneous results.',
+            stacklevel=2)
     header, is_complex, delimiter = _read_comsol_get_headerline(filename)
 
     # set default variables
@@ -698,7 +717,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     expressions_header = np.array(re.findall(exp_pattern, header))
     domain_header = np.array(
         [float(x) for x in re.findall(domain_pattern, header)])
-    parameter_header = dict()
+    parameter_header = {}
     for key in parameters:
         parameter_header[key] = np.array(
             [float(x) for x in re.findall(key+value_pattern, header)])
@@ -714,8 +733,8 @@ def read_comsol(filename, expressions=None, parameters=None):
     temp_shape = [n_nodes, len(expressions), n_combinations, len(domain_data)]
 
     # create pairs of parameter values
-    pairs = np.meshgrid(*[x for x in parameters.values()])
-    parameter_pairs = dict()
+    pairs = np.meshgrid(*list(parameters.values()))
+    parameter_pairs = {}
     for idx, key in enumerate(parameters):
         parameter_pairs[key] = pairs[idx].T.flatten()
 
@@ -742,7 +761,7 @@ def read_comsol(filename, expressions=None, parameters=None):
                         warnings.warn(
                             r'Specific combinations is set in the Parametric '
                             r'Sweep in Comsol. Missing data is filled with '
-                            r'nans.')
+                            r'nans.', stacklevel=2)
 
     # reshape data to final shape
     data_out = np.reshape(data_out, final_shape)
@@ -887,7 +906,7 @@ def read_comsol_header(filename):
     # create parameters dict
     parameter_names = _unique_strings(re.findall(param_pattern, header))
     parameter_names.remove(domain_str)
-    parameters = dict()
+    parameters = {}
     for para_name in parameter_names:
         unit = _unique_strings(
             re.findall(para_name + param_unit_pattern, header))
@@ -901,7 +920,7 @@ def read_comsol_header(filename):
 
 def _read_comsol_metadata(filename):
     suffix = pathlib.Path(filename).suffix
-    metadata = dict()
+    metadata = {}
     # loop over meta data lines (starting with %)
     number_names = ['Dimension', 'Nodes', 'Expressions']
     with open(filename) as f:

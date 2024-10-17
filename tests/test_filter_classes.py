@@ -64,7 +64,7 @@ def test_filter_fir_init_multi_dim():
         [1, 1/4, 1/8]])
     desired = np.array([
         [[1, 1/2, 0], [1, 0, 0]],
-        [[1, 1/4, 1/8], [1, 0, 0]]
+        [[1, 1/4, 1/8], [1, 0, 0]],
         ])
     filt = fo.FilterFIR(coeff, sampling_rate=2*np.pi)
     # seprately test internal coefficients and property because they differ
@@ -89,6 +89,22 @@ def test_filter_iir_process(impulse):
     filt = fo.FilterIIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
     desired = np.ones((1, impulse.n_samples))
+    desired[:, 1::2] *= -1
+
+    npt.assert_allclose(res.time, desired)
+
+
+def test_filter_iir_process_complex(impulse_complex):
+    coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
+    filt = fo.FilterIIR(coeff, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+
+    npt.assert_allclose(res.time[0, :3], coeff[0])
+
+    coeff = np.array([[1, 0, 0], [1, 1, 0]])
+    filt = fo.FilterIIR(coeff, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+    desired = np.ones((1, impulse_complex.n_samples))
     desired[:, 1::2] *= -1
 
     npt.assert_allclose(res.time, desired)
@@ -124,7 +140,7 @@ def test_filter_iir_init_state(impulse):
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
-    desired = np.array([[[-0.5, 0, ]]])
+    desired = np.array([[[-0.5, 0]]])
     npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
@@ -143,6 +159,14 @@ def test_filter_fir_process(impulse):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse.sampling_rate)
     res = filt.process(impulse)
+
+    npt.assert_allclose(res.time[0, :3], coeff)
+
+
+def test_filter_fir_process_complex(impulse_complex):
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
 
     npt.assert_allclose(res.time[0, :3], coeff)
 
@@ -186,7 +210,8 @@ def test_filter_fir_init_state(impulse):
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse.sampling_rate-1)
-    with pytest.raises(ValueError):
+    match = 'The sampling rates of filter and signal do not match'
+    with pytest.raises(ValueError, match=match):
         filt.process(impulse)
 
 
@@ -233,7 +258,6 @@ def test_filter_fir_process_multi_dim_filt(impulse):
 
 def test_filter_sos_process(impulse):
     sos = np.array([[1, 1/2, 0, 1, 0, 0]])
-    filt = fo.FilterSOS(sos, impulse.sampling_rate)
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
@@ -244,6 +268,23 @@ def test_filter_sos_process(impulse):
     filt = fo.FilterSOS(sos, impulse.sampling_rate)
     res = filt.process(impulse)
     desired = np.ones(impulse.n_samples)
+    desired[1::2] *= -1
+
+    npt.assert_allclose(res.time, np.atleast_2d(desired))
+
+
+def test_filter_sos_process_complex(impulse_complex):
+    sos = np.array([[1, 1/2, 0, 1, 0, 0]])
+    coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
+    filt = fo.FilterSOS(sos, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+
+    npt.assert_allclose(res.time[0, :3], coeff[0])
+
+    sos = np.array([[1, 0, 0, 1, 1, 0]])
+    filt = fo.FilterSOS(sos, impulse_complex.sampling_rate)
+    res = filt.process(impulse_complex)
+    desired = np.ones(impulse_complex.n_samples)
     desired[1::2] *= -1
 
     npt.assert_allclose(res.time, np.atleast_2d(desired))
@@ -298,7 +339,7 @@ def test_filter_sos_init_state(impulse):
 
     # init with step function response
     filt.init_state(impulse.cshape, state='step')
-    desired = np.array([[[[-0.5, 0, ]]]])
+    desired = np.array([[[[-0.5, 0]]]])
     npt.assert_allclose(filt.state, desired)
 
     # init with step function response multichannel
@@ -361,21 +402,21 @@ def test_blockwise_processing(Filter):
 
 def test_blockwise_processing_with_coefficients_exchange():
     # input signal
-    input = pf.Signal([1, 2, 3, 4, 0], 44100)
+    input_data = pf.Signal([1, 2, 3, 4, 0], 44100)
 
     coefficients_1 = [2, -2]
     coefficients_2 = [2, -1.9]
 
     # time variant filtering using Filter object
     # initialize filter and state
-    filter = pf.FilterFIR([coefficients_1], 44100)
-    filter.init_state(input.cshape, state='zeros')
+    filterObj = pf.FilterFIR([coefficients_1], 44100)
+    filterObj.init_state(input_data.cshape, state='zeros')
     # process first block
-    filter_1 = filter.process(pf.Signal(input.time[..., :2], 44100))
+    filter_1 = filterObj.process(pf.Signal(input_data.time[..., :2], 44100))
     # update filter coefficients
-    filter.coefficients = [coefficients_2]
+    filterObj.coefficients = [coefficients_2]
     # process second block
-    filter_2 = filter.process(pf.Signal(input.time[..., 2:], 44100))
+    filter_2 = filterObj.process(pf.Signal(input_data.time[..., 2:], 44100))
 
     # overlap and add time variant filtering
     # first block
@@ -433,19 +474,19 @@ def test_extend_sos_coefficients():
     npt.assert_allclose(imp_filt, imp)
 
 
-def test___eq___equal(filter):
-    actual = filter.copy()
-    assert filter == actual
+def test___eq___equal(filterObject):
+    actual = filterObject.copy()
+    assert filterObject == actual
 
 
-def test___eq___notEqual(filter, coeffs, state):
+def test___eq___notEqual(filterObject, coeffs, state):
     actual = fo.Filter(coefficients=2 * coeffs, state=state)
-    assert not filter == actual
+    assert not filterObject == actual
     actual = fo.Filter(coefficients=coeffs, state=2 * state)
-    assert not filter == actual
-    actual = filter.copy()
+    assert not filterObject == actual
+    actual = filterObject.copy()
     actual.comment = f'{actual.comment} A completely different thing'
-    assert not filter == actual
+    assert not filterObject == actual
 
 
 def test_repr(capfd):

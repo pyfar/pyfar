@@ -42,7 +42,13 @@ such as `$ndarray`, become the name of the node in the zipfile.
 Class-Level
 ===========
 
-For saving pyfar objects, the class method ``_encode`` must return a dictionary
+Four steps are required for for writing and reading pyfar objects.
+
+First, the object must be listed in
+
+    _is_pyfar_type(obj)
+
+Second, the class method ``_encode`` must exist and return a dictionary
 representation containing all required class variables. In the simplest case
 this is
 
@@ -54,10 +60,12 @@ and requires the class method ``copy``
     def copy(self):
         return copy.deepcopy(self)
 
-In some cases not all data of an object must be written to the dict during
-encoding. See pyfar.dsp.filter.GammatoneBands for an example of removing
-redundant data. For reading pyfar objects, a new class instance is created.
-This requires the class method ``_encode`` and in the simplest case looks like
+Third, the class method ``_decode`` must exist and return the corresponding
+pyfar object. In some cases not all data of an object must be written to the
+dict during encoding. See pyfar.dsp.filter.GammatoneBands for an example of
+removing redundant data. For reading pyfar objects, a new class instance is
+created. This requires the class method ``_encode`` and in the simplest case
+looks like
 
     @classmethod
     def _decode(cls, obj_dict):
@@ -154,7 +162,7 @@ def _decode(obj, zipfile):
     if isinstance(obj, dict):
         for key in obj.keys():
             _inner_decode(obj, key, zipfile)
-    elif any([isinstance(obj, x) for x in [list, tuple, set, frozenset]]):
+    elif isinstance(obj, (list, tuple, set, frozenset)):
         for i in range(0, len(obj)):
             _inner_decode(obj, i, zipfile)
 
@@ -195,7 +203,7 @@ def _inner_decode(obj, key, zipfile):
     elif obj[key][0][1:] == 'tuple':
         obj[key] = tuple(obj[key][1])
     elif obj[key][0][1:] == 'set':
-        obj[key] = set(tuple(obj[key][1]))
+        obj[key] = set(obj[key][1])
     elif obj[key][0][1:] == 'frozenset':
         obj[key] = frozenset(tuple(obj[key][1]))
     elif obj[key][0][1:] == 'bytes':
@@ -247,9 +255,9 @@ def _decode_object_json_aided(name, type_hint, zipfile):
     ObjType = _str_to_type(type_hint[1:])
     try:
         return ObjType._decode(obj_dict)
-    except AttributeError:
+    except AttributeError as e:
         raise NotImplementedError(
-            f'You must implement `{type}._decode` first.')
+            f'You must implement `{ObjType.__name__}._decode` first.') from e
 
 
 def _encode(obj, zip_path, zipfile):
@@ -377,9 +385,9 @@ def _encode_object_json_aided(obj, name, zipfile):
         zipfile.writestr(
             f'{name}/{type_hint}',
             json.dumps(obj_dict))
-    except AttributeError:
+    except AttributeError as error:
         raise NotImplementedError(
-            f'You must implement `{type}._encode` first.')
+            f'You must implement `{type}._encode` first.') from error
 
 
 def _is_pyfar_type(obj):
@@ -398,6 +406,7 @@ def _is_pyfar_type(obj):
         'SphericalVoronoi',
         'TimeData',
         'FrequencyData',
+        'TransmissionMatrix',
         'BuiltinsWrapper']
 
 

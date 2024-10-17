@@ -1,6 +1,5 @@
 import os
 import pytest
-from pytest import raises
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import pyfar as pf
@@ -74,6 +73,55 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('mode', [
+    'real', 'imag', 'abs'])
+def test_complex_time_plots(mode,
+                            handsome_complex_signal,
+                            handsome_complex_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {plot.time.__name__}, mode "
+          f"= {mode}")
+
+    # initial plot
+    filename = f'{plot.time.__name__}_{mode}_default'
+    create_figure()
+    plot.time(handsome_complex_signal, mode=mode)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = f'{plot.time.__name__}_{mode}_hold'
+    plot.time(handsome_complex_signal_v2,
+              mode=mode)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.freq), (plot.phase), (plot.group_delay),
+    (plot.freq_phase), (plot.freq_group_delay)])
+@pytest.mark.parametrize('side_flag', [
+                         'left', 'right'])
+def test_complex_freq_plots(function, side_flag,
+                            handsome_complex_signal,
+                            handsome_complex_signal_v2):
+    """Test all line plots with default arguments and hold functionality."""
+    print(f"Testing: {function.__name__}")
+
+    # initial plot
+    filename = f'{function.__name__}_{side_flag}_default'
+    create_figure()
+    function(handsome_complex_signal, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+    # test hold functionality
+    filename = f'{function.__name__}_{side_flag}_hold'
+    function(handsome_complex_signal_v2, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('signal', ['handsome_signal', 'impulse'])
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
@@ -95,7 +143,8 @@ def test_line_phase_options(param, signal, request):
 def test_line_phase_unwrap_assertion(sine):
     """Test assertion for unwrap parameter."""
     create_figure()
-    with raises(ValueError):
+    match = 'unwrap is infinity but must be True, False, or 360'
+    with pytest.raises(ValueError, match=match):
         plot.phase(sine, unwrap='infinity')
 
 
@@ -146,7 +195,8 @@ def test_line_freq_scale_assertion(function, sine):
     """
 
     create_figure()
-    with raises(ValueError):
+    match = "scale is warped but must be 'linear', or 'log'."
+    with pytest.raises(ValueError, match=match):
         function(sine, freq_scale="warped")
 
     plt.close("all")
@@ -171,13 +221,16 @@ def test_time_unit_assertion(sine):
     """Test if all line plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
-    with raises(ValueError):
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
+    with pytest.raises(ValueError, match=match):
         plot.time(sine, unit="pascal")
 
-    with raises(ValueError):
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
+    with pytest.raises(ValueError, match=match):
         plot.group_delay(sine, unit="pascal")
 
-    with raises(ValueError):
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
+    with pytest.raises(ValueError, match=match):
         plot.spectrogram(sine, unit="pascal")
 
     plt.close("all")
@@ -194,7 +247,7 @@ def test_line_custom_subplots(handsome_signal, handsome_signal_v2):
         'row': [plot.time, plot.freq],
         'col': [[plot.time], [plot.freq]],
         'mix': [[plot.time, plot.freq],
-                [plot.phase, plot.group_delay]]
+                [plot.phase, plot.group_delay]],
     }
 
     for p in plots:
@@ -254,6 +307,26 @@ def test_spectrogram():
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('side', ['left', 'right'])
+def test_spectrogram_complex(side):
+    """Test spectrogram with default parameters"""
+    function = plot.spectrogram
+
+    print(f"Testing: {function.__name__}")
+
+    filename = function.__name__ + f'_complex_{side}_default'
+    create_figure()
+
+    sweep = pf.signals.exponential_sweep_time(2**16, [100, 10e3])
+
+    sweep.fft_norm = "none"
+    sweep.complex = True
+
+    function(sweep, side=side)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
 @pytest.mark.parametrize('function', [
     (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
     (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
@@ -262,6 +335,18 @@ def test_2d_plots(function, handsome_signal_2d):
     filename = function.__name__
     create_figure()
     function(handsome_signal_2d)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    (plot.time_2d), (plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d),
+    (plot.time_freq_2d), (plot.freq_phase_2d), (plot.freq_group_delay_2d)])
+def test_2d_plots_complex(function, handsome_signal_complex_2d):
+    """Test all 2d plots with default arguments."""
+    filename = f'complex_2d_{function.__name__}'
+    create_figure()
+    function(handsome_signal_complex_2d)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
@@ -328,7 +413,7 @@ def test_2d_colorbar_assertion(function, handsome_signal_2d):
     Test assertion when passing an array of axes but not having a colorbar.
     """
     create_figure()
-    with raises(ValueError, match="A list of axes"):
+    with pytest.raises(ValueError, match="A list of axes"):
         function(handsome_signal_2d, colorbar=False,
                  ax=[plt.gca(), plt.gca()])
 
@@ -343,7 +428,7 @@ def test_2d_cshape_assertion(function):
     """
     error_str = r"signal.cshape must be \(m, \) with m\>=2 but is \(2, 2\)"
     create_figure()
-    with raises(ValueError, match=error_str):
+    with pytest.raises(ValueError, match=error_str):
         function(pf.signals.impulse(10, [[0, 0], [0, 0]]))
 
 
@@ -365,7 +450,8 @@ def test_2d_phase_options(param, handsome_signal_2d):
 def test_phase_2d_unwrap_assertion(handsome_signal_2d):
     """Test assertion for unwrap parameter."""
     create_figure()
-    with raises(ValueError):
+    match = 'unwrap is infinity but must be True, False, or 360'
+    with pytest.raises(ValueError, match=match):
         plot.phase_2d(handsome_signal_2d, unwrap='infinity')
 
 
@@ -414,13 +500,16 @@ def test_2d_freq_scale_assertion(handsome_signal_2d):
     """
 
     create_figure()
-    with raises(ValueError):
+    match = "xscale is warped but must be 'linear', or 'log'."
+    with pytest.raises(ValueError, match=match):
         plot.freq_2d(handsome_signal_2d, freq_scale="warped")
 
-    with raises(ValueError):
+    match = "xscale is warped but must be 'linear', or 'log'."
+    with pytest.raises(ValueError, match=match):
         plot.phase_2d(handsome_signal_2d, freq_scale="warped")
 
-    with raises(ValueError):
+    match = "xscale is warped but must be 'linear', or 'log'."
+    with pytest.raises(ValueError, match=match):
         plot.group_delay_2d(handsome_signal_2d, freq_scale="warped")
 
     plt.close("all")
@@ -445,10 +534,12 @@ def test_2d_time_unit_assertion(handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
-    with raises(ValueError):
+    match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
+    with pytest.raises(ValueError, match=match):
         plot.time_2d(handsome_signal_2d, unit="pascal")
 
-    with raises(ValueError):
+    match = "'pascal' is not in list"
+    with pytest.raises(ValueError, match=match):
         plot.group_delay_2d(handsome_signal_2d, unit="pascal")
 
     plt.close("all")
@@ -501,7 +592,7 @@ def test_2d_contourf(function, handsome_signal_2d):
 def test_2d_method_assertion(function, handsome_signal_2d):
     """Test 2d plots method assertion ."""
     create_figure()
-    with raises(ValueError, match="method must be"):
+    with pytest.raises(ValueError, match="method must be"):
         function(handsome_signal_2d, method='pcontourmesh')
 
 
@@ -591,7 +682,7 @@ def test_log_tick_labels(function, limits, noise):
 
 
 @pytest.mark.parametrize(
-    "function", [(plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)]
+    "function", [(plot.freq_2d), (plot.phase_2d), (plot.group_delay_2d)],
 )
 @pytest.mark.parametrize("limits", [[20, 20e3], [50, 425]])
 def test_2d_log_tick_labels(function, limits, handsome_signal_2d):
@@ -635,10 +726,10 @@ def test_spectrogram_log_tick_labels(limits, noise):
     assert not any(minor_label_test)
 
 
-@pytest.mark.parametrize('rcParams, value', [
-    ['lines.linestyle', ':'],
-    ['axes.facecolor', 'black'],
-    ['axes.grid', False]])
+@pytest.mark.parametrize(("rcParams", "value"), [
+    ('lines.linestyle', ':'),
+    ('axes.facecolor', 'black'),
+    ('axes.grid', False)])
 def test_pyfar_plot_with_empty_style(rcParams, value):
     """
     Test passing an empty style to a pyfar plot function to check if the
