@@ -155,13 +155,13 @@ class Regularization():
     def from_signal(cls, regularization, beta=1, target=None):
         """
         Regularization from signal.
-        Regularization factors passed as FrequencyData. The factors have to
+        Regularization factors passed as pf.Signal. The factors have to
         match the number of bins of the signal to be inverted.
 
         Parameters
         ----------
-        regularization : pf.FrequencyData
-            Regularization as pyfar FrequencyData.
+        regularization : pf.Signal
+            Regularization as pyfar Signal.
         beta : float, optional
             Beta parameter to control the amount of regularization.
         target : pf.Signal, optional
@@ -247,7 +247,7 @@ class Regularization():
         if self._regu_type == "frequency range":
             regu = self._get_regularization_from_frequency_range(signal)
         elif self._regu_type == "signal":
-            regu = self._get_regularization_from_regularization_final(signal)
+            regu = self._get_regularization_from_regularization_signal(signal)
 
         if self._target:
             regu = self._get_regularization_from_target(signal, regu)
@@ -304,7 +304,7 @@ class Regularization():
 
         return pf.FrequencyData(regu_final, signal.frequencies)
 
-    def _get_regularization_from_regularization_final(self, signal):
+    def _get_regularization_from_regularization_signal(self, signal):
         """
         Get regularization from final regularization factors.
         """
