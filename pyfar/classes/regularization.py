@@ -7,9 +7,104 @@ from pyfar.dsp.dsp import _cross_fade
 import numpy as np
 
 class Regularization():
-    """Class for regularization."""
+    r"""Class for frequency dependent regularization and inversion.
+
+    Regularization is used in inverse filtering methods to limit the gain
+    applied by an inverse filter. This, for example, is nescessary to
+    avoid extreme amplification caused by notches and peaks in the original
+    signal's spectrum or by the limit of a system's bandwidth.
+
+    The frequency dependent regularization :math:`\epsilon(f)` can be defined
+    using one of the class methods. Note that the resulting regularization
+    function is adjusted to the quadratic maximum of the given signal.
+    The regularization is then applied when calculating the inverse of a
+    signal as [1]_, [2]_:
+
+    .. math::
+
+        S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \beta * \epsilon(f)},
+
+    with :math:`S(f)` being the input signal's Fourier transform,
+    :math:`S^*(f)` the complex conjugate, and :math:`\beta` a parameter to
+    control the influence of the regularization function on the inversion.
+
+    Further, the class methods offer the possibility of passing an arbitrary
+    target function :math:`D(f)`. This function can be used to manipulate
+    the frequency response of the inversion. Therefore the chosen
+    regularization :math:`\epsilon(f)` is first converted into a target
+    function :math:`A_{eq}(f)` with the same effect as the regularization [3]_:
+
+    .. math::
+
+        A_{eq}(f)=\frac{1}{1+\beta \frac{|\epsilon(f)|^2}{|S(f)|^2}},
+
+    and then magnitude multiplied with the passed target :math:`D(f)`:
+
+    .. math::
+
+        A(f)=A_{eq}(f)*|D(f)|.
+
+    Finally the inverse signal is calculated as [3]_:
+
+    .. math::
+
+        S^{-1}(f)=\frac{S^*(f) A(f)}{|S(f)|^2}.
+
+    The inversion of signals is handled using the class' :meth:`invert` method.
+
+
+    Examples
+    --------
+
+    Regularized inversion from a frequency range. For better control over
+    the slopes at the lower and upper frequency limits a bandpass target
+    function is also passed.
+
+    .. plot::
+        :context: reset
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> # get regularization object
+        >>> Regu = pf.Regularization.from_frequency_range([20, 15e3])
+        >>> # create linear sweep and invert it:
+        >>> sweep = pf.signals.linear_sweep_time(1000, (20, 20e3))
+        >>> inv = Regu.invert(sweep)
+        >>>
+        >>> # design bandpass target function
+        >>> bp = pf.dsp.filter.butterworth(None, 4, (20, 15e3), 'bandpass', 44.1e3)
+        >>> target = bp.process(pf.signals.impulse(1000))
+        >>> # get regularization object with target function
+        >>> Regu_target = pf.Regularization.from_frequency_range([20, 15e3], target=target)
+        >>> # invert signal
+        >>> inv_target = Regu_target.invert(sweep)
+        >>>
+        >>> # plot results
+        >>> pf.plot.freq(sweep, label="Original signal")
+        >>> pf.plot.freq(inv, label="Regularized inversion")
+        >>> pf.plot.freq(inv_target, label="Regularized inversion with target")
+        >>> plt.legend()
+        >>> plt.show()
+
+    References
+    ----------
+    .. [1]  O. Kirkeby and P. A. Nelson, “Digital Filter Design for Inversion
+            Problems in Sound Reproduction,” J. Audio Eng. Soc., vol. 47,
+            no. 7, p. 13, 1999.
+
+    .. [2]  P. C. Hansen, Rank-deficient and discrete ill-posed problems:
+            numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
+
+    .. [3]  S. G. Norcross, M. Bouchard, and G. A. Soulodre, “Inverse Filtering
+            Design Using a Minimal-Phase Target Function from Regularization,”
+            Convention Paper 6929 Presented at the 121st Convention, 2006
+            October 5–8, San Francisco, CA, USA.
+    """ # noqa: E501
 
     def __init__(self, regu_type: str="") -> None:
+
+        self._regu_type = regu_type
 
         # throw error if object is instanced without classmethod
         if regu_type == "":
@@ -22,17 +117,23 @@ class Regularization():
 
     @classmethod
     def from_frequency_range(cls, frequency_range, beta=1, target=None):
-        """
+        r"""
         Regularization from frequency range.
+        Defines a frequency range within which the regularization factor is set
+        to ``0``. Outside the frequency range the regularization factor is
+        ``1`` and can be scaled using the ``beta`` parameter.
+        The regularization factors are cross-faded using a raised cosine
+        window function with a width of :math:`\sqrt{2}f` above and below the
+        given frequency range.
 
         Parameters
         ----------
         frequency_range : array, tuple
             Tuple with two values for the lower and upper frequency limit.
-        regu_outside : float
-            Regularization factor outside the frequency range.
-        regu_inside : float
-            Regularization factor inside the frequency range.
+        beta : float, optional
+            Beta parameter to control the amount of regularization.
+        target : pf.Signal, optional
+            Target function for the regularization.
         """
         instance = cls(regu_type = "frequency range")
 
@@ -47,7 +148,6 @@ class Regularization():
         instance._frequency_range = np.asarray(frequency_range)
         instance._target = target
         instance._beta = beta
-        instance._regu_type = "frequency range"
 
         return instance
 
@@ -55,11 +155,17 @@ class Regularization():
     def from_signal(cls, regularization, beta=1, target=None):
         """
         Regularization from signal.
+        Regularization factors passed as FrequencyData. The factors have to
+        match the number of bins of the signal to be inverted.
 
         Parameters
         ----------
-        regularization : pf.Signal
-            Regularization as pyfar Signal
+        regularization : pf.FrequencyData
+            Regularization as pyfar FrequencyData.
+        beta : float, optional
+            Beta parameter to control the amount of regularization.
+        target : pf.Signal, optional
+            Target function for the regularization.
         """
         if not isinstance(regularization, pf.Signal):
             raise ValueError(
@@ -77,7 +183,19 @@ class Regularization():
         return instance
 
     def invert(self, signal):
-        """Method to get inverse of signal"""
+        """Invert the spectrum of a signal applying frequency dependent
+        regularization.
+
+        Parameters
+        ----------
+        signal : pf.Signal
+            Signal to be inverted.
+
+        Returns
+        -------
+        inverse : pf.Signal
+            Resulting signal after regularized inversion.
+        """
 
         # get regularization factors
         regu = self.get_regularization(signal)
@@ -99,13 +217,19 @@ class Regularization():
 
     def get_regularization(self, signal):
         """
-        Method to get the regularization factors based on regularization type.
+        Method to get the frequency dependent regularization.
 
         Parameters
         ----------
         signal : pf.Signal, optional
-            Signal object to get the regularization factors from. Depending on
-            the regularization type, a signal must be passed.
+            Signal on which the regularization will be used on. This is
+            nescessary to assure that the regularization factors have the same
+            number of bins as the signal.
+
+        Returns
+        -------
+        regu : pf.FrequencyData
+            Frequency dependent regularization as FrequencyData.
         """
 
         # zero pad, if target function is given
@@ -126,17 +250,22 @@ class Regularization():
             regu = self._get_regularization_from_regularization_final(signal)
 
         if self._target:
-            regu = self._get_regularization_with_target(signal, regu)
+            regu = self._get_regularization_from_target(signal, regu)
 
         return regu
 
-    def _get_regularization_with_target(self, signal, regu):
+    def _get_regularization_from_target(self, signal, regu):
         """Get regularization using a target function"""
-        # calculate target function regularization (Norcross 2006)
-        regu_abs_sq = regu.freq * np.conj(regu.freq)
-        sig_avs_sq = signal.freq * np.conj(signal.freq)
+        # scale regularization to signal's magnitude spectrum
+        regu_scaled = regu.freq * np.max(np.abs(signal.freq))
+        # calculate target function from regularization (Norcross 2006)
+        regu_abs_sq = regu_scaled * np.conj(regu_scaled)
+        sig_abs_sq = signal.freq * np.conj(signal.freq)
 
-        A_eq = 1 / (1 + self._beta * (regu_abs_sq / sig_avs_sq))
+        A_eq = 1 / (1 + self._beta * (regu_abs_sq / sig_abs_sq))
+
+        # Apply passed target function by magnitude multiplication
+
         A = A_eq * np.abs(self._target.freq)
 
         return pf.FrequencyData(A, signal.frequencies)
@@ -151,7 +280,7 @@ class Regularization():
 
         # arrange regularization factors for inside and outside frequency range
         regu_inside = np.zeros(signal.n_bins, dtype=np.double)
-        regu_outside = np.ones(signal.n_bins, dtype=np.double) * self._beta
+        regu_outside = np.ones(signal.n_bins, dtype=np.double)
 
         # index for crossfade at lower frequency limit
         idx_xfade_lower = signal.find_nearest_frequency(
@@ -184,9 +313,10 @@ class Regularization():
             raise TypeError(f"Regularization of type '{self._regu_type}' "
                             "requires an input signal of type pyfar.Signal.")
 
-        if signal.n_bins != len(self._regu_final):
+        if signal.n_bins != self._regu.n_bins:
             raise ValueError(
                 "The number of bins in the signal and the regularization "
                 "factors must be equal.")
-        return pf.FrequencyData(self._regu_final, signal.frequencies)
+
+        return pf.FrequencyData(np.abs(self._regu.freq), signal.frequencies)
 
