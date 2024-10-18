@@ -18,7 +18,8 @@ def test_regularization_errors():
 
     with pytest.raises(ValueError,
                        match="Target function must be a pyfar.Signal object."):
-        assert pf.dsp.Regularization.from_frequency_range((200, 20e3), target=1)
+        assert pf.dsp.Regularization.from_frequency_range((200, 20e3),
+                                                          target=1)
 
     with pytest.raises(ValueError,
                        match="Regularization must be a pyfar.Signal"
