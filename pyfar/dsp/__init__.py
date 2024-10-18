@@ -34,6 +34,8 @@ from .interpolation import (
 from . import filter
 from . import fft
 
+from .regularization import Regularization
+
 
 __all__ = [
     'fft',
@@ -65,4 +67,5 @@ __all__ = [
     'average',
     'normalize',
     'fractional_time_shift',
+    'Regularization',
 ]

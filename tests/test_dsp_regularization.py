@@ -9,28 +9,28 @@ def test_regularization_errors():
     with pytest.raises(RuntimeError,
                        match="Regularization objects must be created using a"
                        " classmethod."):
-        assert pf.Regularization()
+        assert pf.dsp.Regularization()
 
     with pytest.raises(ValueError,
                        match="The frequency range needs to specify lower and"
                         " upper limits."):
-        assert pf.Regularization.from_frequency_range((200,))
+        assert pf.dsp.Regularization.from_frequency_range((200,))
 
     with pytest.raises(ValueError,
                        match="Target function must be a pyfar.Signal object."):
-        assert pf.Regularization.from_frequency_range((200, 20e3), target=1)
+        assert pf.dsp.Regularization.from_frequency_range((200, 20e3), target=1)
 
     with pytest.raises(ValueError,
                        match="Regularization must be a pyfar.Signal"
                        " object."):
-        assert pf.Regularization.from_signal(1)
+        assert pf.dsp.Regularization.from_signal(1)
 
 
 @pytest.mark.parametrize(("beta", "expected"), [(1, 0.5), (0.5, 2/3), (0, 1)])
 def test_regularization_frequency_range(impulse, beta, expected):
     """Test Regularization from a frequency range using different beta
     values."""
-    Regu = pf.Regularization.from_frequency_range((200, 10e3), beta=beta)
+    Regu = pf.dsp.Regularization.from_frequency_range((200, 10e3), beta=beta)
     inv = Regu.invert(impulse)
 
     idx = inv.find_nearest_frequency([200, 10e3])
@@ -40,10 +40,10 @@ def test_regularization_frequency_range(impulse, beta, expected):
     npt.assert_allclose(inv.freq[:, -1], expected)
 
 
-def test_regularization_compare_to_dsp(impulse):
+def test_regularization_compare_to_dsp_function(impulse):
     """Compare result to dsp.regularized_spectrum_inversion."""
     res_dsp = pf.dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
-    Regu = pf.Regularization.from_frequency_range((200, 10e3))
+    Regu = pf.dsp.Regularization.from_frequency_range((200, 10e3))
     res_regu = Regu.invert(impulse * 2)
 
     npt.assert_allclose(res_dsp.freq, res_regu.freq)
@@ -56,7 +56,7 @@ def test_regularization_target(impulse):
                                    impulse.sampling_rate)
     target = bp.process(impulse)
 
-    ReguTarget = pf.Regularization.from_frequency_range((20, 15.5e3),
+    ReguTarget = pf.dsp.Regularization.from_frequency_range((20, 15.5e3),
                                                         target=target,
                                                         beta=1)
 
@@ -68,7 +68,7 @@ def test_regularization_target(impulse):
 
 def test_regularization_from_signal(noise):
     """Test Regularization from an arbitrary signal."""
-    Regu = pf.Regularization.from_signal(noise)
+    Regu = pf.dsp.Regularization.from_signal(noise)
     regu = Regu.get_regularization(pf.signals.impulse(noise.n_samples))
 
     npt.assert_allclose(regu.freq, np.abs(noise.freq))

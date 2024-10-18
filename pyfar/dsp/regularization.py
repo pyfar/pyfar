@@ -61,13 +61,12 @@ class Regularization():
     function is also passed.
 
     .. plot::
-        :context: reset
 
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>>
         >>> # get regularization object
-        >>> Regu = pf.Regularization.from_frequency_range([20, 15e3])
+        >>> Regu = pf.dsp.Regularization.from_frequency_range([20, 15e3])
         >>> # create linear sweep and invert it:
         >>> sweep = pf.signals.linear_sweep_time(1000, (20, 20e3))
         >>> inv = Regu.invert(sweep)
@@ -76,7 +75,7 @@ class Regularization():
         >>> bp = pf.dsp.filter.butterworth(None, 4, (20, 15e3), 'bandpass', 44.1e3)
         >>> target = bp.process(pf.signals.impulse(1000))
         >>> # get regularization object with target function
-        >>> Regu_target = pf.Regularization.from_frequency_range([20, 15e3], target=target)
+        >>> Regu_target = pf.dsp.Regularization.from_frequency_range([20, 15e3], target=target)
         >>> # invert signal
         >>> inv_target = Regu_target.invert(sweep)
         >>>
@@ -85,7 +84,6 @@ class Regularization():
         >>> pf.plot.freq(inv, label="Regularized inversion")
         >>> pf.plot.freq(inv_target, label="Regularized inversion with target")
         >>> plt.legend()
-        >>> plt.show()
 
     References
     ----------

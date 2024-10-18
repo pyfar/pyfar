@@ -22,7 +22,6 @@ Classes
    classes/pyfar.coordinates
    classes/pyfar.orientations
    classes/pyfar.transmission_matrix
-   classes/pyfar.regularization
 
 Modules
 -------
