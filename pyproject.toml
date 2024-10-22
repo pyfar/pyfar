@@ -71,7 +71,7 @@ Documentation = "https://pyfar.readthedocs.io/"
 Download = "https://pypi.org/project/pyfar/"
 Homepage = "https://pyfar.org/"
 "Source Code" = "https://github.com/pyfar/pyfar"
-changelog = "https://github.com/pyfar/pyfar/blob/main/CHANGELOG.md"
+changelog = "https://github.com/pyfar/pyfar/blob/main/HISTORY.rst"
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
