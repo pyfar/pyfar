@@ -6,7 +6,7 @@ import pyfar as pf
 from pyfar.dsp.dsp import _cross_fade
 import numpy as np
 
-class Regularization():
+class RegularizedSpectrumInversion():
     r"""Class for frequency dependent regularization and inversion.
 
     Regularization is used in inverse filtering methods to limit the gain
@@ -15,8 +15,7 @@ class Regularization():
     signal's spectrum or by the limit of a system's bandwidth.
 
     The frequency dependent regularization :math:`\epsilon(f)` can be defined
-    using one of the class methods. Note that the resulting regularization
-    function is adjusted to the quadratic maximum of the given signal.
+    using one of the class methods.
     The regularization is then applied when calculating the inverse of a
     signal as [1]_, [2]_:
 
@@ -38,11 +37,11 @@ class Regularization():
 
         A_{eq}(f)=\frac{1}{1+\beta \frac{|\epsilon(f)|^2}{|S(f)|^2}},
 
-    and then magnitude multiplied with the passed target :math:`D(f)`:
+    and then multiplied with the passed target :math:`D(f)`:
 
     .. math::
 
-        A(f)=A_{eq}(f)*|D(f)|.
+        A(f)=A_{eq}(f)*D(f).
 
     Finally the inverse signal is calculated as [3]_:
 
@@ -66,7 +65,7 @@ class Regularization():
         >>> import matplotlib.pyplot as plt
         >>>
         >>> # get regularization object
-        >>> Regu = pf.dsp.Regularization.from_frequency_range([20, 15e3])
+        >>> Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range([20, 15e3])
         >>> # create linear sweep and invert it:
         >>> sweep = pf.signals.linear_sweep_time(1000, (20, 20e3))
         >>> inv = Regu.invert(sweep)
@@ -75,7 +74,7 @@ class Regularization():
         >>> bp = pf.dsp.filter.butterworth(None, 4, (20, 15e3), 'bandpass', 44.1e3)
         >>> target = bp.process(pf.signals.impulse(1000))
         >>> # get regularization object with target function
-        >>> Regu_target = pf.dsp.Regularization.from_frequency_range([20, 15e3], target=target)
+        >>> Regu_target = pf.dsp.RegularizedSpectrumInversion.from_frequency_range([20, 15e3], target=target)
         >>> # invert signal
         >>> inv_target = Regu_target.invert(sweep)
         >>>
@@ -114,7 +113,8 @@ class Regularization():
             f"of type '{self._regu_type}'."
 
     @classmethod
-    def from_frequency_range(cls, frequency_range, beta=1, target=None):
+    def from_frequency_range(cls, frequency_range, beta=1, target=None,
+                             normalize_regularization=None):
         r"""
         Regularization from frequency range.
         Defines a frequency range within which the regularization factor is set
@@ -132,6 +132,12 @@ class Regularization():
             Beta parameter to control the amount of regularization.
         target : pf.Signal, optional
             Target function for the regularization.
+        normalize_regularization : str, optional
+            Normalize the regularization factors. Default is ``None``.
+
+            ``'energy'``
+                Normalize regularization factors to the quadratic maximum
+                of a given signal.
         """
         instance = cls(regu_type = "frequency range")
 
@@ -139,20 +145,22 @@ class Regularization():
             raise ValueError(
                 "The frequency range needs to specify lower and upper limits.")
 
-        if target and not isinstance(target, pf.Signal):
+        if target is not None and not isinstance(target, pf.Signal):
             raise ValueError(
                 "Target function must be a pyfar.Signal object.")
 
         instance._frequency_range = np.asarray(frequency_range)
         instance._target = target
         instance._beta = beta
+        instance._normalize = normalize_regularization
 
         return instance
 
     @classmethod
-    def from_signal(cls, regularization, beta=1, target=None):
+    def from_magnitude_spectrum(cls, regularization, beta=1, target=None,
+                                normalize_regularization=None):
         """
-        Regularization from signal.
+        Regularization from magnitude spectrum.
         Regularization factors passed as pf.Signal. The factors have to
         match the number of bins of the signal to be inverted.
 
@@ -164,19 +172,27 @@ class Regularization():
             Beta parameter to control the amount of regularization.
         target : pf.Signal, optional
             Target function for the regularization.
+        normalize_regularization : str, optional
+            Normalize the regularization factors.  Default is ``None``.
+
+            ``'energy'``
+                Normalize regularization factors to the quadratic maximum
+                of a given signal.
+
         """
         if not isinstance(regularization, pf.Signal):
             raise ValueError(
                 "Regularization must be a pyfar.Signal object.")
 
-        if target and not isinstance(target, pf.Signal):
+        if target is not None and not isinstance(target, pf.Signal):
             raise ValueError(
                 "Target function must be a pyfar.Signal object.")
 
-        instance = cls(regu_type = "signal")
+        instance = cls(regu_type = "magnitude spectrum")
         instance._regu = regularization
         instance._target = target
         instance._beta = beta
+        instance._normalize = normalize_regularization
 
         return instance
 
@@ -196,26 +212,25 @@ class Regularization():
         """
 
         # get regularization factors
-        regu = self.get_regularization(signal)
+        regu = self.regularization(signal)
         regu_final = regu.freq
 
         data = self._signal.freq
 
         # calculate inverse filter
         inverse = self._signal.copy()
-        if self._target:
+        if self._target is not None:
             # Norcross 2006 eq. 2.13
             inverse.freq = np.conj(data) * regu_final / (np.conj(data) * data)
         else:
-            # normalize to maximum of signal's magnitude spectrum
-            regu_final *= np.max(np.abs(data)**2)
             inverse.freq = np.conj(data) / (np.conj(data) * data + regu_final)
 
         return inverse
 
-    def get_regularization(self, signal):
+
+    def regularization(self, signal):
         """
-        Method to get the frequency dependent regularization.
+        Get the frequency dependent regularization factors.
 
         Parameters
         ----------
@@ -231,7 +246,8 @@ class Regularization():
         """
 
         # zero pad, if target function is given
-        if self._target and self._target.n_samples != signal.n_samples:
+        if self._target is not None and \
+            self._target.n_samples != signal.n_samples:
             n_samples = max(signal.n_samples, self._target.n_samples)
             signal = pf.dsp.pad_zeros(signal, (n_samples-signal.n_samples))
             self._target = pf.dsp.pad_zeros(self._target,
@@ -244,27 +260,28 @@ class Regularization():
         # Call private method to get regularization factors
         if self._regu_type == "frequency range":
             regu = self._get_regularization_from_frequency_range(signal)
-        elif self._regu_type == "signal":
+        elif self._regu_type == "magnitude spectrum":
             regu = self._get_regularization_from_regularization_signal(signal)
 
-        if self._target:
+        # Normalize regularization factors to energy of signal
+        if self._normalize == 'energy':
+            regu.freq *= np.max(np.abs(signal.freq)**2)
+
+        if self._target is not None:
             regu = self._get_regularization_from_target(signal, regu)
 
         return regu
 
     def _get_regularization_from_target(self, signal, regu):
         """Get regularization using a target function"""
-        # scale regularization to signal's magnitude spectrum
-        regu_scaled = regu.freq * np.max(np.abs(signal.freq))
         # calculate target function from regularization (Norcross 2006)
-        regu_abs_sq = regu_scaled * np.conj(regu_scaled)
+        regu_abs_sq = regu.freq * np.conj(regu.freq)
         sig_abs_sq = signal.freq * np.conj(signal.freq)
 
         A_eq = 1 / (1 + self._beta * (regu_abs_sq / sig_abs_sq))
 
-        # Apply passed target function by magnitude multiplication
-
-        A = A_eq * np.abs(self._target.freq)
+        # Apply passed target function
+        A = A_eq * self._target.freq
 
         return pf.FrequencyData(A, signal.frequencies)
 
