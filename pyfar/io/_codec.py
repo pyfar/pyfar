@@ -346,7 +346,7 @@ def _encode_ndarray(ndarray):
     Returns
     -------
     bytes : bytes
-        They bytes that where written by `numpy.save` into a memfile.
+        The bytes that were written by `numpy.save` into a memfile.
 
     Note
     ----
