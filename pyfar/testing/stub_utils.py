@@ -352,6 +352,7 @@ def dict_of_builtins():
 
 class AnyClass:
     """Placeholder class."""
+
     def __init__(self, x=42):
         self.x = x
 
@@ -365,6 +366,7 @@ class NoEncodeClass:
 
 class NoDecodeClass:
     """Placeholder class to Raise NotImplementedError for `_decode`."""
+
     def __init__(self, x=42):
         self.x = x
 

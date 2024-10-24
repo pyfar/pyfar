@@ -12,6 +12,7 @@ from matplotlib.ticker import (
 
 class FractionalOctaveFormatter(FixedFormatter):
     """Formatter for fractional octave bands."""
+
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -32,6 +33,7 @@ class FractionalOctaveFormatter(FixedFormatter):
 
 class FractionalOctaveLocator(FixedLocator):
     """Locator for fractional octave bands."""
+
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -50,6 +52,7 @@ class FractionalOctaveLocator(FixedLocator):
 
 class LogLocatorITAToolbox(LogLocator):
     """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
+
     def __init__(
         self,
         base=10.0,
