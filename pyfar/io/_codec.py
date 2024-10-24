@@ -206,7 +206,7 @@ def _inner_decode(obj, key, zipfile):
 
 
 def _decode_numpy_scalar(obj, key):
-    """ This function is exclusively used by `io._inner_decode` and
+    """This function is exclusively used by `io._inner_decode` and
     decodes numpy scalars e.g. of type `numpy.int32`.
     """
     try:
@@ -218,7 +218,7 @@ def _decode_numpy_scalar(obj, key):
 
 
 def _decode_ndarray(obj, zipfile):
-    """ This function is exclusively used by `io._inner_decode` and
+    """This function is exclusively used by `io._inner_decode` and
     decodes `numpy.ndarrays` from a memfile.
     """
     # Numpy.load is applied on a memory file instead of a physical file
@@ -384,7 +384,7 @@ def _encode_object_json_aided(obj, name, zipfile):
 
 
 def _is_pyfar_type(obj):
-    """ True if object is a Pyfar-type.
+    """True if object is a Pyfar-type.
     """
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
@@ -423,26 +423,26 @@ def _supported_builtin_types():
 
 
 def _is_numpy_type(obj):
-    """ True if object is a Numpy-type.
+    """True if object is a Numpy-type.
     """
     return type(obj).__module__ == np.__name__
 
 
 def _is_dtype(obj):
-    """ True if object is `numpy.dtype`.
+    """True if object is `numpy.dtype`.
     """
     return isinstance(obj, type) and (
         obj.__module__ == 'numpy' or obj == complex)
 
 
 def _is_numpy_scalar(obj):
-    """ True if object is any numpy.dtype scalar e.g. `numpy.int32`.
+    """True if object is any numpy.dtype scalar e.g. `numpy.int32`.
     """
     return type(obj).__module__ == 'numpy'
 
 
 def _is_type_hint(obj):
-    """ Check if object is stored along with its type in the typical format:
+    """Check if object is stored along with its type in the typical format:
     [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)].
     """
     return isinstance(obj, list) \
@@ -489,6 +489,7 @@ class BuiltinsWrapper(dict):
     `_encode` and `_decode` methods, which are called polymorphically
     in `io.write` and `io.read`.
     """
+
     def copy(self):
         return deepcopy(self)
 

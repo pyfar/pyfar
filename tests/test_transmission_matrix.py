@@ -87,7 +87,8 @@ def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
 @pytest.fixture(scope="module")
 def abcd_data_1x2():
     """ABCD matrices with 2 frequency bins and one additional
-    dimension of size 3."""
+    dimension of size 3.
+    """
     frequencies = [100, 200]
     A = FrequencyData([[1, 1]], frequencies)
     B = FrequencyData([[2, 2]], frequencies)
@@ -98,7 +99,8 @@ def abcd_data_1x2():
 @pytest.fixture(scope="module")
 def abcd_data_3x2():
     """ABCD matrices with 2 frequency bins and one additional
-    dimension of size 3."""
+    dimension of size 3.
+    """
     frequencies = [100, 200]
     A = FrequencyData([[1, 1], [1, 1], [1, 1]], frequencies)
     B = FrequencyData([[2, 2], [2, 2], [2, 2]], frequencies)
@@ -109,7 +111,8 @@ def abcd_data_3x2():
 @pytest.fixture(scope="module")
 def abcd_data_3x3x1():
     """ABCD matrices with 1 frequency bin and two additional
-    dimensions of size 3."""
+    dimensions of size 3.
+    """
     A = FrequencyData(
         [[[1.1], [1.1], [1.1]], [[1.2], [1.2], [1.2]], [[1.3], [1.3], [1.3]]],
         100)
@@ -143,7 +146,8 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
 
 def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
     """Test whether ABCD entries of T-Matrix match ABCD data used for
-    initialization."""
+    initialization.
+    """
     tmat, A, B, C, D = abcd_data_3x2
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
@@ -268,7 +272,8 @@ def test_tmatrix_create_gyrator(transducer_constant, frequencies):
 
 def test_tmatrix_slicing(frequencies):
     """Test whether slicing a T-Matrix object return T-Matrix or raises correct
-    error for invalid keys."""
+    error for invalid keys.
+    """
     eye_2x2 = TransmissionMatrix.create_identity(frequencies)
     eye_1x2x2 = pf.utils.broadcast_cshape(eye_2x2, (1, 2, 2))
     eye_3x2x2 = pf.utils.broadcast_cshape(eye_2x2, (3, 2, 2))

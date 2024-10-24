@@ -217,7 +217,7 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):
-    """
+    r"""
     Normalize a Fourier spectrum.
 
     Apply normalizations defined in [1]_ to the DFT spectrum.
@@ -249,7 +249,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Scale spectrum by ``1/n_samples`` as in [1]_ Eq. (4)
             to obtain the amplitude spectrum.
         'rms'
-            Scale spectrum by :math:`1/\\sqrt{2}` as in [1]_
+            Scale spectrum by :math:`1/\sqrt{2}` as in [1]_
             Eq.(10) to obtain the RMS spectrum.
         'power'
             Power spectrum, which equals the squared RMS spectrum

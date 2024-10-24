@@ -217,7 +217,8 @@ class TransmissionMatrix(FrequencyData):
     @property
     def abcd_caxes(self):
         """The indices of the channel axes referring to the transmission
-        matrix, namely (-2, -1)."""
+        matrix, namely (-2, -1).
+        """
         return (-2, -1)
 
     @property
@@ -287,7 +288,7 @@ class TransmissionMatrix(FrequencyData):
         return idx_inf, idx_inf_Zl, Zl
 
     def input_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
-        """Calculates the input impedance given the load impedance Zl at the
+        r"""Calculates the input impedance given the load impedance Zl at the
         output.
 
         Two-port representation::
@@ -350,7 +351,7 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     def output_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
-        """Calculates the output impedance given the load impedance Zl at the
+        r"""Calculates the output impedance given the load impedance Zl at the
         input.
 
         Two-port representation::
@@ -397,7 +398,7 @@ class TransmissionMatrix(FrequencyData):
 
     def transfer_function(self, quantity_indices,
                           Zl: complex | FrequencyData) -> FrequencyData:
-        """Returns the transfer function (output/input) for specified
+        r"""Returns the transfer function (output/input) for specified
         quantities and a given load impedance.
 
         The transfer function is the relation between an output and input
