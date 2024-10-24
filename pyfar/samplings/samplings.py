@@ -1,3 +1,4 @@
+"""Module for spherical sampling grids."""
 import numpy as np
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
@@ -502,7 +503,6 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     References
     ----------
-
     .. [#]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
             Spherical Designs for Integration and Interpolation on the
             Two-Sphere,” SIAM Journal on Numerical Analysis, vol. 48, no. 6,

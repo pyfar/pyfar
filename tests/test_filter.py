@@ -350,7 +350,7 @@ def test_reconstructing_fractional_octave_bands():
 
 
 def test_reconstructing_fractional_octave_bands_filter_slopes():
-    """Test the shape of the filter slopes for different parameters"""
+    """Test the shape of the filter slopes for different parameters."""
     # test different filter slopes against reference
     x = pf.signals.impulse(2**10)
 
@@ -375,7 +375,7 @@ def test_reconstructing_fractional_octave_bands_warning():
 
 
 def test_notch(impulse):
-    """Test notch filter behavior"""
+    """Test notch filter behavior."""
     f_obj = pfilt.notch(None, 1e3, 1, 44100)
     assert isinstance(f_obj, pclass.FilterIIR)
     assert f_obj.comment == ("Second order notch filter at "
@@ -401,7 +401,7 @@ def test_notch(impulse):
 @pytest.mark.parametrize("f", [1e3, 4e3])
 @pytest.mark.parametrize("Q", [1, 10])
 def test_notch_result(f, Q):
-    """Test the frequency response of the notch filter"""
+    """Test the frequency response of the notch filter."""
     # generate and apply notch filter
     notch = pf.dsp.filter.notch(pf.signals.impulse(44100), f, Q)
 

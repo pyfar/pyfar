@@ -490,7 +490,7 @@ def test___eq___notEqual(filterObject, coeffs, state):
 
 
 def test_repr(capfd):
-    """Test the repr string of the filter classes"""
+    """Test the repr string of the filter classes."""
 
     print(fo.FilterFIR([[1, 0, 1]], 44100))
     out, _ = capfd.readouterr()

@@ -1,3 +1,4 @@
+"""Digital signal processing functions."""
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn
@@ -446,7 +447,6 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     Examples
     --------
-
     Options for parameter `shape`.
 
     .. plot::
@@ -623,7 +623,7 @@ def _time_window_symmetric_interval_two(interval, window):
 
 
 def _time_window_left(n_samples, interval, window):
-    """ Left-sided time window. ""
+    """ Left-sided time window. "".
 
     Parameters
     ----------
@@ -653,7 +653,7 @@ def _time_window_left(n_samples, interval, window):
 
 
 def _time_window_right(interval, window):
-    """ Right-sided time window. ""
+    """ Right-sided time window. "".
 
     Parameters
     ----------
@@ -681,7 +681,7 @@ def _time_window_right(interval, window):
 
 
 def _time_window_symmetric_zero(n_samples, interval, window):
-    """ Symmetric time window with respect to t=0. ""
+    """ Symmetric time window with respect to t=0. "".
 
     Parameters
     ----------
@@ -945,7 +945,6 @@ def minimum_phase(signal, n_fft=None, truncate=True):
 
     Examples
     --------
-
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
     .. plot::
@@ -1119,7 +1118,7 @@ def time_shift(
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : numeric, optional
+    pad_value : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
         Pad :py:data:`numpy.nan` to the respective channels if the rms value
         of the signal is to be maintained for block-wise rms estimation of the
@@ -1251,7 +1250,6 @@ def find_impulse_response_delay(impulse_response, N=1):
 
     References
     ----------
-
     .. [#]  N. S. M. Tamim and F. Ghani, “Hilbert transform of FFT pruned
             cross correlation function for optimization in time delay
             estimation,” in Communications (MICC), 2009 IEEE 9th Malaysia
@@ -1555,7 +1553,7 @@ def deconvolve(system_output, system_input, fft_length=None,
         The ``fft_norm`` of is set to ``'none'``.
 
     References
-    -----------
+    ----------
     .. [#] S. Mueller and P. Masserani "Transfer function measurement with
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
@@ -1810,6 +1808,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         If return_prefix is ``True``, the function will also return the
         `log_prefix` value. This can be used to delogrithmize the data. The
         default is ``False``.
+
     Returns
     -------
     decibel : numpy.ndarray
@@ -1917,7 +1916,6 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
     Examples
     --------
-
     Illustrate effect of limit and knee
 
     .. plot ::
@@ -2014,7 +2012,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> ax.legend(loc='upper left')
 
     References
-    -----------
+    ----------
     .. [#] B. Bernschütz, Microphone arrays and sound field decomposition for
            dynamic binaural synthesis, Ph.D Thesis, (Berlin, Germany,
            TU Berlin, 2016).
@@ -2113,7 +2111,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
 def energy(signal):
     r"""
-    Computes the channel wise energy in the time domain
+    Computes the channel wise energy in the time domain.
 
     .. math::
 
@@ -2140,7 +2138,7 @@ def energy(signal):
     to compute the power and the rms of a signal.
 
     References
-    -----------
+    ----------
     .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
            (Upper Saddle et al., Pearson, 2010), Third edition.
     """
@@ -2254,7 +2252,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     signal: Signal, TimeData, FrequencyData
         Input signal.
     mode: string
-
         ``'linear'``
             Average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that
@@ -2307,7 +2304,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         The default is ``'raise'``.
 
     Returns
-    --------
+    -------
     averaged_signal: Signal, TimeData, FrequencyData
         Averaged input Signal.
 

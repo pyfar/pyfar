@@ -1,3 +1,4 @@
+"""Audio filter design and application."""
 import warnings
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import numpy as np
@@ -64,7 +65,7 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
 blob/master/filter_design/audiofilter.py
 
     Examples
-    -----
+    --------
     First and second order allpass filter with ``fc = 1000`` Hz.
 
     .. plot::
@@ -549,7 +550,6 @@ def high_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -657,7 +657,6 @@ def high_shelf_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -760,7 +759,6 @@ def low_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -867,7 +865,6 @@ def low_shelf_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -951,9 +948,45 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
 
     Parameters
     ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass ``None`` to create the filter without
+        applying it.
+    frequency : number
+        Characteristic frequency in Hz (see `frequency_type`)
+    frequency_type : string
+        Defines how `frequency` is used
+
+        ``'upper'``
+            `frequency` gives the upper characteristic frequency. In this case
+            the lower characteristic frequency is given by
+            ``2**bandwidth / frequency``
+        ``'lower'``
+            `frequency` gives the lower characteristic frequency. In this case
+            the upper characteristic frequency is given by
+            ``2**bandwidth * frequency``
+    gain : number
+        The filter gain in dB. The default is ``None``, which calculates the
+        gain from the `slope` and `bandwidth` (must be given if `gain` is
+        ``None``).
+    slope : number
+        Filter slope in dB per octave, with positive values denoting a rising
+        filter slope and negative values denoting a falling filter slope. The
+        default is ``None``, which calculates the slope from the `gain` and
+        `bandwidth` (must be given if `slope` is ``None``).
+    bandwidth : number
+        The bandwidth of the filter in octaves. The default is ``None``, which
+        calculates the bandwidth from `gain` and `slope` (must be given if
+        `bandwidth` is ``None``).
+    N : int
+        Number of shelf filters that are cascaded. The default is ``None``,
+        which calculated the minimum ``N`` that is required to satisfy Eq. (11)
+        in Schultz et al. 2020, i.e., the minimum ``N`` that is required for
+        a good approximation of the ideal filter response.
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if signal is ``None``. The
+        default is ``None``.
     shelf_type : string
-        ``'low'``, or ``'high'`` for low- or high-shelf
-    other : see high_shelf_cascade and low_shelf_cascade
+        ``'low'`` or ``'high'`` for low- or high-shelf.
 
     [1] F. Schultz, N. Hahn, and S. Spors, “Shelving Filter Cascade with
         Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
@@ -1075,12 +1108,14 @@ def _shelving_cascade_slope_parameters(gain, slope, bandwidth, shelf_type):
 
     Parameters
     ----------
+    gain : float
+        Desired gain of the stop band in decibel.
     slope : float
         Desired shelving slope in decibel per octave.
     bandwidth : float
         Desired bandwidth of the slope in octave.
-    gain : float
-        Desired gain of the stop band in decibel.
+    shelf_type : string
+        ``'low'`` or ``'high'`` for low- or high-shelf.
 
     """
     if slope == 0:

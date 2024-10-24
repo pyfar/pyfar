@@ -452,7 +452,7 @@ def room_impulse_response(sampling_rate=48000):
 
     Parameters
     ----------
-    sample_rate : int, optional
+    sampling_rate : int
         The sampling rate of the RIR in Hz. The default of ``48000`` uses the
         RIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
         for resampling to the desired sampling rate.
