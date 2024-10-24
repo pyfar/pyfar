@@ -188,7 +188,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     if np.shape(delay) != cshape:
         raise ValueError("Shape of delay needs to equal cshape.")
     if delay.max() >= n_samples:
-        raise ValueError("Delay is larger than number of samples,"
+        raise ValueError("Delay is larger than number of samples, "
                          f"which is {n_samples}")
 
     # Time vector
@@ -352,7 +352,6 @@ def dict_of_builtins():
 
 class AnyClass:
     """Placeholder class."""
-
     def __init__(self, x=42):
         self.x = x
 
@@ -366,7 +365,6 @@ class NoEncodeClass:
 
 class NoDecodeClass:
     """Placeholder class to Raise NotImplementedError for `_decode`."""
-
     def __init__(self, x=42):
         self.x = x
 

@@ -13,8 +13,13 @@ lint.ignore = [
     "D205", # 1 blank line required between summary line and description
     "D401", # First line should be in imperative mood
     "D404", # First word of the docstring should not be "This"
+    "B006",
+    "B008",
+    "PT018", # Assertion should be broken down into multiple parts
+    "PT019", # Fixture `_` without value is injected as parameter
 ]
 lint.select = [
+    "B",
     "ARG",
     "C4",
     "E",
@@ -22,6 +27,8 @@ lint.select = [
     "W",
     "D",
     "D417",   # Missing argument descriptions in the docstring
+    "PT", # Pytest style
+    "A",
     "ERA",
     "NPY",
     "COM",

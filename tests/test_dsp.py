@@ -487,7 +487,8 @@ def test_time_window_input():
         dsp.time_window(sig, interval=[1, 2, 3])
     with pytest.raises(ValueError, match='longer'):
         dsp.time_window(sig, interval=[1, 11])
-    with pytest.raises(ValueError):
+    m = "invalid literal for int"
+    with pytest.raises(ValueError, match=m):
         dsp.time_window(sig, interval=['a', 'b'])
 
 
@@ -1015,7 +1016,7 @@ def test_convolve_fft_norm_error():
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]])),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]]))])
@@ -1027,7 +1028,7 @@ def test_convolve_mode_and_method(method, mode, desired):
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
@@ -1040,7 +1041,7 @@ def test_convolve_mode_and_method_complex(method, mode, desired):
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])

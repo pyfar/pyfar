@@ -644,8 +644,9 @@ class TransmissionMatrix(FrequencyData):
             1, 0, admittance.freq, 1, admittance.frequencies)
 
     @staticmethod
-    def create_transformer(transducer_constant :
-                complex | FrequencyData) -> np.ndarray | TransmissionMatrix:
+    def create_transformer(
+            transducer_constant: float | int | FrequencyData,
+            ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a transformer.
 
         See Equation (2-12) in Table I of Reference [1]_:
@@ -662,7 +663,7 @@ class TransmissionMatrix(FrequencyData):
             The transmission ratio with respect to voltage-like quantity,
             i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
-            return value will be a 2x2 np.ndarray isntead.
+            return value will be a 2x2 np.ndarray instead.
 
         Returns
         -------
@@ -783,14 +784,14 @@ class TransmissionMatrix(FrequencyData):
         # try indexing and raise verbose errors if it fails
         try:
             data = self._data[key]
-        except IndexError as Error:
-            if 'too many indices for array' in str(Error):
+        except IndexError as error:
+            if 'too many indices for array' in str(error):
                 raise IndexError((
                     f'Indexed dimensions must not exceed the ABCD '
                     f'channel dimension (abcd_cdim), which is '
-                    f'{len(self.abcd_cshape)}'))
+                    f'{len(self.abcd_cshape)}')) from error
             else:
-                raise Error
+                raise error
 
         return TransmissionMatrix.from_tmatrix(
             data, frequencies=self.frequencies,

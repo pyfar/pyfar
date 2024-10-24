@@ -575,7 +575,7 @@ class PlotParameter(object):
 
     @property
     def plot_type(self):
-        """Return current the plot type."""
+        """Return the current plot type."""
         return self._plot_type[0]
 
     @property

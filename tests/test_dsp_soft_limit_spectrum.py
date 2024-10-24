@@ -108,7 +108,7 @@ def test_arctan_knee(limit):
     assert np.all(20*np.log10(np.abs(data_out.freq)) <= limit + 1e-14)
 
 
-@pytest.mark.parametrize('fft_norm,log_prefix', [
+@pytest.mark.parametrize(('fft_norm', 'log_prefix'), [
     ('none', 20), ('unitary', 20), ('amplitude', 20), ('rms', 20),
     ('power', 10), ('psd', 10)])
 def test_automatic_setting_of_log_prefix(fft_norm, log_prefix):

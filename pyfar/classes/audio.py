@@ -131,10 +131,11 @@ class _Audio():
         try:
             reshaped._data = reshaped._data.reshape(
                 newshape + (length_last_dimension, ))
-        except ValueError:
+        except ValueError as e:
             if np.prod(newshape) != np.prod(self.cshape):
-                raise ValueError((f"Cannot reshape audio object of cshape "
-                                  f"{self.cshape} to {newshape}"))
+                raise ValueError(
+                    (f"Cannot reshape audio object of cshape "
+                     f"{self.cshape} to {newshape}")) from e
 
         return reshaped
 
@@ -254,13 +255,13 @@ class _Audio():
         # try indexing and raise verbose errors if it fails
         try:
             data = self._data[key]
-        except IndexError as Error:
-            if 'too many indices for array' in str(Error):
+        except IndexError as e:
+            if 'too many indices for array' in str(e):
                 raise IndexError((
                     f'Indexed dimensions must not exceed the channel '
-                    f'dimension (cdim), which is {len(self.cshape)}'))
+                    f'dimension (cdim), which is {len(self.cshape)}')) from e
             else:
-                raise Error
+                raise e
 
         return self._return_item(data)
 
@@ -376,7 +377,7 @@ class TimeData(_Audio):
 
     @property
     def complex(self):
-        """Return or set the flag indicating if the data is complex."""
+        """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
     @complex.setter
@@ -815,7 +816,8 @@ class Signal(FrequencyData, TimeData):
                     data.shape[-1], is_complex=is_complex)
                 warnings.warn(
                     f"Number of samples not given, assuming {n_samples} "
-                    f"samples from {data.shape[-1]} frequency bins.")
+                    f"samples from {data.shape[-1]} frequency bins.",
+                    stacklevel=2)
             elif (n_samples > 2 * data.shape[-1] - 1) and not self.complex:
                 raise ValueError(("n_samples can not be larger than "
                                   "2 * data.shape[-1] - 2"
@@ -908,7 +910,7 @@ class Signal(FrequencyData, TimeData):
                 data.shape[-1], self.complex)
             warnings.warn(
                 f"Number of samples not given, assuming {self.n_samples} "
-                f"samples from {data.shape[-1]} frequency bins.")
+                f"samples from {data.shape[-1]} frequency bins.", stacklevel=2)
         # set domain
         self._domain = 'freq'
         if not raw:
@@ -971,7 +973,7 @@ class Signal(FrequencyData, TimeData):
 
     @property
     def complex(self):
-        """Return or set the flag indicating if the data is complex."""
+        """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
     @complex.setter
@@ -1115,7 +1117,8 @@ class Signal(FrequencyData, TimeData):
         """
         warnings.warn(
             ("len(Signal) will be deprecated in pyfar 0.8.0 "
-             "Use Signal.n_samples instead"), PyfarDeprecationWarning)
+             "Use Signal.n_samples instead"),
+             PyfarDeprecationWarning, stacklevel=2)
         return self.n_samples
 
     def __iter__(self):
@@ -1723,9 +1726,9 @@ def _assert_match_for_arithmetic(data: tuple, domain: str, division: bool,
                 if not matmul:
                     try:
                         cshape = np.broadcast_shapes(cshape, d.cshape)
-                    except ValueError:
+                    except ValueError as e:
                         raise ValueError(
-                            "The cshapes do not match.")
+                            "The cshapes do not match.") from e
 
         # check type of non signal input
         else:

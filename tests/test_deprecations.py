@@ -23,6 +23,7 @@ from pyfar.classes.warnings import PyfarDeprecationWarning
 
 # This defines the plot size and the backend
 from pyfar.testing.plot_utils import create_figure
+import numpy.testing as npt
 
 
 # deprecate in 0.6.0 ----------------------------------------------------------
@@ -32,30 +33,31 @@ from pyfar.testing.plot_utils import create_figure
 def test_xscale_deprecation(function, handsome_signal):
     """Deprecate xscale parameter in plot functions."""
 
+    create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove xscale from pyfar 0.6.0!
-            create_figure()
             function(handsome_signal, xscale='linear')
 
 
 def test_spectrogram_yscale_deprecation(sine):
     """Deprecate yscale parameter in plot functions."""
 
+    create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
         with pytest.raises(AttributeError):
             # remove yscale from pyfar 0.6.0!
-            create_figure()
             pf.plot.spectrogram(sine, yscale='linear')
 
 
 def test__check_time_unit():
     """Deprecate unit=None in plots showing the time or group delay."""
 
+    create_figure()
     if version.parse(pf.__version__) >= version.parse('0.6.0'):
-        with pytest.raises(ValueError):
+        match = 'Unit is None but must be s, ms, mus, samples, auto.'
+        with pytest.raises(ValueError, match=match):
             # remove xscale from pyfar 0.6.0!
-            create_figure()
             pf.plot._utils._check_time_unit(None)
 
 
@@ -66,7 +68,8 @@ def test_pad_zero_modi():
         pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(ValueError):
+        match = 'Unknown padding mode.'
+        with pytest.raises(ValueError, match=match):
             # remove mode 'before' and 'after' from pyfar 0.8.0!
             pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, mode='before')
 
@@ -237,11 +240,11 @@ def test_deprecations_freq_range_parameter_warnings():
             PyfarDeprecationWarning,
             match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
             "favor of frequency_range"):
-        gt.freq_range
+        npt.assert_equal((20, 20e3), gt.freq_range)
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
-            gt.freq_range
+            npt.assert_equal((20, 20e3), gt.freq_range)
 
     with pytest.warns(
             PyfarDeprecationWarning,
