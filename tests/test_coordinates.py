@@ -56,7 +56,7 @@ def test__systems():
 
 
 def test_coordinate_names():
-    """Test if units agree across coordinates that appear more than once"""
+    """Test if units agree across coordinates that appear more than once."""
 
     # get all coordinate systems
     c = Coordinates()
@@ -318,7 +318,7 @@ def test_setter_and_getter_with_conversion(domain_in, domain_out, point):
 
 
 def test_getter_with_degrees():
-    """Test if getter return correct values also in degrees"""
+    """Test if getter return correct values also in degrees."""
     coords = Coordinates(0, 1, 0)
 
     sph = coords.get_sph(unit="deg")
@@ -329,7 +329,7 @@ def test_getter_with_degrees():
 
 
 def test_assertion_for_getter():
-    """Test assertion for empty Coordinates objects"""
+    """Test assertion for empty Coordinates objects."""
     coords = Coordinates()
     with pytest.raises(ValueError, match="Object is empty"):
         coords.get_cart()
@@ -429,7 +429,7 @@ def test_getitem():
 
 
 def test_find_nearest_k():
-    """Test returns of find_nearest_k"""
+    """Test returns of find_nearest_k."""
     # 1D cartesian, nearest point
     x = np.arange(6)
     coords = Coordinates(x, 0, 0)
@@ -583,7 +583,7 @@ def test_find_slice():
     (Coordinates([0, 1], 2, 3), [0, 2, 3]),
     (Coordinates([[0, 1], [1, 0]], 2, 3), [[0, 2, 3], [0, 2, 3]])])
 def test_find_slice_slicing(coordinates, desired):
-    """Test if return values can be used for slicing"""
+    """Test if return values can be used for slicing."""
 
     index, mask = coordinates.find_slice('x', 'met', 0)
     assert coordinates[index] == coordinates[mask]
@@ -625,7 +625,7 @@ def test_inverse_rotation():
 def test_converters():
     """
     Test if converters can handle numbers (correctness of the conversion is
-    tested in test_setter_and_getter_with_conversion)
+    tested in test_setter_and_getter_with_conversion).
     """
     coordinates.cart2sph(0, 0, 1)
     coordinates.sph2cart(0, 0, 1)

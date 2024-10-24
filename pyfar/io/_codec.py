@@ -1,5 +1,5 @@
 """
-Brief
+Brief.
 =====
 
 This module is not part of the public API. It contains encoding and decoding
@@ -153,9 +153,9 @@ def _decode(obj, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
-    zipfile: zipfile-object.
+    obj : PyFar-object
+        PyFar-objects are decoded by calling their class method `_decode`.
+    zipfile: zipfile-object
         The zipfile object is looped in the recursive structure
         e.g. to decode ndarrays when they occur.
     """
@@ -180,13 +180,14 @@ def _inner_decode(obj, key, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
+    obj : PyFar-object
+        The object that is currently being encoded.
     key :  str or int
         The key provided by the dict or list over which currently is being
         iterated.
-
     zipfile: zipfile
+        The zipfile object is looped in the recursive structure
+        e.g. to encode ndarrays when they occur
     """
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
@@ -266,13 +267,12 @@ def _encode(obj, zip_path, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
-    zip_path: str.
-        zipfile acceps a path-like-string to know where to write
+    obj : PyFar-object
+        The object that is currently being encoded.
+    zip_path: str
+        zipfile accepts a path-like-string to know where to write
         special types e.g. ndarrays into the archive.
-
-    zipfile: zipfile-object.
+    zipfile: zipfile-object
         The zipfile object is looped in the recursive structure
         e.g. to encode ndarrays when they occur.
 
@@ -310,16 +310,16 @@ def _inner_encode(obj, key, zip_path, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
+    obj : PyFar-object
+        The object that is currently being encoded.
     key :  str or int
         The key provided by the dict or list over which currently is being
         iterated.
-
-    zip_path: str
+    zip_path : str
         The potential zip path looped through all recursions.
-
     zipfile: zipfile
+        The zipfile object is looped in the recursive structure
+        e.g. to encode ndarrays when they occur.
     """
     if _is_dtype(obj[key]):
         obj[key] = ['$dtype', obj[key].__name__]
@@ -348,12 +348,13 @@ def _encode_ndarray(ndarray):
 
     Parameters
     ----------
-    ndarray: numpy.array.
+    ndarray: numpy.array
+        The numpy array that should be encoded.
 
     Returns
     -------
-    bytes.
-        They bytes that where written by `numpy.save` into a memfile.
+    bytes : bytes
+        The bytes that were written by `numpy.save` into a memfile.
 
     Note
     ----
@@ -450,7 +451,7 @@ def _is_numpy_scalar(obj):
 
 def _is_type_hint(obj):
     """ Check if object is stored along with its type in the typical format:
-            [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)]
+    [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)].
     """
     return isinstance(obj, list) \
         and len(obj) == 2 \
@@ -471,7 +472,7 @@ def _str_to_type(type_as_string, module='pyfar'):
         The default is 'pyfar'.
 
     Returns
-    ----------
+    -------
     PyfarType: type.
         A valid PyfarType.
     """

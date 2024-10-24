@@ -1,3 +1,5 @@
+"""Digital signal processing functions."""
+
 from .dsp import (
     minimum_phase,
     phase,

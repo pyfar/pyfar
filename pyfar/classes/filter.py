@@ -79,7 +79,7 @@ def _extend_sos_coefficients(sos, order):
 
 
 def _repr_string(filter_type, order, n_channels, sampling_rate):
-    """Generate repr string for filter objects"""
+    """Generate repr string for filter objects."""
 
     ch_str = 'channel' if n_channels == 1 else 'channels'
 
@@ -159,6 +159,7 @@ class Filter(object):
         self.comment = comment
 
     def init_state(self, state='zeros'):
+        """Initialize the buffer elements to pre-defined initial conditions."""
         self._state = state
         self._initialized = True
 
@@ -175,7 +176,7 @@ class Filter(object):
 
     @coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
         self._coefficients = _atleast_3d_first_dim(value)
 
     @property
@@ -187,7 +188,7 @@ class Filter(object):
 
     @property
     def n_channels(self):
-        """The number of channels of the filter"""
+        """The number of channels of the filter."""
         return self._coefficients.shape[0]
 
     @property
@@ -351,7 +352,7 @@ class FilterFIR(Filter):
 
     @coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
 
         b = np.atleast_2d(value)
         # add a-coefficients for easier handling across filter classes
@@ -389,6 +390,7 @@ class FilterFIR(Filter):
         return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "FIR", self.order, self.n_channels, self.sampling_rate)
 
@@ -459,6 +461,7 @@ class FilterIIR(Filter):
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "IIR", self.order, self.n_channels, self.sampling_rate)
 
@@ -501,7 +504,7 @@ class FilterSOS(Filter):
 
     @Filter.coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
 
         coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
@@ -519,7 +522,7 @@ class FilterSOS(Filter):
 
     @property
     def n_sections(self):
-        """The number of sections"""
+        """The number of sections."""
         return self._coefficients.shape[-2]
 
     def init_state(self, cshape, state='zeros'):
@@ -557,5 +560,6 @@ class FilterSOS(Filter):
             return res
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "SOS", self.n_sections, self.n_channels, self.sampling_rate)

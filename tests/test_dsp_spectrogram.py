@@ -6,7 +6,7 @@ import numpy.testing as npt
 
 
 def test_assertions(sine):
-    """Test assertions due to wrong input data"""
+    """Test assertions due to wrong input data."""
 
     with pytest.raises(
             TypeError, match="Input data has to be of type: Signal."):
@@ -21,7 +21,7 @@ def test_assertions(sine):
 
 
 def test_return_values():
-    """Test return values of the spectrogram with default parameters"""
+    """Test return values of the spectrogram with default parameters."""
     # test signal and spectrogram
     signal = pf.signals.sine(256, 2*1024, sampling_rate=1024)
     signal.fft_norm = 'amplitude'
@@ -38,7 +38,7 @@ def test_return_values():
 
 
 def test_return_values_complex():
-    """Test return values of the spectrogram with default parameters"""
+    """Test return values of the spectrogram with default parameters."""
     # test signal and spectrogram
     signal = pf.signals.sine(256, 2*1024, sampling_rate=1024)
     signal.fft_norm = "none"
@@ -64,7 +64,7 @@ def test_return_values_complex():
     ('rect', [0, 1, 0]),         # rect window does not spread energy
     ('hann', [.5, 1, .5])])      # hann window spreads energy
 def test_window(window, value):
-    """Test return values of the spectrogram with default parameters"""
+    """Test return values of the spectrogram with default parameters."""
     # test signal and spectrogram
     signal = pf.signals.sine(256, 2*1024, sampling_rate=1024)
     signal.fft_norm = 'amplitude'
@@ -75,7 +75,7 @@ def test_window(window, value):
 
 
 def test_normalize(sine):
-    """Test normalize parameter"""
+    """Test normalize parameter."""
     sine.fft_norm = 'amplitude'
     assert pf.dsp.spectrogram(sine)[-1].max() < 1
     assert pf.dsp.spectrogram(sine, normalize=False)[-1].max() > 1
@@ -83,7 +83,7 @@ def test_normalize(sine):
 
 @pytest.mark.parametrize('shape', [(2, 1), (1, 2), (1,), (1, 1)])
 def test_spectrogram_shape(shape):
-    """Test cshape of spectrogram returns"""
+    """Test cshape of spectrogram returns."""
     impulse = pf.signals.impulse(2048, 0, np.ones((shape)))
     freq, time, spectro = pf.dsp.spectrogram(impulse)
 

@@ -1,3 +1,4 @@
+"""Plotting functions for 2D data."""
 import numpy as np
 from pyfar.plot.utils import context
 from pyfar import Signal
@@ -126,7 +127,6 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
 
     Examples
     --------
-
     Plot a 25-channel impulse signal with different delays and amplitudes.
 
     .. plot::
@@ -710,7 +710,6 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
     Examples
     --------
-
     Plot a 25-channel impulse signal with different delays and amplitudes.
 
     .. plot::
@@ -857,7 +856,6 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
     Examples
     --------
-
     Plot a 25-channel impulse signal with different delays and amplitudes.
 
     .. plot::
@@ -1012,7 +1010,6 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
 
     Examples
     --------
-
     Plot a 25-channel impulse signal with different delays and amplitudes.
 
     .. plot::

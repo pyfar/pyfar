@@ -158,7 +158,7 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
 @pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
 def test_group_delay_cshape(shape):
     """Test if group delay function keeps cshape of signals of shape `m x n`
-     with `m = 1` or `n = 1`."""
+    with `m = 1` or `n = 1`."""
     impulse = pf.signals.impulse(256, 0, np.ones(shape))
 
     grp = dsp.group_delay(impulse)
@@ -247,7 +247,7 @@ def test_xfade():
 
 
 def test_regularized_spectrum_inversion(impulse):
-    """Test regularized_spectrum_inversion"""
+    """Test regularized_spectrum_inversion."""
     res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -260,7 +260,7 @@ def test_regularized_spectrum_inversion(impulse):
 
 
 def test_regularized_spectrum_inversion_complex(impulse_complex):
-    """Test regularized_spectrum_inversion for complex input signals"""
+    """Test regularized_spectrum_inversion for complex input signals."""
     res = dsp.regularized_spectrum_inversion(impulse_complex * 2, [200, 10e3])
 
     ind = impulse_complex.find_nearest_frequency([200, 10e3])
@@ -273,7 +273,7 @@ def test_regularized_spectrum_inversion_complex(impulse_complex):
 
 
 def test_regularized_spectrum_inversion_assertions(impulse):
-    """Test regularized_spectrum_inversion errors"""
+    """Test regularized_spectrum_inversion errors."""
     with pytest.raises(
             ValueError, match='needs to be of type pyfar.Signal'):
         dsp.regularized_spectrum_inversion('error', (1, 2))
@@ -288,7 +288,7 @@ def test_regularized_spectrum_inversion_assertions(impulse):
 
 
 def test_regularized_spectrum_inversion_normalized(impulse):
-    """Test normalized parameter of regularized_spectrum_inversion"""
+    """Test normalized parameter of regularized_spectrum_inversion."""
     impulse.fft_norm = 'amplitude'
 
     # normalized -> True
@@ -310,7 +310,7 @@ def test_regularized_spectrum_inversion_normalized(impulse):
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
 @pytest.mark.parametrize("unit", ["samples", "s"])
 def test_time_shift_cyclic(shift_samples, unit):
-    """Test cyclic time shift using samples and seconds"""
+    """Test cyclic time shift using samples and seconds."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -331,7 +331,7 @@ def test_time_shift_cyclic(shift_samples, unit):
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
 @pytest.mark.parametrize("unit", ["samples", "s"])
 def test_time_shift_cyclic_complex(shift_samples, unit):
-    """Test cyclic time shift using samples and seconds"""
+    """Test cyclic time shift using samples and seconds."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -354,7 +354,7 @@ def test_time_shift_cyclic_complex(shift_samples, unit):
 @pytest.mark.parametrize("shift", [2, -2, 0])
 @pytest.mark.parametrize("pad_value", [0, np.nan])
 def test_time_shift_linear(shift, pad_value):
-    """Test linear time shift with different pad values"""
+    """Test linear time shift with different pad values."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -383,7 +383,7 @@ def test_time_shift_linear(shift, pad_value):
 @pytest.mark.parametrize("shift", [2, -2, 0])
 @pytest.mark.parametrize("pad_value", [0, np.nan])
 def test_time_shift_linear_complex(shift, pad_value):
-    """Test linear time shift with different pad values"""
+    """Test linear time shift with different pad values."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -414,7 +414,7 @@ def test_time_shift_linear_complex(shift, pad_value):
 @pytest.mark.parametrize("shift_samples", [(
     [1, 2, 3]), (np.array([1, 2, 3]))])
 def test_time_shift_multi_dim(shift_samples):
-    """Test with multi-channel signal and shift values as list and np.array"""
+    """Test with multi-channel signal and shift values as list and np.array."""
     delay = 2
     n_samples = 10
 
@@ -429,7 +429,7 @@ def test_time_shift_multi_dim(shift_samples):
 
 
 def test_time_shift_assertions():
-    """Test assertions for shift_time"""
+    """Test assertions for shift_time."""
 
     # wrong mode
     with pytest.raises(ValueError, match="mode is 'cut'"):
@@ -737,7 +737,7 @@ def test_minimum_phase_multidim():
 
 @pytest.mark.parametrize("is_complex", [False, True])
 def test_impulse_response_delay(is_complex):
-    """Test delay of an ideal impulse"""
+    """Test delay of an ideal impulse."""
     n_samples = 2**10
     snr = 60
     start_sample = np.array([24])
@@ -758,7 +758,7 @@ def test_impulse_response_delay(is_complex):
 
 
 def test_impulse_response_delay_sinc():
-    """Test delay of a band-limited sinc function shifted by 1/2 samples"""
+    """Test delay of a band-limited sinc function shifted by 1/2 samples."""
     sr = 44100
     n_samples = 128
     samples = np.arange(n_samples)
@@ -773,7 +773,7 @@ def test_impulse_response_delay_sinc():
 
 
 def test_impulse_response_delay_multidim():
-    """Ideal multi-dimensional Signal of ideal impulses"""
+    """Ideal multi-dimensional Signal of ideal impulses."""
     n_samples = 2**10
     snr = 60
 
@@ -979,7 +979,7 @@ def test_convolve_default():
 
 
 def test_convolve_complex():
-    '''Test dsp.convolve with complex signals with default parameters'''
+    '''Test dsp.convolve with complex signals with default parameters.'''
     x = pf.Signal([1, 0.5, 0.25, 0], 44100, is_complex=True)
     y = pf.Signal([1, -1, 0], 44100, is_complex=True)
 
@@ -1022,7 +1022,7 @@ def test_convolve_mode_and_method(method, mode, desired):
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
 def test_convolve_mode_and_method_complex(method, mode, desired):
-    '''Test dsp.convolve with complex signals with various methods and modes'''
+    """Test convolve with complex signals with various methods and modes."""
     x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=True)
     y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
     res = dsp.convolve(x, y, mode=mode, method=method)
@@ -1035,7 +1035,7 @@ def test_convolve_mode_and_method_complex(method, mode, desired):
     ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
 def test_convolve_mode_and_method_real_complex(method, mode, desired):
-    '''Test dsp.convolve with complex signals with various methods and modes'''
+    """Test convolve with complex signals with various methods and modes."""
     x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=False)
     y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
     res = dsp.convolve(x, y, mode=mode, method=method)
@@ -1044,7 +1044,7 @@ def test_convolve_mode_and_method_real_complex(method, mode, desired):
 
 def test_convolve_mismatching_cdims():
     """
-    Test if convolve works with broadcastable signals with different cdims
+    Test if convolve works with broadcastable signals with different cdims.
     """
     # generate and convolve signals
     signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))

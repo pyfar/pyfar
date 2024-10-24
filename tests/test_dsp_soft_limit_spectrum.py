@@ -47,7 +47,7 @@ def test_signal_and_frequency_data_input(data_in):
 @pytest.mark.parametrize('limit', [-10, 0, 10])
 @pytest.mark.parametrize('direction', ['upper', 'lower'])
 def test_limit_and_direction(limit, direction):
-    """Test if all values are correctly limited"""
+    """Test if all values are correctly limited."""
 
     data_in = pf.FrequencyData(10**(np.arange(-100, 101)/20), np.arange(201))
     data_out = soft_limit_spectrum(data_in, limit, knee=0, direction=direction)
@@ -59,7 +59,7 @@ def test_limit_and_direction(limit, direction):
 
 
 def test_frequency_dependend_limit():
-    """Test frequency-dependent limit passed as audio object"""
+    """Test frequency-dependent limit passed as audio object."""
 
     limit = np.atleast_2d([0, -6, -12])
     data_in = pf.FrequencyData(10**(np.array([-3, -3, -3])/20), [0, 1, 3])
@@ -78,7 +78,7 @@ def test_frequency_dependend_limit():
 @pytest.mark.parametrize('limit', [-10, 0, 10])
 @pytest.mark.parametrize('knee', [0, 5, 10])
 def test_knee_width_in_db(limit, knee):
-    "Test the knee width given in decibel."""
+    """Test the knee width given in decibel."""
 
     data_in = pf.FrequencyData(10**(np.arange(-100, 101)/20), np.arange(201))
     data_out = soft_limit_spectrum(data_in, limit, knee)
