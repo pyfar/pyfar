@@ -54,9 +54,9 @@ class RegularizedSpectrumInversion():
         >>> bp = pf.dsp.filter.butterworth(None, 4, (20, 15e3), 'bandpass', 44.1e3)
         >>> target = bp.process(pf.signals.impulse(1000))
         >>> # get regularization object with target function
-        >>> Regu_target = pf.dsp.RegularizedSpectrumInversion.from_frequency_range([20, 15e3], target=target)
+        >>> Regu_target = pf.dsp.RegularizedSpectrumInversion.from_frequency_range([20, 15e3])
         >>> # invert signal
-        >>> inv_target = Regu_target.invert(sweep)
+        >>> inv_target = Regu_target.invert(sweep, target=target)
         >>>
         >>> # plot results
         >>> pf.plot.freq(sweep, label="Original signal")
