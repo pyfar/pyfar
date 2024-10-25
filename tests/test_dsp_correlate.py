@@ -52,7 +52,16 @@ def test_error_cyclic_mode():
         correlate(signal_1, signal_2, mode='cyclic')
 
 
+def test_mutable_objects():
+    """Test if input does not change."""
 
+    signal_1 = pf.Signal([1, 0, 0], 1)
+    signal_2 = pf.Signal([2, 0, 0], 1)
+
+    correlate(signal_1, signal_2)
+
+    assert signal_1 == pf.Signal([1, 0, 0], 1)
+    assert signal_2 == pf.Signal([2, 0, 0], 1)
 
 
 @pytest.mark.parametrize('length_1', [4, 5])

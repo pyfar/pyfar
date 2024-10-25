@@ -2819,7 +2819,7 @@ def correlate(signal_1, signal_2, mode='full'):
 
     # compute correlation as frequency domain convolution
     # with time flipped and conjugate values for second signal
-    signal_2.time = signal_2.time.copy()[..., ::-1].conj()
+    signal_2.time = signal_2.time[..., ::-1].conj()
     correlation = signal_1 * signal_2
     correlation = correlation.time
 
