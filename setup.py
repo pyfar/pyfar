@@ -30,7 +30,7 @@ test_requirements = [
     'watchdog',
     'ruff',
     'coverage',
-    'Sphinx<8',
+    'Sphinx',
     'twine',
     'sphinx_mdinclude',
 ]
