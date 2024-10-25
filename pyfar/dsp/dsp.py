@@ -2783,10 +2783,6 @@ def correlate(signal_1, signal_2, mode='full'):
             type(signal_2) is not pyfar.Signal:
         raise TypeError("signal_1 and signal_2 must be pyfar.Signal objects")
 
-    if signal_1.complex != signal_2.complex:
-        raise ValueError(("Both signals must be complex or real valued. "
-                          "Mixtures are not allowed."))
-
     if signal_1.sampling_rate != signal_2.sampling_rate:
         raise ValueError("Both signals must have the same sampling rate.")
 
@@ -2796,6 +2792,12 @@ def correlate(signal_1, signal_2, mode='full'):
     # copy input to avoid changing mutual data
     signal_1 = signal_1.copy()
     signal_2 = signal_2.copy()
+
+    # check for complex signals
+    if signal_1.complex and not signal_2.complex:
+        signal_2.complex = True
+    if signal_2.complex and not signal_1.complex:
+        signal_1.complex = True
 
     # determine signal length for the FFT
     n_samples = np.array([signal_1.n_samples, signal_2.n_samples], dtype=int)

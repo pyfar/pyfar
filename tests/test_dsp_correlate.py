@@ -20,16 +20,6 @@ def test_error_signal_type():
         correlate('not a signal', 'not a signal')
 
 
-def test_error_complex_and_real_signals():
-    """Test if a mixture of complex and real signals raises an error."""
-
-    signal_1 = pf.Signal(1, 1)
-    signal_2 = pf.Signal(1+1j, 1, is_complex=True)
-
-    with pytest.raises(ValueError, match="Both signals must be complex or"):
-        correlate(signal_1, signal_2)
-
-
 def test_error_different_sampling_rates():
     """Test if signals with different sampling rates raise an error."""
 
@@ -60,6 +50,9 @@ def test_error_cyclic_mode():
 
     with pytest.raises(ValueError, match="must be of the same length"):
         correlate(signal_1, signal_2, mode='cyclic')
+
+
+
 
 
 @pytest.mark.parametrize('length_1', [4, 5])
@@ -162,5 +155,28 @@ def test_complex_signals():
     lag = 2
     npt.assert_almost_equal(
         correlation.time[0, correlation.times==lag], 0-1j, 10)
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times!=lag], 0+0j, 10)
+
+
+@pytest.mark.parametrize('complex_first', [True, False])
+def test_complex_and_real_signals(complex_first):
+    """Test with real and complex-valued signals"""
+
+    if complex_first:
+        signal_1 = pf.Signal([0, 0, 1j], 1, is_complex=True)
+        signal_2 = pf.Signal([1, 0, 0], 1, is_complex=True)
+        expected = 1j
+    else:
+        signal_1 = pf.Signal([0, 0, 1], 1, is_complex=True)
+        signal_2 = pf.Signal([1j, 0, 0], 1, is_complex=True)
+        expected = -1j
+
+    correlation = correlate(signal_1, signal_2)
+
+    # test correlation values
+    lag = 2
+    npt.assert_almost_equal(
+        correlation.time[0, correlation.times==lag], expected, 10)
     npt.assert_almost_equal(
         correlation.time[0, correlation.times!=lag], 0+0j, 10)
