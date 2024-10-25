@@ -210,7 +210,8 @@ def test_filter_fir_init_state(impulse):
 def test_filter_fir_process_sampling_rate_mismatch(impulse):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse.sampling_rate-1)
-    with pytest.raises(ValueError):
+    match = 'The sampling rates of filter and signal do not match'
+    with pytest.raises(ValueError, match=match):
         filt.process(impulse)
 
 
@@ -489,7 +490,7 @@ def test___eq___notEqual(filterObject, coeffs, state):
 
 
 def test_repr(capfd):
-    """Test the repr string of the filter classes"""
+    """Test the repr string of the filter classes."""
 
     print(fo.FilterFIR([[1, 0, 1]], 44100))
     out, _ = capfd.readouterr()

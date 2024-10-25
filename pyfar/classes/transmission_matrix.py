@@ -217,12 +217,12 @@ class TransmissionMatrix(FrequencyData):
     @property
     def abcd_caxes(self):
         """The indices of the channel axes referring to the transmission
-        matrix, namely (-2, -1)"""
+        matrix, namely (-2, -1)."""
         return (-2, -1)
 
     @property
     def abcd_cshape(self):
-        """The channel shape of the transmission matrix entries (A, B, C, D)
+        """The channel shape of the transmission matrix entries (A, B, C, D).
 
         This is the same as 'cshape' without the last two elements.
         As an exception, a matrix with cshape (2,2) will return
@@ -259,7 +259,7 @@ class TransmissionMatrix(FrequencyData):
                              self.comment)
 
     def _check_for_inf(self, Zl: complex | FrequencyData):
-        """Check given load impedance for np.inf values
+        """Check given load impedance for np.inf values.
 
         Returns
         -------
@@ -767,7 +767,7 @@ class TransmissionMatrix(FrequencyData):
     def __getitem__(self, key):
         """Get copied slice of the TransmissionMatrix at key.
 
-            Note, that slicing ABCD or frequency dimensions is not possible.
+        Note, that slicing ABCD or frequency dimensions is not possible.
         """
 
         if not self.is_indexable():
@@ -783,14 +783,14 @@ class TransmissionMatrix(FrequencyData):
         # try indexing and raise verbose errors if it fails
         try:
             data = self._data[key]
-        except IndexError as Error:
-            if 'too many indices for array' in str(Error):
+        except IndexError as error:
+            if 'too many indices for array' in str(error):
                 raise IndexError((
                     f'Indexed dimensions must not exceed the ABCD '
                     f'channel dimension (abcd_cdim), which is '
-                    f'{len(self.abcd_cshape)}'))
+                    f'{len(self.abcd_cshape)}')) from error
             else:
-                raise Error
+                raise error
 
         return TransmissionMatrix.from_tmatrix(
             data, frequencies=self.frequencies,

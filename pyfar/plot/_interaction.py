@@ -540,12 +540,12 @@ class PlotParameter(object):
         return changed
 
     def toggle_orientation(self):
-        """Toggle the orientation of 2D plots"""
+        """Toggle the orientation of 2D plots."""
         self.orientation = "horizontal" if self.orientation == "vertical" \
             else "vertical"
 
     def cycle_plot_types(self):
-        """Cycle the plot types"""
+        """Cycle the plot types."""
         self._plot_type = np.roll(self._plot_type, -1)
 
     def toggle_mode(self):
@@ -570,7 +570,7 @@ class PlotParameter(object):
 
     @property
     def plot_type(self):
-        """Return current the plot type"""
+        """Return the current plot type."""
         return self._plot_type[0]
 
     @property
@@ -613,12 +613,17 @@ class Interaction(object):
             axes objects of all axes in the plot holding data
         colorbars : Matplotlib colorbar, array like
             all colorbar objects in the plot
-        style : plot style
-            E.g. 'light'
+        style : str
+            ``light`` or ``dark`` to use the pyfar plot styles or a plot style
+            from :py:data:`matplotlib.style.available`. Pass a dictionary
+            to set specific plot parameters, for example
+            ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+            ``style = {}`` to use the currently active plotstyle. The default
+            is ``light``.
         plot_parameter : PlotParameter
             An object of the PlotParameter class
-
-        **kwargs are passed to the plot functions
+        kwargs : arguments, optional
+            **kwargs are passed to the plot functions.
         """
 
         # save input arguments
@@ -665,7 +670,7 @@ class Interaction(object):
 
     def select_action(self, event):
         """
-        Select what to do based on the keyboard event
+        Select what to do based on the keyboard event.
 
         Parameters
         ----------

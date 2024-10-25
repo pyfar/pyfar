@@ -1,3 +1,4 @@
+"""Module for generating deterministic signals as part of pyfar.signals."""
 import numpy as np
 import warnings
 import pyfar
@@ -44,9 +45,9 @@ def sine(frequency, n_samples, amplitude=1, phase=0, sampling_rate=44100,
     try:
         cshape, (frequency, amplitude, phase) = _match_shape(
             frequency, amplitude, phase)
-    except ValueError:
+    except ValueError as error:
         raise ValueError(("The parameters frequency, amplitude, and phase can "
-                          "not be broadcasted to the same shape"))
+                          "not be broadcasted to the same shape")) from error
 
     if np.any(frequency < 0) or np.any(frequency > sampling_rate/2):
         raise ValueError(
@@ -121,9 +122,10 @@ def impulse(n_samples, delay=0, amplitude=1, sampling_rate=44100):
     # check and match the cshape
     try:
         cshape, (delay, amplitude) = _match_shape(delay, amplitude)
-    except ValueError:
-        raise ValueError(("The parameters delay and amplitude can not be "
-                          "broadcasted to the same shape"))
+    except ValueError as error:
+        raise ValueError(
+            ("The parameters delay and amplitude can not be "
+            "broadcasted to the same shape")) from error
 
     # generate the impulse
     n_samples = int(n_samples)
@@ -374,7 +376,6 @@ def exponential_sweep_time(n_samples, frequency_range, n_fade_out=90,
 
     Examples
     --------
-
     Exponential sweep between 50 and 22050 Hz
 
     .. plot::
@@ -471,7 +472,6 @@ def exponential_sweep_freq(
 
     Examples
     --------
-
     Exponential sweep between 50 and 22050 Hz
 
     .. plot::
@@ -564,7 +564,6 @@ def magnitude_spectrum_weighted_sweep(
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -692,6 +691,8 @@ def _frequency_domain_sweep(
 
     Parameters
     ----------
+    n_samples : int
+        The length of the sweep in samples.
     sweep_type : Signal, string
         Specify the magnitude response of the sweep.
 
@@ -710,6 +711,38 @@ def _frequency_domain_sweep(
         ``'perfect_linear'``
             Perfect linear sweep. Note that the parameters `start_margin`,
             `stop_margin`, and `frequency_range` are not required in this case.
+    frequency_range : array like
+        Frequency range of the sweep given by the lower and upper cut-off
+        frequency in Hz. The restriction of the frequency range is realized
+        by applying a Butterworth high-pass if ``frequency_range[0] > 0``
+        and/or by a low-pass if ``frequency_range[1] < sampling_rate / 2``.
+        Note that the exponential sweep can not start at 0 Hz, because its
+        magnitude is defined by 1/frequency.
+    bandpass_order : int
+        The order of the Butterworth filters that are applied to limit the
+        frequency range (see above).
+    start_margin : int, float
+        The time in samples, at which the sweep starts. The start margin is
+        required because the frequency domain sweep synthesis has pre-ringing
+        in the time domain.
+    stop_margin : int, float
+        Time in samples, at which the sweep stops. This is relative to
+        `n_samples`, e.g., a stop margin of 100 samples means that the sweep
+        ends at sample ``n_samples-100``. This is required, because the
+        frequency domain sweep synthesis has post-ringing in the time domain.
+    n_fade_in : int
+        Duration of a squared sine fade-in in samples. The fade starts at the
+        first sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal.
+    n_fade_out : int
+        Duration of a squared cosine fade-out in samples. The fade ends at the
+        last sample of the sweep that is closer than 60 dB to the absolute
+        maximum of the sweep time signal.
+    sampling_rate : int
+        The sampling rate in Hz.
+    return_group_delay : boolean
+        Return the analytical group delay of the sweep. This can be used to
+        compute the times at which distortion products appear.
 
     Returns
     -------
@@ -745,7 +778,8 @@ def _frequency_domain_sweep(
     if frequency_range[0] == 0 and sweep_type == "exponential":
         warnings.warn((
             "The exponential sweep has a 1/sqrt(frequency) magnitude spectrum."
-            " The magnitude is set to 0 at 0 Hz to avoid a division by zero."))
+            " The magnitude is set to 0 at 0 Hz to avoid a division by zero."),
+            stacklevel=2)
 
     # initialize basic parameters ---------------------------------------------
 
@@ -958,7 +992,7 @@ def _exponential_sweep(n_samples, frequency_range, amplitude, sweep_rate,
 def _match_shape(*args):
     """
     Match the shape of *args to the shape of the arg with the largest size
-    using np.broadcast_shapes and np.broadcast_to()
+    using np.broadcast_shapes and np.broadcast_to().
 
     Parameters
     ----------

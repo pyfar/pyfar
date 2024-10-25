@@ -12,9 +12,9 @@ import pyfar as pf
     pf.signals.files.room_impulse_response,
     pf.signals.files.headphone_impulse_responses,
 ])
-@pytest.mark.parametrize('sampling_rate', (44100, 48000))
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_files(function, sampling_rate):
-    """Test all files that only have the sampling rate as parameter"""
+    """Test all files that only have the sampling rate as parameter."""
 
     # load data
     signal = function(sampling_rate=sampling_rate)
@@ -23,7 +23,7 @@ def test_files(function, sampling_rate):
     assert signal.sampling_rate == sampling_rate
 
 
-@pytest.mark.parametrize('sampling_rate', (44100, 48000))
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_speech(sampling_rate):
 
     # load data
@@ -51,14 +51,14 @@ def test_speech(sampling_rate):
         np.sum(np.abs(female.freq_raw[:f_id]))
 
 
-@pytest.mark.parametrize('position,convention,first,second', [
+@pytest.mark.parametrize(('position', 'convention', 'first', 'second'), [
     ([[0, 20]], 'spherical_elevation', [0], [20]),
     ([[0, 20], [10, 0]], 'spherical_elevation', [0, 10], [20, 0]),
     ([[90, 0], [0, 0]], 'spherical_elevation', [90, 0], [0, 0]),
     ('horizontal', 'spherical_elevation', np.arange(0, 180)*2, np.zeros(180)),
     ('median', 'spherical_side', np.zeros(180), np.arange(-45, 135)*2)])
 def test_hrirs_position(position, convention, first, second):
-    """Test `position` argument"""
+    """Test `position` argument."""
 
     # get the data
     hrirs, sources = pf.signals.files.head_related_impulse_responses(position)
@@ -73,7 +73,7 @@ def test_hrirs_position(position, convention, first, second):
 
 
 def test_hrirs_diffuse_field_compensation():
-    """Test diffuse field compensation for HRIRs"""
+    """Test diffuse field compensation for HRIRs."""
     hrirs, _ = pf.signals.files.head_related_impulse_responses(
         diffuse_field_compensation=False)
     dtfs, _ = pf.signals.files.head_related_impulse_responses(
@@ -87,9 +87,9 @@ def test_hrirs_diffuse_field_compensation():
     assert dtfs.comment.startswith("Diffuse field compensated data from")
 
 
-@pytest.mark.parametrize('sampling_rate', (44100, 48000))
+@pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_hrirs_sampling_rate(sampling_rate):
-    """Test getting HRIRs in different sampling rates"""
+    """Test getting HRIRs in different sampling rates."""
 
     hrirs, _ = pf.signals.files.head_related_impulse_responses(
         sampling_rate=sampling_rate)
@@ -97,6 +97,6 @@ def test_hrirs_sampling_rate(sampling_rate):
 
 
 def test_hrirs_assertions():
-    """Test assertions for getting HRIRs"""
+    """Test assertions for getting HRIRs."""
     with pytest.raises(ValueError, match="HRIR for azimuth=1"):
         pf.signals.files.head_related_impulse_responses([[1, 0]])

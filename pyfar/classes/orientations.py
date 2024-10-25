@@ -1,3 +1,4 @@
+"""This module contains the Orientations class. """
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings
@@ -97,8 +98,9 @@ class Orientations(Rotation):
         try:
             views = np.atleast_2d(views).astype(np.float64)
             ups = np.atleast_2d(ups).astype(np.float64)
-        except VisibleDeprecationWarning:
-            raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
+        except VisibleDeprecationWarning as exc:
+            raise ValueError(
+                "Expected `views` and `ups` to have shape (N, 3)") from exc
 
         # check views and ups
         if (views.ndim > 2 or views.shape[-1] != 3 or
@@ -150,6 +152,8 @@ class Orientations(Rotation):
         show_rights: bool
             select wether to show the right vectors or not.
             The default is True.
+        kwargs : dict
+            Additional arguments passed to :py:func:`pyfar.plot.quiver`.
 
         Returns
         -------
@@ -190,7 +194,7 @@ class Orientations(Rotation):
         perpendicular to minimize rounding errors.
 
         Returns
-        ----------
+        -------
         vector_triple: ndarray, shape (N, 3), normalized vectors
             - views, see :py:func:`Orientations.from_view_up`
             - ups, see :py:func:`Orientations.from_view_up`
@@ -226,8 +230,10 @@ class Orientations(Rotation):
 
         Parameters
         ----------
-        idx : see NumPy Indexing
-        val : array_like quaternion(s), shape (N, 4) or (4,)
+        idx : indexes
+            see NumPy Indexing
+        val : array_like
+            quaternion(s), shape (N, 4) or (4,)
         """
         if isinstance(val, Orientations):
             val = val.as_quat()

@@ -188,7 +188,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     if np.shape(delay) != cshape:
         raise ValueError("Shape of delay needs to equal cshape.")
     if delay.max() >= n_samples:
-        raise ValueError("Delay is larger than number of samples,"
+        raise ValueError("Delay is larger than number of samples, "
                          f"which is {n_samples}")
 
     # Time vector
@@ -332,6 +332,7 @@ def _normalization(freq, n_samples, fft_norm):
 
 
 def any_ndarray():
+    """Return an arbitrary ndarray for testing purposes."""
     return np.arange(0, 24).reshape((2, 3, 4))
 
 
@@ -350,7 +351,7 @@ def dict_of_builtins():
 
 
 class AnyClass:
-    """Placeholder class"""
+    """Placeholder class."""
     def __init__(self, x=42):
         self.x = x
 
@@ -362,7 +363,7 @@ class NoEncodeClass:
 
 
 class NoDecodeClass:
-    """Placeholder class to Raise NotImplementedError for `_decode`"""
+    """Placeholder class to Raise NotImplementedError for `_decode`."""
     def __init__(self, x=42):
         self.x = x
 
@@ -398,6 +399,7 @@ class FlatData:
         return deepcopy(self)
 
     def __eq__(self, other):
+        """Compare two FlatData objects."""
         return not deepdiff.DeepDiff(self, other)
 
 
@@ -421,6 +423,7 @@ class NestedData:
 
     @classmethod
     def create(cls):
+        """Create a NestedData object with arbitrary data."""
         n = 42
         comment = 'My String'
         matrix = any_ndarray()
@@ -459,6 +462,7 @@ class NestedData:
         return deepcopy(self)
 
     def __eq__(self, other):
+        """Compare two NestedData objects."""
         return not deepdiff.DeepDiff(self, other)
 
 

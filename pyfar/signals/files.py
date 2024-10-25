@@ -452,7 +452,7 @@ def room_impulse_response(sampling_rate=48000):
 
     Parameters
     ----------
-    sample_rate : int, optional
+    sampling_rate : int
         The sampling rate of the RIR in Hz. The default of ``48000`` uses the
         RIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
         for resampling to the desired sampling rate.
@@ -496,7 +496,7 @@ def _load_files(data):
         except OSError as error:
             if 'Read-only' in str(error):
                 raise OSError((f'{data} can not be loaded because the file '
-                               'system is read-only.'))
+                               'system is read-only.')) from error
             else:
                 raise error
 
