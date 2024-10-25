@@ -4,7 +4,7 @@ import numpy as np
 import numpy.testing as npt
 
 
-def test_regularization_errors():
+def test_regularization_errors(impulse):
     """Test errors"""
     with pytest.raises(RuntimeError,
                        match="Regularization objects must be created using a"
@@ -19,7 +19,7 @@ def test_regularization_errors():
     with pytest.raises(ValueError,
                        match="Target function must be a pyfar.Signal object."):
         assert pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
-            (200, 20e3), target=1)
+            (200, 20e3)).invert(impulse, target=1)
 
     with pytest.raises(ValueError,
                        match="Regularization must be a pyfar.Signal"
@@ -32,8 +32,8 @@ def test_regularization_frequency_range(impulse, beta, expected):
     """Test Regularization from a frequency range using different beta
     values."""
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
-        (200, 10e3), beta=beta)
-    inv = Regu.invert(impulse)
+        (200, 10e3))
+    inv = Regu.invert(impulse, beta=beta)
 
     idx = inv.find_nearest_frequency([200, 10e3])
 
@@ -42,28 +42,33 @@ def test_regularization_frequency_range(impulse, beta, expected):
     npt.assert_allclose(inv.freq[:, -1], expected)
 
 
-@pytest.mark.parametrize(("norm", "expected"), [(None, 1), ('energy', 0.25)])
+@pytest.mark.parametrize(("norm", "expected"), [(None, 0.4),
+                                                ('max', 0.25)])
 def test_regularization_normalization(impulse, norm, expected):
     """Test normalization parameter of Regularization."""
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
-        (200, 10e3), normalize_regularization=norm)
-    regu = Regu.regularization(impulse*0.5)
+        (200, 10e3))
+    inv = Regu.invert(impulse*2, normalize_regularization=norm)
 
-    idx = regu.find_nearest_frequency([200, 10e3])
+    idx = inv.find_nearest_frequency([200, 10e3])
 
-    npt.assert_allclose(regu.freq[:, idx[0]:idx[1]], 0)
-    npt.assert_allclose(regu.freq[:, 0], expected)
-    npt.assert_allclose(regu.freq[:, -1], expected)
+    npt.assert_allclose(inv.freq[:, idx[0]:idx[1]], 0.5)
+    npt.assert_allclose(inv.freq[:, 0], expected)
+    npt.assert_allclose(inv.freq[:, -1], expected)
 
 
-def test_regularization_compare_to_dsp_function(impulse):
-    """Compare result to dsp.regularized_spectrum_inversion."""
-    res_dsp = pf.dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
+def test_regularization_normalization_factor(impulse):
+    """Test normalization factor of caclulated during inversion."""
+    impulse = impulse*2
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
-        (200, 10e3), normalize_regularization='energy')
-    res_regu = Regu.invert(impulse * 2)
+        (200, 10e3))
+    regu = Regu.regularization(impulse)
 
-    npt.assert_allclose(res_dsp.freq, res_regu.freq)
+    assert Regu.normalization_factor(impulse, 'max') == \
+        np.max(np.abs(impulse.freq)) / np.max(np.abs(regu.freq))
+
+    assert Regu.normalization_factor(impulse, 'mean') == \
+        np.mean(np.abs(impulse.freq)) / np.mean(np.abs(regu.freq))
 
 
 def test_regularization_target(impulse):
@@ -74,10 +79,10 @@ def test_regularization_target(impulse):
     target = bp.process(impulse)
 
     ReguTarget = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
-        (20, 15.5e3), target=target, beta=1,
-        normalize_regularization=None)
+        (20, 15.5e3))
 
-    inv = ReguTarget.invert(impulse)
+    inv = ReguTarget.invert(impulse,  target=target, beta=1,
+                            normalize_regularization=None)
     idx = inv.find_nearest_frequency([20, 15.5e3])
 
     npt.assert_allclose(np.abs(inv.freq[0, idx]), np.abs(target.freq[0, idx]))
