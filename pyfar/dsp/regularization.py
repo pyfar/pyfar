@@ -7,66 +7,110 @@ from pyfar.dsp.dsp import _cross_fade
 import numpy as np
 
 class RegularizedSpectrumInversion():
-    r"""Class for frequency dependent regularization and inversion.
+    r"""Class for frequency-dependent regularized inversion.
 
     Regularization is used in inverse filtering methods to limit the gain
-    applied by an inverse filter. This, for example, is nescessary to
-    avoid extreme amplification caused by notches and peaks in the original
-    signal's spectrum or by the limit of a system's bandwidth.
+    applied by an inverse filter. This, for example, is necessary to
+    avoid extreme amplification to compensate a signal of limited bandwidth or
+    containing notches in the spectrum.
 
-    The frequency dependent regularization :math:`\epsilon(f)` can be defined
-    using one of the class methods.
-    The regularization is then applied when calculating the inverse of a
-    signal as [1]_:
+    The inverse is computed as [#]_:
 
     .. math::
 
-        S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \beta * |\epsilon(f)|^2} * D(f)
+        S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \beta |\epsilon(f)|^2} D(f)
 
-    with :math:`S(f)` being the input signal's Fourier transform,
-    :math:`S^*(f)` the complex conjugate, and :math:`\beta` a parameter to
-    control the influence of the regularization function on the inversion.
-    :math:`D(f)` denotes an optional arbitrary target function.
-    This function can be used to manipulate the frequency response and phase
-    of the inversion [1]_.
+    with :math:`S(f)` being the input signal's spectrum, :math:`(\cdot)^*` the
+    complex conjugate, :math:`\epsilon(f)` the regularization, and
+    :math:`\beta` a scalar to control the influence of the regularization on
+    the inversion. :math:`D(f)` denotes an optional target function.
 
-    The inversion of signals is handled using the class' :meth:`invert` method.
+    The compensated system :math:`C(f) = S(f)S^{-1}(f)` approaches the target
+    function in magnitude and phase. In many applications, the target function
+    should contain a delay to make sure that :math:`S^{-1}(f)` is causal. The
+    larger :math:`\beta` and :math:`\epsilon(f)` are, the larger the deviation
+    of :math:`C(f)` from the target :math:`D(f)`.
 
     Examples
     --------
 
-    Regularized inversion from a frequency range. For better control over
-    the slopes at the lower and upper frequency limits a bandpass target
-    function is also passed.
+    Invert a sine sweep with limited bandwidth and apply maximum normalization
+    to the regularization function.
 
     .. plot::
 
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
+        ...
+        >>> sweep = pf.signals.exponential_sweep_freq(
+        ...     2**16, [50, 16e3], 1000, 10e3)
+        ...
+        >>> # inversion
+        >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
+        >>>     [50, 16e3])
+        >>> inverted = Inversion.invert(sweep, normalize_regularization='max')
+        ...
+        >>> # obtain the normalized regularization function
+        >>> regularization = Inversion.regularization(sweep) * \
+        >>>     Inversion.normalization_factor(sweep, 'max')
+        ...
+        >>> pf.plot.use()
+        >>> fig, axes = plt.subplots(2,1)
+        >>> pf.plot.freq(sweep, ax=axes[0], label='sweep')
+        >>> pf.plot.freq(regularization, ax=axes[0], label='regularization')
+        >>> axes[0].axvline(50, color='k', linestyle='--',
+        ...     label='frequency range')
+        >>> axes[0].axvline(16e3, color='k', linestyle='--')
+        >>> axes[0].legend(loc='lower center')
+        ...
+        >>> pf.plot.freq(inverted, ax=axes[1], color='p',
+        ...     label='inverted with regulariztion')
+        >>> pf.plot.freq(1 / (sweep+1e-10), ax=axes[1], color='y',
+        ...     linestyle=':', label='inverted without regulariztion')
+        >>> axes[1].axvline(50, color='k', linestyle='--',
+        ...     label='frequency range')
+        >>> axes[1].axvline(16e3, color='k', linestyle='--')
+        >>> axes[1].set_ylim(-120, -20)
+        >>> axes[1].legend(loc='lower center')
+
+    Invert a headphone transfer function (HpTF), regularize the inversion at
+    high frequencies, and use a band-pass as target function. Note that the
+    equalized HpTF, which is obtained from a convolution of the HpTF with its
+    inverse filter, approaches the target function in both, time and frequency.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
         >>>
-        >>> # get regularization object
-        >>> Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range([20, 15e3])
-        >>> # create linear sweep and invert it:
-        >>> sweep = pf.signals.linear_sweep_time(1000, (20, 20e3))
-        >>> inv = Regu.invert(sweep)
+        >>> # Hedphone transfer function to be inverted
+        >>> hptf = pf.signals.files.headphone_impulse_responses()[0, 0].flatten()
+        >>> # Regularize inversion at high frequencies
+        >>> regularization = pf.dsp.filter.low_shelf(
+        ...     pf.signals.impulse(hptf.n_samples), 4e3, -20, 2, 'II')
+        >>> # Use band-pass as target function
+        >>> target = pf.dsp.filter.butterworth(
+        ...     pf.signals.impulse(hptf.n_samples), 4, [100, 16e3], 'bandpass')
+        >>> target = pf.dsp.time_shift(target, 125, 'cyclic')
         >>>
-        >>> # design bandpass target function
-        >>> bp = pf.dsp.filter.butterworth(None, 4, (20, 15e3), 'bandpass', 44.1e3)
-        >>> target = bp.process(pf.signals.impulse(1000))
-        >>> # get regularization object with target function
-        >>> Regu_target = pf.dsp.RegularizedSpectrumInversion.from_frequency_range([20, 15e3])
-        >>> # invert signal
-        >>> inv_target = Regu_target.invert(sweep, target=target)
+        >>> # Regulated inversion
+        >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
+        ...     regularization)
+        >>> inverted = Inversion.invert(hptf, beta=.1, target=target)
         >>>
-        >>> # plot results
-        >>> pf.plot.freq(sweep, label="Original signal")
-        >>> pf.plot.freq(inv, label="Regularized inversion")
-        >>> pf.plot.freq(inv_target, label="Regularized inversion with target")
-        >>> plt.legend()
+        >>> # Plot the result
+        >>> ax = pf.plot.time_freq(hptf, label='HpTF')
+        >>> pf.plot.time_freq(inverted, label='HpTF inverted')
+        >>> pf.plot.time_freq(hptf * inverted, label='Equalized HpTF')
+        >>> pf.plot.time_freq(target, linestyle='--', label='Target')
+        >>> pf.plot.freq(regularization, ax=ax[1], label='Regularization')
+        >>> ax[0].set_xlim(0 , .005)
+        >>> ax[1].set_ylim(-40 , 15)
+        >>> ax[1].legend(loc='lower center', ncols=3)
 
     References
     ----------
-    .. [1]  S. G. Norcross, M. Bouchard, and G. A. Soulodre, “Inverse Filtering
+    .. [#]  S. G. Norcross, M. Bouchard, and G. A. Soulodre, “Inverse Filtering
             Design Using a Minimal-Phase Target Function from Regularization,”
             Convention Paper 6929 Presented at the 121st Convention, 2006
             October 5–8, San Francisco, CA, USA.
@@ -88,18 +132,19 @@ class RegularizedSpectrumInversion():
     @classmethod
     def from_frequency_range(cls, frequency_range):
         r"""
-        Regularization from frequency range.
+        Compute regularization from frequency range.
+
         Defines a frequency range within which the regularization factor is set
         to ``0``. Outside the frequency range the regularization factor is
-        ``1`` and can be scaled using the ``beta`` parameter.
+        ``1`` and can be scaled using the `beta` parameter.
         The regularization factors are cross-faded using a raised cosine
         window function with a width of :math:`\sqrt{2}f` above and below the
         given frequency range.
 
         Parameters
         ----------
-        frequency_range : array, tuple
-            Tuple with two values for the lower and upper frequency limit.
+        frequency_range : array like
+            Array like containing the lower and upper frequency limit in Hz.
         """
         instance = cls(regu_type = "frequency range")
 
@@ -114,13 +159,14 @@ class RegularizedSpectrumInversion():
     @classmethod
     def from_magnitude_spectrum(cls, regularization):
         """
-        Regularization from magnitude spectrum.
-        Regularization factors passed as :py:class:`~pyfar.Signal`. The factors
-        have to match the number of bins of the signal to be inverted.
+        Compute regularization from magnitude spectrum.
+
+        Regularization passed as :py:class:`~pyfar.Signal`. The length of
+        `regularization` must match the length the signal to be inverted.
 
         Parameters
         ----------
-        regularization : pf.Signal
+        regularization : Signal
             Regularization as pyfar Signal.
         """
         if not isinstance(regularization, pf.Signal):
@@ -134,17 +180,19 @@ class RegularizedSpectrumInversion():
 
     def invert(self, signal, beta=1, target=None,
                normalize_regularization=None):
-        r"""Invert the spectrum of a signal applying frequency dependent
-        regularization.
+        r"""
+        Invert the input using frequency-dependent regularized inversion.
 
         Parameters
         ----------
-        signal : pf.Signal
+        signal : Signal
             Signal to be inverted.
         beta : float, optional
-            Beta parameter to control the amount of regularization.
-        target : pf.Signal, optional
-            Target function for the regularization.
+            Beta parameter to control the amount of regularization. The default
+            is ``1``.
+        target : Signal, optional
+            Target function for the regularization. The default ``None`` uses
+            constant spectrum with an amplitude of 1 as target.
         normalize_regularization : str
             Method of normalization.
 
@@ -159,11 +207,13 @@ class RegularizedSpectrumInversion():
 
                 :math:`Normalization Factor = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
 
+            The default ``None`` does not apply any normalization.
+
 
         Returns
         -------
-        inverse : pf.Signal
-            Resulting signal after regularized inversion.
+        inverse : Signal
+            The inverted input signal.
         """ # noqa: E501
         if target is not None and not isinstance(target, pf.Signal):
             raise ValueError(
@@ -202,21 +252,21 @@ class RegularizedSpectrumInversion():
 
     def regularization(self, signal):
         r"""
-        Get the frequency dependent regularization factors :math:`\epsilon(f)`.
+        Compute the frequency dependent regularization :math:`\epsilon(f)`.
 
-        Returns the regularization factors without any normalization apllied.
+        Returns the regularization function without normalization.
 
         Parameters
         ----------
         signal : pf.Signal, optional
             Signal on which the regularization will be used on. This is
-            nescessary to assure that the regularization factors have the same
-            number of bins as the signal.
+            necessary to assure that the regularization function has the same
+            number of frequency bins as the signal.
 
         Returns
         -------
-        regu : pf.FrequencyData
-            Frequency dependent regularization as FrequencyData.
+        regu : FrequencyData
+            The frequency dependent regularization.
         """
         # Call private method to get regularization factors
         if self._regu_type == "frequency range":
@@ -228,27 +278,28 @@ class RegularizedSpectrumInversion():
 
 
     def normalization_factor(self, signal, normalize_regularization):
-        r"""Returns the normalization factor by which the regularization is
-        scaled during inversion.
+        r"""
+        Compute the normalization factor by which the regularization is
+        scaled during inversion in :py:func:`~RegularizedSpectrumInversion.invert`.
 
         Parameters
         ----------
-        signal : pf.Signal
+        signal : Signal
             Signal on which the regularization will be used on. The
-            normalization is being calculated in relation to the signal.
+            normalization factor is being calculated in relation to the signal.
         normalize_regularization : str
             Method of normalization.
 
             ``'max'``
                 Normalize the regularization :math:`\epsilon` to the maximum
-                magnitude of a given signal :math:`S(f)`.
-
-                :math:`Normalization Factor = \frac{\max(|S(f)|)}{\max(|\epsilon(f)|)}`
+                magnitude of a given signal :math:`S(f)`. In this case the
+                normalization factor is given by
+                :math:`\frac{\max(|S(f)|)}{\max(|\epsilon(f)|)}`
             ``'mean'``
                 Normalize the regularization :math:`\epsilon` to the mean
-                magnitude of a given signal :math:`S(f)`.
-
-                :math:`Normalization Factor = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
+                magnitude of a given signal :math:`S(f)`. In this case the
+                normalization factor is given by
+                :math:`\frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
 
         Returns
         -------
@@ -296,9 +347,7 @@ class RegularizedSpectrumInversion():
         return pf.FrequencyData(regu_final, signal.frequencies)
 
     def _get_regularization_from_regularization_signal(self, signal):
-        """
-        Get regularization from final regularization factors.
-        """
+        """Get regularization from signal."""
 
         if not isinstance(signal, pf.Signal):
             raise TypeError(f"Regularization of type '{self._regu_type}' "
