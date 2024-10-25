@@ -2718,14 +2718,16 @@ def correlate(signal_1, signal_2, mode='full'):
     -------
     correlation : TimeData
         The correlation :math:`c[l]` is contained in ``correlation.time`` and
-        the lags, i.e., the delays applied to `signal_2` (see equations above)
-        are contained in ``correlation.times``. The cshape of `correlation`
-        matches the cshape to which `signal_1` and `signal_2` were broadcasted.
-        The time lags are given in seconds and can be converted to samples by
-        multiplication with ``signal_1.sampling_rate``. In this case, they are
-        in the interval ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]``
-        if the full correlation was computed. In case of the cyclic
-        correlation, they are in the interval
+        the lags in seconds, i.e., the delays applied to `signal_2`
+        (see equations above) are contained in ``correlation.times``.
+        ``correlation.time`` is complex if one of the input signals has
+        complex-valued time data. The cshape of `correlation` matches the
+        cshape to which `signal_1` and `signal_2` were broadcasted. The lags
+        can be converted to samples by multiplication with
+        ``signal_1.sampling_rate``. In this case, they are in the interval
+        ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]`` if the full
+        correlation was computed. In case of the cyclic correlation, they are
+        in the interval
         ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]``
         if the signals have an even number of samples, and in the interval
         ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]``
@@ -2772,11 +2774,13 @@ def correlate(signal_1, signal_2, mode='full'):
         >>>
         >>> # compute the lags in samples
         >>> argmax = cor.times[np.argmax(cor.time, axis=-1)]
-        >>> argmax *= signal_1.sampling_rate
-
-    In this case the lags correspond to the negative delays:
-    ``argmax = [[0, -1], [-2, -3]]``.
-    """  # noqa: E501
+        >>>
+        >>> # plot correlation and indicate maximum
+        >>> ax = pf.plot.time(cor)
+        >>> ax.set_title('Correlation and position of maxima (dots)')
+        >>> for amax, color in zip(argmax.flatten(), 'bryp'):
+        >>>     ax.axvline(amax, color=pf.plot.color(color), linestyle=':')
+    """
 
     # check input
     if type(signal_1) is not pyfar.Signal or \
