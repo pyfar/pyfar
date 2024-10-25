@@ -264,7 +264,8 @@ def binaural_room_impulse_response(
 
     # load and resample diffuse field filter
     if diffuse_field_compensation:
-        inverse_ctf, *_ = pf.io.read_sofa(os.path.join(file_dir, files_2[1]))
+        inverse_ctf, *_ = pf.io.read_sofa(
+            os.path.join(file_dir, files_2[1]), verbose=False)
         inverse_ctf.time = np.squeeze(inverse_ctf.time, 0)
         inverse_ctf = pf.dsp.resample(inverse_ctf, 48000, 'freq')
 
@@ -311,7 +312,8 @@ def headphone_impulse_responses(sampling_rate=44100):
     files = _load_files('headphone_impulse_responses')
 
     # load HRIRs
-    hpirs, *_ = pf.io.read_sofa(os.path.join(file_dir, files[0]))
+    hpirs, *_ = pf.io.read_sofa(
+        os.path.join(file_dir, files[0]), verbose=False)
 
     if sampling_rate != 44100:
         hpirs = pf.dsp.resample(hpirs, sampling_rate, 'freq', post_filter=True)
@@ -382,7 +384,8 @@ def head_related_impulse_responses(
     files = _load_files('head_related_impulse_responses')
 
     # load HRIRs
-    hrirs, sources, _ = pf.io.read_sofa(os.path.join(file_dir, files[0]))
+    hrirs, sources, _ = pf.io.read_sofa(
+        os.path.join(file_dir, files[0]), verbose=False)
 
     # tolerance in radians for finding source positions. If this tolerance is
     # exceeded, an error is raised to inform the user
@@ -418,7 +421,8 @@ def head_related_impulse_responses(
 
     # diffuse field compensation
     if diffuse_field_compensation:
-        inverse_ctf, *_ = pf.io.read_sofa(os.path.join(file_dir, files[1]))
+        inverse_ctf, *_ = pf.io.read_sofa(
+            os.path.join(file_dir, files[1]), verbose=False)
 
         hrirs = pf.dsp.convolve(hrirs, inverse_ctf, 'cut')
         hrirs.comment = (
