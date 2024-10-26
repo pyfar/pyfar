@@ -152,6 +152,21 @@ def test_full_mode_nd():
                 0., 10)
 
 
+@pytest.mark.parametrize('normalize', [False, True])
+def test_normalize(normalize):
+    """Test the normalize parameter"""
+    # sine with 4 samples period -> auto-correlation is 4 samples period sine
+    signal = pf.signals.sine(5, 8, 1, 0, 20)
+    correlation = correlate(signal, signal, 'cyclic', normalize)
+    max_correlation = 1 if normalize else pf.dsp.energy(signal)
+
+    npt.assert_almost_equal(correlation.time[0, 0::2], np.zeros(4), 10)
+    npt.assert_almost_equal(correlation.time[0, 1::4],
+                            -max_correlation * np.ones(2), 10)
+    npt.assert_almost_equal(correlation.time[0, 3::4],
+                            max_correlation * np.ones(2), 10)
+
+
 def test_complex_signals():
     """Test with complex signals"""
 

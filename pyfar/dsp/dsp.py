@@ -2671,12 +2671,12 @@ def normalize(signal, reference_method='max', domain='auto',
         return normalized_signal
 
 
-def correlate(signal_1, signal_2, mode='full'):
+def correlate(signal_1, signal_2, mode='full', normalize=None):
     r"""
-    Compute channel-wise correlation between signals.
+    Compute channel-wise correlation function between signals.
 
-    The correlation between the time signals :math:`x_1[n]` and :math:`x_2[n]`
-    is given by
+    The correlation function of the time signals :math:`x_1[n]` and
+    :math:`x_2[n]` is given by
 
     .. math:: c[l] = \sum_n x_1[n] x_2[n-l]
 
@@ -2704,26 +2704,34 @@ def correlate(signal_1, signal_2, mode='full'):
     mode : str, optional
 
         ``'full'``
-            Computes the full correlation by zero padding the input signals
-            to a length of ``signal_1.n_samples + signal_2.n_samples - 1``
-            before applying the Fourier transform (see equations above).
+            Computes the full correlation function by zero padding the input
+            signals to a length of
+            ``signal_1.n_samples + signal_2.n_samples - 1`` before applying the
+            Fourier transform (see equations above).
         ``'cyclic'``
-            Computes the cyclic correlation, which uses the input signals as
-            they are. In this case `signal_1` and `signal_2` must have the
-            same number of samples (length).
+            Computes the cyclic correlation function, which uses the input
+            signals as they are. In this case `signal_1` and `signal_2` must
+            have the same number of samples (length).
 
         The default is ``'full'``.
+    normalize : bool, optional
+        If ``True``, the correlation function is normalized to force
+        :math:`|c[l]|\leq1`. This is done by the division
+        :math:`c[l]/\sqrt{E(x_1[n])\,E(x_2[n])}`, where :math:`E(\cdot)`
+        denotes the :py:func:`~energy`. The default ``False`` does not apply
+        any normalization. Normalization is not available for complex-valued
+        time signals.
 
     Returns
     -------
     correlation : TimeData
-        The correlation :math:`c[l]` is contained in ``correlation.time`` and
-        the lags in seconds, i.e., the delays applied to `signal_2`
-        (see equations above) are contained in ``correlation.times``.
-        ``correlation.time`` is complex if one of the input signals has
-        complex-valued time data. The cshape of `correlation` matches the
-        cshape to which `signal_1` and `signal_2` were broadcasted. The lags
-        can be converted to samples by multiplication with
+        The correlation function :math:`c[l]` is contained in
+        ``correlation.time`` and the lags in seconds, i.e., the delays applied
+        to `signal_2` (see equations above) are contained in
+        ``correlation.times``. ``correlation.time`` is complex if one of the
+        input signals has complex-valued time data. The cshape of `correlation`
+        matches the cshape to which `signal_1` and `signal_2` were broadcasted.
+        The lags can be converted to samples by multiplication with
         ``signal_1.sampling_rate``. In this case, they are in the interval
         ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]`` if the full
         correlation was computed. In case of the cyclic correlation, they are
@@ -2735,24 +2743,6 @@ def correlate(signal_1, signal_2, mode='full'):
 
     Examples
     --------
-
-    Linear and cyclic auto-correlation of a perfect sequence. Perfect sequences
-    have unit auto-correlation for :math:`l=0` and zero auto-correlation
-    otherwise
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>>
-        >>> signal = pf.signals.linear_perfect_sweep(2**8)
-        >>>
-        >>> for mode in ['full', 'cyclic']:
-        >>>     cor = pf.dsp.correlate(signal, signal, mode)
-        >>>     ax = pf.plot.time(cor / pf.dsp.energy(signal), label=mode)
-        >>>
-        >>> ax.set_xlabel('time lags in seconds')
-        >>> ax.set_ylabel('auto correlation')
-        >>> ax.legend()
 
     Compute the lags (delay) that are required to maximize the
     cross-correlation between a one and multi-dimensional signal
@@ -2780,6 +2770,25 @@ def correlate(signal_1, signal_2, mode='full'):
         >>> ax.set_title('Correlation and position of maxima (dots)')
         >>> for amax, color in zip(argmax.flatten(), 'bryp'):
         >>>     ax.axvline(amax, color=pf.plot.color(color), linestyle=':')
+
+    Linear and cyclic auto-correlation of a perfect sequence. Perfect sequences
+    have unit auto-correlation for :math:`l=0` and zero auto-correlation
+    otherwise
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.linear_perfect_sweep(2**8)
+        >>>
+        >>> for mode in ['full', 'cyclic']:
+        >>>     line = '--' if mode == 'cyclic' else '-'
+        >>>     cor = pf.dsp.correlate(signal, signal, mode, normalize=True)
+        >>>     ax = pf.plot.time(cor, unit='ms', label=mode, ls=line)
+        >>>
+        >>> ax.set_xlabel('time lags in seconds')
+        >>> ax.set_ylabel('auto correlation')
+        >>> ax.legend()
     """
 
     # check input
@@ -2802,6 +2811,10 @@ def correlate(signal_1, signal_2, mode='full'):
         signal_2.complex = True
     if signal_2.complex and not signal_1.complex:
         signal_1.complex = True
+
+    # compute normalization factor before zero padding
+    if normalize:
+        normalization = np.sqrt(energy(signal_1) * energy(signal_2))
 
     # determine signal length for the FFT
     n_samples = np.array([signal_1.n_samples, signal_2.n_samples], dtype=int)
@@ -2826,6 +2839,10 @@ def correlate(signal_1, signal_2, mode='full'):
     signal_2.time = signal_2.time[..., ::-1].conj()
     correlation = signal_1 * signal_2
     correlation = correlation.time
+
+    # apply normalization
+    if normalize:
+        correlation /= normalization
 
     # compute lags, i.e., times that the second signal was shifted
     # with respect to the first
