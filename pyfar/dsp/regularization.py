@@ -123,7 +123,7 @@ class RegularizedSpectrumInversion():
         # throw error if object is instanced without classmethod
         if regu_type == "":
             raise RuntimeError("Regularization objects must be created "
-                             "using a classmethod.")
+                               "using a classmethod.")
 
     def __repr__(self):
         return f"Regularization object with regularization "\
@@ -167,7 +167,8 @@ class RegularizedSpectrumInversion():
         Parameters
         ----------
         regularization : Signal
-            Regularization as pyfar Signal.
+            Signal containing the regularization factors. The signal's
+            magnitude spectrum is used for regularization.
         """
         if not isinstance(regularization, pf.Signal):
             raise ValueError(
@@ -193,8 +194,9 @@ class RegularizedSpectrumInversion():
         target : Signal, optional
             Target function for the regularization. The default ``None`` uses
             constant spectrum with an amplitude of 1 as target.
-        normalize_regularization : str
-            Method of normalization.
+        normalize_regularization : str, optional
+            Method of normalization. The default ``None`` does not apply any
+            normalization.
 
             ``'max'``
                 Normalize the regularization :math:`\epsilon(f)` to the maximum
@@ -207,7 +209,7 @@ class RegularizedSpectrumInversion():
 
                 :math:`Normalization Factor = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
 
-            The default ``None`` does not apply any normalization.
+
 
 
         Returns
@@ -227,21 +229,21 @@ class RegularizedSpectrumInversion():
             target = pf.dsp.pad_zeros(target, (n_samples-target.n_samples))
 
         # get regularization factors
-        regu = self.regularization(signal)
+        regularization = self.regularization(signal)
 
         # Apply optional normalization
         if normalize_regularization is not None:
-            normalization_factor_ = \
+            normalization_factor = \
                 self.normalization_factor(signal, normalize_regularization)
-            regu.freq *= normalization_factor_
+            regularization.freq *= normalization_factor
 
         data = signal.freq
 
         # calculate inverse filter
         inverse = signal.copy()
         inverse.freq = \
-            np.conj(data) / (np.conj(data) * data + beta *
-                             np.abs(regu.freq)**2)
+            np.conj(data) / (np.abs(data)**2 + beta *
+                             np.abs(regularization.freq)**2)
 
         # Apply target function
         if target is not None:
@@ -265,16 +267,18 @@ class RegularizedSpectrumInversion():
 
         Returns
         -------
-        regu : FrequencyData
+        regularization : FrequencyData
             The frequency dependent regularization.
         """
         # Call private method to get regularization factors
         if self._regu_type == "frequency range":
-            regu = self._get_regularization_from_frequency_range(signal)
+            regularization = \
+                self._get_regularization_from_frequency_range(signal)
         elif self._regu_type == "magnitude spectrum":
-            regu = self._get_regularization_from_regularization_signal(signal)
+            regularization =  \
+                self._get_regularization_from_regularization_signal(signal)
 
-        return regu
+        return regularization
 
 
     def normalization_factor(self, signal, normalize_regularization):
@@ -306,14 +310,16 @@ class RegularizedSpectrumInversion():
         normalization_factor : float
             Normalization factor by which the regularization is scaled.
         """ # noqa: E501
-        regu = self.regularization(signal)
+        regularization = self.regularization(signal)
 
         if normalize_regularization == 'mean':
             self._normalization_factor = \
-                np.mean(np.abs(signal.freq)) / np.mean(np.abs(regu.freq))
+                np.mean(np.abs(signal.freq)) / np.mean(np.abs(
+                    regularization.freq))
         if normalize_regularization == 'max':
             self._normalization_factor = \
-                np.max(np.abs(signal.freq)) / np.max(np.abs(regu.freq))
+                np.max(np.abs(signal.freq)) / np.max(np.abs(
+                    regularization.freq))
 
         return self._normalization_factor
 
