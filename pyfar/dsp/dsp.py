@@ -2671,9 +2671,9 @@ def normalize(signal, reference_method='max', domain='auto',
         return normalized_signal
 
 
-def correlate(signal_1, signal_2, mode='full', normalize=None):
+def correlate(signal_1, signal_2, mode='full', normalize=False):
     r"""
-    Compute channel-wise correlation function between signals.
+    Compute the channel-wise correlation function between signals.
 
     The correlation function of the time signals :math:`x_1[n]` and
     :math:`x_2[n]` is given by
@@ -2766,8 +2766,10 @@ def correlate(signal_1, signal_2, mode='full', normalize=None):
         >>> argmax = cor.times[np.argmax(cor.time, axis=-1)]
         >>>
         >>> # plot correlation and indicate maximum
-        >>> ax = pf.plot.time(cor)
+        >>> ax = pf.plot.time(cor, unit='ms')
         >>> ax.set_title('Correlation and position of maxima (dots)')
+        >>> ax.set_xlabel('Time lags in ms')
+        >>> ax.set_ylabel('Auto correlation')
         >>> for amax, color in zip(argmax.flatten(), 'bryp'):
         >>>     ax.axvline(amax, color=pf.plot.color(color), linestyle=':')
 
@@ -2779,15 +2781,15 @@ def correlate(signal_1, signal_2, mode='full', normalize=None):
 
         >>> import pyfar as pf
         >>>
-        >>> signal = pf.signals.linear_perfect_sweep(2**8)
+        >>> signal = pf.signals.linear_perfect_sweep(2**7)
         >>>
         >>> for mode in ['full', 'cyclic']:
         >>>     line = '--' if mode == 'cyclic' else '-'
         >>>     cor = pf.dsp.correlate(signal, signal, mode, normalize=True)
         >>>     ax = pf.plot.time(cor, unit='ms', label=mode, ls=line)
         >>>
-        >>> ax.set_xlabel('time lags in seconds')
-        >>> ax.set_ylabel('auto correlation')
+        >>> ax.set_xlabel('Time lags in ms')
+        >>> ax.set_ylabel('Auto correlation')
         >>> ax.legend()
     """
 
