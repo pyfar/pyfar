@@ -256,7 +256,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.13"
           requires:
             - build_and_test
           filters:
