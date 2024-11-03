@@ -2920,8 +2920,8 @@ def dot(a, b):
     r"""Dot product of two Coordinates objects.
 
     .. math::
-        \\vec{a} \\cdot \\vec{b}
-        = a_x \\cdot b_x + a_y \\cdot b_y + a_z \\cdot b_z
+        \vec{a} \cdot \vec{b}
+        = a_x \cdot b_x + a_y \cdot b_y + a_z \cdot b_z
 
     Parameters
     ----------
@@ -2955,10 +2955,10 @@ def cross(a, b):
     r"""Cross product of two Coordinates objects.
 
     .. math::
-        \\vec{a} \\times \\vec{b}
-        = (a_y \\cdot b_z - a_z \\cdot b_y) \\cdot \\hat{x}
-        + (a_z \\cdot b_x - a_x \\cdot b_z) \\cdot \\hat{y}
-        + (a_x \\cdot b_y - a_y \\cdot b_x) \\cdot \\hat{z}
+        \vec{a} \times \vec{b}
+        = (a_y \cdot b_z - a_z \cdot b_y) \cdot \hat{x}
+        + (a_z \cdot b_x - a_x \cdot b_z) \cdot \hat{y}
+        + (a_x \cdot b_y - a_y \cdot b_x) \cdot \hat{z}
 
     Parameters
     ----------

@@ -300,7 +300,7 @@ class TransmissionMatrix(FrequencyData):
                     o---xxxxxxxxx---o
 
         See Equation (2-6) in Reference [1]_:
-        :math:`Z_\\mathrm{in} = \\frac{AZ_L + B}{CZ_L + D}`
+        :math:`Z_\mathrm{in} = \frac{AZ_L + B}{CZ_L + D}`
 
         Parameters
         ----------
@@ -363,7 +363,7 @@ class TransmissionMatrix(FrequencyData):
                     o---xxxxxxxxx---o
 
         See Equation (2-6) in Reference [1]_:
-        :math:`Z_\\mathrm{out} = \\frac{DZ_L + B}{CZ_L + A}`
+        :math:`Z_\mathrm{out} = \frac{DZ_L + B}{CZ_L + A}`
 
         For a code example, see :py:func:`~input_impedance` and exchange
         respective method call with `output_impedance`.
@@ -412,20 +412,20 @@ class TransmissionMatrix(FrequencyData):
         in Reference [1]_:
 
         .. math::
-            Q_{1,\\mathrm{in}} = AQ_{1,\\mathrm{out}} + BQ_{2,\\mathrm{in}}
+            Q_{1,\mathrm{in}} = AQ_{1,\mathrm{out}} + BQ_{2,\mathrm{in}}
 
-            Q_{2,\\mathrm{in}} = CQ_{1,\\mathrm{out}} + DQ_{2,\\mathrm{in}}
+            Q_{2,\mathrm{in}} = CQ_{1,\mathrm{out}} + DQ_{2,\mathrm{in}}
 
         The four transfer functions are defined as:
 
-        * :math:`Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}}` using
-          :math:`Q_{2,\\mathrm{out}} = Q_{1,\\mathrm{out}}/Z_L`
-        * :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}} =
-          Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}} \\cdot \\frac{1}{Z_L}`
-        * :math:`Q_{2,\\mathrm{out}} / Q_{2,\\mathrm{in}}` using
-          :math:`Q_{1,\\mathrm{out}} = Q_{2,\\mathrm{out}}\\cdot Z_L`
-        * :math:`Q_{1,\\mathrm{out}} / Q_{2,\\mathrm{in}} =
-          Q_{2,\\mathrm{out}} / Q_{2,\\mathrm{in}} \\cdot Z_L`
+        * :math:`Q_{1,\mathrm{out}} / Q_{1,\mathrm{in}}` using
+          :math:`Q_{2,\mathrm{out}} = Q_{1,\mathrm{out}}/Z_L`
+        * :math:`Q_{2,\mathrm{out}} / Q_{1,\mathrm{in}} =
+          Q_{1,\mathrm{out}} / Q_{1,\mathrm{in}} \cdot \frac{1}{Z_L}`
+        * :math:`Q_{2,\mathrm{out}} / Q_{2,\mathrm{in}}` using
+          :math:`Q_{1,\mathrm{out}} = Q_{2,\mathrm{out}}\cdot Z_L`
+        * :math:`Q_{1,\mathrm{out}} / Q_{2,\mathrm{in}} =
+          Q_{2,\mathrm{out}} / Q_{2,\mathrm{in}} \cdot Z_L`
 
         Parameters
         ----------
@@ -433,7 +433,7 @@ class TransmissionMatrix(FrequencyData):
             Array-like object with two integer elements referring to the
             indices of the utilized quantity at the output (first integer)
             and input (second integer). For example, (1,0) refers to the
-            transfer function :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}}`.
+            transfer function :math:`Q_{2,\mathrm{out}} / Q_{1,\mathrm{in}}`.
         Zl : scalar | FrequencyData
             The load impedance data as scalar or FrequencyData. In latter case,
             the shape must match the entries of the T-matrix, i.e.
