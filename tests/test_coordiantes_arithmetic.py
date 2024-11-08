@@ -6,7 +6,7 @@ import numpy as np
 
 @pytest.mark.parametrize(
     "other",
-    (
+    [
         # 1d coords
         pf.Coordinates(1, 1, 1),
         # 2d coords
@@ -14,21 +14,21 @@ import numpy as np
         # numbers
         1,
         1.0,
-    ),
+    ],
 )
 @pytest.mark.parametrize(
     "operator",
-    (
+    [
         "-",
         "+",
-    ),
+    ],
 )
 @pytest.mark.parametrize(
     "order",
-    (
+    [
         True,
         False,
-    ),
+    ],
 )
 def test_arithmetic_coordinates(other, operator, order):
     coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
@@ -50,24 +50,24 @@ def test_arithmetic_coordinates(other, operator, order):
 
 @pytest.mark.parametrize(
     "other",
-    (
+    [
         5,
         5.0,
-    ),
+    ],
 )
 @pytest.mark.parametrize(
     "operator",
-    (
+    [
         "*",
         "/",
-    ),
+    ],
 )
 @pytest.mark.parametrize(
     "order",
-    (
+    [
         True,
         False,
-    ),
+    ],
 )
 def test_arithmetic_coordinates_mul_div(other, operator, order):
     coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
@@ -89,20 +89,20 @@ def test_arithmetic_coordinates_mul_div(other, operator, order):
 
 @pytest.mark.parametrize(
     "other",
-    (
+    [
         "wrong",
         1 + 1j * 1,
         np.array([1, 1]),
-    ),
+    ],
 )
 @pytest.mark.parametrize(
     "operator",
-    (
+    [
         "-",
         "+",
         "dot",
         "cross",
-    ),
+    ],
 )
 def test_arithmetic_coordinates_error(other, operator):
     coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
@@ -126,10 +126,10 @@ def test_arithmetic_coordinates_error(other, operator):
 
 @pytest.mark.parametrize(
     "other",
-    (
+    [
         pf.Coordinates(1, 1, 1),
         pf.Coordinates([1, 1], [1, 1], [1, 1]),
-    ),
+    ],
 )
 def test_dot_product(other):
     coords = pf.Coordinates(1, 1, 1)

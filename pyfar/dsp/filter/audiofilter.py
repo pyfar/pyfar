@@ -1,3 +1,4 @@
+"""Audio filter design and application."""
 import warnings
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import numpy as np
@@ -6,20 +7,20 @@ from . import _audiofilter as iir
 
 
 def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
-    """
+    r"""
     Create and apply first or second order allpass filter.
 
     Allpass filters have an almost constant group delay below their cut-off
     frequency and are often used in analogue loudspeaker design.
     The filter transfer function is based on Tietze et al. [#]_:
 
-    .. math:: A(s) = \\frac{1-\\frac{a_i}{\\omega_c} s+\\frac{b_i}
-                {\\omega_c^2} s^2}{1+\\frac{a_i}{\\omega_c} s
-                +\\frac{b_i}{\\omega_c^2} s^2},
+    .. math:: A(s) = \frac{1-\frac{a_i}{\omega_c} s+\frac{b_i}
+                {\omega_c^2} s^2}{1+\frac{a_i}{\omega_c} s
+                +\frac{b_i}{\omega_c^2} s^2},
 
 
-    where :math:`\\omega_c = 2 \\pi f_c` with the cut-off frequency :math:`f_c`
-    and :math:`s=\\mathrm{i} \\omega`.
+    where :math:`\omega_c = 2 \pi f_c` with the cut-off frequency :math:`f_c`
+    and :math:`s=\mathrm{i} \omega`.
 
     By definition the ``bi`` coefficient of a first order allpass is ``0``.
 
@@ -60,11 +61,10 @@ def allpass(signal, frequency, order, coefficients=None, sampling_rate=None):
     ----------
     .. [#] Tietze, U., Schenk, C. & Gamm, E. (2019). Halbleiter-
         Schaltungstechnik (16th ed.). Springer Vieweg
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
 
     Examples
-    -----
+    --------
     First and second order allpass filter with ``fc = 1000`` Hz.
 
     .. plot::
@@ -182,8 +182,7 @@ def bell(signal, center_frequency, gain, quality, bell_type='II',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     # check input
@@ -277,12 +276,11 @@ def high_shelve(signal, frequency, gain, order, shelve_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     warnings.warn(("'high_shelve' will be deprecated in pyfar 0.9.0 in favor"
-                   " of 'high_shelf'"), PyfarDeprecationWarning)
+                   " of 'high_shelf'"), PyfarDeprecationWarning, stacklevel=2)
 
     return high_shelf(signal, frequency, gain, order, shelve_type,
                       sampling_rate)
@@ -338,8 +336,7 @@ def high_shelf(signal, frequency, gain, order, shelf_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     output = _shelf(
@@ -400,12 +397,11 @@ def low_shelve(signal, frequency, gain, order, shelve_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     warnings.warn(("'low_shelve' will be deprecated in pyfar 0.9.0 in favor "
-                   "of 'low_shelf'"), PyfarDeprecationWarning)
+                   "of 'low_shelf'"), PyfarDeprecationWarning, stacklevel=2)
 
     return low_shelf(signal, frequency, gain, order, shelve_type,
                      sampling_rate)
@@ -461,8 +457,7 @@ def low_shelf(signal, frequency, gain, order, shelf_type='I',
 
     References
     ----------
-    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/\
-blob/master/filter_design/audiofilter.py
+    .. [#] https://github.com/spatialaudio/digital-signal-processing-lecture/blob/master/filter_design/audiofilter.py
     """
 
     output = _shelf(
@@ -549,7 +544,6 @@ def high_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -569,7 +563,7 @@ def high_shelve_cascade(
 
     warnings.warn(("'high_shelve_cascade' will be deprecated in pyfar 0.9.0 "
                    "in favor of 'high_shelf_cascade'"),
-                  PyfarDeprecationWarning)
+                  PyfarDeprecationWarning, stacklevel=2)
 
     return high_shelf_cascade(signal, frequency, frequency_type, gain, slope,
                               bandwidth, N, sampling_rate)
@@ -657,7 +651,6 @@ def high_shelf_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -760,7 +753,6 @@ def low_shelve_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -779,7 +771,8 @@ def low_shelve_cascade(
     """
 
     warnings.warn(("'low_shelve_cascade' will be deprecated in pyfar 0.9.0 "
-                   "in favor of 'low_shelf_cascade'"), PyfarDeprecationWarning)
+                   "in favor of 'low_shelf_cascade'"),
+                   PyfarDeprecationWarning, stacklevel=2)
 
     return low_shelf_cascade(signal, frequency, frequency_type, gain, slope,
                              bandwidth, N, sampling_rate)
@@ -866,7 +859,6 @@ def low_shelf_cascade(
 
     Examples
     --------
-
     Generate a filter with a bandwith of 4 octaves and a gain of -60 dB and
     compare it to the piece-wise constant idealized magnitude response.
 
@@ -950,9 +942,45 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
 
     Parameters
     ----------
+    signal : Signal, None
+        The Signal to be filtered. Pass ``None`` to create the filter without
+        applying it.
+    frequency : number
+        Characteristic frequency in Hz (see `frequency_type`)
+    frequency_type : string
+        Defines how `frequency` is used
+
+        ``'upper'``
+            `frequency` gives the upper characteristic frequency. In this case
+            the lower characteristic frequency is given by
+            ``2**bandwidth / frequency``
+        ``'lower'``
+            `frequency` gives the lower characteristic frequency. In this case
+            the upper characteristic frequency is given by
+            ``2**bandwidth * frequency``
+    gain : number
+        The filter gain in dB. The default is ``None``, which calculates the
+        gain from the `slope` and `bandwidth` (must be given if `gain` is
+        ``None``).
+    slope : number
+        Filter slope in dB per octave, with positive values denoting a rising
+        filter slope and negative values denoting a falling filter slope. The
+        default is ``None``, which calculates the slope from the `gain` and
+        `bandwidth` (must be given if `slope` is ``None``).
+    bandwidth : number
+        The bandwidth of the filter in octaves. The default is ``None``, which
+        calculates the bandwidth from `gain` and `slope` (must be given if
+        `bandwidth` is ``None``).
+    N : int
+        Number of shelf filters that are cascaded. The default is ``None``,
+        which calculated the minimum ``N`` that is required to satisfy Eq. (11)
+        in Schultz et al. 2020, i.e., the minimum ``N`` that is required for
+        a good approximation of the ideal filter response.
+    sampling_rate : None, number
+        The sampling rate in Hz. Only required if signal is ``None``. The
+        default is ``None``.
     shelf_type : string
-        ``'low'``, or ``'high'`` for low- or high-shelf
-    other : see high_shelf_cascade and low_shelf_cascade
+        ``'low'`` or ``'high'`` for low- or high-shelf.
 
     [1] F. Schultz, N. Hahn, and S. Spors, “Shelving Filter Cascade with
         Adjustable Transition Slope and Bandwidth,” in 148th AES Convention
@@ -973,7 +1001,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
         warnings.warn((
             f"The bandwidth is {bandwidth} octaves but should be at least 1 "
             "to obtain a good approximation of the desired frequency response."
-        ))
+        ), stacklevel=2)
 
     # get sampling rate
     sampling_rate = sampling_rate if signal is None else signal.sampling_rate
@@ -1004,7 +1032,8 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
                        f"It was set to {sampling_rate/2} Hz, which equals "
                        f"a restriction of the bandwidth to {bandwidth} "
                        f"octaves and a reduction of the gain to {gain} dB to "
-                       f"maintain the intended slope of {slope} dB/octave."))
+                       f"maintain the intended slope of {slope} dB/octave."),
+                       stacklevel=2)
 
     # determine number of shelf filters per octave ---------------------------
 
@@ -1019,7 +1048,7 @@ def _shelf_cascade(signal, frequency, frequency_type, gain, slope, bandwidth,
     if N < N_min:
         warnings.warn((
             f"N is {N} but should be at least {N_min} to obtain an good "
-            "approximation of the desired frequency response"))
+            "approximation of the desired frequency response"), stacklevel=2)
 
     # used shelf filters per octave
     N_octave = N / bandwidth
@@ -1073,12 +1102,14 @@ def _shelving_cascade_slope_parameters(gain, slope, bandwidth, shelf_type):
 
     Parameters
     ----------
+    gain : float
+        Desired gain of the stop band in decibel.
     slope : float
         Desired shelving slope in decibel per octave.
     bandwidth : float
         Desired bandwidth of the slope in octave.
-    gain : float
-        Desired gain of the stop band in decibel.
+    shelf_type : string
+        ``'low'`` or ``'high'`` for low- or high-shelf.
 
     """
     if slope == 0:

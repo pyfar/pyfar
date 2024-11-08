@@ -217,7 +217,7 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
 
 def normalization(spec, n_samples, sampling_rate, fft_norm='none',
                   inverse=False, single_sided=True, window=None):
-    """
+    r"""
     Normalize a Fourier spectrum.
 
     Apply normalizations defined in [1]_ to the DFT spectrum.
@@ -249,7 +249,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
             Scale spectrum by ``1/n_samples`` as in [1]_ Eq. (4)
             to obtain the amplitude spectrum.
         'rms'
-            Scale spectrum by :math:`1/\\sqrt{2}` as in [1]_
+            Scale spectrum by :math:`1/\sqrt{2}` as in [1]_
             Eq.(10) to obtain the RMS spectrum.
         'power'
             Power spectrum, which equals the squared RMS spectrum
@@ -392,13 +392,13 @@ def _is_odd(num):
 def _n_bins_from_n_samples(n_samples, complex_time=False):
     """
     Helper function to calculate the number of bins resulting from a FFT
-    with n_samples
+    with n_samples.
 
     Parameters
     ----------
     n_samples : int
         Number of samples
-    complex : bool
+    complex_time : bool
         Flag which indicates if the time data are real or complex-valued.
 
     Returns
@@ -414,13 +414,13 @@ def _n_bins_from_n_samples(n_samples, complex_time=False):
 def _n_samples_from_n_bins(num_freq_bins, is_complex=False):
     """
     Helper function to calculate the number of samples resulting from
-    an inverse FFT of a spectrum with n_freq_bins
+    an inverse FFT of a spectrum with n_freq_bins.
 
     Parameters
     ----------
     num_freq_bins : int
         Number of frequency bins
-    complex : bool
+    is_complex : bool
         Flag which indicates if the frequency data are a one or two-sided
         spectrum.
 
@@ -439,7 +439,7 @@ def _check_conjugate_symmetry(data):
     around 0 Hz.
 
     Parameters
-    -------
+    ----------
     data : numpy array
         M-dimensional array of double-sided spectrum of shape (..., N)
         containing N frequency bins. The 0 Hz bin must always be at index
@@ -470,11 +470,11 @@ def add_mirror_spectrum(data_single_sided, even_samples):
     spectrum that matches the format of :py:func:`~fft`.
 
     Parameters
-    ---------
-    data : numpy array
+    ----------
+    data_single_sided : numpy array
         M-dimensional array of single-sided spectrum of shape (..., N)
         containing N frequency bins.
-    even : bool
+    even_samples : bool
         flag which indicates if the number of samples of the time
         data were even.
 

@@ -27,7 +27,7 @@ def test_signal_init_default_parameter():
 
 
 def test_signal_init_assertions():
-    """Test assertions in initialization"""
+    """Test assertions in initialization."""
 
     with pytest.raises(ValueError, match="Invalid FFT normalization"):
         Signal(1, 44100, fft_norm="funky")
@@ -51,7 +51,7 @@ def test_signal_init_assertions():
 def test_signal_init_time_dtype():
     """
     Test casting and assertions of dtype (also test time setter because
-    it is called during initialization)
+    it is called during initialization).
     """
     # pass integer values, expect float casting
     signal = Signal([1, 2, 3], 44100)
@@ -85,7 +85,7 @@ def test_signal_init_time_dtype():
 def test_data_frequency_init_dtype():
     """
     Test casting and assertions of dtype (also test freq setter because
-    it is called during initialization)
+    it is called during initialization).
     """
 
     # integer to float casting
@@ -257,7 +257,8 @@ def test_getter_freq():
 
 def test_setter_freq():
     """Test if attribute freq is set correctly and for the warning for
-    estimating the number of samples from n_bins."""
+    estimating the number of samples from n_bins.
+    """
     signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
     with pytest.warns(UserWarning, match="Number of samples not given"):
         signal.freq = np.array([[1., 2., 3.]])
@@ -328,7 +329,8 @@ def test_setter_fft_norm():
     npt.assert_allclose(signal.freq, spec_power_unitary)
 
     # setting an invalid fft_norm
-    with pytest.raises(ValueError):
+    match = 'Invalid FFT normalization. Has to be none, unitary, amplitude'
+    with pytest.raises(ValueError, match=match):
         signal.fft_norm = 'bullshit'
 
     # setting fft_norm for complex time signals
@@ -349,7 +351,7 @@ def test_setter_fft_norm():
 
 
 def test_fft_selection():
-    """Test if appropriate FFT is computed"""
+    """Test if appropriate FFT is computed."""
     signal = Signal([1, 2, 3], 44100, is_complex=False)
     assert signal.freq.shape[1] == 2
 
@@ -468,8 +470,8 @@ def test_magic_setitem_wrong_n_samples():
         signal[0] = set_signal
 
 
-@pytest.mark.parametrize("audio", (
-    pf.TimeData([1, 2], [1, 2]), pf.FrequencyData([1, 2], [1, 2])))
+@pytest.mark.parametrize("audio", [
+    pf.TimeData([1, 2], [1, 2]), pf.FrequencyData([1, 2], [1, 2])])
 def test_magic_setitem_wrong_type(audio):
     signal = Signal([1, 2, 3, 4], 44100)
     with pytest.raises(ValueError, match="Comparison only valid"):
@@ -530,7 +532,8 @@ def test_reshape_exceptions():
     signal_out = signal_in.reshape((3, 2))
     npt.assert_allclose(signal_in._data.reshape(3, 2, -1), signal_out._data)
     # test assertion for non-tuple input
-    with pytest.raises(ValueError):
+    match = 'newshape must be an integer or tuple'
+    with pytest.raises(ValueError, match=match):
         signal_out = signal_in.reshape([3, 2])
 
     # test assertion for wrong dimension
@@ -602,7 +605,7 @@ def test___eq___notEqual():
 
 
 def test__repr__(capfd):
-    """Test string representation"""
+    """Test string representation."""
     print(Signal([0, 1, 0], 44100))
     out, _ = capfd.readouterr()
     assert ("time domain energy Signal:\n"
@@ -642,7 +645,7 @@ def test_setter_freq_raw_single_frequency():
 def test_setter_freq_raw_dtype():
     """
     Test casting and assertions of dtype (not tested during initialization
-    because that calls the `freq` setter)
+    because that calls the `freq` setter).
     """
     signal = Signal([0, 1, 2], 44100, 4, "freq")
 
@@ -665,9 +668,9 @@ def test_setter_freq_raw_dtype():
 
 
 @pytest.mark.parametrize("domain", ["time", "freq"])
-@pytest.mark.parametrize("is_complex, kind", [(True, "c"), (False, "f")])
+@pytest.mark.parametrize(('is_complex', 'kind'), [(True, "c"), (False, "f")])
 def test_setter_complex_(domain, is_complex, kind):
-    """ test setting complex flag of time and frequency domain signals"""
+    """Test setting complex flag of time and frequency domain signals."""
     # test setting complex from False to True
     # for time domain signals
 
@@ -679,7 +682,7 @@ def test_setter_complex_(domain, is_complex, kind):
 
 
 def test_setter_complex_assert():
-    """ test setting complex flag of time and frequency domain signals"""
+    """Test setting complex flag of time and frequency domain signals."""
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
                     is_complex=True)
@@ -696,8 +699,9 @@ def test_setter_complex_assert():
 
 
 def test_setter_complex_even():
-    """ test setting complex flag of time and frequency domain signals
-        with even number of samples """
+    """Test setting complex flag of time and frequency domain signals
+    with even number of samples.
+    """
     # test setting complex from False to True
     # for time domain signals
     signal = Signal([0, 1, 2, 3], 44100, 4, "time")
@@ -745,8 +749,9 @@ def test_setter_complex_even():
 
 
 def test_setter_complex_odd():
-    """ test setting complex flag of time and frequency domain signals
-        with odd number of samples """
+    """Test setting complex flag of time and frequency domain signals
+    with odd number of samples.
+    """
     # test setting complex from False to True
     # for time domain signals
     signal = Signal([0, 1, 2, 3, 4], 44100, 5, "time")
@@ -795,7 +800,7 @@ def test_setter_complex_odd():
 
 def test_frequencies():
     """
-    Test computing the discrete frequencies of the rfft/fft
+    Test computing the discrete frequencies of the rfft/fft.
     """
     # test frequencies from a real-valued signals
     # with odd number of samples

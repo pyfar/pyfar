@@ -44,7 +44,8 @@ def load_impedance_with_correct_format(request, frequencies, abcd_cshape):
     """Fixture creating load_impedance in different formats:
     1) scalar,
     2) array matching the frequency vector,
-    3) FrequencyData object match abcd_cshape."""
+    3) FrequencyData object match abcd_cshape.
+    """
     if request.param == "scalar":
         return 2
     elif request.param == "FrequencyData_vector":
@@ -58,7 +59,8 @@ def test_valid_input_formats_impedance(impedance_type,
                                          load_impedance_with_correct_format,
                                          tmatrix_random_data):
     """Test whether input/output impedance runs without errors for Zl with
-    valid input formats."""
+    valid input formats.
+    """
     Zl = load_impedance_with_correct_format
     if impedance_type == "input":
         tmatrix_random_data.input_impedance(Zl)
@@ -72,14 +74,16 @@ def simple_tmat():
                          [(0,0), (0,1), (1,0), (1,1), [0,0], np.array([1,0])])
 def test_TF_valid_quantity_input(quantity_indices, simple_tmat):
     """Test whether TF method runs without errors for valid input types
-    for indices."""
+    for indices.
+    """
     simple_tmat.transfer_function(quantity_indices, np.inf)
 
 @pytest.mark.parametrize("quantity_indices",
                          [1, "string", (1, "string"), [1,1,1]])
 def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
     """Test whether TF method raises error for invalid types or size
-    of indices."""
+    of indices.
+    """
     error_msg = re.escape("'quantity_indices' must be an array-like type "
                           "with two numeric elements.")
     with pytest.raises(ValueError, match=error_msg):
@@ -88,7 +92,8 @@ def test_TF_quantity_input_wrong_numel(quantity_indices, simple_tmat):
 @pytest.mark.parametrize("quantity_indices", [(-1,0), (0, 1.9)])
 def test_TF_quantity_input_wrong_ints(quantity_indices, simple_tmat):
     """Test whether TF method raises error for invalid integer values
-    for indices."""
+    for indices.
+    """
     error_msg = re.escape("'quantity_indices' must contain two "
                           "integers between 0 and 1.")
     with pytest.raises(ValueError, match=error_msg):
@@ -115,7 +120,8 @@ def impedance_random(frequencies) -> FrequencyData:
 def load_impedance(request, frequencies) -> FrequencyData:
     """Parametrized fixture for load impedance as FrequencyData object with
     different types of data:
-    1) random, 2) infinite load, 3) zero load, 4) mix of all."""
+    1) random, 2) infinite load, 3) zero load, 4) mix of all.
+    """
     if request.param == "random_load":
         rng = np.random.default_rng()
         return FrequencyData(rng.random(len(frequencies)), frequencies)
@@ -128,12 +134,15 @@ def load_impedance(request, frequencies) -> FrequencyData:
 
 def _special_twoport_tmatrix(
         twoport_type, Zl: FrequencyData, Z: FrequencyData):
-    """Returns a T-Matrix representing a twoport for special circuit types:
+    """
+    Returns a T-Matrix representing a twoport for special circuit types.
+
     1) By-pass system
     2) A series impedance != load_impedance
     3) A parallel impedance != load_impedance
     4) A series impedance == load_impedance
-    5) A parallel impedance == load_impedance"""
+    5) A parallel impedance == load_impedance
+    """
     if twoport_type == "bypass":
         return TransmissionMatrix.create_identity(Zl.frequencies)
     if twoport_type == "series_impedance":
@@ -253,7 +262,8 @@ def _expected_voltage_to_current_tf(
 def test_input_impedance(impedance_type : str, twoport_type : str,
                          load_impedance : FrequencyData, impedance_random):
     """Significantly parametrized test for result of input/output impedance
-    method."""
+    method.
+    """
     tmat = _special_twoport_tmatrix(
         twoport_type, load_impedance, impedance_random)
     if impedance_type == "input":

@@ -43,7 +43,8 @@ def _atleast_4d_first_dim(arr):
 def _pop_state_from_kwargs(**kwargs):
     kwargs.pop('zi', None)
     warnings.warn(
-        "This filter function does not support saving the filter state")
+        "This filter function does not support saving the filter state",
+        stacklevel=2)
     return kwargs
 
 
@@ -78,7 +79,7 @@ def _extend_sos_coefficients(sos, order):
 
 
 def _repr_string(filter_type, order, n_channels, sampling_rate):
-    """Generate repr string for filter objects"""
+    """Generate repr string for filter objects."""
 
     ch_str = 'channel' if n_channels == 1 else 'channels'
 
@@ -111,6 +112,7 @@ class Filter(object):
     This is an abstract class method, only used for the shared processing
     method used for the application of a filter on a signal.
     """
+
     def __init__(
             self,
             coefficients=None,
@@ -158,6 +160,7 @@ class Filter(object):
         self.comment = comment
 
     def init_state(self, state='zeros'):
+        """Initialize the buffer elements to pre-defined initial conditions."""
         self._state = state
         self._initialized = True
 
@@ -174,7 +177,7 @@ class Filter(object):
 
     @coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
         self._coefficients = _atleast_3d_first_dim(value)
 
     @property
@@ -186,7 +189,7 @@ class Filter(object):
 
     @property
     def n_channels(self):
-        """The number of channels of the filter"""
+        """The number of channels of the filter."""
         return self._coefficients.shape[0]
 
     @property
@@ -325,6 +328,7 @@ class FilterFIR(Filter):
     FilterFIR
         The FIR filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -350,7 +354,7 @@ class FilterFIR(Filter):
 
     @coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
 
         b = np.atleast_2d(value)
         # add a-coefficients for easier handling across filter classes
@@ -388,6 +392,7 @@ class FilterFIR(Filter):
         return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "FIR", self.order, self.n_channels, self.sampling_rate)
 
@@ -421,6 +426,7 @@ class FilterIIR(Filter):
     FilterIIR
         The IIR filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -458,6 +464,7 @@ class FilterIIR(Filter):
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "IIR", self.order, self.n_channels, self.sampling_rate)
 
@@ -491,6 +498,7 @@ class FilterSOS(Filter):
     FilterSOS
         The SOS filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         if state is not None:
@@ -500,7 +508,7 @@ class FilterSOS(Filter):
 
     @Filter.coefficients.setter
     def coefficients(self, value):
-        """Coefficients of the filter"""
+        """Coefficients of the filter."""
 
         coeff = _atleast_3d_first_dim(value)
         if coeff.shape[-1] != 6:
@@ -513,12 +521,13 @@ class FilterSOS(Filter):
     @property
     def order(self):
         """The order of the filter.
-        This is always twice the number of sections."""
+        This is always twice the number of sections.
+        """
         return 2*self.n_sections
 
     @property
     def n_sections(self):
-        """The number of sections"""
+        """The number of sections."""
         return self._coefficients.shape[-2]
 
     def init_state(self, cshape, state='zeros'):
@@ -556,5 +565,6 @@ class FilterSOS(Filter):
             return res
 
     def __repr__(self):
+        """Representation of the filter object."""
         return _repr_string(
             "SOS", self.n_sections, self.n_channels, self.sampling_rate)

@@ -1,3 +1,4 @@
+"""This module provides functions to calculate spherical Voronoi diagrams."""
 import deepdiff
 import numpy as np
 from scipy import spatial as spat
@@ -13,6 +14,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
     :py:func:`calculate_sph_voronoi_weights` can be used directly, if only the
     sampling weights are needed.
     """
+
     def __init__(self, sampling, round_decimals=12, center=0.0):
         """
         Calculate a Voronoi diagram on the sphere for the given samplings
@@ -37,7 +39,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
             Spherical voronoi diagram as implemented in
             :py:mod:`scipy.spatial`.
 
-        See also
+        See Also
         --------
         :py:func:`calculate_sph_voronoi_weights`
 
@@ -45,7 +47,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         warnings.warn((
             "This function will be deprecated in pyfar 0.8.0 in favor "
             "of spharpy.samplings.spherical_voronoi."),
-                PyfarDeprecationWarning)
+                PyfarDeprecationWarning, stacklevel=2)
 
         points = sampling.cartesian
         radius = sampling.radius
@@ -82,7 +84,7 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
 def calculate_sph_voronoi_weights(
         sampling, normalize=True, center=[0, 0, 0], round_decimals=12):
-    """
+    r"""
     Calculate sampling weights for numeric integration.
 
     This function will be deprecated in pyfar 0.8.0 in favor
@@ -102,7 +104,7 @@ def calculate_sph_voronoi_weights(
         radius.
     normalize : boolean, optional
         Normalize the samplings weights to ``sum(weights)=1``. Otherwise the
-        weights sum to :math:`4 \\pi r^2`. The default is ``True``.
+        weights sum to :math:`4 \pi r^2`. The default is ``True``.
     center : list
         Center of the spherical sampling grid. The default is ``[0, 0, 0]``.
     round_decimals : int, optional
@@ -118,7 +120,7 @@ def calculate_sph_voronoi_weights(
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.calculate_sampling_weights."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     # get Voronoi diagram
     if sampling.csize <= 3:

@@ -131,7 +131,7 @@ def point_set_polar(dimension, N):
 
 
 def caps(dimension, N):
-    """Partition a sphere into to nested spherical caps
+    """Partition a sphere into to nested spherical caps.
 
     Does the following:
     1)  partitions the unit sphere S^dim into a list of spherical caps of
@@ -144,7 +144,6 @@ def caps(dimension, N):
 
     Examples
     --------
-
     % > [s_cap,n_regions] = eq_caps(2,10)
     % s_cap =
     %     0.6435    1.5708    2.4981    3.1416
@@ -168,6 +167,10 @@ def caps(dimension, N):
 
     Returns
     -------
+    s_cap : array, double
+        The colatitude of the spherical caps.
+    n_regions : array, int
+        The number of regions in each cap.
 
     """
     if dimension == 1:
@@ -217,7 +220,7 @@ def polar_colat(dimension, N):
 
 
 def ideal_region_list(dimension, N, c_polar, n_collars):
-    """The ideal real number of regions in each zone
+    """The ideal real number of regions in each zone.
 
     List the ideal real number of regions in each collar, plus the polar caps.
     Given dim, N, c_polar and n_collars, determine r_regions, a list of the
@@ -230,12 +233,14 @@ def ideal_region_list(dimension, N, c_polar, n_collars):
     Parameters
     ----------
     dimension : int
-        The dimension
+        The dimension.
     N : int
-        The number of points
-    c_polar :
+        The number of points.
+    c_polar : double
+        The colatitude angle of the polar caps.
     n_collars : int
-        The number of collar elements
+        The number of collar elements.
+
     Returns
     -------
     ideal_regions : double
@@ -276,6 +281,7 @@ def round_to_naturals(N, r_regions):
         The dimension
     r_regions : double
         The ideal number of regions per collar before rounding
+
     Returns
     -------
     n_regions : int
@@ -312,6 +318,7 @@ def cap_colats(dimension, N, c_polar, n_regions):
         Colatitude angles of the spherical caps
     n_regions: int
         Number of regions
+
     Returns
     -------
     c_caps : double
@@ -345,6 +352,7 @@ def num_collars(N, c_polar, a_ideal):
         The colatitude angle of the polar caps
     a_ideal : double
         The ideal collar angles.
+
     Returns
     -------
     n_collars : int
@@ -383,6 +391,7 @@ def circle_offset(n_top, n_bot, extra_twist=False):
         Number of points in the lower circle
     extra_twist : boolean
         Perform an additional rotation (see part 3)
+
     Returns
     -------
     offset : int
@@ -448,6 +457,7 @@ def area_of_sphere(dimension):
     Parameters
     ----------
     dimension : int
+        The dimension
 
     Returns
     -------
@@ -559,7 +569,7 @@ def sradius_of_cap(dimension, area):
 
 
 def polar2cart(points_polar):
-    """Comnversion from the polar angles theta and phi to Cartesian coordinates
+    """Conversion from the polar angles theta and phi to Cartesian coordinates.
 
         x = cos(phi) * sin(theta)
         y = sin(phi) * sin(theta)
@@ -570,7 +580,8 @@ def polar2cart(points_polar):
     points_polar : array, double
         The points in polar coordinates, with shape (2, N)
 
-    Returns:
+    Returns
+    -------
     points_cart : array, double
         The points in Cartesian coordinates with shape (3, N)
 

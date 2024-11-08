@@ -215,7 +215,7 @@ def test_interaction_attached():
         plt.close()
 
 
-@pytest.mark.parametrize("plot_type,initial_function,function_list", [
+@pytest.mark.parametrize(("plot_type", "initial_function", "function_list"), [
     ("line", pf.plot.time, getmembers(pf.plot.line, isfunction)),
     ("2d", pf.plot.time_2d, getmembers(pf.plot.two_d, isfunction)),
 ])
@@ -276,7 +276,7 @@ def test_toggle_plots(plot_type, initial_function, function_list):
     plt.close("all")
 
 
-@pytest.mark.parametrize("plot,signal,shortcut", [
+@pytest.mark.parametrize(("plot", "signal", "shortcut"), [
     # togling spectrogram with short signal raises Value error if not caught
     (pf.plot.time, pf.Signal([1, 0, 0], 44100),
      sc_plot["spectrogram"]["key"][0]),
@@ -300,7 +300,7 @@ def test_interaction_not_allowed(plot, signal, shortcut):
 
 
 @pytest.mark.parametrize(
-    "ax_type,operation,direction,limits,new_limits",
+    ("ax_type", "operation", "direction", "limits", "new_limits"),
     [("freq", "move", "increase", [20, 20e3], [20 + 1.998, 20e3 + 1996.002]),
      ("freq", "move", "decrease", [20, 20e3], [20 - 1.998, 20e3 - 1996.002]),
      ("freq", "zoom", "increase", [20, 20e3], [20 + 1.998, 20e3 - 1996.002]),

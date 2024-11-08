@@ -1,3 +1,4 @@
+"""Module for spherical sampling grids."""
 import numpy as np
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
@@ -36,7 +37,7 @@ def cart_equidistant_cube(n_points):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.cube_equidistant."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     if np.size(n_points) == 1:
         n_x = n_points
@@ -87,7 +88,7 @@ def sph_dodecahedron(radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.dodecahedron."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     dihedral = 2 * np.arcsin(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     R = np.tan(np.pi / 3) * np.tan(dihedral / 2)
@@ -149,7 +150,7 @@ def sph_icosahedron(radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.icosahedron."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     gamma_R_r = np.arccos(np.cos(np.pi / 3) / np.sin(np.pi / 5))
     gamma_R_rho = np.arccos(1 / (np.tan(np.pi / 5) * np.tan(np.pi / 3)))
@@ -208,7 +209,7 @@ def sph_equiangular(n_points=None, sh_order=None, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.equiangular."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     if (n_points is None) and (sh_order is None):
         raise ValueError(
@@ -300,7 +301,7 @@ def sph_gaussian(n_points=None, sh_order=None, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.gaussian."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     if (n_points is None) and (sh_order is None):
         raise ValueError(
@@ -393,7 +394,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.hyperinterpolation."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     if (n_points is None) and (sh_order is None):
         for o in range(1, 100):
@@ -450,7 +451,7 @@ def sph_extremal(n_points=None, sh_order=None, radius=1.):
 
 def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
                  radius=1.):
-    """
+    r"""
     Return spherical t-design sampling grid.
 
     This function will be deprecated in pyfar 0.8.0 in favor
@@ -464,12 +465,12 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     .. math::
 
-        L = \\lceil \\frac{(t+1)^2}{2} \\rceil+1,
+        L = \lceil \frac{(t+1)^2}{2} \rceil+1,
 
     points will be generated, except for t = 3, 5, 7, 9, 11, 13, and 15.
     T-designs allow for an inverse spherical harmonic transform matrix
-    calculated as :math:`D = \\frac{4\\pi}{L} \\mathbf{Y}^\\mathrm{H}` with
-    :math:`\\mathbf{Y}^\\mathrm{H}` being the hermitian transpose of the
+    calculated as :math:`D = \frac{4\pi}{L} \mathbf{Y}^\mathrm{H}` with
+    :math:`\mathbf{Y}^\mathrm{H}` being the hermitian transpose of the
     spherical harmonics matrix.
 
     Parameters
@@ -502,7 +503,6 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
 
     References
     ----------
-
     .. [#]  C. An, X. Chen, I. H. Sloan, and R. S. Womersley, “Well Conditioned
             Spherical Designs for Integration and Interpolation on the
             Two-Sphere,” SIAM Journal on Numerical Analysis, vol. 48, no. 6,
@@ -516,7 +516,7 @@ def sph_t_design(degree=None, sh_order=None, criterion='const_energy',
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.spherical_t_design."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     # check input
     if (degree is None) and (sh_order is None):
@@ -618,7 +618,7 @@ def sph_equal_angle(delta_angles, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.equal_angle."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     # get the angles
     delta_angles = np.asarray(delta_angles)
@@ -658,7 +658,7 @@ def sph_equal_angle(delta_angles, radius=1.):
 
 def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
                      azimuth_res=1, match=360):
-    """
+    r"""
     Spherical sampling grid according to the great circle distance criterion.
 
     This function will be deprecated in pyfar 0.8.0 in favor
@@ -670,9 +670,9 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     Parameters
     ----------
     elevation : array like, optional
-        Contains the elevation from wich the sampling grid is generated, with
-        :math:`-90^\\circ\\leq elevation \\leq 90^\\circ` (:math:`90^\\circ`:
-        North Pole, :math:`-90^\\circ`: South Pole). The default is
+        Contains the elevation from which the sampling grid is generated, with
+        :math:`-90^\circ\leq elevation \leq 90^\circ` (:math:`90^\circ`:
+        North Pole, :math:`-90^\circ`: South Pole). The default is
         ``np.linspace(-90, 90, 19)``.
     gcd : number, optional
         Desired great circle distance (GCD). Note that the actual GCD of the
@@ -704,7 +704,7 @@ def sph_great_circle(elevation=np.linspace(-90, 90, 19), gcd=10, radius=1,
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.great_circle."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     # check input
     assert 1 / azimuth_res % 1 == 0, "1/azimuth_res must be an integer."
@@ -796,7 +796,7 @@ def sph_lebedev(n_points=None, sh_order=None, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.hyperinterpolation."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     # possible degrees
     degrees = np.array([6, 14, 26, 38, 50, 74, 86, 110, 146, 170, 194, 230,
@@ -960,7 +960,7 @@ def sph_fliege(n_points=None, sh_order=None, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.fliege."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     # possible values for n_points and sh_order
     points = np.array([4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196,
@@ -1057,7 +1057,7 @@ def sph_equal_area(n_points, radius=1.):
     warnings.warn((
         "This function will be deprecated in pyfar 0.8.0 in favor "
         "of spharpy.samplings.equal_area."),
-            PyfarDeprecationWarning)
+            PyfarDeprecationWarning, stacklevel=2)
 
     point_set = external.eq_point_set(2, n_points)
     sampling = pyfar.Coordinates(

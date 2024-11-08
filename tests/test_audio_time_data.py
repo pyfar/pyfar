@@ -26,7 +26,7 @@ def test_data_time_init_with_defaults():
 def test_data_time_init_wrong_dtype():
     """
     Test assertion from non integer/float data (also test time setter because
-    it is called during initialization)
+    it is called during initialization).
     """
     with pytest.raises(ValueError, match="time data is complex"):
         TimeData(np.arange(2).astype(complex), [0, 1])
@@ -38,7 +38,7 @@ def test_data_time_init_wrong_dtype():
 
 def test_time_init_complex_flag():
     """
-    Test assertion from non boolean complex flag
+    Test assertion from non boolean complex flag.
     """
     complex_flag = 1
     with pytest.raises(TypeError, match="``is_complex`` flag is "
@@ -52,7 +52,8 @@ def test_data_time_init_wrong_number_of_times():
     data = [1, 0, -1]
     times = [0, .1]
 
-    with pytest.raises(ValueError):
+    match = 'The length of times must be data.shape'
+    with pytest.raises(ValueError, match=match):
         TimeData(data, times)
 
 
@@ -61,7 +62,8 @@ def test_data_time_with_non_monotonously_increasing_time():
     data = [1, 0, -1]
     times = [0, .2, .1]
 
-    with pytest.raises(ValueError):
+    match = 'Times must be monotonously increasing'
+    with pytest.raises(ValueError, match=match):
         TimeData(data, times)
 
 
@@ -129,7 +131,8 @@ def test_reshape_exceptions():
     data_out = data_in.reshape((3, 2))
     npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
     # test assertion for non-tuple input
-    with pytest.raises(ValueError):
+    match = 'newshape must be an integer or tuple'
+    with pytest.raises(ValueError, match=match):
         data_out = data_in.reshape([3, 2])
 
     # test assertion for wrong dimension
@@ -244,12 +247,13 @@ def test_magic_setitem_wrong_n_samples():
 
     time_a = TimeData([1, 0, -1], [0, .1, .3])
     time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
-    with pytest.raises(ValueError):
+    match = 'The number of samples does not match'
+    with pytest.raises(ValueError, match=match):
         time_a[0] = time_b
 
 
-@pytest.mark.parametrize("audio", (
-    pf.FrequencyData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)))
+@pytest.mark.parametrize("audio", [
+    pf.FrequencyData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)])
 def test_magic_setitem_wrong_type(audio):
     time_data = TimeData([1, 2, 3, 4], [1, 2, 3, 4])
     with pytest.raises(ValueError, match="Comparison only valid"):
@@ -263,13 +267,13 @@ def test_separation_from_data_frequency():
     time = TimeData(data, times)
 
     with pytest.raises(AttributeError):
-        time.freq
+        assert time.freq
     with pytest.raises(AttributeError):
-        time.frequencies
+        assert time.frequencies
     with pytest.raises(AttributeError):
-        time.n_bins
+        assert time.n_bins
     with pytest.raises(AttributeError):
-        time.find_nearest_frequency
+        assert time.find_nearest_frequency
 
 
 def test_separation_from_signal():
@@ -279,7 +283,7 @@ def test_separation_from_signal():
     time = TimeData(data, times)
 
     with pytest.raises(AttributeError):
-        time.sampling_rate
+        assert time.sampling_rate
     with pytest.raises(AttributeError):
         time.domain = 'time'
 
@@ -304,7 +308,7 @@ def test___eq___notEqual():
 
 
 def test__repr__(capfd):
-    """Test string representation"""
+    """Test string representation."""
     print(TimeData([1, 2, 3], [1, 2, 3]))
     out, _ = capfd.readouterr()
     assert ("TimeData:\n"

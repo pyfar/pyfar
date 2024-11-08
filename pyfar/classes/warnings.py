@@ -39,8 +39,10 @@ class PyfarDeprecationWarning(Warning):
     >>>         pf.signals.exponential_sweep(2**10, [1e3, 20e3])
 
     """
+
     def __init__(self, message):
         self.message = message
 
     def __str__(self):
+        """Return the message of the warning."""
         return repr(self.message)

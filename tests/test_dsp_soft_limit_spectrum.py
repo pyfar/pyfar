@@ -47,7 +47,7 @@ def test_signal_and_frequency_data_input(data_in):
 @pytest.mark.parametrize('limit', [-10, 0, 10])
 @pytest.mark.parametrize('direction', ['upper', 'lower'])
 def test_limit_and_direction(limit, direction):
-    """Test if all values are correctly limited"""
+    """Test if all values are correctly limited."""
 
     data_in = pf.FrequencyData(10**(np.arange(-100, 101)/20), np.arange(201))
     data_out = soft_limit_spectrum(data_in, limit, knee=0, direction=direction)
@@ -59,7 +59,7 @@ def test_limit_and_direction(limit, direction):
 
 
 def test_frequency_dependend_limit():
-    """Test frequency-dependent limit passed as audio object"""
+    """Test frequency-dependent limit passed as audio object."""
 
     limit = np.atleast_2d([0, -6, -12])
     data_in = pf.FrequencyData(10**(np.array([-3, -3, -3])/20), [0, 1, 3])
@@ -78,7 +78,7 @@ def test_frequency_dependend_limit():
 @pytest.mark.parametrize('limit', [-10, 0, 10])
 @pytest.mark.parametrize('knee', [0, 5, 10])
 def test_knee_width_in_db(limit, knee):
-    "Test the knee width given in decibel."""
+    """Test the knee width given in decibel."""
 
     data_in = pf.FrequencyData(10**(np.arange(-100, 101)/20), np.arange(201))
     data_out = soft_limit_spectrum(data_in, limit, knee)
@@ -108,7 +108,7 @@ def test_arctan_knee(limit):
     assert np.all(20*np.log10(np.abs(data_out.freq)) <= limit + 1e-14)
 
 
-@pytest.mark.parametrize('fft_norm,log_prefix', [
+@pytest.mark.parametrize(('fft_norm', 'log_prefix'), [
     ('none', 20), ('unitary', 20), ('amplitude', 20), ('rms', 20),
     ('power', 10), ('psd', 10)])
 def test_automatic_setting_of_log_prefix(fft_norm, log_prefix):

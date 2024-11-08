@@ -68,7 +68,7 @@ def test_sine_assertions():
 
 
 def test_impulse_with_defaults():
-    """Test impulse with default parameters"""
+    """Test impulse with default parameters."""
     signal = pfs.impulse(3)
     assert isinstance(signal, pf.Signal)
     npt.assert_allclose(signal.time, np.atleast_2d([1, 0, 0]))
@@ -79,7 +79,7 @@ def test_impulse_with_defaults():
 
 
 def test_impulse_with_user_parameters():
-    """Test impulse with custom delay, amplitude and sampling rate"""
+    """Test impulse with custom delay, amplitude and sampling rate."""
     signal = pfs.impulse(3, 1, 2, 48000)
     npt.assert_allclose(signal.time, np.atleast_2d([0, 2, 0]))
     assert signal.sampling_rate == 48000
@@ -102,7 +102,7 @@ def test_impulse_multi_channel():
 @pytest.mark.parametrize("amp_shape", [
     (1,), (1, 1), (2, 2), (2, 1), (1, 2), None])
 def test_impulse_different_cshapes(delay_shape, amp_shape):
-    """test impulse different cshapes."""
+    """Test impulse different cshapes."""
     signal = pfs.impulse(
         3,
         0 if delay_shape is None else np.zeros(delay_shape, dtype=int),
@@ -122,7 +122,7 @@ def test_impulse_different_cshapes(delay_shape, amp_shape):
 @pytest.mark.parametrize("phase_shape", [
     (1,), (1, 1), (2, 2), (2, 1), (1, 2), None])
 def test_sine_different_cshapes(frequency_shape, amp_shape, phase_shape):
-    """test impulse different cshapes."""
+    """Test impulse different cshapes."""
     signal = pfs.sine(
         1 if frequency_shape is None else np.ones(frequency_shape),
         5,
@@ -142,7 +142,7 @@ def test_impulse_float():
 
 
 def test_impulse_assertions():
-    """Test assertions for impulse functions"""
+    """Test assertions for impulse functions."""
     with pytest.raises(ValueError, match="The parameters delay"):
         pfs.impulse(10, [1, 2], [1, 2, 3])
 
@@ -395,10 +395,10 @@ def test_match_shape():
 @pytest.mark.parametrize('n_samples', [2**8, 2**8 + 1])
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_linear_perfect_sweep(n_samples, sampling_rate):
-    '''
+    """
     Test the perfect sweep generation. General tests for frequency domain sweep
     synthesis in test_frequency_domain_sweep.
-    '''
+    """
 
     sweep = pfs.linear_perfect_sweep(n_samples, sampling_rate)
 
@@ -435,10 +435,10 @@ def test_linear_perfect_sweep(n_samples, sampling_rate):
 @pytest.mark.parametrize('n_samples', [2**16, 2**16 + 1])
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_linear_sweep_freq(n_samples, sampling_rate):
-    '''
+    """
     Test the linear sweep generation. General tests for frequency domain sweep
     synthesis in test_frequency_domain_sweep.
-    '''
+    """
 
     sweep = pfs.linear_sweep_freq(
         n_samples, [200, 16e3], 5000, 5000, sampling_rate=sampling_rate)
@@ -468,10 +468,10 @@ def test_linear_sweep_freq(n_samples, sampling_rate):
 @pytest.mark.parametrize('n_samples', [2**16, 2**16 + 1])
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_exponential_sweep_freq(n_samples, sampling_rate):
-    '''
+    """
     Test the exponential sweep generation. General tests for frequency domain
     sweep synthesis in test_frequency_domain_sweep.
-    '''
+    """
 
     sweep = pfs.exponential_sweep_freq(
         n_samples, [200, 16e3], 5000, 5000, sampling_rate=sampling_rate)
@@ -501,10 +501,10 @@ def test_exponential_sweep_freq(n_samples, sampling_rate):
 @pytest.mark.parametrize('n_samples', [2**16, 2**16 + 1])
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
-    '''
+    """
     Test the magnitude weighted sweep. General tests for frequency domain sweep
     synthesis in test_frequency_domain_sweep.
-    '''
+    """
 
     # magnitude spectrum
     magnitude = pf.dsp.filter.low_shelf(
@@ -538,9 +538,10 @@ def test_magnitude_spectrum_weighted_sweep(n_samples, sampling_rate):
 
 
 def test_magnitude_spectrum_weigthed_sweep_input_length():
-    '''
+    """
     Test length of input magnitude spectrum. General tests for frequency domain
-    sweep synthesis in test_frequency_domain_sweep.'''
+    sweep synthesis in test_frequency_domain_sweep.
+    """
 
     # sorter signal will be zero padded
     sweep_a = pfs.magnitude_spectrum_weighted_sweep(
@@ -555,12 +556,12 @@ def test_magnitude_spectrum_weigthed_sweep_input_length():
 
 
 def test_frequency_domain_sweep():
-    '''
+    """
     Test general frequency domain sweep synthesis. Specific tests for public
     functions are contained in ``test_linear_perfect_sweep``,
     ``test_linear_sweep_freq``, ``test_exponential_sweep_freq``, and
-    ``test_magnitude_spectrum_weighted_sweep``,
-    '''
+    ``test_magnitude_spectrum_weighted_sweep``,.
+    """
 
     # test frequency range - sweep with smaller range contains less energy
     sweep_a = pfs.linear_sweep_freq(2**14, [200, 20e3], 5000, 5000)

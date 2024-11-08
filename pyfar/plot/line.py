@@ -1,3 +1,4 @@
+"""Line plots for time and frequency domain signals."""
 from pyfar.plot.utils import context
 from . import _line
 from . import _interaction as ia
@@ -65,7 +66,6 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -289,7 +289,6 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -389,7 +388,6 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -475,7 +473,6 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -566,7 +563,6 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -627,7 +623,6 @@ def custom_subplots(signal, plots, ax=None, style='light', **kwargs):
 
     Examples
     --------
-
     Generate a two by two subplot layout
 
     .. plot::

@@ -217,12 +217,13 @@ class TransmissionMatrix(FrequencyData):
     @property
     def abcd_caxes(self):
         """The indices of the channel axes referring to the transmission
-        matrix, namely (-2, -1)"""
+        matrix, namely (-2, -1).
+        """
         return (-2, -1)
 
     @property
     def abcd_cshape(self):
-        """The channel shape of the transmission matrix entries (A, B, C, D)
+        """The channel shape of the transmission matrix entries (A, B, C, D).
 
         This is the same as 'cshape' without the last two elements.
         As an exception, a matrix with cshape (2,2) will return
@@ -259,7 +260,7 @@ class TransmissionMatrix(FrequencyData):
                              self.comment)
 
     def _check_for_inf(self, Zl: complex | FrequencyData):
-        """Check given load impedance for np.inf values
+        """Check given load impedance for np.inf values.
 
         Returns
         -------
@@ -287,7 +288,7 @@ class TransmissionMatrix(FrequencyData):
         return idx_inf, idx_inf_Zl, Zl
 
     def input_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
-        """Calculates the input impedance given the load impedance Zl at the
+        r"""Calculates the input impedance given the load impedance Zl at the
         output.
 
         Two-port representation::
@@ -299,7 +300,7 @@ class TransmissionMatrix(FrequencyData):
                     o---xxxxxxxxx---o
 
         See Equation (2-6) in Reference [1]_:
-        :math:`Z_\\mathrm{in} = \\frac{AZ_L + B}{CZ_L + D}`
+        :math:`Z_\mathrm{in} = \frac{AZ_L + B}{CZ_L + D}`
 
         Parameters
         ----------
@@ -350,7 +351,7 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     def output_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
-        """Calculates the output impedance given the load impedance Zl at the
+        r"""Calculates the output impedance given the load impedance Zl at the
         input.
 
         Two-port representation::
@@ -362,7 +363,7 @@ class TransmissionMatrix(FrequencyData):
                     o---xxxxxxxxx---o
 
         See Equation (2-6) in Reference [1]_:
-        :math:`Z_\\mathrm{out} = \\frac{DZ_L + B}{CZ_L + A}`
+        :math:`Z_\mathrm{out} = \frac{DZ_L + B}{CZ_L + A}`
 
         For a code example, see :py:func:`~input_impedance` and exchange
         respective method call with `output_impedance`.
@@ -397,7 +398,7 @@ class TransmissionMatrix(FrequencyData):
 
     def transfer_function(self, quantity_indices,
                           Zl: complex | FrequencyData) -> FrequencyData:
-        """Returns the transfer function (output/input) for specified
+        r"""Returns the transfer function (output/input) for specified
         quantities and a given load impedance.
 
         The transfer function is the relation between an output and input
@@ -411,20 +412,20 @@ class TransmissionMatrix(FrequencyData):
         in Reference [1]_:
 
         .. math::
-            Q_{1,\\mathrm{in}} = AQ_{1,\\mathrm{out}} + BQ_{2,\\mathrm{in}}
+            Q_{1,\mathrm{in}} = AQ_{1,\mathrm{out}} + BQ_{2,\mathrm{in}}
 
-            Q_{2,\\mathrm{in}} = CQ_{1,\\mathrm{out}} + DQ_{2,\\mathrm{in}}
+            Q_{2,\mathrm{in}} = CQ_{1,\mathrm{out}} + DQ_{2,\mathrm{in}}
 
         The four transfer functions are defined as:
 
-        * :math:`Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}}` using
-          :math:`Q_{2,\\mathrm{out}} = Q_{1,\\mathrm{out}}/Z_L`
-        * :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}} =
-          Q_{1,\\mathrm{out}} / Q_{1,\\mathrm{in}} \\cdot \\frac{1}{Z_L}`
-        * :math:`Q_{2,\\mathrm{out}} / Q_{2,\\mathrm{in}}` using
-          :math:`Q_{1,\\mathrm{out}} = Q_{2,\\mathrm{out}}\\cdot Z_L`
-        * :math:`Q_{1,\\mathrm{out}} / Q_{2,\\mathrm{in}} =
-          Q_{2,\\mathrm{out}} / Q_{2,\\mathrm{in}} \\cdot Z_L`
+        * :math:`Q_{1,\mathrm{out}} / Q_{1,\mathrm{in}}` using
+          :math:`Q_{2,\mathrm{out}} = Q_{1,\mathrm{out}}/Z_L`
+        * :math:`Q_{2,\mathrm{out}} / Q_{1,\mathrm{in}} =
+          Q_{1,\mathrm{out}} / Q_{1,\mathrm{in}} \cdot \frac{1}{Z_L}`
+        * :math:`Q_{2,\mathrm{out}} / Q_{2,\mathrm{in}}` using
+          :math:`Q_{1,\mathrm{out}} = Q_{2,\mathrm{out}}\cdot Z_L`
+        * :math:`Q_{1,\mathrm{out}} / Q_{2,\mathrm{in}} =
+          Q_{2,\mathrm{out}} / Q_{2,\mathrm{in}} \cdot Z_L`
 
         Parameters
         ----------
@@ -432,7 +433,7 @@ class TransmissionMatrix(FrequencyData):
             Array-like object with two integer elements referring to the
             indices of the utilized quantity at the output (first integer)
             and input (second integer). For example, (1,0) refers to the
-            transfer function :math:`Q_{2,\\mathrm{out}} / Q_{1,\\mathrm{in}}`.
+            transfer function :math:`Q_{2,\mathrm{out}} / Q_{1,\mathrm{in}}`.
         Zl : scalar | FrequencyData
             The load impedance data as scalar or FrequencyData. In latter case,
             the shape must match the entries of the T-matrix, i.e.
@@ -767,7 +768,7 @@ class TransmissionMatrix(FrequencyData):
     def __getitem__(self, key):
         """Get copied slice of the TransmissionMatrix at key.
 
-            Note, that slicing ABCD or frequency dimensions is not possible.
+        Note, that slicing ABCD or frequency dimensions is not possible.
         """
 
         if not self.is_indexable():
@@ -783,14 +784,14 @@ class TransmissionMatrix(FrequencyData):
         # try indexing and raise verbose errors if it fails
         try:
             data = self._data[key]
-        except IndexError as Error:
-            if 'too many indices for array' in str(Error):
+        except IndexError as error:
+            if 'too many indices for array' in str(error):
                 raise IndexError((
                     f'Indexed dimensions must not exceed the ABCD '
                     f'channel dimension (abcd_cdim), which is '
-                    f'{len(self.abcd_cshape)}'))
+                    f'{len(self.abcd_cshape)}')) from error
             else:
-                raise Error
+                raise error
 
         return TransmissionMatrix.from_tmatrix(
             data, frequencies=self.frequencies,

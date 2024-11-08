@@ -1,3 +1,4 @@
+"""Digital signal processing functions."""
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn
@@ -147,15 +148,15 @@ def wrap_to_2pi(x):
 
 
 def linear_phase(signal, group_delay, unit="samples"):
-    """
+    r"""
     Set the phase to a linear phase with a specified group delay.
 
     The linear phase signal is computed as
 
-    .. math:: H_{\\mathrm{lin}} = |H| \\mathrm{e}^{-j \\omega \\tau}\\,,
+    .. math:: H_{\mathrm{lin}} = |H| \mathrm{e}^{-j \omega \tau}\,,
 
-    with :math:`H` the complex spectrum of the input data, :math:`|\\cdot|` the
-    absolute values, :math:`\\omega` the frequency in radians and :math:`\\tau`
+    with :math:`H` the complex spectrum of the input data, :math:`|\cdot|` the
+    absolute values, :math:`\omega` the frequency in radians and :math:`\tau`
     the group delay in seconds.
 
     Parameters
@@ -201,12 +202,12 @@ def linear_phase(signal, group_delay, unit="samples"):
 
 
 def zero_phase(signal):
-    """Calculate zero phase signal.
+    r"""Calculate zero phase signal.
 
     The zero phase signal is obtained by taking the absolute values of the
     spectrum
 
-    .. math:: H_z = |H| = \\sqrt{\\mathrm{real}(H)^2 + \\mathrm{imag}(H)^2},
+    .. math:: H_z = |H| = \sqrt{\mathrm{real}(H)^2 + \mathrm{imag}(H)^2},
 
     where :math:`H` is the complex valued spectrum of the input data and
     :math:`H_z` the real valued zero phase spectrum.
@@ -446,7 +447,6 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     Examples
     --------
-
     Options for parameter `shape`.
 
     .. plot::
@@ -564,7 +564,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
 
 def kaiser_window_beta(A):
-    """ Return a shape parameter beta to create kaiser window based on desired
+    """Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
 
     This function can be used to call :py:func:`~pyfar.dsp.time_window` with
@@ -597,7 +597,7 @@ def kaiser_window_beta(A):
 
 
 def _time_window_symmetric_interval_two(interval, window):
-    """ Symmetric time window between 2 values given in interval.
+    """Symmetric time window between 2 values given in interval.
 
     Parameters
     ----------
@@ -623,7 +623,7 @@ def _time_window_symmetric_interval_two(interval, window):
 
 
 def _time_window_left(n_samples, interval, window):
-    """ Left-sided time window. ""
+    """Left-sided time window.
 
     Parameters
     ----------
@@ -653,7 +653,7 @@ def _time_window_left(n_samples, interval, window):
 
 
 def _time_window_right(interval, window):
-    """ Right-sided time window. ""
+    """Right-sided time window.
 
     Parameters
     ----------
@@ -681,7 +681,7 @@ def _time_window_right(interval, window):
 
 
 def _time_window_symmetric_zero(n_samples, interval, window):
-    """ Symmetric time window with respect to t=0. ""
+    """Symmetric time window with respect to t=0.
 
     Parameters
     ----------
@@ -714,7 +714,7 @@ def _time_window_symmetric_zero(n_samples, interval, window):
 
 
 def _time_window_symmetric_interval_four(interval, window):
-    """ Symmetric time window with two fades and constant range in between.
+    """Symmetric time window with two fades and constant range in between.
 
     Parameters
     ----------
@@ -945,7 +945,6 @@ def minimum_phase(signal, n_fft=None, truncate=True):
 
     Examples
     --------
-
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
     .. plot::
@@ -1047,7 +1046,7 @@ def pad_zeros(signal, pad_width, mode='end'):
     if mode in ['before', 'after']:
         warnings.warn(('Mode "before" and "after" will be renamed into '
                        '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning)
+                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=2)
 
         mode = 'beginning' if mode == 'before' else 'end'
 
@@ -1119,7 +1118,7 @@ def time_shift(
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : numeric, optional
+    pad_value : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
         Pad :py:data:`numpy.nan` to the respective channels if the rms value
         of the signal is to be maintained for block-wise rms estimation of the
@@ -1251,7 +1250,6 @@ def find_impulse_response_delay(impulse_response, N=1):
 
     References
     ----------
-
     .. [#]  N. S. M. Tamim and F. Ghani, “Hilbert transform of FFT pruned
             cross correlation function for optimization in time delay
             estimation,” in Communications (MICC), 2009 IEEE 9th Malaysia
@@ -1335,7 +1333,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 else:
                     start_sample[idx] = np.nan
                     warnings.warn('Starting sample not found for channel '
-                                  f'{ch}')
+                                  f'{ch}', stacklevel=2)
             else:
                 start_sample[idx] = np.nan
 
@@ -1453,7 +1451,7 @@ def find_impulse_response_start(
             warnings.warn(
                 "The SNR seems lower than the specified threshold value. "
                 "Check if this is a valid impulse response with sufficient "
-                "SNR.")
+                "SNR.", stacklevel=2)
 
         start_sample = max_sample.copy()
 
@@ -1474,7 +1472,7 @@ def find_impulse_response_start(
                     start_sample[ch] = 0
                     warnings.warn(
                         'No values below threshold found found for channel '
-                        f'{ch} defaulting to 0')
+                        f'{ch} defaulting to 0', stacklevel=2)
 
         ir_start[idx] = start_sample
 
@@ -1555,7 +1553,7 @@ def deconvolve(system_output, system_input, fft_length=None,
         The ``fft_norm`` of is set to ``'none'``.
 
     References
-    -----------
+    ----------
     .. [#] S. Mueller and P. Masserani "Transfer function measurement with
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
@@ -1810,6 +1808,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         If return_prefix is ``True``, the function will also return the
         `log_prefix` value. This can be used to delogrithmize the data. The
         default is ``False``.
+
     Returns
     -------
     decibel : numpy.ndarray
@@ -1917,7 +1916,6 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
     Examples
     --------
-
     Illustrate effect of limit and knee
 
     .. plot ::
@@ -2014,7 +2012,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> ax.legend(loc='upper left')
 
     References
-    -----------
+    ----------
     .. [#] B. Bernschütz, Microphone arrays and sound field decomposition for
            dynamic binaural synthesis, Ph.D Thesis, (Berlin, Germany,
            TU Berlin, 2016).
@@ -2113,7 +2111,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
 def energy(signal):
     r"""
-    Computes the channel wise energy in the time domain
+    Computes the channel wise energy in the time domain.
 
     .. math::
 
@@ -2140,7 +2138,7 @@ def energy(signal):
     to compute the power and the rms of a signal.
 
     References
-    -----------
+    ----------
     .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
            (Upper Saddle et al., Pearson, 2010), Third edition.
     """
@@ -2254,7 +2252,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     signal: Signal, TimeData, FrequencyData
         Input signal.
     mode: string
-
         ``'linear'``
             Average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that
@@ -2307,7 +2304,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         The default is ``'raise'``.
 
     Returns
-    --------
+    -------
     averaged_signal: Signal, TimeData, FrequencyData
         Averaged input Signal.
 
@@ -2353,7 +2350,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     if 1 in signal.cshape:
         for ax in caxis:
             if signal.cshape[ax] == 1:
-                warnings.warn(f"Averaging one dimensional caxis={caxis}.")
+                warnings.warn(
+                    f"Averaging one dimensional caxis={caxis}.", stacklevel=2)
     if not isinstance(caxis, int):
         axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
     else:

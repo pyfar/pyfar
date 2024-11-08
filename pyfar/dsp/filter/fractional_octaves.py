@@ -1,3 +1,4 @@
+"""Fractional octave filter bank."""
 import warnings
 import numpy as np
 import scipy.signal as spsignal
@@ -22,6 +23,9 @@ def fractional_octave_frequencies(
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
         ``frequency_range=(20, 20e3)``.
+    return_cutoff : bool, optional
+        If ``True``, the lower and upper critical frequencies of the bandpass
+        filters for each band are returned. The default is ``False``.
 
     Returns
     -------
@@ -48,7 +52,7 @@ def fractional_octave_frequencies(
 
     if num_fractions in [1, 3]:
         nominal, exact = _center_frequencies_fractional_octaves_iec(
-            nominal, num_fractions)
+            num_fractions)
 
         mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
         nominal = nominal[mask]
@@ -96,7 +100,7 @@ def _exact_center_frequencies_fractional_octaves(
     return exact
 
 
-def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+def _center_frequencies_fractional_octaves_iec(num_fractions):
     """Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
@@ -305,7 +309,8 @@ def _coefficients_fractional_octave_bands(
     mask_skip = Wns[:, 0] >= 1
     if np.any(mask_skip):
         Wns = Wns[~mask_skip]
-        warnings.warn("Skipping bands above the Nyquist frequency")
+        warnings.warn(
+            "Skipping bands above the Nyquist frequency", stacklevel=2)
 
     num_bands = np.sum(~mask_skip)
     sos = np.zeros((num_bands, order, 6), np.double)
@@ -313,9 +318,11 @@ def _coefficients_fractional_octave_bands(
     for idx, Wn in enumerate(Wns):
         # in case the upper frequency limit is above Nyquist, use a highpass
         if Wn[-1] > 1:
-            warnings.warn('The upper frequency limit {} Hz is above the \
-                Nyquist frequency. Using a highpass filter instead of a \
-                bandpass'.format(np.round(freqs_upper[idx], decimals=1)))
+            warnings.warn(
+                f'The upper frequency limit {freqs_upper[idx]:.1f} Hz is above'
+                ' the Nyquist frequency. Using a highpass filter instead of a '
+                'bandpass.',
+                stacklevel=2)
             Wn = Wn[0]
             btype = 'highpass'
             sos_hp = spsignal.butter(order, Wn, btype=btype, output='sos')
@@ -398,7 +405,6 @@ def reconstructing_fractional_octave_bands(
 
     Examples
     --------
-
     Filter and re-synthesize an impulse signal.
 
     .. plot::
@@ -448,7 +454,8 @@ def reconstructing_fractional_octave_bands(
     # half the sampling rate
     f_id = f_m < sampling_rate / 2
     if not np.all(f_id):
-        warnings.warn("Skipping bands above the Nyquist frequency")
+        warnings.warn(
+            "Skipping bands above the Nyquist frequency", stacklevel=2)
 
     # DFT lines of the lower cut-off and center frequency as in
     # Antoni, Eq. (14)
