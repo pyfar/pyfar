@@ -176,7 +176,8 @@ class GammatoneBands():
     def freq_range(self):
         """Get the frequency range of the filter bank in Hz.
         ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``."""
+        of ``'frequency_range'``.
+        """
 
         # Deprecation warning for freq_range parameter
         warnings.warn((

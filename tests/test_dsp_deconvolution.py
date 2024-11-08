@@ -30,7 +30,8 @@ def test_input_sampling_freq_error():
 
 def test_fft_length_error():
     """Test assertion by passing fft_length shorter than n_samples of
-    given Signals."""
+    given Signals.
+    """
     with pytest.raises(ValueError,
                        match="The fft_length can not be shorter than" +
                              "system_output.n_samples."):
@@ -78,8 +79,9 @@ def test_output_length():
 @pytest.mark.parametrize("is_complex_sig1", [True, False])
 @pytest.mark.parametrize("is_complex_sig2", [True, False])
 def test_output_sweep(is_complex_sig1, is_complex_sig2):
-    """test of flat output frequency response resulting from deconvolving
-    a sweep with the same sweep."""
+    """Test of flat output frequency response resulting from deconvolving
+    a sweep with the same sweep.
+    """
     fs = 44100
     sweep_1 = pfs.exponential_sweep_time(fs, (100, 10000))
     sweep_2 = pfs.exponential_sweep_time(fs, (100, 10000))
@@ -102,7 +104,8 @@ def test_output_sweep(is_complex_sig1, is_complex_sig2):
 
 def test_fft_norm():
     """Test the correct call of _match_fft_norm with parameter division=True
-    for two example inputs."""
+    for two example inputs.
+    """
     sig1 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
     res = pf.dsp.dsp.deconvolve(sig1, sig1, freq_range=(1, 44100))
     assert res.fft_norm == 'none'

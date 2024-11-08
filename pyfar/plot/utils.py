@@ -24,7 +24,7 @@ def plotstyle(style='light'):
     style : str
         Full path to the pyfar plotstyle.
 
-    See also
+    See Also
     --------
     pyfar.plot.use
     pyfar.plot.context
@@ -68,7 +68,7 @@ def context(style='light', after_reset=False):
         If ``True``, apply style after resetting settings to their defaults;
         otherwise, apply style on top of the current settings.
 
-    See also
+    See Also
     --------
     pyfar.plot.plotstyle
 
@@ -119,7 +119,7 @@ def use(style="light"):
         |      | first to last in the list.                                  |
         +------+-------------------------------------------------------------+
 
-    See also
+    See Also
     --------
     pyfar.plot.plotstyle
 
