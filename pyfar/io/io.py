@@ -570,7 +570,7 @@ def default_audio_subtype(audio_format):
 
 
 def read_comsol(filename, expressions=None, parameters=None):
-    """Read data exported from COMSOL Multiphysics.
+    r"""Read data exported from COMSOL Multiphysics.
 
     .. note::
         The data is created by defining at least one `Expression` within a
@@ -630,7 +630,7 @@ def read_comsol(filename, expressions=None, parameters=None):
     Obtain information on the input file with
     :py:func:`~pyfar.io.read_comsol_header`.
 
-    >>> expressions, units, parameters, domain, domain_data = \\
+    >>> expressions, units, parameters, domain, domain_data = \
     >>>     pf.io.read_comsol_header('comsol_sample.csv')
     >>> expressions
     ['pabe.p_t']
@@ -785,7 +785,7 @@ def read_comsol(filename, expressions=None, parameters=None):
 
 
 def read_comsol_header(filename):
-    """Read header information on exported data from COMSOL Multiphysics.
+    r"""Read header information on exported data from COMSOL Multiphysics.
 
     .. note::
         The data is created by defining at least one `Expression` within a
@@ -836,7 +836,7 @@ def read_comsol_header(filename):
 
     Obtain information on the input file.
 
-    >>> expressions, units, parameters, domain, domain_data = \\
+    >>> expressions, units, parameters, domain, domain_data = \
     >>>     pf.io.read_comsol_header('comsol_sample.csv')
     >>> expressions
     ['pabe.p_t']

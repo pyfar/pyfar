@@ -112,6 +112,7 @@ class Filter(object):
     This is an abstract class method, only used for the shared processing
     method used for the application of a filter on a signal.
     """
+
     def __init__(
             self,
             coefficients=None,
@@ -327,6 +328,7 @@ class FilterFIR(Filter):
     FilterFIR
         The FIR filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -424,6 +426,7 @@ class FilterIIR(Filter):
     FilterIIR
         The IIR filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         super().__init__(coefficients, sampling_rate, state, comment)
@@ -495,6 +498,7 @@ class FilterSOS(Filter):
     FilterSOS
         The SOS filter object.
     """
+
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
         if state is not None:
@@ -517,7 +521,8 @@ class FilterSOS(Filter):
     @property
     def order(self):
         """The order of the filter.
-        This is always twice the number of sections."""
+        This is always twice the number of sections.
+        """
         return 2*self.n_sections
 
     @property
