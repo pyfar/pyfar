@@ -379,7 +379,7 @@ def test_normalization_exceptions():
 
 
 def test_rfft_normalization_impulse(impulse_stub):
-    """ Test for call of normalization in rfft.
+    """Test for call of normalization in rfft.
     """
     signal_spec = fft.rfft(
         impulse_stub.time, impulse_stub.n_samples, impulse_stub.sampling_rate,
@@ -391,7 +391,7 @@ def test_rfft_normalization_impulse(impulse_stub):
 
 
 def test_rfft_normalization_sine(sine_stub):
-    """ Test for correct call of normalization in rfft.
+    """Test for correct call of normalization in rfft.
     """
     signal_spec = fft.rfft(
         sine_stub.time, sine_stub.n_samples, sine_stub.sampling_rate,
@@ -403,7 +403,7 @@ def test_rfft_normalization_sine(sine_stub):
 
 
 def test_fft_add_mirror_spec():
-    """ Test method to add mirror spectrum to single-sided frequency data."""
+    """Test method to add mirror spectrum to single-sided frequency data."""
     data_odd = [1, 2, 3, 4, 5, 6, 7]
     fr_odd = fft.rfft(data_odd, n_samples=7, sampling_rate=48000,
                       fft_norm='none')
@@ -427,7 +427,7 @@ def test_fft_add_mirror_spec():
 
 
 def test_fft_remove_mirror_spec():
-    """ Test method to remove redundant part of double-sided frequency data."""
+    """Test method to remove redundant part of double-sided frequency data."""
     data_odd = [1, 2, 3, 4, 5, 6, 7]
     fr_odd_desired = fft.rfft(data_odd, n_samples=7, sampling_rate=48000,
                               fft_norm='none')
@@ -452,7 +452,7 @@ def test_fft_remove_mirror_spec():
 
 
 def test_check_conjugate_symmetry():
-    """test checking for conjugate symmetry."""
+    """Test checking for conjugate symmetry."""
 
     sampling_rate = 48000
     fft_norm = 'none'

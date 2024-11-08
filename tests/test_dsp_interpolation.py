@@ -252,7 +252,7 @@ def test_interpolate_spectrum_init():
 
 
 def test_interpolate_spectrum_init_assertions():
-    """Test if init pytest.raises assertions correctly."""
+    """Test if init raises assertions correctly."""
     fd = pf.FrequencyData([1, .5], [100, 200])
 
     # data (invalid type)
@@ -390,7 +390,8 @@ def test_interpolate_spectrum_show():
 
     This only tests if the code finishes without errors. Because the plot is
     an informal plot for inspection, we don't test specifics of the figure and
-    axes for speed up the testing."""
+    axes for speed up the testing.
+    """
 
     data = pf.FrequencyData([1, 2], [1, 2])
     interpolator = InterpolateSpectrum(
