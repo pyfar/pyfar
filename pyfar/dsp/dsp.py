@@ -2700,6 +2700,7 @@ def correlate(signal_1, signal_2, mode='full', normalize=False):
         `signal_1` and its ``cshape`` must be broadcastable to that of
         `signal_1`.
     mode : str, optional
+        Specifies how the correlation is computed.
 
         ``'full'``
             Computes the full correlation function by zero padding the input
@@ -2741,7 +2742,6 @@ def correlate(signal_1, signal_2, mode='full', normalize=False):
 
     Examples
     --------
-
     Compute the lags (delay) that are required to maximize the
     cross-correlation between a one and multi-dimensional signal
 

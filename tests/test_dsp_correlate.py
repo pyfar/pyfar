@@ -154,7 +154,7 @@ def test_full_mode_nd():
 
 @pytest.mark.parametrize('normalize', [False, True])
 def test_normalize(normalize):
-    """Test the normalize parameter"""
+    """Test the normalize parameter."""
     # sine with 4 samples period -> auto-correlation is 4 samples period sine
     signal = pf.signals.sine(5, 8, 1, 0, 20)
     correlation = correlate(signal, signal, 'cyclic', normalize)
@@ -168,7 +168,7 @@ def test_normalize(normalize):
 
 
 def test_complex_signals():
-    """Test with complex signals"""
+    """Test with complex signals."""
 
     signal_1 = pf.Signal([0, 0, 1+0j], 1, is_complex=True)
     signal_2 = pf.Signal([0+1j, 0, 0], 1, is_complex=True)
@@ -185,7 +185,7 @@ def test_complex_signals():
 
 @pytest.mark.parametrize('complex_first', [True, False])
 def test_complex_and_real_signals(complex_first):
-    """Test with real and complex-valued signals"""
+    """Test with real and complex-valued signals."""
 
     if complex_first:
         signal_1 = pf.Signal([0, 0, 1j], 1, is_complex=True)
