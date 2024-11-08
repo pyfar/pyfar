@@ -2768,7 +2768,7 @@ def correlate(signal_1, signal_2, mode='full', normalize=False):
         >>> # plot correlation and indicate maximum
         >>> ax = pf.plot.time(cor, unit='ms')
         >>> ax.set_title('Correlation and position of maxima (dots)')
-        >>> ax.set_xlabel('Time lags in ms')
+        >>> ax.set_xlabel('Time lag in ms')
         >>> ax.set_ylabel('Auto correlation')
         >>> for amax, color in zip(argmax.flatten(), 'bryp'):
         >>>     ax.axvline(amax, color=pf.plot.color(color), linestyle=':')
@@ -2788,7 +2788,7 @@ def correlate(signal_1, signal_2, mode='full', normalize=False):
         >>>     cor = pf.dsp.correlate(signal, signal, mode, normalize=True)
         >>>     ax = pf.plot.time(cor, unit='ms', label=mode, ls=line)
         >>>
-        >>> ax.set_xlabel('Time lags in ms')
+        >>> ax.set_xlabel('Time lag in ms')
         >>> ax.set_ylabel('Auto correlation')
         >>> ax.legend()
     """

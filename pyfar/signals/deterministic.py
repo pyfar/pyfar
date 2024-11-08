@@ -654,7 +654,7 @@ def linear_perfect_sweep(
         ...     sweep, sweep, 'cyclic', normalize=True)
         >>>
         >>> ax = pf.plot.time(auto_correlation, unit='ms')
-        >>> ax.set_xlabel('Time lags in ms')
+        >>> ax.set_xlabel('Time lag in ms')
         >>> ax.set_ylabel('Auto correlation')
     """
 
