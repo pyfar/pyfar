@@ -24,7 +24,6 @@ from .dsp import (
     rms,
     normalize,
     average,
-    correlate,
 )
 
 from .interpolation import (
@@ -68,5 +67,4 @@ __all__ = [
     'average',
     'normalize',
     'fractional_time_shift',
-    'correlate',
 ]
