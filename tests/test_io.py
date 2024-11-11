@@ -722,7 +722,7 @@ def test__sofa_pos_error():
         io.io._sofa_pos('bla', np.array([1, 2, 3]))
 
 
-@pytest.mark.parametrize('file,data_type', [
+@pytest.mark.parametrize(('filename', 'data_type'), [
     ('dirac_itaAudio.ita', 'signal'),
     ('dirac_itaAudio_mult.ita', 'signal'),
     ('dirac_itaAudio_mult.ita', 'data'),
@@ -733,20 +733,18 @@ def test__sofa_pos_error():
     ('freq_itaResult_mult_ww.ita', 'data'),
     ('time_itaResult.ita', 'data'),
     ('time_itaResult_mult.ita', 'data')])
-def test_read_ita(file, data_type):
+def test_read_ita(filename, data_type):
     """Tests correct exception raise for example *.ita files."""
-    if (file == 'freq_itaResult.ita' and data_type == 'signal'):
-        file = os.path.join('tests', 'test_io_data', file)
+    filepath = os.path.join('tests', 'test_io_data', filename)
+    if (filename == 'freq_itaResult.ita' and data_type == 'signal'):
         message = "The itaResult object can't contain a signal."
         with pytest.raises(Exception, match=message):
-            read_ita(file)
+            read_ita(filepath)
         pass
-    elif (file == 'freq_itaResult_mult_ww.ita'):
-        file = os.path.join('tests', 'test_io_data', file)
+    elif (filename == 'freq_itaResult_mult_ww.ita'):
         message = "channelCoordinates.weights must have the same size as\
                    channelCoordinates.csize."
         with pytest.raises(Exception, match=message):
-            read_ita(file)
+            read_ita(filepath)
     else:
-        file = os.path.join('tests', 'test_io_data', file)
-        read_ita(file)
+        read_ita(filepath)
