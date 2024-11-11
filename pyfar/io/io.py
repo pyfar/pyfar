@@ -961,94 +961,105 @@ def _read_comsol_get_headerline(filename):
     return header, is_complex, delimiter
 
 
-def read_ita(fname):
-    """Read a *.ita file.
+def read_ita(filename):
+    """Read a *.ita file from the ITA-toolbox.
 
     Parameters
     ----------
-    fname : str
-        The filename.
+    filename : str
+        The filename. The file extension must be *.ita.
 
     Returns
     -------
-    data : pyfar.Signal or pyfar.TimeData, pyfar.FrequencyData
+    data : pyfar.Signal, pyfar.TimeData, pyfar.FrequencyData
         The data contained in the *.ita file.
-    objectCoordinates : pyfar.Coordinates
+    object_coordinates : pyfar.Coordinates
         The object coordinates of the *.ita file.
-    channelCoordinates : pyfar.Coordinates
+    channel_coordinates : pyfar.Coordinates
         The channel coordinates of the *.ita file.
     metadata : dict
         Additional metadata contained in the *.ita file.
     """
     matfile = spio.loadmat(
-        os.path.join(fname),
+        os.path.join(filename),
         struct_as_record=False, squeeze_me=True, appendmat=False)
-    mfiledata = matfile['ITA_TOOLBOX_AUDIO_OBJECT']
+    matlab_data = matfile['ITA_TOOLBOX_AUDIO_OBJECT']
 
-    comment = mfiledata.comment if len(str(mfiledata.comment)) > 0 else None
+    has_comment = isinstance(matlab_data.comment, str)
+    comment = matlab_data.comment if has_comment else ""
 
-    domain = mfiledata.domain
+    domain = matlab_data.domain
 
     # convert coordinates
-    channelCoordinates = _to_coordinates(mfiledata.channelCoordinates)
-    objectCoordinates = _to_coordinates(mfiledata.objectCoordinates)
+    channel_coordinates = _to_coordinates(matlab_data.channelCoordinates)
+    object_coordinates = _to_coordinates(matlab_data.objectCoordinates)
 
-    data_in = np.ascontiguousarray((mfiledata.data.T).astype(float))
+    data_in = np.ascontiguousarray((matlab_data.data.T).astype(float))
 
     # checks if *.ita object is itaAudio or itaResult
-    if (hasattr(mfiledata, 'signalType')):  # itaAudio
-        fft_norm = 'none' if mfiledata.signalType == 'energy' else 'rms'
+    if (hasattr(matlab_data, 'signalType')):  # itaAudio
+        fft_norm = 'none' if matlab_data.signalType == 'energy' else 'rms'
         data = pf.Signal(
-            data_in, mfiledata.samplingRate, domain,
+            data_in, matlab_data.samplingRate, domain,
             fft_norm=fft_norm, comment=comment)
 
     else:  # itaResult
         if domain == 'time':
             data = pf.TimeData(
-                data_in, mfiledata.abscissa,
+                data_in, matlab_data.abscissa,
                 comment=comment)
         elif domain == 'freq':
             data = pf.FrequencyData(
-                data_in, mfiledata.abscissa,
+                data_in, matlab_data.abscissa,
                 comment=comment)
 
-    metadata = _todict(mfiledata)
+    metadata = _matlab_to_dict(matlab_data)
 
-    return data, objectCoordinates, channelCoordinates, metadata
+    return data, object_coordinates, channel_coordinates, metadata
 
 
-def _to_coordinates(coordinates):
-    # import as carteasian coordinates: x, y, z
-    if hasattr(coordinates, 'cart'):
-        if coordinates.cart.shape[-1] != 3:
-            coordinates.cart = coordinates.cart.T
-        coords = pf.Coordinates(
-            coordinates.cart[..., 0],
-            coordinates.cart[..., 1],
-            coordinates.cart[..., 2])
+def _to_coordinates(ita_coordinates):
+    ita_contains_weights = ita_coordinates.weights.size > 0
+    weights = ita_coordinates.weights if ita_contains_weights else None
+
+    # import as cartesian coordinates: x, y, z
+    if hasattr(ita_coordinates, 'cart'):
+        if ita_coordinates.cart.size == 0:
+            return pf.Coordinates()
+        if ita_coordinates.cart.shape[-1] != 3:
+            raise ValueError(
+                "ITA coordinates must have three "
+                "columns at the last dimension.")
+        return pf.Coordinates(
+            ita_coordinates.cart[..., 0],
+            ita_coordinates.cart[..., 1],
+            ita_coordinates.cart[..., 2],
+            weights=weights)
 
     # import as spherical coordinates: r, theta, phi
-    if hasattr(coordinates, 'sph'):
-        if coordinates.sph.shape[-1] != 3:
-            coordinates.sph = coordinates.sph.T
-        coords = pf.Coordinates.from_spherical_colatitude(
-            coordinates.sph[..., 1],
-            coordinates.sph[..., 2],
-            coordinates.sph[..., 0])
+    if hasattr(ita_coordinates, 'sph'):
+        if ita_coordinates.cart.size == 0:
+            return pf.Coordinates()
+        if ita_coordinates.sph.shape[-1] != 3:
+            raise ValueError(
+                "ITA coordinates must have three "
+                "columns at the last dimension.")
+        return pf.Coordinates.from_spherical_colatitude(
+            ita_coordinates.sph[..., 1],
+            ita_coordinates.sph[..., 2],
+            ita_coordinates.sph[..., 0],
+            weights=weights)
     else:
-        coords = pf.Coordinates()
-
-    coords.weights = coordinates.weights if coordinates.weights.size > 0 else None
-    return coords
+        return pf.Coordinates()
 
 
-def _todict(mat_obj):
+def _matlab_to_dict(mat_obj):
     """Recursively transform MATLAB struct objects to nested dictionaries."""
     mat_dict = {}
     for fieldname in mat_obj._fieldnames:
         elem = mat_obj.__dict__[fieldname]
         if isinstance(elem, spio.matlab.mio5_params.mat_struct):
-            mat_dict[fieldname] = _todict(elem)
+            mat_dict[fieldname] = _matlab_to_dict(elem)
         else:
             mat_dict[fieldname] = elem
     return mat_dict
