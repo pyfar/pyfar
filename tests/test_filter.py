@@ -23,10 +23,12 @@ def test_butterworth(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.butterworth(impulse, 2, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.butterworth(None, 2, 1000, 'lowpass')
 
@@ -47,10 +49,12 @@ def test_chebyshev1(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.chebyshev1(impulse, 2, 1, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.chebyshev1(None, 2, 1, 1000, 'lowpass')
 
@@ -71,10 +75,12 @@ def test_chebyshev2(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.chebyshev2(impulse, 2, 40, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.chebyshev2(None, 2, 40, 1000, 'lowpass')
 
@@ -96,10 +102,12 @@ def test_elliptic(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.elliptic(impulse, 2, 1, 40, 1000, 'lowpass', 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.elliptic(None, 2, 1, 40, 1000, 'lowpass')
 
@@ -119,12 +127,78 @@ def test_bessel(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.bessel(impulse, 2, 1000, 'lowpass', 'phase', 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.bessel(None, 2, 1000, 'lowpass', 'phase')
+
+
+@pytest.mark.parametrize('order', [1, 2])
+def test_allpass(impulse, order):
+    # Uses third party code.
+    # We thus only test the functionality not the results
+    fc = 1033
+
+    sig_filt = pfilt.allpass(impulse, fc, order)
+    gd = pf.dsp.group_delay(sig_filt)
+
+    # Group delay at w = 0
+    T_gr_0 = gd[0, 0]
+    # definition of group delay at fc (Tietze et al.)
+    T_fc_desired = T_gr_0 * (1 / np.sqrt(2))
+    # id of frequency bin closest to fc
+    idx = sig_filt.find_nearest_frequency(fc)
+    # group delay below fc and at fc
+    T_below = gd[0, :idx]
+    T_fc = gd[0, idx]
+
+    # tolerance for group delay below fc
+    tol = 1 - (T_fc / T_gr_0)
+
+    # Test if group delay at fc is correct
+    np.testing.assert_allclose(T_fc_desired, T_fc, rtol=0.01)
+    # Test group delay below fc
+    np.testing.assert_allclose(T_below, T_gr_0, rtol=tol)
+
+    f_obj = pfilt.allpass(None, fc, order, sampling_rate=44100)
+    assert isinstance(f_obj, pclass.FilterIIR)
+    assert f_obj.comment == (
+        f"Allpass of order {order} with cutoff frequency "
+        f"{fc} Hz.")
+
+    # Filter
+    x = pfilt.allpass(impulse, fc, order)
+    y = f_obj.process(impulse)
+    assert isinstance(x, Signal)
+    npt.assert_allclose(x.time, y.time)
+
+
+def test_allpass_warnings(impulse, fc=1000):
+    # test ValueError
+    with pytest.raises(ValueError,
+                       match='Either signal or sampling_rate must be none.'):
+        # pass signal and sampling rate
+        pfilt.allpass(impulse, fc, 1, sampling_rate=44100)
+    with pytest.raises(ValueError,
+                       match='Either signal or sampling_rate must be none.'):
+        # pass no signal and no sampling rate
+        pfilt.allpass(None, fc, 1)
+    with pytest.raises(ValueError,
+                       match='Order must be 1 or 2'):
+        # pass wrong order
+        pfilt.allpass(impulse, fc, 3)
+    with pytest.raises(ValueError,
+                       match='Coefficients must match the allpass order'):
+        # pass wrong combination of coefficients and order
+        pfilt.allpass(impulse, fc, 1, [1, 2])
+    with pytest.raises(ValueError,
+                       match='Coefficients must match the allpass order'):
+        # pass wrong combination of coefficients and order
+        pfilt.allpass(impulse, fc, 2, 1)
 
 
 def test_bell(impulse):
@@ -144,51 +218,59 @@ def test_bell(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # test ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.bell(impulse, 1000, 10, 2, sampling_rate=44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.bell(None, 1000, 10, 2)
     # check wrong input arguments
-    with pytest.raises(ValueError):
+    match = "bell_type must be 'I', 'II' or 'III' but is 'nope'.'"
+    with pytest.raises(ValueError, match=match):
         x = pfilt.bell(impulse, 1000, 10, 2, bell_type='nope')
-    with pytest.raises(ValueError):
+    match = "quality_warp must be 'cos', 'sin' or 'tan' but is 'nope'.'"
+    with pytest.raises(ValueError, match=match):
         x = pfilt.bell(impulse, 1000, 10, 2, quality_warp='nope')
 
 
-def test_shelve(impulse):
+def test_shelf(impulse):
     # Uses third party code.
     # We thus only test the functionality not the results
 
-    shelves = [pfilt.low_shelve, pfilt.high_shelve]
+    shelves = [pfilt.low_shelf, pfilt.high_shelf]
     kinds = ['Low', 'High']
 
-    for shelve, kind in zip(shelves, kinds):
+    for shelf, kind in zip(shelves, kinds):
         # Filter object
-        f_obj = shelve(None, 1000, 10, 2, sampling_rate=44100)
+        f_obj = shelf(None, 1000, 10, 2, sampling_rate=44100)
         assert isinstance(f_obj, pclass.FilterIIR)
-        assert f_obj.comment == (f"{kind}-shelve of order 2 and type I with "
+        assert f_obj.comment == (f"{kind}-shelf of order 2 and type I with "
                                  "10 dB gain at 1000 Hz.")
 
         # Filter
-        x = shelve(impulse, 1000, 10, 2)
+        x = shelf(impulse, 1000, 10, 2)
         y = f_obj.process(impulse)
         assert isinstance(x, Signal)
         npt.assert_allclose(x.time, y.time)
 
         # ValueError
-        with pytest.raises(ValueError):
+        match = 'Either signal or sampling_rate must be none.'
+        with pytest.raises(ValueError, match=match):
             # pass signal and sampling rate
-            x = shelve(impulse, 1000, 10, 2, sampling_rate=44100)
-        with pytest.raises(ValueError):
+            x = shelf(impulse, 1000, 10, 2, sampling_rate=44100)
+        match = 'Either signal or sampling_rate must be none.'
+        with pytest.raises(ValueError, match=match):
             # pass no signal and no sampling rate
-            x = shelve(None, 1000, 10, 2)
+            x = shelf(None, 1000, 10, 2)
         # check wrong input arguments
-        with pytest.raises(ValueError):
-            x = shelve(impulse, 1000, 10, 2, shelve_type='nope')
-        with pytest.raises(ValueError):
-            x = shelve(impulse, 1000, 10, 3)
+        match = "shelf_type must be 'I', 'II' or 'III' but is 'nope'.'"
+        with pytest.raises(ValueError, match=match):
+            x = shelf(impulse, 1000, 10, 2, shelf_type='nope')
+        match = 'order must be 1 or 2 but is 3'
+        with pytest.raises(ValueError, match=match):
+            x = shelf(impulse, 1000, 10, 3)
 
 
 def test_crossover(impulse):
@@ -208,13 +290,16 @@ def test_crossover(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # test ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.crossover(impulse, 2, 1000, 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be none.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.crossover(None, 2, 1000)
-    with pytest.raises(ValueError):
+    match = "The order 'N' must be an even number."
+    with pytest.raises(ValueError, match=match):
         # odd filter order
         x = pfilt.crossover(impulse, 3, 1000)
 
@@ -223,7 +308,7 @@ def test_crossover(impulse):
     for order in [2, 4, 6, 8]:
         for frequency in [4000, (1e2, 10e3)]:
             x = pfilt.crossover(impulse, order, frequency)
-            x_sum = np.sum(x.freq, axis=-2).flatten()
+            x_sum = np.sum(x.freq, axis=-3).flatten()
             x_ref = np.ones(x.n_bins)
             npt.assert_allclose(x_ref, np.abs(x_sum), atol=.0005)
 
@@ -254,7 +339,7 @@ def test_reconstructing_fractional_octave_bands():
     x = pf.signals.impulse(2**12)
     y, f = pfilt.reconstructing_fractional_octave_bands(x)
     assert isinstance(y, Signal)
-    assert y.cshape == (9, )
+    assert y.cshape == (9, 1)
     assert y.fft_norm == 'none'
 
     # test reconstruction (sum has a group delay of half the filter length)
@@ -265,7 +350,7 @@ def test_reconstructing_fractional_octave_bands():
 
 
 def test_reconstructing_fractional_octave_bands_filter_slopes():
-    """Test the shape of the filter slopes for different parameters"""
+    """Test the shape of the filter slopes for different parameters."""
     # test different filter slopes against reference
     x = pf.signals.impulse(2**10)
 
@@ -277,9 +362,9 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
         # restricting rtol was not needed locally. It was added for tests to
-        # pass on travis ci
+        # pass on the testing platform
         npt.assert_allclose(
-            y.time, np.atleast_2d(reference), rtol=.01, atol=1e-10)
+            y.time[:, 0, :], np.atleast_2d(reference), rtol=.01, atol=1e-10)
 
 
 def test_reconstructing_fractional_octave_bands_warning():
@@ -290,7 +375,7 @@ def test_reconstructing_fractional_octave_bands_warning():
 
 
 def test_notch(impulse):
-    """Test notch filter behavior"""
+    """Test notch filter behavior."""
     f_obj = pfilt.notch(None, 1e3, 1, 44100)
     assert isinstance(f_obj, pclass.FilterIIR)
     assert f_obj.comment == ("Second order notch filter at "
@@ -303,10 +388,12 @@ def test_notch(impulse):
     npt.assert_allclose(x.time, y.time)
 
     # ValueError
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be None.'
+    with pytest.raises(ValueError, match=match):
         # pass signal and sampling rate
         x = pfilt.notch(impulse, 1e3, 1, 44100)
-    with pytest.raises(ValueError):
+    match = 'Either signal or sampling_rate must be None.'
+    with pytest.raises(ValueError, match=match):
         # pass no signal and no sampling rate
         x = pfilt.notch(None, 1e3, 1)
 
@@ -314,7 +401,7 @@ def test_notch(impulse):
 @pytest.mark.parametrize("f", [1e3, 4e3])
 @pytest.mark.parametrize("Q", [1, 10])
 def test_notch_result(f, Q):
-    """Test the frequency response of the notch filter"""
+    """Test the frequency response of the notch filter."""
     # generate and apply notch filter
     notch = pf.dsp.filter.notch(pf.signals.impulse(44100), f, Q)
 

@@ -20,16 +20,18 @@ def scatter(points, projection='3d', ax=None, set_ax=True, **kwargs):
     projection : '3d', 'ortho'
         Projection to be used for the plot. Only three-dimensional projections
         are supported.
-    ax : matplotlib.axis (optional)
+    ax : matplotlib.axes.Axes (optional)
         If no axis is defined, a new axis in a new figure is created.
     set_ax: boolean
         Set the limits of the axis according to the points in coordinates. The
         default is True.
     **kwargs :
-        Additional key value arguments are passed to matplotlib.pyplot.scatter.
+        Additional key value arguments are passed to
+        :py:func:`matplotlib.pyplot.scatter`.
 
     Returns
-    ax : matplotlib.axes
+    -------
+    ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
         The axis used for the plot.
 
     """
@@ -61,7 +63,7 @@ def quiver(
     projection : '3d', 'ortho'
         Projection to be used for the plot. Only three-dimensional projections
         are supported.
-    ax : matplotlib.axis (optional)
+    ax : matplotlib.axes.Axes, optional
         If no axis is defined, a new axis in a new figure is created.
     set_ax: boolean
         Set the limits of the axis according to the points in coordinates. The
@@ -70,7 +72,8 @@ def quiver(
         Additional key value arguments are passed to matplotlib.pyplot.quiver.
 
     Returns
-    ax : matplotlib.axes
+    -------
+    ax : matplotlib.axes.Axes
         The axis used for the plot.
 
     """
@@ -99,7 +102,7 @@ def _setup_axes(projection=Axes3D.name, ax=None,
     projection : '3d', 'ortho'
         Projection to be used for the plot. Only three-dimensional projections
         are supported.
-    ax : matplotlib.axis (optional)
+    ax : matplotlib.axes.Axes, optional
         If no axis is defined, a new axis in a new figure is created.
     set_ax: boolean
         Set the limits of the axis according to the points in coordinates. The
@@ -111,7 +114,8 @@ def _setup_axes(projection=Axes3D.name, ax=None,
         Additional key value arguments are passed to matplotlib.pyplot.scatter.
 
     Returns
-    ax : matplotlib.axes
+    -------
+    ax : matplotlib.axes.Axes
         The axis used for the plot.
 
     """

@@ -3,7 +3,8 @@ import numpy.testing as npt
 import pytest
 
 from pyfar import Coordinates
-from pyfar.classes.coordinates import sph2cart, cart2sph, cyl2cart
+from pyfar.classes.coordinates import (sph2cart, cart2sph, cyl2cart)
+from pyfar import (deg2rad, rad2deg)
 
 
 def test___eq___copy():
@@ -13,7 +14,7 @@ def test___eq___copy():
 
 
 @pytest.mark.parametrize(
-    'x, y, z, radius, radius_z', [
+    ("x", "y", "z", "radius", "radius_z"), [
         (1, 0, 0, 1, 1),
         (-1, 0, 0, 1, 1),
         (0, 2, 0, 2, 2),
@@ -28,7 +29,7 @@ def test_getter_radii_from_cart(x, y, z, radius, radius_z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, azimuth, elevation', [
+    ("x", "y", "z", "azimuth", "elevation"), [
         (1, 0, 0, 0, 0),
         (-1, 0, 0, np.pi, 0),
         (0, 1, 0, np.pi/2, 0),
@@ -59,7 +60,7 @@ def test_getter_sph_top_from_cart(x, y, z, azimuth, elevation):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, frontal, upper', [
+    ("x", "y", "z", "frontal", "upper"), [
         (0, 1, 0, 0, np.pi/2),
         (0, -1, 0, np.pi, np.pi/2),
         (0, 0, 1, np.pi/2, np.pi/2),
@@ -83,7 +84,7 @@ def test_getter_sph_front_from_cart(x, y, z, frontal, upper):
 
 
 @pytest.mark.parametrize(
-    'x, y, z, lateral, polar', [
+    ("x", "y", "z", "lateral", "polar"), [
         (0, 1, 0, np.pi/2, 0),
         (0, -1, 0, -np.pi/2, 0),
         (0, 0, 1, 0, np.pi/2),
@@ -107,7 +108,7 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
 
 
 @pytest.mark.parametrize(
-    'x, actual', [
+    ("x", "actual"), [
         (0, np.array([0])),
         (np.ones((1,)), np.ones((1,))),
         (np.ones((3,)), np.ones((3,))),
@@ -129,7 +130,7 @@ def test_coordinates_squeeze(x, actual):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (0, 1, 0),
         (0, -1, 0),
         (0., 0, 1),
@@ -153,7 +154,7 @@ def test_cart_setter_same_size(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (np.ones((2, 3, 1)), 10, -1),
         (np.ones((2,)), 2, 1),
     ])
@@ -172,7 +173,7 @@ def test_cart_setter_different_size(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (np.ones((3, 1)), 7, 3),
         (np.ones((1, 2)), 5, 1),
         (np.ones((1, 1)), 5, 1),
@@ -190,7 +191,7 @@ def test_cart_setter_different_size_with_flatten(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (0, 1, 0),
         (0, -1, 0),
         (0., 0, 1),
@@ -212,7 +213,7 @@ def test__array__getter(x, y, z):
 
 
 @pytest.mark.parametrize(
-    'x, y, z', [
+    ("x", "y", "z"), [
         (np.ones((3, 1)), 7, 3),
         (np.ones((1, 2)), 5, 1),
         (np.ones((1, 1)), 5, 1),
@@ -298,7 +299,7 @@ def test_find_slice_cart():
 
 
 @pytest.mark.parametrize(
-    'coordinate, unit, value, tol, des_index, des_mask', [
+    ("coordinate", "unit", "value", "tol", "des_index", "des_mask"), [
         ('azimuth', 'deg', 0, 1, np.array([1, 2, 3]),
             np.array([0, 1, 1, 1, 0])),
         ('azimuth', 'deg', 359, 2, np.array([0, 1, 2, 3]),
@@ -320,9 +321,6 @@ def test_find_slice_sph(coordinate, unit, value, tol, des_index, des_mask):
 def test_find_slice_error():
     d = np.array([358, 359, 0, 1, 2]) * np.pi / 180
     c = Coordinates.from_spherical_elevation(d, 0, 1)
-    # out of range query
-    # with pytest.raises(AssertionError):
-    #     c.find_slice('azimuth', 'deg', -1, 1)
     # non existing coordinate query
     with pytest.raises(ValueError, match="does not exist"):
         c.find_slice('elevation', 'ged', 1, 1)
@@ -331,43 +329,43 @@ def test_find_slice_error():
 
 
 @pytest.mark.parametrize(
-    'coordinate, min, max', [
+    ("coordinate", "minimum", "maximum"), [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
     ])
-def test_angle_limits_cyclic(coordinate, min, max):
+def test_angle_limits_cyclic(coordinate, minimum, maximum):
     """Test different queries for find slice."""
     # spherical grid
     d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
-    desired = (d - min) % (max - min) + min
+    desired = (d - minimum) % (maximum - minimum) + minimum
     np.testing.assert_allclose(attr, desired, atol=2e-14)
 
 
 @pytest.mark.parametrize(
-    'coordinate, min, max', [
+    ("coordinate", "minimum", "maximum"), [
         ('azimuth', 0, 2*np.pi),
         ('polar', -np.pi/2, 3*np.pi/2),
         ('frontal', 0, 2*np.pi),
         ('radius', 0, np.inf),
         ('rho', 0, np.inf),
     ])
-def test_angle_cyclic_limits(coordinate, min, max):
+def test_angle_cyclic_limits(coordinate, minimum, maximum):
     """Test different queries for find slice."""
     # spherical grid
     d = np.arange(-4*np.pi, 4*np.pi, np.pi/4)
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
-    assert all(attr <= max)
-    assert all(attr >= min)
+    assert all(attr <= maximum)
+    assert all(attr >= minimum)
 
 
 @pytest.mark.parametrize(
-    'coordinate, min, max', [
+    ("coordinate", "minimum", "maximum"), [
         ('colatitude', 0, np.pi),
         ('upper', 0, np.pi),
         ('elevation', -np.pi/2, np.pi/2),
@@ -385,20 +383,21 @@ def test_angle_cyclic_limits(coordinate, min, max):
         (0),
         (np.finfo(float).eps),
     ])
-def test_angle_limits_rounded_by_2eps(coordinate, min, max, eps_min, eps_max):
+def test_angle_limits_rounded_by_2eps(
+        coordinate, minimum, maximum, eps_min, eps_max):
     """Test different queries for find slice."""
     # spherical grid
-    if max == np.inf:
-        d = np.arange(min, np.pi/4, 4*np.pi)
+    if maximum == np.inf:
+        d = np.arange(minimum, np.pi/4, 4*np.pi)
     else:
-        d = np.arange(min, np.pi/4, max)
+        d = np.arange(minimum, np.pi/4, maximum)
     d[0] -= eps_min
     d[-1] += eps_max
     c = Coordinates(d, 0, 1)
     c.__setattr__(coordinate, d)
     attr = c.__getattribute__(coordinate)
-    assert all(attr <= max)
-    assert all(attr >= min)
+    assert all(attr <= maximum)
+    assert all(attr >= minimum)
 
 
 def test__repr__dim():
@@ -429,8 +428,8 @@ def test_coordinates_init_from_cartesian_with(x, y, z, weights, comment):
     npt.assert_allclose(coords._x, x)
     npt.assert_allclose(coords._y, y)
     npt.assert_allclose(coords._z, z)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('x', [0, 1, -1.])
@@ -461,8 +460,8 @@ def test_coordinates_init_from_spherical_colatitude_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
@@ -480,8 +479,8 @@ def test_coordinates_init_from_spherical_elevation_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('lateral', [0, np.pi/2, -np.pi/2])
@@ -499,8 +498,8 @@ def test_coordinates_init_from_spherical_side_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('frontal', [0, np.pi, -np.pi, 3*np.pi])
@@ -518,8 +517,8 @@ def test_coordinates_init_from_spherical_front_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
@@ -537,8 +536,8 @@ def test_coordinates_init_from_cylindrical_with(
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
-    coords.comment == comment
-    coords.weights == weights
+    assert coords.comment == comment
+    assert coords.weights == weights
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
@@ -591,3 +590,69 @@ def test_coordinates_init_from_cylindrical(azimuth, z, radius_z):
     npt.assert_allclose(coords._x, x, atol=1e-15)
     npt.assert_allclose(coords._y, y, atol=1e-15)
     npt.assert_allclose(coords._z, z, atol=1e-15)
+
+
+def test_angle_conversion_wrong_input():
+    """Test input checks when converting from deg to rad and vice versa."""
+
+    # test input checks (common functionality, needs to be tested for
+    # only one function)
+    # 1. input data has the wrong shape
+    with pytest.raises(ValueError, match='coordinates must be of shape'):
+        deg2rad(np.ones((2, 4)))
+    # 2. invalid domain
+    with pytest.raises(ValueError, match='domain must be'):
+        deg2rad(np.ones((2, 3)), 'wrong')
+
+
+@pytest.mark.parametrize(("rad", "deg"), [
+        # flat array
+        (np.array([0, np.pi, 1]), np.array([0, 180, 1])),
+        # 2D array
+        (np.array([[0, np.pi, 1], [np.pi, 0, 2]]),
+         np.array([[0, 180, 1], [180, 0, 2]])),
+        # list
+        ([0, np.pi, 1], np.array([0, 180, 1]))])
+def test_angle_conversion_rad2deg_spherical(rad, deg):
+    """Test angle conversion from rad to deg and spherical coordinates."""
+
+    # copy input
+    rad_copy = rad.copy()
+    # convert
+    deg_actual = rad2deg(rad)
+    # check that input did not change
+    npt.assert_equal(rad_copy, rad)
+    # check output values
+    npt.assert_allclose(deg_actual, np.atleast_2d(deg))
+    # check type and shape
+    assert isinstance(deg_actual, np.ndarray)
+    assert deg_actual.ndim >= 2
+    assert deg_actual.shape[-1] == 3
+
+
+def test_angle_conversion_rad2deg_cylindrical():
+    """
+    Test angle conversion from rad to deg and cylindrical coordinates. Only
+    the result is checked. Everything else is tested above.
+    """
+
+    # copy input
+    rad = np.array([np.pi, 1, 2])
+    # convert
+    deg = rad2deg(rad, 'cylindrical')
+    # check output values
+    npt.assert_allclose(deg, np.atleast_2d([180, 1, 2]))
+
+
+def test_angle_conversion_deg2rad():
+    """
+    Test angle conversion from rad to deg. Only spherical coordinates are used
+    and the result is checked. Everything else is tested above.
+    """
+
+    # copy input
+    deg = np.array([180, 360, 1])
+    # convert
+    rad = deg2rad(deg)
+    # check output values
+    npt.assert_allclose(rad, np.atleast_2d([np.pi, 2*np.pi, 1]))

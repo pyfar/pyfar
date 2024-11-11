@@ -1,3 +1,4 @@
+"""Module for creating and applying digital IIR filters."""
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
@@ -7,7 +8,7 @@ def butterworth(signal, N, frequency, btype='lowpass', sampling_rate=None):
     """
     Create and apply a digital Butterworth IIR filter.
 
-    This is a wrapper for ``scipy.signal.butter``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.butter`. Which creates digital
     Butterworth filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -69,7 +70,7 @@ def chebyshev1(signal, N, ripple, frequency, btype='lowpass',
     """
     Create and apply digital Chebyshev Type I IIR filter.
 
-    This is a wrapper for ``scipy.signal.cheby1``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.cheby1`. Which creates digital
     Chebyshev Type I filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -135,7 +136,7 @@ def chebyshev2(signal, N, attenuation, frequency, btype='lowpass',
     """
     Create and apply digital Chebyshev Type II IIR filter.
 
-    This is a wrapper for ``scipy.signal.cheby2``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.cheby2`. Which creates digital
     Chebyshev Type II filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -202,7 +203,7 @@ def elliptic(signal, N, ripple, attenuation, frequency, btype='lowpass',
     """
     Create and apply digital Elliptic (Cauer) IIR filter.
 
-    This is a wrapper for ``scipy.signal.ellip``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.ellip`. Which creates digital
     Elliptic (Cauer) filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -271,7 +272,7 @@ def bessel(signal, N, frequency, btype='lowpass', norm='phase',
     """
     Create and apply digital Bessel/Thomson IIR filter.
 
-    This is a wrapper for ``scipy.signal.bessel``. Which creates digital
+    This is a wrapper for :py:func:`scipy.signal.bessel`. Which creates digital
     Bessel filter coefficients in second-order sections (SOS).
 
     Parameters
@@ -453,14 +454,15 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
 
 def notch(signal, center_frequency, quality, sampling_rate=None):
-    """
+    r"""
     Create and apply or return a second order IIR notch filter.
 
     A notch filter is a band-stop filter with a narrow bandwidth
     (high quality factor). It rejects a narrow frequency band around the
-    center frequency with a gain of 0 (:math:`-\\infty` dB) at the center
+    center frequency with a gain of 0 (:math:`-\infty` dB) at the center
     frequency and leaves the rest of the spectrum little changed
-    with gains close to 1 (0 dB). Wrapper for ``scipy.signal.iirnotch``.
+    with gains close to 1 (0 dB) [#]_. Wrapper for
+    :py:func:`scipy.signal.iirnotch`.
 
     Parameters
     ----------
@@ -469,7 +471,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
         applying it.
     center_frequency : number
         Frequency in Hz at which the magnitude response will be 0
-        (:math:`-\\infty` dB).
+        (:math:`-\infty` dB).
     quality : number
         The quality characterizes notch filter -3 dB bandwidth relative to its
         center frequency (both in Hz), i.e,

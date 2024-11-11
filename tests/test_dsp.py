@@ -37,9 +37,38 @@ def test_phase_deg_unwrap(sine_plus_impulse):
     npt.assert_allclose(phase, truth, rtol=1e-10)
 
 
+def test_phase_rad_complex(sine_plus_impulse_complex):
+    """Test the function returning the phase of a signal in radians."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=False, unwrap=False)
+    truth = np.angle(sine_plus_impulse_complex.freq)
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
+def test_phase_deg_complex(sine_plus_impulse_complex):
+    """Test the function returning the phase of a signal in degrees."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=True, unwrap=False)
+    truth = np.degrees(np.angle(sine_plus_impulse_complex.freq))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
+def test_phase_unwrap_complex(sine_plus_impulse_complex):
+    """Test the function returning the unwrapped phase of a signal."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=False, unwrap=True)
+    truth = np.unwrap(np.angle(sine_plus_impulse_complex.freq))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
+def test_phase_deg_unwrap_complex(sine_plus_impulse_complex):
+    """Test the function returning the unwrapped phase of a signal in deg."""
+    phase = dsp.phase(sine_plus_impulse_complex, deg=True, unwrap=True)
+    truth = np.degrees(np.unwrap(np.angle(sine_plus_impulse_complex.freq)))
+    npt.assert_allclose(phase, truth, rtol=1e-10)
+
+
 def test_group_delay_single_channel(impulse_group_delay):
     """Test the function returning the group delay of a signal,
-    single channel."""
+    single channel.
+    """
     signal = impulse_group_delay[0]
 
     with pytest.raises(ValueError, match="Invalid method"):
@@ -49,25 +78,43 @@ def test_group_delay_single_channel(impulse_group_delay):
         dsp.group_delay(signal, method='fft', frequencies=[1, 2, 3])
 
     grp = dsp.group_delay(signal, method='scipy')
-    assert grp.shape == (signal.n_bins, )
+    assert grp.shape == (1, signal.n_bins)
     npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+        grp[0, :], impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(signal, method='fft')
-    assert grp.shape == (signal.n_bins, )
+    assert grp.shape == (1, signal.n_bins)
     npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+        grp[0, :], impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
 
     grp = dsp.group_delay(
         signal, method='fft')
-    assert grp.shape == (signal.n_bins, )
+    assert grp.shape == (1, signal.n_bins)
     npt.assert_allclose(
-        grp, impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+        grp[0, :], impulse_group_delay[1].flatten(), rtol=1e-10, atol=1e-10)
+
+
+def test_complex_group_delay_single_channel(impulse_complex_group_delay):
+    """Test the function returning the group delay of a signal,
+    single channel.
+    """
+    signal = impulse_complex_group_delay[0]
+
+    grp = dsp.group_delay(signal, method='scipy')
+    assert grp.shape == (1, signal.n_bins)
+    npt.assert_allclose(grp[0], impulse_complex_group_delay[1].flatten(),
+                        rtol=1e-10, atol=1e-10)
+
+    grp = dsp.group_delay(signal, method='fft')
+    assert grp.shape == (1, signal.n_bins)
+    npt.assert_allclose(grp[0], impulse_complex_group_delay[1].flatten(),
+                        rtol=1e-10, atol=1e-10)
 
 
 def test_group_delay_two_channel(impulse_group_delay_two_channel):
     """Test the function returning the group delay of a signal,
-    two channels."""
+    two channels.
+    """
     signal = impulse_group_delay_two_channel[0]
     grp = dsp.group_delay(signal, method='scipy')
     assert grp.shape == (signal.cshape + (signal.n_bins,))
@@ -81,7 +128,8 @@ def test_group_delay_two_channel(impulse_group_delay_two_channel):
 def test_group_delay_two_by_two_channel(
         impulse_group_delay_two_by_two_channel):
     """Test the function returning the group delay of a signal,
-    2-by-2 channels."""
+    2-by-2 channels.
+    """
     signal = impulse_group_delay_two_by_two_channel[0]
     grp = dsp.group_delay(signal)
     assert grp.shape == (signal.cshape + (signal.n_bins,))
@@ -91,13 +139,14 @@ def test_group_delay_two_by_two_channel(
 
 def test_group_delay_custom_frequencies(impulse_group_delay):
     """Test the function returning the group delay of a signal,
-    called for specific frequencies."""
+    called for specific frequencies.
+    """
     signal = impulse_group_delay[0]
     # Single frequency, of type int
     frequency = 1000
     frequency_idx = np.abs(signal.frequencies-frequency).argmin()
     grp = dsp.group_delay(signal, frequency, method='scipy')
-    assert grp.shape == ()
+    assert grp.shape == (1, 1)
     npt.assert_allclose(
         grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
 
@@ -106,9 +155,22 @@ def test_group_delay_custom_frequencies(impulse_group_delay):
     frequency_idx = np.abs(
         signal.frequencies-frequency[..., np.newaxis]).argmin(axis=-1)
     grp = dsp.group_delay(signal, frequency, method='scipy')
-    assert grp.shape == (2,)
+    assert grp.shape == (1, 2)
     npt.assert_allclose(
-        grp, impulse_group_delay[1][0, frequency_idx], atol=1e-10)
+        grp[0, :], impulse_group_delay[1][0, frequency_idx], atol=1e-10)
+
+
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
+def test_group_delay_cshape(shape):
+    """
+    Test if group delay function keeps cshape of signals of shape `m x n`
+    with `m = 1` or `n = 1`.
+    """
+    impulse = pf.signals.impulse(256, 0, np.ones(shape))
+
+    grp = dsp.group_delay(impulse)
+
+    assert grp.shape == (*impulse.cshape, impulse.n_bins)
 
 
 def test_linear_phase():
@@ -121,13 +183,13 @@ def test_linear_phase():
     y = dsp.linear_phase(x, N/2)
     # test output
     assert isinstance(y, pf.Signal)
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y)[0, :], N / 2 * np.ones(y.n_bins))
     # test if input did not change
     npt.assert_allclose(x.time, pf.signals.impulse(N).time)
 
     # test group delay in seconds
     y = dsp.linear_phase(x, N / 2 / fs, unit="s")
-    npt.assert_allclose(dsp.group_delay(y), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y)[0, :], N / 2 * np.ones(y.n_bins))
 
     # test assertion
     with pytest.raises(TypeError, match="signal must be a pyfar Signal"):
@@ -144,13 +206,13 @@ def test_linear_phase_multichannel():
 
     # test with scalar group delay
     y = dsp.linear_phase(x, N/2)
-    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
-    npt.assert_allclose(dsp.group_delay(y[1]), N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[0])[0, :], N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1])[0, :], N / 2 * np.ones(y.n_bins))
 
     # test with array like group delay
     y = dsp.linear_phase(x, [N/2, N/4])
-    npt.assert_allclose(dsp.group_delay(y[0]), N / 2 * np.ones(y.n_bins))
-    npt.assert_allclose(dsp.group_delay(y[1]), N / 4 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[0])[0, :], N / 2 * np.ones(y.n_bins))
+    npt.assert_allclose(dsp.group_delay(y[1])[0, :], N / 4 * np.ones(y.n_bins))
 
 
 def test_zero_phase():
@@ -174,7 +236,7 @@ def test_zero_phase_assertion():
         dsp.zero_phase(pf.TimeData([1, 0, 0], [0, 1, 3]))
 
 
-def test_xfade(impulse):
+def test_xfade():
     first = np.ones(5001)
     idx_1 = 500
     second = np.ones(5001)*2
@@ -192,7 +254,7 @@ def test_xfade(impulse):
 
 
 def test_regularized_spectrum_inversion(impulse):
-    """Test regularized_spectrum_inversion"""
+    """Test regularized_spectrum_inversion."""
     res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -204,8 +266,21 @@ def test_regularized_spectrum_inversion(impulse):
     npt.assert_allclose(res.freq[:, -1], [0.25])
 
 
+def test_regularized_spectrum_inversion_complex(impulse_complex):
+    """Test regularized_spectrum_inversion for complex input signals."""
+    res = dsp.regularized_spectrum_inversion(impulse_complex * 2, [200, 10e3])
+
+    ind = impulse_complex.find_nearest_frequency([200, 10e3])
+    npt.assert_allclose(
+        res.freq[:, ind[0]:ind[1]],
+        np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5)
+
+    npt.assert_allclose(res.freq[:, 0], [0.25])
+    npt.assert_allclose(res.freq[:, -1], [0.25])
+
+
 def test_regularized_spectrum_inversion_assertions(impulse):
-    """Test regularized_spectrum_inversion errors"""
+    """Test regularized_spectrum_inversion errors."""
     with pytest.raises(
             ValueError, match='needs to be of type pyfar.Signal'):
         dsp.regularized_spectrum_inversion('error', (1, 2))
@@ -220,17 +295,17 @@ def test_regularized_spectrum_inversion_assertions(impulse):
 
 
 def test_regularized_spectrum_inversion_normalized(impulse):
-    """Test normalized parameter of regularized_spectrum_inversion"""
+    """Test normalized parameter of regularized_spectrum_inversion."""
     impulse.fft_norm = 'amplitude'
 
-    # normalized = True
+    # normalized -> True
     res = dsp.regularized_spectrum_inversion(
         impulse * 2, [200, 10e3], normalized=True)
     ind = impulse.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(
         res.freq[:, ind[0]:ind[1]],
         np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5*0.5*impulse.n_samples)
-    # normalized = False
+    # normalized -> False
     res = dsp.regularized_spectrum_inversion(
         impulse * 2, [200, 10e3], normalized=False)
     ind = impulse.find_nearest_frequency([200, 10e3])
@@ -242,7 +317,7 @@ def test_regularized_spectrum_inversion_normalized(impulse):
 @pytest.mark.parametrize("shift_samples", [2, -2, 0])
 @pytest.mark.parametrize("unit", ["samples", "s"])
 def test_time_shift_cyclic(shift_samples, unit):
-    """Test cyclic time shift using samples and seconds"""
+    """Test cyclic time shift using samples and seconds."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -260,10 +335,33 @@ def test_time_shift_cyclic(shift_samples, unit):
     npt.assert_allclose(shifted.time, ref.time)
 
 
+@pytest.mark.parametrize("shift_samples", [2, -2, 0])
+@pytest.mark.parametrize("unit", ["samples", "s"])
+def test_time_shift_cyclic_complex(shift_samples, unit):
+    """Test cyclic time shift using samples and seconds."""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+    test_signal.complex = True
+
+    # apply shift
+    shift = shift_samples if unit == "samples" else shift_samples/sampling_rate
+    shifted = dsp.time_shift(test_signal, shift, unit=unit)
+
+    # compare to reference
+    ref = impulse(
+        n_samples, delay=delay+shift_samples, sampling_rate=sampling_rate)
+    ref.complex = True
+
+    npt.assert_allclose(shifted.time, ref.time)
+
+
 @pytest.mark.parametrize("shift", [2, -2, 0])
 @pytest.mark.parametrize("pad_value", [0, np.nan])
 def test_time_shift_linear(shift, pad_value):
-    """Test linear time shift with different pad values"""
+    """Test linear time shift with different pad values."""
     # generate test signal
     sampling_rate = 100
     delay = 2
@@ -289,10 +387,41 @@ def test_time_shift_linear(shift, pad_value):
     assert type(shifted) is type(ref)
 
 
+@pytest.mark.parametrize("shift", [2, -2, 0])
+@pytest.mark.parametrize("pad_value", [0, np.nan])
+def test_time_shift_linear_complex(shift, pad_value):
+    """Test linear time shift with different pad values."""
+    # generate test signal
+    sampling_rate = 100
+    delay = 2
+    n_samples = 10
+    test_signal = impulse(n_samples, delay=delay, sampling_rate=sampling_rate)
+    test_signal.complex = True
+
+    # apply shift
+    shifted = dsp.time_shift(
+        test_signal, shift, "linear", "samples", pad_value)
+
+    # compare to reference
+    ref = impulse(
+        n_samples, delay=delay+shift, sampling_rate=sampling_rate)
+    ref.complex = True
+
+    if pad_value != 0 and shift != 0:
+        ref = pf.TimeData(ref.time, ref.times, is_complex=True)
+    if shift == 2:
+        ref.time[0, :2] = pad_value
+    elif shift == -2:
+        ref.time[0, -2:] = pad_value
+
+    npt.assert_allclose(shifted.time, ref.time)
+    assert type(shifted) is type(ref)
+
+
 @pytest.mark.parametrize("shift_samples", [(
     [1, 2, 3]), (np.array([1, 2, 3]))])
 def test_time_shift_multi_dim(shift_samples):
-    """Test with multi-channel signal and shift values as list and np.array"""
+    """Test with multi-channel signal and shift values as list and np.array."""
     delay = 2
     n_samples = 10
 
@@ -307,7 +436,7 @@ def test_time_shift_multi_dim(shift_samples):
 
 
 def test_time_shift_assertions():
-    """Test assertions for shift_time"""
+    """Test assertions for shift_time."""
 
     # wrong mode
     with pytest.raises(ValueError, match="mode is 'cut'"):
@@ -325,10 +454,19 @@ def test_time_shift_assertions():
 
 
 def test_time_window_default():
-    """ Test time_window function with default values."""
+    """Test time_window function with default values."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
     time_win = np.atleast_2d(sgn.windows.hann(10, sym=True))
+    npt.assert_allclose(sig_win.time, time_win)
+
+
+def test_time_window_complex():
+    """Test time_window function with default values."""
+    sig = pyfar.Signal(np.ones(10), 2, is_complex=True)
+    sig_win = dsp.time_window(sig, interval=(0, sig.n_samples-1))
+    time_win = np.atleast_2d(sgn.windows.hann(10, sym=True)).astype(complex)
+    assert sig_win.complex is True
     npt.assert_allclose(sig_win.time, time_win)
 
 
@@ -349,7 +487,8 @@ def test_time_window_input():
         dsp.time_window(sig, interval=[1, 2, 3])
     with pytest.raises(ValueError, match='longer'):
         dsp.time_window(sig, interval=[1, 11])
-    with pytest.raises(ValueError):
+    m = "invalid literal for int"
+    with pytest.raises(ValueError, match=m):
         dsp.time_window(sig, interval=['a', 'b'])
 
 
@@ -362,7 +501,7 @@ def test_time_window_interval_types():
 
 
 def test_time_window_interval_order_error():
-    """ Test errors for incorrect order of values in interval."""
+    """Test errors for incorrect order of values in interval."""
     sig = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='ascending'):
         dsp.time_window(sig, interval=[2, 1])
@@ -371,7 +510,7 @@ def test_time_window_interval_order_error():
 
 
 def test_time_window_interval_unit_error():
-    """ Test errors for incorrect boundaries in combinations with unit."""
+    """Test errors for incorrect boundaries in combinations with unit."""
     sig = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='than signal'):
         dsp.time_window(sig, interval=[0, 11], unit='samples')
@@ -380,14 +519,14 @@ def test_time_window_interval_unit_error():
 
 
 def test_time_window_crop_none():
-    """ Test crop option 'none'."""
+    """Test crop option 'none'."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(sig, interval=[1, 3], crop='none')
     assert sig_win.n_samples == 10
 
 
 def test_time_window_crop_interval():
-    """ Test truncation of windowed signal to interval."""
+    """Test truncation of windowed signal to interval."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='symmetric', unit='samples',
@@ -406,7 +545,7 @@ def test_time_window_crop_interval():
 
 
 def test_time_window_crop_end():
-    """ Test crop option 'end'."""
+    """Test crop option 'end'."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 3], shape='symmetric', unit='samples',
@@ -425,7 +564,7 @@ def test_time_window_crop_end():
 
 
 def test_time_window_symmetric():
-    """ Test window option symmetric."""
+    """Test window option symmetric."""
     sig = pyfar.Signal(np.ones(10), 2)
     sig_win = dsp.time_window(
         sig, interval=[1, 5], window='hann', shape='symmetric',
@@ -435,7 +574,7 @@ def test_time_window_symmetric():
 
 
 def test_time_window_symmetric_zero():
-    """ Test window option symmetric_zero."""
+    """Test window option symmetric_zero."""
     sig = pyfar.Signal(np.ones(12), 2)
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 4], shape='symmetric_zero')
@@ -444,7 +583,7 @@ def test_time_window_symmetric_zero():
 
 
 def test_time_window_left():
-    """ Test window options left."""
+    """Test window options left."""
     sig = pyfar.Signal(np.ones(7), 1)
     # Odd number of samples, crop='none'
     sig_win = dsp.time_window(
@@ -456,12 +595,12 @@ def test_time_window_left():
         sig, window='triang', interval=[2, 5], shape='left', crop='none')
     time_win = np.array([[0, 0, 1/6, 3/6, 5/6, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='end'
+    # crop -> 'end'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='left', crop='end')
     time_win = np.array([[0, 0, 1/6, 3/6, 5/6, 1, 1]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='window'
+    # crop -> 'window'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='left', crop='window')
     time_win = np.array([[1/6, 3/6, 5/6, 1, 1]])
@@ -469,7 +608,7 @@ def test_time_window_left():
 
 
 def test_time_window_right():
-    """ Test window options right."""
+    """Test window options right."""
     sig = pyfar.Signal(np.ones(7), 1)
     # Odd number of samples, crop='none'
     sig_win = dsp.time_window(
@@ -481,12 +620,12 @@ def test_time_window_right():
         sig, window='triang', interval=[2, 5], shape='right', crop='none')
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6, 0]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='end'
+    # crop -> 'end'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='right', crop='end')
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6]])
     npt.assert_allclose(sig_win.time, time_win)
-    # crop='window'
+    # crop -> 'window'
     sig_win = dsp.time_window(
         sig, window='triang', interval=[2, 5], shape='right', crop='window')
     time_win = np.array([[1, 1, 1, 5/6, 3/6, 1/6]])
@@ -494,7 +633,7 @@ def test_time_window_right():
 
 
 def test_time_window_interval_four_values():
-    """ Test time_window with four values given in interval."""
+    """Test time_window with four values given in interval."""
     sig = pyfar.Signal(np.ones(9), 1)
     sig_win = dsp.time_window(
         sig, window='triang', interval=[1, 3, 6, 7], crop='none')
@@ -508,7 +647,7 @@ def test_time_window_interval_four_values():
 
 
 def test_time_window_multichannel():
-    """ Test time_window of multichannel signal."""
+    """Test time_window of multichannel signal."""
     time = np.array(
         [[[1, 1, 1, 1], [2, 2, 2, 2]], [[3, 3, 3, 3], [4, 4, 4, 4]]])
     sig = pyfar.Signal(time, 1)
@@ -522,28 +661,30 @@ def test_time_window_multichannel():
 
 @pytest.mark.parametrize("crop", ['none', 'window', 'end'])
 def test_time_window_return_window(crop):
-    """ Test return window parameter."""
+    """Test return window parameter."""
     sig = pyfar.Signal(np.ones(10), 44100)
     sig_win, win = dsp.time_window(
         sig, interval=(4, 8), crop=crop, return_window=True)
     assert isinstance(win, pyfar.Signal)
     assert sig_win.sampling_rate == win.sampling_rate
     npt.assert_allclose(sig_win.time, win.time)
-    desired_comment = (
-        f"Time window with parameters interval=(4, 8),"
-        f"window='hann', shape='symmetric', unit='samples', crop='{crop}'")
-    assert win.comment == desired_comment
+    assert 'interval=(4, 8)' in win.comment
+    assert "window='hann'," in win.comment
+    assert "shape='symmetric'," in win.comment
+    assert "unit='samples'," in win.comment
+    assert f"crop='{crop}'" in win.comment
+    assert 'Time window with parameters' in win.comment
 
 
 def test_time_window_return_window_error():
-    """ Test return window with non bool parameter."""
+    """Test return window with non bool parameter."""
     sig = pyfar.Signal(np.ones(10), 44100)
     with pytest.raises(TypeError, match="boolean"):
         dsp.time_window(sig, interval=(4, 8), return_window='a')
 
 
 def test_kaiser_window_beta():
-    """ Test function call."""
+    """Test function call."""
     A = 51
     beta = dsp.kaiser_window_beta(A)
     beta_true = 0.1102*(A-8.7)
@@ -562,10 +703,10 @@ def test_minimum_phase_against_reference():
     # tests are separated since their reliability depends on the type of
     # filters. The homomorphic method works best for filters with odd numbers
     # of taps. Hilbert_2 approximates the ideal minimum phase
-    input = [0, 0, 0, 0, 1, 0, 0, 0, 0]
+    input_data = [0, 0, 0, 0, 1, 0, 0, 0, 0]
     output = [1, 0, 0, 0, 0]
     min_phase = pyfar.dsp.minimum_phase(
-        pyfar.Signal(input, 44100))
+        pyfar.Signal(input_data, 44100))
 
     npt.assert_allclose(
         min_phase.time.flatten(), np.array(output, dtype=float),
@@ -595,23 +736,25 @@ def test_minimum_phase_multidim():
     imp_minphase = pyfar.dsp.minimum_phase(
         imp_linphase, truncate=False)
 
-    # assert imp_minphase.n_samples == imp_linphase.n_samples
-    # assert imp_minphase.cshape == imp_linphase.cshape
-
     imp_zerophase = pyfar.signals.impulse(
         n_samples+1, amplitude=np.ones((2, 3)))
 
     npt.assert_allclose(imp_minphase.time, imp_zerophase.time, atol=1e-10)
 
 
-def test_impulse_response_delay():
-    """Test delay of an ideal impulse"""
+@pytest.mark.parametrize("is_complex", [False, True])
+def test_impulse_response_delay(is_complex):
+    """Test delay of an ideal impulse."""
     n_samples = 2**10
     snr = 60
     start_sample = np.array([24])
 
     ir = pf.signals.impulse(n_samples, delay=start_sample)
     noise = pf.signals.noise(n_samples, rms=10**(-snr/20), seed=1)
+    if is_complex:
+        ir.fft_norm = 'none'
+        noise.fft_norm = 'none'
+        ir.complex = is_complex
 
     start_sample_est = dsp.find_impulse_response_delay(ir)
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-6)
@@ -622,7 +765,7 @@ def test_impulse_response_delay():
 
 
 def test_impulse_response_delay_sinc():
-    """Test delay of a band-limited sinc function shifted by 1/2 samples"""
+    """Test delay of a band-limited sinc function shifted by 1/2 samples."""
     sr = 44100
     n_samples = 128
     samples = np.arange(n_samples)
@@ -637,7 +780,7 @@ def test_impulse_response_delay_sinc():
 
 
 def test_impulse_response_delay_multidim():
-    """Ideal multi-dimensional Signal of ideal impulses"""
+    """Ideal multi-dimensional Signal of ideal impulses."""
     n_samples = 2**10
     snr = 60
 
@@ -650,6 +793,18 @@ def test_impulse_response_delay_multidim():
     start_sample_est = dsp.find_impulse_response_delay(ir_awgn)
 
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
+
+
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
+def test_impulse_response_delay_cshape(shape):
+    """
+    Test if find_impulse_response_delay function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`.
+    """
+    ir = pf.signals.impulse(256, 24, np.ones(shape))
+    start_sample = dsp.find_impulse_response_delay(ir)
+
+    assert start_sample.shape == ir.cshape
 
 
 def test_impulse_response_start_insufficient_snr():
@@ -669,7 +824,9 @@ def test_impulse_response_start():
     ir = np.zeros(n_samples)
     snr = 60
 
-    noise = pf.Signal(np.random.randn(n_samples) * 10**(-snr/20), 44100)
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((n_samples))
+    noise = pf.Signal(rand * 10**(-snr/20), 44100)
 
     start_sample = 24
     ir[start_sample] = 1
@@ -722,8 +879,10 @@ def test_impulse_response_start_multidim():
 
     snr = 60
 
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((n_channels, n_samples))
     noise = pf.Signal(
-        np.random.randn(n_channels, n_samples) * 10**(-snr/20), 44100)
+        rand * 10**(-snr/20), 44100)
 
     start_sample = [24, 5, 43]
     ir[[0, 1, 2], start_sample] = 1
@@ -736,8 +895,11 @@ def test_impulse_response_start_multidim():
     npt.assert_allclose(start_sample_est, np.array(start_sample) - 1)
 
     ir = np.zeros((2, n_channels, n_samples))
+
+    rng = np.random.default_rng()
+    rand = rng.standard_normal((2, n_channels, n_samples))
     noise = pf.Signal(
-        np.random.randn(2, n_channels, n_samples) * 10**(-snr/20), 44100)
+        rand * 10**(-snr/20), 44100)
 
     start_sample_1 = [24, 5, 43]
     ir[0, [0, 1, 2], start_sample_1] = 1
@@ -754,12 +916,86 @@ def test_impulse_response_start_multidim():
     npt.assert_allclose(start_sample_est, start_samples - 1)
 
 
+@pytest.mark.parametrize("shape", [(4, 1), (1, 4), (1, ), (1, 1)])
+def test_impulse_response_start_cshape(shape):
+    """
+    Test if find_impulse_response_start function keeps cshape of signals of
+    shape `m x n` with `m = 1` or `n = 1`.
+    """
+    ir = pf.signals.impulse(256, 24, np.ones(shape))
+    start_sample = dsp.find_impulse_response_start(ir)
+
+    assert start_sample.shape == ir.cshape
+
+
+def test_impulse_response_start_multidim_complex():
+    n_samples = 2**10
+    n_channels = 3
+    ir = np.zeros((n_channels, n_samples), dtype=complex)
+
+    snr = 60
+    rng = np.random.default_rng()
+    noise = pf.Signal(
+        rng.standard_normal((n_channels, n_samples)) * 10**(-snr/20), 44100)
+
+    start_sample_real = [24, 5, 43]
+    ir[[0, 1, 2], start_sample_real] = 1
+
+    start_sample_imag = [14, 3, 20]
+    ir[[0, 1, 2], start_sample_imag] = 1j
+
+    ir = pf.Signal(ir, 44100, is_complex=True)
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est[0, :],
+                        np.array(start_sample_real) - 1)
+    npt.assert_allclose(start_sample_est[1, :],
+                        np.array(start_sample_imag) - 1)
+
+    ir = np.zeros((2, n_channels, n_samples), dtype=complex)
+    rng = np.random.default_rng()
+    noise = pf.Signal(
+        rng.standard_normal((n_channels, n_samples)) * 10**(-snr/20), 44100)
+
+    start_sample_real_1 = [24, 5, 43]
+    start_sample_imag_1 = [14, 3, 20]
+    ir[0, [0, 1, 2], start_sample_real_1] = 1
+    ir[0, [0, 1, 2], start_sample_imag_1] = 1j
+    start_sample_real_2 = [14, 12, 16]
+    start_sample_imag_2 = [35, 7, 3]
+    ir[1, [0, 1, 2], start_sample_real_2] = 1
+    ir[1, [0, 1, 2], start_sample_imag_2] = 1j
+
+    ir = pf.Signal(ir, 44100, is_complex=True)
+
+    start_samples_real = np.vstack((start_sample_real_1, start_sample_real_2))
+    start_samples_imag = np.vstack((start_sample_imag_1, start_sample_imag_2))
+
+    ir_awgn = ir + noise
+    start_sample_est = dsp.find_impulse_response_start(ir_awgn)
+
+    npt.assert_allclose(start_sample_est[0, :, :], start_samples_real - 1)
+    npt.assert_allclose(start_sample_est[1, :, :], start_samples_imag - 1)
+
+
 def test_convolve_default():
     x = pf.Signal([1, 0.5, 0.25, 0], 44100)
     y = pf.Signal([1, -1, 0], 44100)
 
     res = dsp.convolve(x, y)
     desired = np.array([[1, -0.5, -0.25, -0.25, 0, 0]])
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+def test_convolve_complex():
+    """Test dsp.convolve with complex signals with default parameters."""
+    x = pf.Signal([1, 0.5, 0.25, 0], 44100, is_complex=True)
+    y = pf.Signal([1, -1, 0], 44100, is_complex=True)
+
+    res = dsp.convolve(x, y)
+    desired = np.array([[1, -0.5, -0.25, -0.25, 0, 0]], dtype='complex')
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
 
@@ -780,7 +1016,7 @@ def test_convolve_fft_norm_error():
 
 
 @pytest.mark.parametrize("method", ['overlap_add', 'fft'])
-@pytest.mark.parametrize("mode, desired", [
+@pytest.mark.parametrize(("mode", "desired"), [
     ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]])),
     ('cut', np.array([[1, -0.5, 0.1, -0.35]])),
     ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]]))])
@@ -791,9 +1027,35 @@ def test_convolve_mode_and_method(method, mode, desired):
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
 
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize(("mode", "desired"), [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
+def test_convolve_mode_and_method_complex(method, mode, desired):
+    """Test convolve with complex signals with various methods and modes."""
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=True)
+    y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize(("mode", "desired"), [
+    ('full', np.array([[1, -0.5, 0.1, -0.35, -0.05, 0.01]], dtype='complex')),
+    ('cut', np.array([[1, -0.5, 0.1, -0.35]], dtype='complex')),
+    ('cyclic', np.array([[0.95, -0.49, 0.1, -0.35]], dtype='complex'))])
+def test_convolve_mode_and_method_real_complex(method, mode, desired):
+    """Test convolve with complex signals with various methods and modes."""
+    x = pf.Signal([1, 0.5, 0.5, 0.1], 44100, is_complex=False)
+    y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
+    res = dsp.convolve(x, y, mode=mode, method=method)
+    np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
 def test_convolve_mismatching_cdims():
     """
-    Test if convolve works with broadcastable signals with different cdims
+    Test if convolve works with broadcastable signals with different cdims.
     """
     # generate and convolve signals
     signal_a = pf.signals.impulse(1, amplitude=np.atleast_2d([1, 2]))

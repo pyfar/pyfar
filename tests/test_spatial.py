@@ -81,7 +81,8 @@ def test_weights_from_voronoi():
 
 
 def test_voronoi_error_not_enough_points():
-    points = np.random.randn(3, 3)
+    rng = np.random.default_rng()
+    points = rng.standard_normal((3, 3))
     points = points/np.linalg.norm(points, axis=0)
     s = Coordinates(points[0], points[1], points[2])
     with pytest.raises(ValueError, match='points needs to be at least 4'):

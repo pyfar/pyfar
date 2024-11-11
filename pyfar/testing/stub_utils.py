@@ -14,7 +14,7 @@ from pyfar import Signal, TimeData, FrequencyData
 from pyfar.io import _codec
 
 
-def signal_stub(time, freq, sampling_rate, fft_norm):
+def signal_stub(time, freq, sampling_rate, fft_norm, is_complex=False):
     """Function to generate stub of pyfar Signal class based on MagicMock.
     The properties of the signal are set without any further check.
 
@@ -28,6 +28,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         Sampling rate
     fft_norm : 'unitary', 'amplitude', 'rms', 'power', 'psd'
         See documentation of pyfar.fft.normalization.
+    is_complex : bool
+        Specifies if the underlying time domain data are complex
+        real-valued.
 
     Returns
     -------
@@ -38,9 +41,9 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(signal.time[slice])
-        freq = np.atleast_2d(signal.freq[slice])
+    def getitem(slice_idx):
+        time = np.atleast_2d(signal.time[slice_idx])
+        freq = np.atleast_2d(signal.freq[slice_idx])
         item = signal_stub(
             time,
             freq,
@@ -55,17 +58,19 @@ def signal_stub(time, freq, sampling_rate, fft_norm):
         return samples
 
     def find_nearest_frequency(freqs):
-        bin = np.zeros(len(freqs), dtype=int)
+        bins = np.zeros(len(freqs), dtype=int)
         for idx, freq in enumerate(freqs):
-            bin[idx] = np.argmin(np.abs(signal.frequencies-freq))
-        return bin
+            bins[idx] = np.argmin(np.abs(signal.frequencies-freq))
+        return bins
 
     signal = mock.MagicMock(
-        spec_set=Signal(time, sampling_rate, domain='time'))
+        spec_set=Signal(time, sampling_rate, domain='time',
+                        is_complex=is_complex))
     signal.time = np.atleast_2d(time)
     signal.freq = np.atleast_2d(freq)
     signal.sampling_rate = sampling_rate
     signal.fft_norm = fft_norm
+    signal._complex = is_complex
     signal.n_samples = signal.time.shape[-1]
     signal.n_bins = signal.freq.shape[-1]
     signal.cshape = signal.time.shape[:-1]
@@ -100,8 +105,8 @@ def time_data_stub(time, times):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        time = np.atleast_2d(time_data.time[slice])
+    def getitem(slice_idx):
+        time = np.atleast_2d(time_data.time[slice_idx])
         item = time_data_stub(time, time_data.times)
         return item
 
@@ -110,6 +115,7 @@ def time_data_stub(time, times):
     time_data.time = np.atleast_2d(time)
     time_data.times = np.atleast_1d(times)
     time_data.domain = 'time'
+    time_data._complex = False
     time_data.n_samples = time_data.time.shape[-1]
     time_data.cshape = time_data.time.shape[:-1]
     time_data.__getitem__.side_effect = getitem
@@ -138,8 +144,8 @@ def frequency_data_stub(freq, frequencies):
     # Use MagicMock and side_effect to mock __getitem__
     # See "Mocking a dictionary with MagicMock",
     # https://het.as.utexas.edu/HET/Software/mock/examples.html
-    def getitem(slice):
-        freq = np.atleast_2d(frequency_data.freq[slice])
+    def getitem(slice_idx):
+        freq = np.atleast_2d(frequency_data.freq[slice_idx])
         item = frequency_data_stub(freq, frequency_data.frequencies)
         return item
 
@@ -156,7 +162,7 @@ def frequency_data_stub(freq, frequencies):
 
 
 def impulse_func(delay, n_samples, fft_norm, cshape):
-    """ Generate time and frequency data of delta impulse.
+    """Generate time and frequency data of delta impulse.
 
     Parameters
     ----------
@@ -182,7 +188,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
     if np.shape(delay) != cshape:
         raise ValueError("Shape of delay needs to equal cshape.")
     if delay.max() >= n_samples:
-        raise ValueError("Delay is larger than number of samples,"
+        raise ValueError("Delay is larger than number of samples, "
                          f"which is {n_samples}")
 
     # Time vector
@@ -200,7 +206,7 @@ def impulse_func(delay, n_samples, fft_norm, cshape):
 
 
 def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
-    """ Generate time and frequency data of sine signal.
+    """Generate time and frequency data of sine signal.
     The frequency is adjusted resulting in a fully periodic signal in the
     given time interval.
 
@@ -254,7 +260,7 @@ def sine_func(frequency, sampling_rate, n_samples, fft_norm, cshape):
 
 
 def noise_func(sigma, n_samples, cshape):
-    """ Generate time and frequency data of zero-mean, gaussian white noise,
+    """Generate time and frequency data of zero-mean, gaussian white noise,
     RMS FFT normalization.
 
     Parameters
@@ -274,9 +280,9 @@ def noise_func(sigma, n_samples, cshape):
         Spectrum
 
     """
-    np.random.seed(1000)
     # Time vector
-    time = np.random.normal(0, sigma, (cshape + (n_samples,)))
+    rng = np.random.default_rng(1000)
+    time = sigma * rng.standard_normal((cshape + (n_samples,)))
     freq = np.fft.rfft(time)
     norm = 1 / n_samples / np.sqrt(2) * 2
     freq *= norm
@@ -326,6 +332,7 @@ def _normalization(freq, n_samples, fft_norm):
 
 
 def any_ndarray():
+    """Return an arbitrary ndarray for testing purposes."""
     return np.arange(0, 24).reshape((2, 3, 4))
 
 
@@ -344,19 +351,22 @@ def dict_of_builtins():
 
 
 class AnyClass:
-    """Placeholder class"""
+    """Placeholder class."""
+
     def __init__(self, x=42):
         self.x = x
 
 
 class NoEncodeClass:
     """Placeholder class to Raise NotImplementedError for `_encode`."""
+
     def __init__(self, x=42):
         self.x = x
 
 
 class NoDecodeClass:
-    """Placeholder class to Raise NotImplementedError for `_decode`"""
+    """Placeholder class to Raise NotImplementedError for `_decode`."""
+
     def __init__(self, x=42):
         self.x = x
 
@@ -372,6 +382,7 @@ class NoDecodeClass:
 class FlatData:
     """Class only containing flat data and methods.
     """
+
     def __init__(self, m=49):
         self.signal = any_ndarray()
         self._m = m
@@ -392,6 +403,7 @@ class FlatData:
         return deepcopy(self)
 
     def __eq__(self, other):
+        """Compare two FlatData objects."""
         return not deepdiff.DeepDiff(self, other)
 
 
@@ -400,6 +412,7 @@ class NestedData:
     as well as methods. The purpose of this class is, to define and test
     general requirements for the encoding and decoding process.
     """
+
     def __init__(self, n, comment, matrix, subobj, mylist, mydict):
         self._n = n
         self._comment = comment
@@ -410,11 +423,12 @@ class NestedData:
         self._complex = 3 + 4j
         print('foo')
         self._tuple = (1, 2, 3)
-        self._set = set(('a', 1, 2))
+        self._set = {'a', 1, 2}
         self._frozenset = frozenset(('a', 1, 2))
 
     @classmethod
     def create(cls):
+        """Create a NestedData object with arbitrary data."""
         n = 42
         comment = 'My String'
         matrix = any_ndarray()
@@ -427,7 +441,7 @@ class NestedData:
             'subobject': FlatData(-1),
             'complex-number': 3 + 4j,
             'a tuple': (1, 2, 3),
-            'a set': set(('a', 1, 2)),
+            'a set': {'a', 1, 2},
             'a frozenset': frozenset(('a', 1, 2))}
         return NestedData(
             n, comment, matrix, subobj, mylist, mydict)
@@ -453,11 +467,12 @@ class NestedData:
         return deepcopy(self)
 
     def __eq__(self, other):
+        """Compare two NestedData objects."""
         return not deepdiff.DeepDiff(self, other)
 
 
 def stub_str_to_type():
-    """ Stubs `_codec.str_to_type` for tests that use general data structures.
+    """Stubs `_codec.str_to_type` for tests that use general data structures.
     """
     def side_effect(type_str):
         if type_str == "BuiltinsWrapper":
@@ -468,13 +483,13 @@ def stub_str_to_type():
                 'NoEncodeClass': type(NoEncodeClass()),
                 'NoDecodeClass': type(NoDecodeClass()),
                 'FlatData': type(FlatData()),
-                'NestedData': type(NestedData.create())
+                'NestedData': type(NestedData.create()),
                 }.get(type_str)
     return mock.MagicMock(side_effect=side_effect)
 
 
 def stub_is_pyfar_type():
-    """ Stubs `_codec._is_pyfar_type` for tests that use general data
+    """Stubs `_codec._is_pyfar_type` for tests that use general data
     structures.
     """
     def side_effect(obj):

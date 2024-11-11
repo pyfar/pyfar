@@ -1,3 +1,4 @@
+"""Custom tick locators and formatters for matplotlib."""
 import numpy as np
 from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
@@ -10,6 +11,8 @@ from matplotlib.ticker import (
 
 
 class FractionalOctaveFormatter(FixedFormatter):
+    """Formatter for fractional octave bands."""
+
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -29,6 +32,8 @@ class FractionalOctaveFormatter(FixedFormatter):
 
 
 class FractionalOctaveLocator(FixedLocator):
+    """Locator for fractional octave bands."""
+
     def __init__(self, n_fractions=1):
         if n_fractions == 1:
             ticks = [
@@ -46,17 +51,17 @@ class FractionalOctaveLocator(FixedLocator):
 
 
 class LogLocatorITAToolbox(LogLocator):
+    """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
+
     def __init__(
         self,
         base=10.0,
         subs=(0.2, 0.4, 0.6, 1),
-        numdecs=4,
-        numticks=None
+        numticks=None,
     ):
         super().__init__(
             base=base,
             subs=subs,
-            numdecs=numdecs,
             numticks=numticks)
 
 
@@ -65,12 +70,13 @@ class LogFormatterITAToolbox(LogFormatter):
     Log-formatter inspired by the tick labels used in the ITA-Toolbox
     for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
     """
+
     def __init__(
         self,
         base=10.0,
         labelOnlyBase=False,
         minor_thresholds=None,
-        linthresh=None
+        linthresh=None,
     ):
         super().__init__(
             base=base,
@@ -92,7 +98,7 @@ class LogFormatterITAToolbox(LogFormatter):
                 s = self.pprint_val(x, vmax - vmin)
         return s
 
-    def __call__(self, x, pos=None):
+    def __call__(self, x, pos=None):  # noqa: ARG002
         """
         Return the format for tick val *x*.
         """
@@ -110,8 +116,9 @@ class LogFormatterITAToolbox(LogFormatter):
 class MultipleFractionLocator(MultipleLocator):
     r"""
     Tick locator for rational fraction multiples of a specified base, ie.
-    `math: \pi / 2`.
+    :math:`\pi / 2`.
     """
+
     def __init__(self, nominator=1, denominator=2, base=1):
         super().__init__(base=base * nominator / denominator)
         self._nominator = nominator
@@ -121,8 +128,9 @@ class MultipleFractionLocator(MultipleLocator):
 class MultipleFractionFormatter(Formatter):
     r"""
     Tick formatter for rational fraction multiples of a specified base, ie.
-    `math: \pi / 2`.
+    :math:`\pi / 2`.
     """
+
     def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
         super().__init__()
         self._nominator = nominator
@@ -138,7 +146,8 @@ class MultipleFractionFormatter(Formatter):
             nom, denom = denom, nom % denom
         return nom
 
-    def __call__(self, x, pos=None):
+    def __call__(self, x, pos=None):  # noqa: ARG002
+        """Return the format for tick val *x* at position *pos*."""
         den = self._denominator
         num = int(np.rint(den*x/self._base))
         com = self._gcd(num, den)

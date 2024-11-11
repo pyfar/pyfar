@@ -50,6 +50,7 @@ be done this way
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import pyfar as pf
 from pyfar.plot import utils
 from pyfar.plot import _line
 from pyfar.plot import _two_d
@@ -57,9 +58,10 @@ from pyfar.plot import _utils
 
 
 class Cycle(object):
-    """ Cycle class implementation inspired by itertools.cycle. Supports
+    """Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions.
     """
+
     def __init__(self, cshape, index=0):
         """
         Parameters
@@ -130,6 +132,7 @@ class PlotParameter(object):
     `self.update` for more information.
 
     """
+
     def __init__(self, plot,
                  dB_time=False, dB_freq=True,              # dB properties
                  log_prefix_time=20, log_prefix_freq=20,
@@ -142,7 +145,8 @@ class PlotParameter(object):
                  window_overlap_fct=.5,
                  colorbar=True,
                  orientation='vertical', indices=None,     # 2D plots
-                 method='pcolormesh'):
+                 method='pcolormesh',
+                 mode='real', side='right'):               # complex audio data
 
         # set plot type
         self._plot_type = ['line', '2d']
@@ -168,6 +172,8 @@ class PlotParameter(object):
         self.orientation = orientation
         self.indices = indices
         self.method = method
+        self.mode = mode
+        self.side = side
 
         # set axis types based on `plot`
         self.update(plot)
@@ -220,8 +226,10 @@ class PlotParameter(object):
         # set the axis, color map, and cycle, parameter for each plot
         if plot == 'time':
             # x-axis
-            self._x_type = ['other']
-            self._x_id = 0
+            self._x_type = ['other', 'other', 'other', 'other', 'other']
+            self._x_param = 'unit_time'
+            self._x_values = ['s', 'ms', 'mus', 'samples', 'auto']
+            self._x_id = self._x_values.index(getattr(self, self._x_param))
             # y-axis
             self._y_type = ['other', 'dB']
             self._y_param = 'dB_time'
@@ -230,6 +238,13 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # mode
+            self._mode_param = 'mode'
+            self._mode_values = ['real', 'imag', 'abs']
+            self._mode_id = self._mode_values.index(
+                getattr(self, self._mode_param))
+            # side
+            self._side_param = None
             # cycler type
             self._cycler_type = 'line'
 
@@ -240,15 +255,22 @@ class PlotParameter(object):
             self._x_param = None
             self._x_values = None
             # y-axis
-            self._y_type = ['other']
-            self._y_id = 0
-            self._y_param = None
-            self._y_values = None
+            self._y_type = ['other', 'other', 'other', 'other', 'other']
+            self._y_param = 'unit_time'
+            self._y_values = ['s', 'ms', 'mus', 'samples', 'auto']
+            self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = ['other', 'dB']
             self._cm_param = 'dB_time'
             self._cm_values = [False, True]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # mode
+            self._mode_param = 'mode'
+            self._mode_values = ['real', 'imag', 'abs']
+            self._mode_id = self._mode_values.index(
+                getattr(self, self._mode_param))
+            # side
+            self._side_param = None
             # cycler type
             self._cycler_type = None
 
@@ -266,6 +288,13 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = 'line'
 
@@ -285,6 +314,13 @@ class PlotParameter(object):
             self._cm_param = 'dB_freq'
             self._cm_values = [False, True]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = None
 
@@ -303,6 +339,13 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = 'line'
 
@@ -323,6 +366,13 @@ class PlotParameter(object):
             self._cm_param = 'unwrap'
             self._cm_values = [True, False, "360"]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = None
 
@@ -335,11 +385,18 @@ class PlotParameter(object):
             # y-axis
             self._y_type = ['other', 'other', 'other', 'other', 'other']
             self._y_param = 'unit_gd'
-            self._y_values = ['auto', 's', 'ms', 'mus', 'samples']
+            self._y_values = ['s', 'ms', 'mus', 'samples', 'auto']
             self._y_id = self._y_values.index(getattr(self, self._y_param))
             # color map
             self._cm_type = None
             self._cm_id = None
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = 'line'
 
@@ -357,8 +414,15 @@ class PlotParameter(object):
             # color map
             self._cm_type = ['other', 'other', 'other', 'other', 'other']
             self._cm_param = 'unit_gd'
-            self._cm_values = ['auto', 's', 'ms', 'mus', 'samples']
+            self._cm_values = ['s', 'ms', 'mus', 'samples', 'auto']
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = None
 
@@ -376,6 +440,13 @@ class PlotParameter(object):
             self._cm_param = 'dB_freq'
             self._cm_values = [True, False]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
+            # mode
+            self._mode_param = None
+            # side
+            self._side_param = 'side'
+            self._side_values = ['left', 'right']
+            self._side_id = self._side_values.index(
+                getattr(self, self._side_param))
             # cycler type
             self._cycler_type = 'signal'
 
@@ -434,7 +505,8 @@ class PlotParameter(object):
     def toggle_x(self):
         """Toggle the x-axis type.
 
-        For example toggle between lin and log frequency axis."""
+        For example toggle between lin and log frequency axis.
+        """
         changed = False
         if self.x_type is not None:
             if len(self._x_type) > 1:
@@ -447,7 +519,8 @@ class PlotParameter(object):
     def toggle_y(self):
         """Toggle the y-axis type.
 
-        For example toggle between showing lin and log time signals."""
+        For example toggle between showing lin and log time signals.
+        """
         changed = False
         if self.y_type is not None:
             if len(self._y_type) > 1:
@@ -460,7 +533,8 @@ class PlotParameter(object):
     def toggle_colormap(self):
         """Toggle the color map type.
 
-        For example toggle between showing lin and log magnitude."""
+        For example toggle between showing lin and log magnitude.
+        """
         changed = False
         if self.cm_type is not None:
             if len(self._cm_type) > 1:
@@ -471,17 +545,37 @@ class PlotParameter(object):
         return changed
 
     def toggle_orientation(self):
-        """Toggle the orientation of 2D plots"""
+        """Toggle the orientation of 2D plots."""
         self.orientation = "horizontal" if self.orientation == "vertical" \
             else "vertical"
 
     def cycle_plot_types(self):
-        """Cycle the plot types"""
+        """Cycle the plot types."""
         self._plot_type = np.roll(self._plot_type, -1)
+
+    def toggle_mode(self):
+        """Toggle mode of time plots: show real, imag or abs time data."""
+        changed = False
+        if self._mode_param is not None:
+            self._mode_id = (self._mode_id + 1) % len(self._mode_values)
+            setattr(self, self._mode_param, self._mode_values[self._mode_id])
+            changed = True
+
+        return changed
+
+    def toggle_side(self):
+        """Toggle mode of time plots: show real, imag or abs time data."""
+        changed = False
+        if self._side_param is not None:
+            self._side_id = (self._side_id + 1) % len(self._side_values)
+            setattr(self, self._side_param, self._side_values[self._side_id])
+            changed = True
+
+        return changed
 
     @property
     def plot_type(self):
-        """Return current the plot type"""
+        """Return the current plot type."""
         return self._plot_type[0]
 
     @property
@@ -511,6 +605,7 @@ class Interaction(object):
     Toggle between plots; move or zoom axis or color map; toggle axis types;
     cycle channels.
     """
+
     def __init__(self, signal, axes, colorbars, style, plot_parameter,
                  **kwargs):
         """
@@ -524,12 +619,17 @@ class Interaction(object):
             axes objects of all axes in the plot holding data
         colorbars : Matplotlib colorbar, array like
             all colorbar objects in the plot
-        style : plot style
-            E.g. 'light'
+        style : str
+            ``light`` or ``dark`` to use the pyfar plot styles or a plot style
+            from :py:data:`matplotlib.style.available`. Pass a dictionary
+            to set specific plot parameters, for example
+            ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+            ``style = {}`` to use the currently active plotstyle. The default
+            is ``light``.
         plot_parameter : PlotParameter
             An object of the PlotParameter class
-
-        **kwargs are passed to the plot functions
+        kwargs : arguments, optional
+            **kwargs are passed to the plot functions.
         """
 
         # save input arguments
@@ -576,7 +676,7 @@ class Interaction(object):
 
     def select_action(self, event):
         """
-        Select what to do based on the keyboard event
+        Select what to do based on the keyboard event.
 
         Parameters
         ----------
@@ -652,6 +752,29 @@ class Interaction(object):
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
+        # toggle display of complex audio data
+        elif event.key in ctr["toggle_mode"]:
+
+            # return if all frequencies are >= 0
+            if (type(self.signal) is pf.FrequencyData and
+                    np.all(self.signal.frequencies >= 0)):
+                return
+            # return if Signal or TimeData is not complex
+            elif type(self.signal) is not pf.FrequencyData and \
+                    not self.signal.complex:
+                return
+
+            # perform action for time plots
+            if self.params.plot.startswith('time'):
+                self.params.toggle_mode()
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
+
+            # perform action for frequency plots
+            if self.params.plot.startswith(
+                    ('freq', 'phase', 'group', 'spectrogram')):
+                self.params.toggle_side()
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
+
         # color map toggle
         elif event.key in ctr["toggle_cm"]:
             changed = self.params.toggle_colormap()
@@ -682,7 +805,7 @@ class Interaction(object):
         prm = self.params
 
         # cases that are not allowed
-        # spectogram plot if signal has less samples than the window length
+        # spectrogram plot if signal has less samples than the window length
         if event.key in plot['spectrogram'] \
                 and self.signal.n_samples < prm.window_length:
             return
@@ -708,14 +831,14 @@ class Interaction(object):
                     self.all_axes = self.ax = _line._time(
                         self.signal, prm.dB_time, prm.log_prefix_time,
                         prm.log_reference, prm.unit_time, self.ax,
-                        **self.kwargs_line)
+                        mode=prm.mode, **self.kwargs_line)
                 elif self.params.plot_type == "2d":
                     self.params.update('time_2d')
                     self.all_axes, _, self.all_bars = _two_d._time_2d(
                         self.signal, prm.dB_time, prm.log_prefix_time,
                         prm.log_reference, prm.unit_time, prm.indices,
                         prm.orientation, prm.method, prm.colorbar,
-                        self.ax, **self.kwargs_2d)
+                        self.ax, mode=prm.mode, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['freq']:
@@ -723,7 +846,7 @@ class Interaction(object):
                     self.params.update('freq')
                     self.all_axes = self.ax = _line._freq(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
-                        prm.log_reference, prm.xscale, self.ax,
+                        prm.log_reference, prm.xscale, self.ax, side=prm.side,
                         **self.kwargs_line)
                 elif self.params.plot_type == "2d":
                     self.params.update('freq_2d')
@@ -731,7 +854,7 @@ class Interaction(object):
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.indices,
                         prm.orientation, prm.method, prm.colorbar,
-                        self.ax, **self.kwargs_2d)
+                        self.ax, side=prm.side, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['phase']:
@@ -739,13 +862,13 @@ class Interaction(object):
                     self.params.update('phase')
                     self.all_axes = self.ax = _line._phase(
                         self.signal, prm.deg, prm.unwrap, prm.xscale,
-                        self.ax, **self.kwargs_line)
+                        self.ax, side=prm.side, **self.kwargs_line)
                 if self.params.plot_type == "2d":
                     self.params.update('phase_2d')
                     self.all_axes, _, self.all_bars = _two_d._phase_2d(
                         self.signal, prm.deg, prm.unwrap, prm.xscale,
                         prm.indices, prm.orientation, prm.method,
-                        prm.colorbar, self.ax, **self.kwargs_2d)
+                        prm.colorbar, self.ax, side=prm.side, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['group_delay']:
@@ -753,13 +876,13 @@ class Interaction(object):
                     self.params.update('group_delay')
                     self.all_axes = self.ax = _line._group_delay(
                         self.signal, prm.unit_gd, prm.xscale, self.ax,
-                        **self.kwargs_line)
+                        side=prm.side, **self.kwargs_line)
                 if self.params.plot_type == "2d":
                     self.params.update('group_delay_2d')
                     self.all_axes, _, self.all_bars = _two_d._group_delay_2d(
                         self.signal, prm.unit_gd, prm.xscale, prm.indices,
                         prm.orientation, prm.method, prm.colorbar,
-                        self.ax, **self.kwargs_2d)
+                        self.ax, side=prm.side, **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['spectrogram']:
@@ -768,7 +891,7 @@ class Interaction(object):
                     self.signal[self.cycler.index], prm.dB_freq,
                     prm.log_prefix_freq, prm.log_reference, prm.yscale,
                     prm.unit_time, prm.window, prm.window_length,
-                    prm.window_overlap_fct, prm.colorbar, self.ax,
+                    prm.window_overlap_fct, prm.colorbar, self.ax, prm.side,
                     **self.kwargs_2d)
                 self.ax = self.all_axes
 
@@ -779,7 +902,7 @@ class Interaction(object):
                         self.signal, prm.dB_time, prm.dB_freq,
                         prm.log_prefix_time, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.unit_time, self.ax,
-                        **self.kwargs_line)
+                        mode=prm.mode, side=prm.side, **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 elif self.params.plot_type == "2d":
                     self.params.update('time_freq_2d')
@@ -788,7 +911,8 @@ class Interaction(object):
                         prm.log_prefix_time, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.unit_time,
                         prm.indices, prm.orientation, prm.method,
-                        prm.colorbar, self.ax, **self.kwargs_2d)
+                        prm.colorbar, self.ax, mode=prm.mode, side=prm.side,
+                        **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_phase']:
@@ -797,7 +921,7 @@ class Interaction(object):
                     self.all_axes = _line._freq_phase(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
-                        self.ax, **self.kwargs_line)
+                        self.ax, side=prm.side, **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 elif self.params.plot_type == "2d":
                     self.params.update('freq_phase_2d')
@@ -805,7 +929,7 @@ class Interaction(object):
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                         prm.indices, prm.orientation, prm.method,
-                        prm.colorbar, self.ax, **self.kwargs_2d)
+                        prm.colorbar, self.ax, side=prm.side, **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_group_delay']:
@@ -814,7 +938,7 @@ class Interaction(object):
                     self.all_axes = _line._freq_group_delay(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.unit_gd, prm.xscale,
-                        self.ax, **self.kwargs_line)
+                        self.ax, side=prm.side, **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 if self.params.plot_type == "2d":
                     self.params.update('freq_group_delay_2d')
@@ -823,7 +947,8 @@ class Interaction(object):
                             self.signal, prm.dB_freq, prm.log_prefix_freq,
                             prm.log_reference, prm.unit_gd, prm.xscale,
                             prm.indices, prm.orientation, prm.method,
-                            prm.colorbar, self.ax, **self.kwargs_2d)
+                            prm.colorbar, self.ax, side=prm.side,
+                            **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             # update figure
@@ -970,8 +1095,12 @@ class Interaction(object):
 
         # write new text
         with plt.style.context(utils.plotstyle(self.style)):
-            bbox = dict(boxstyle="round", fc=mpl.rcParams["axes.facecolor"],
-                        ec=mpl.rcParams["axes.facecolor"], alpha=.5)
+            bbox = {
+                'boxstyle': "round",
+                'fc': mpl.rcParams["axes.facecolor"],
+                'ec': mpl.rcParams["axes.facecolor"],
+                'alpha': .5,
+                }
 
             self.txt = self.ax.text(
                 x_pos, y_pos, f'Ch. {self.cycler.current_channel}',

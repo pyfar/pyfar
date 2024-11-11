@@ -13,7 +13,7 @@ def test_color():
 
 
 def test_shortcuts_console_output(capfd):
-    """Test output to the console"""
+    """Test output to the console."""
     _ = utils.shortcuts(show=True)
     out, _ = capfd.readouterr()
     assert "Use these shortcuts" in out
@@ -24,7 +24,7 @@ def test_shortcuts_console_output(capfd):
 
 
 def test_shortcuts_returns():
-    """Test return values"""
+    """Test return values."""
     shorts = utils.shortcuts(show=False)
     assert isinstance(shorts, dict)
 
@@ -34,12 +34,14 @@ def test_shortcuts_returns():
 
 
 def test_shortcuts_report():
-    """Test layout of return / console output"""
+    """Test layout of return / console output."""
     _, report = utils.shortcuts(show=False, report=True, layout="console")
     assert ".. list-table::" not in report
+    assert ":py:func:" not in report
 
     _, report = utils.shortcuts(show=False, report=True, layout="sphinx")
     assert ".. list-table::" in report
+    assert ":py:func:" in report
 
     with pytest.raises(ValueError, match="layout is 'tex'"):
         utils.shortcuts(report=True, layout="tex")

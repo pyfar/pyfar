@@ -9,7 +9,7 @@ import numpy.testing as npt
     pf.TimeData([1, 2, 3], [1, 2, 4]),
     pf.FrequencyData([1, 2, 3], [1, 2, 4])])
 def test_broadcast_cshape(signal):
-    """Test broadcasting for all audio classes"""
+    """Test broadcasting for all audio classes."""
 
     broadcasted = pf.utils.broadcast_cshape(signal, (2, 3))
     assert signal.cshape == (1, )
@@ -18,17 +18,17 @@ def test_broadcast_cshape(signal):
 
 
 def test_broadcast_cshape_assertions():
-    """Test assertions"""
+    """Test assertions."""
 
     # invalid input type
     with pytest.raises(TypeError, match="Input data must be a pyfar audio"):
         pf.utils.broadcast_cshape([1, 2, 3], (1, ))
 
 
-@pytest.mark.parametrize("cshape,reference", [
+@pytest.mark.parametrize(("cshape", "reference"), [
     (None, (2,)), ((2, 2), (2, 2))])
 def test_broadcast_cshapes(cshape, reference):
-    """Test broadcasting multiple signals with all audio classes"""
+    """Test broadcasting multiple signals with all audio classes."""
 
     signals = (pf.signals.impulse(5, [0, 1]),
                pf.TimeData([1, 2, 3], [1, 2, 4]),
@@ -43,7 +43,7 @@ def test_broadcast_cshapes(cshape, reference):
 
 
 def test_broadcast_cshapes_assertions():
-    """Test assertions"""
+    """Test assertions."""
 
     # invalid input type
     with pytest.raises(TypeError, match="All input data must be pyfar"):
@@ -55,7 +55,7 @@ def test_broadcast_cshapes_assertions():
     pf.TimeData([1, 2, 3], [1, 2, 4]),
     pf.FrequencyData([1, 2, 3], [1, 2, 4])])
 def test_broadcast_cdim(signal):
-    """Test broadcast cdim for all audio classes"""
+    """Test broadcast cdim for all audio classes."""
 
     broadcasted = pf.utils.broadcast_cdim(signal, 2)
 
@@ -65,7 +65,7 @@ def test_broadcast_cdim(signal):
 
 
 def test_broadcast_cdim_assertions():
-    """Test assertions"""
+    """Test assertions."""
 
     # invalid input type
     with pytest.raises(TypeError, match="Input data must be a pyfar audio"):
@@ -76,10 +76,10 @@ def test_broadcast_cdim_assertions():
         pf.utils.broadcast_cdim(pf.Signal(1, 44100), 0)
 
 
-@pytest.mark.parametrize("cdim,reference", [
+@pytest.mark.parametrize(("cdim", "reference"), [
     (None, 2), (3, 3)])
 def test_broadcast_cdims(cdim, reference):
-    """Test broadcasting multiple signals with all audio classes"""
+    """Test broadcasting multiple signals with all audio classes."""
 
     signals = (pf.signals.impulse(5, [[0, 1], [2, 3]]),
                pf.TimeData([1, 2, 3], [1, 2, 4]))
@@ -101,15 +101,22 @@ def test_broadcast_cdims_assertions():
 
 
 @pytest.mark.parametrize("data_second", [
-    (np.random.randn(512)),
-    (np.random.randn(2, 512))])
-def test_concatenate_channels(data_second):
-    # Parametrized concatenation test for single- and multichannel signal
-    sr = 48e3
+    (np.array([2, -2, 2, -2])),
+    (np.array([[2, -2, 2, -2], [3, -3, 3, -3]]))])
+@pytest.mark.parametrize("domains", [
+    ('time', 'time'), ('time', 'freq'), ('freq', 'freq')])
+def test_concatenate_channels(data_second, domains):
 
-    # Get random data with 512 samples
-    data_first = np.random.randn(512)
-    signals = (pf.Signal(data_first, sr), pf.Signal(data_second, sr))
+    # Generate signals for concatenation
+    # (use rms normalization for being able to test behavior in freq. domain)
+    sr = 48e3
+    data_first = np.array([1, -1, 1, -1])
+    signals = (pf.Signal(data_first, sr, fft_norm='rms'),
+               pf.Signal(data_second, sr, fft_norm='rms'))
+
+    # force signal domain
+    for signal, domain in zip(signals, domains):
+        signal.domain = domain
 
     res = pf.utils.concatenate_channels(signals, caxis=0)
     ideal = np.concatenate(
@@ -141,8 +148,24 @@ def test_pyfar_object_types(signals):
     npt.assert_equal(conc._data, ideal)
 
 
+def test_concatenate_channels_complex_signals():
+    # Test concanation for complex signals
+    s = pf.Signal([1, 2, 3], 44100)
+    s_complex = pf.Signal([1, 2, 3], 44100, is_complex=True)
+
+    s_conc = pf.utils.concatenate_channels((s, s_complex))
+    assert s_conc.complex
+    desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
+    npt.assert_equal(s_conc._data, desired)
+
+    s_conc = pf.utils.concatenate_channels((s_complex, s))
+    assert s_conc.complex
+    desired = [[1 + 0j, 2 + 0j, 3 + 0j], [1 + 0j, 2 + 0j, 3 + 0j]]
+    npt.assert_equal(s_conc._data, desired)
+
+
 def test_concatenate_assertions():
-    """Test assertions"""
+    """Test assertions."""
     with pytest.raises(TypeError, match="All input data must be"):
         pf.utils.concatenate_channels(([1, 2], [3, 4]))
     signals = (pf.Signal(np.ones((1, 2, 512)), 44100),

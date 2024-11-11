@@ -1,3 +1,5 @@
+"""Digital signal processing functions."""
+
 from .dsp import (
     minimum_phase,
     phase,
@@ -16,18 +18,20 @@ from .dsp import (
     deconvolve,
     convolve,
     decibel,
+    soft_limit_spectrum,
     energy,
     power,
     rms,
     normalize,
-    average
+    average,
+    correlate,
 )
 
 from .interpolation import (
     smooth_fractional_octave,
     fractional_time_shift,
     resample,
-    InterpolateSpectrum
+    InterpolateSpectrum,
 )
 
 from . import filter
@@ -54,6 +58,7 @@ __all__ = [
     'deconvolve',
     'convolve',
     'decibel',
+    'soft_limit_spectrum',
     'energy',
     'power',
     'rms',
@@ -62,5 +67,6 @@ __all__ = [
     'resample',
     'average',
     'normalize',
-    'fractional_time_shift'
+    'fractional_time_shift',
+    'correlate',
 ]

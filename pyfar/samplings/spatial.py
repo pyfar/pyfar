@@ -1,8 +1,11 @@
+"""This module provides functions to calculate spherical Voronoi diagrams."""
 import deepdiff
 import numpy as np
 from scipy import spatial as spat
 from pyfar import Coordinates
 from copy import deepcopy
+import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class SphericalVoronoi(spat.SphericalVoronoi):
@@ -11,10 +14,14 @@ class SphericalVoronoi(spat.SphericalVoronoi):
     :py:func:`calculate_sph_voronoi_weights` can be used directly, if only the
     sampling weights are needed.
     """
+
     def __init__(self, sampling, round_decimals=12, center=0.0):
         """
         Calculate a Voronoi diagram on the sphere for the given samplings
         points.
+
+        This function will be deprecated in pyfar 0.8.0 in favor
+        of :py:func:`spharpy.samplings.spherical_voronoi`.
 
         Parameters
         ----------
@@ -29,20 +36,26 @@ class SphericalVoronoi(spat.SphericalVoronoi):
         Returns
         -------
         voronoi : SphericalVoronoi
-            Spherical voronoi diagram as implemented in ``scipy.spatial``.
+            Spherical voronoi diagram as implemented in
+            :py:mod:`scipy.spatial`.
 
-        See also
+        See Also
         --------
         :py:func:`calculate_sph_voronoi_weights`
 
         """
+        warnings.warn((
+            "This function will be deprecated in pyfar 0.8.0 in favor "
+            "of spharpy.samplings.spherical_voronoi."),
+                PyfarDeprecationWarning, stacklevel=2)
+
         points = sampling.cartesian
         radius = sampling.radius
         radius_round = np.unique(np.round(radius, decimals=round_decimals))
         if len(radius_round) > 1:
             raise ValueError("All sampling points need to be on the \
                     same radius.")
-        super().__init__(points, radius_round, center)
+        super().__init__(points, radius_round[0], center)
 
     def copy(self):
         """Return a copy of the Voronoi object."""
@@ -71,12 +84,17 @@ class SphericalVoronoi(spat.SphericalVoronoi):
 
 def calculate_sph_voronoi_weights(
         sampling, normalize=True, center=[0, 0, 0], round_decimals=12):
-    """
+    r"""
     Calculate sampling weights for numeric integration.
 
-    Uses the class method ``calculate_areas`` from :py:class:`SphericalVoronoi`
+    This function will be deprecated in pyfar 0.8.0 in favor
+    of :py:func:`spharpy.samplings.calculate_sampling_weights`.
+
+    Uses the class method
+    :py:meth:`~scipy.spatial.SphericalVoronoi.calculate_areas`
+    from :py:class:`SphericalVoronoi`
     to calculate the weights. It requires a spherical sampling grid with a
-    single radius and uses ``scipy.spatial.SphericalVoronoi`` in the
+    single radius and uses :py:class:`scipy.spatial.SphericalVoronoi` in the
     background.
 
     Parameters
@@ -86,7 +104,7 @@ def calculate_sph_voronoi_weights(
         radius.
     normalize : boolean, optional
         Normalize the samplings weights to ``sum(weights)=1``. Otherwise the
-        weights sum to :math:`4 \\pi r^2`. The default is ``True``.
+        weights sum to :math:`4 \pi r^2`. The default is ``True``.
     center : list
         Center of the spherical sampling grid. The default is ``[0, 0, 0]``.
     round_decimals : int, optional
@@ -99,6 +117,11 @@ def calculate_sph_voronoi_weights(
         Sampling weights of size `samplings.csize`.
 
     """
+    warnings.warn((
+        "This function will be deprecated in pyfar 0.8.0 in favor "
+        "of spharpy.samplings.calculate_sampling_weights."),
+            PyfarDeprecationWarning, stacklevel=2)
+
     # get Voronoi diagram
     if sampling.csize <= 3:
         raise ValueError(

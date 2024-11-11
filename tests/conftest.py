@@ -14,7 +14,7 @@ import pyfar.signals
 from pyfar.testing import stub_utils
 
 
-@pytest.fixture
+@pytest.fixture()
 def sine_stub():
     """Sine signal stub.
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -40,7 +40,34 @@ def sine_stub():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
+def sine_stub_complex():
+    """Sine signal stub.
+    To be used in cases, when a dependence on the Signal class is prohibited,
+    but a correct, fixed relation of the time signal and the spectrum is
+    needed.
+
+    Returns
+    -------
+    signal : Signal
+        Stub of sine signal
+    """
+    frequency = 441
+    sampling_rate = 44100
+    n_samples = 10000
+    fft_norm = 'none'
+    cshape = (1,)
+
+    time, freq, frequency = stub_utils.sine_func(
+        frequency, sampling_rate, n_samples, fft_norm, cshape)
+
+    signal = stub_utils.signal_stub(
+        time, freq, sampling_rate, fft_norm, complex=True)
+
+    return signal
+
+
+@pytest.fixture()
 def sine_stub_odd():
     """Sine signal stub, odd number of samples
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -66,7 +93,7 @@ def sine_stub_odd():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def impulse_stub():
     """Delta impulse signal stub.
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -92,7 +119,7 @@ def impulse_stub():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def noise_stub():
     """Gaussian white noise signal stub.
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -117,7 +144,7 @@ def noise_stub():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def noise_stub_odd():
     """Gaussian white noise signal stub, odd number of samples.
     To be used in cases, when a dependence on the Signal class is prohibited,
@@ -142,7 +169,7 @@ def noise_stub_odd():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def sine():
     """Sine signal.
 
@@ -163,7 +190,7 @@ def sine():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def sine_short():
     """Short sine signal where the first frequency is > 20 Hz.
 
@@ -186,7 +213,7 @@ def sine_short():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def impulse():
     """Delta impulse signal.
 
@@ -207,7 +234,30 @@ def impulse():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
+def impulse_complex():
+    """Delta impulse signal.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    """
+    n_samples = 10000
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+
+    signal = pyfar.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+                          is_complex=True)
+    return signal
+
+
+@pytest.fixture()
 def impulse_group_delay():
     """Delayed delta impulse signal with analytical group delay.
 
@@ -231,7 +281,32 @@ def impulse_group_delay():
     return signal, group_delay
 
 
-@pytest.fixture
+@pytest.fixture()
+def impulse_complex_group_delay():
+    """Delayed delta impulse signal with analytical group delay.
+
+    Returns
+    -------
+    signal : Signal
+        Impulse signal
+    group_delay : ndarray
+        Group delay of impulse signal
+    """
+    n_samples = 10000
+    delay = 0
+    amplitude = 1
+    sampling_rate = 44100
+
+    signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    signal.complex = True
+    group_delay = delay * np.ones_like(signal.freq, dtype=float)
+
+    return signal, group_delay
+
+
+@pytest.fixture()
 def impulse_group_delay_two_channel():
     """Delayed 2 channel delta impulse signal with analytical group delay.
 
@@ -256,7 +331,7 @@ def impulse_group_delay_two_channel():
     return signal, group_delay
 
 
-@pytest.fixture
+@pytest.fixture()
 def impulse_group_delay_two_by_two_channel():
     """Delayed 2-by-2 channel delta impulse signal with analytical group delay.
 
@@ -281,7 +356,7 @@ def impulse_group_delay_two_by_two_channel():
     return signal, group_delay
 
 
-@pytest.fixture
+@pytest.fixture()
 def sine_plus_impulse():
     """Added sine and delta impulse signals.
 
@@ -309,7 +384,36 @@ def sine_plus_impulse():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
+def sine_plus_impulse_complex():
+    """Added sine and delta impulse signals.
+
+    Returns
+    -------
+    signal : Signal
+        Combined signal
+    """
+    frequency = 441
+    delay = 100
+    n_samples = 10000
+    sampling_rate = 44100
+    amplitude = 1
+
+    sine_signal = pyfar.signals.sine(
+        frequency, n_samples, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    sine_signal.fft_norm = 'none'
+
+    impulse_signal = pyfar.signals.impulse(
+        n_samples, delay=delay, amplitude=amplitude,
+        sampling_rate=sampling_rate)
+    signal = sine_signal + impulse_signal
+    signal.complex = True
+
+    return signal
+
+
+@pytest.fixture()
 def noise():
     """Gaussian white noise signal.
 
@@ -332,9 +436,9 @@ def noise():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def noise_two_by_three_channel():
-    """ 2-by-3 channel gaussian white noise signal.
+    """2-by-3 channel gaussian white noise signal.
 
     Returns
     -------
@@ -356,10 +460,10 @@ def noise_two_by_three_channel():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def handsome_signal():
     """
-    Windows 200 Hz sine signal for testing plots
+    Windows 200 Hz sine signal for testing plots.
 
     Returns
     -------
@@ -373,10 +477,10 @@ def handsome_signal():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
 def handsome_signal_v2():
     """
-    Windowed 1kHz sine signal for testing plots
+    Windowed 1kHz sine signal for testing plots.
 
     Returns
     -------
@@ -390,11 +494,48 @@ def handsome_signal_v2():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
+def handsome_complex_signal():
+    """
+    Windows 200 Hz sine signal, with complex valued data for testing plots.
+
+    Returns
+    -------
+    signal : Signal
+        Windowed sine
+    """
+
+    signal = pf.signals.sine(200, 4410)
+    signal = pf.dsp.time_window(signal, (1500, 2000, 3000, 3500))
+    signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+                       is_complex=True)
+
+    return signal
+
+
+@pytest.fixture()
+def handsome_complex_signal_v2():
+    """
+    Windowed 1kHz sine signal for testing plots.
+
+    Returns
+    -------
+    signal : Signal
+        Windowed sine
+    """
+
+    signal = pf.signals.sine(2000, 4410)
+    signal = pf.dsp.time_window(signal, (500, 1000, 2000, 2500))
+    signal = pf.Signal(data=signal.time, sampling_rate=signal.sampling_rate,
+                       is_complex=True)
+    return signal
+
+
+@pytest.fixture()
 def handsome_signal_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
-    for testing 2D plots
+    for testing 2D plots.
 
     Returns
     -------
@@ -411,7 +552,29 @@ def handsome_signal_2d():
     return signal
 
 
-@pytest.fixture
+@pytest.fixture()
+def handsome_signal_complex_2d():
+    """
+    45 channel signal with delayed, scaled and bell-filtered impulses
+    for testing 2D plots.
+
+    Returns
+    -------
+    signal : Signal
+        Multi channel signal
+    """
+
+    delays = np.array(np.sin(np.linspace(0, 2*np.pi, 45))*50 + 55, dtype=int)
+    amplitudes = 10**(-10*(1-np.cos(np.linspace(0, 2*np.pi, 45)))/20)
+    signal = pyfar.signals.impulse(2**9, delays, amplitudes)
+    signal.complex = True
+    for idx, s in enumerate(signal):
+        signal[idx] = pf.dsp.filter.bell(s, (idx+1)*200, -20, 5)
+
+    return signal
+
+
+@pytest.fixture()
 def time_data():
     """
     TimeData object with three data points.
@@ -425,7 +588,7 @@ def time_data():
     return time_data
 
 
-@pytest.fixture
+@pytest.fixture()
 def frequency_data():
     """
     FrequencyData object with three data points.
@@ -439,7 +602,7 @@ def frequency_data():
     return frequency_data
 
 
-@pytest.fixture
+@pytest.fixture()
 def frequency_data_one_point():
     """
     FrequencyData object with one data point.
@@ -453,21 +616,22 @@ def frequency_data_one_point():
     return frequency_data
 
 
-@pytest.fixture
+@pytest.fixture()
 def sofa_reference_coordinates(noise_two_by_three_channel):
     """Define coordinates to write in reference files.
     """
     n_measurements = noise_two_by_three_channel.cshape[0]
     n_receivers = noise_two_by_three_channel.cshape[1]
-    source_coordinates = np.random.rand(n_measurements, 3)
-    receiver_coordinates = np.random.rand(n_receivers, 3)
+    rng = np.random.default_rng()
+    source_coordinates = rng.random((n_measurements, 3))
+    receiver_coordinates = rng.random((n_receivers, 3))
     return source_coordinates, receiver_coordinates
 
 
-@pytest.fixture
+@pytest.fixture()
 def generate_sofa_GeneralFIR(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR."""
+    """Generate the reference sofa files of type GeneralFIR."""
     filename = os.path.join(tmpdir, ('GeneralFIR' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR', True)
@@ -484,10 +648,10 @@ def generate_sofa_GeneralFIR(
     return filename
 
 
-@pytest.fixture
+@pytest.fixture()
 def generate_sofa_GeneralTF(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralTF."""
+    """Generate the reference sofa files of type GeneralTF."""
     filename = os.path.join(tmpdir, ('GeneralTF' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralTF', True)
@@ -502,9 +666,9 @@ def generate_sofa_GeneralTF(
     return filename
 
 
-@pytest.fixture
+@pytest.fixture()
 def generate_sofa_GeneralFIR_E(tmpdir):
-    """ Generate the reference sofa files of type GeneralFIR-E."""
+    """Generate the reference sofa files of type GeneralFIR-E."""
     filename = os.path.join(tmpdir, ('GeneralFIR-E.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR-E', True)
@@ -516,9 +680,9 @@ def generate_sofa_GeneralFIR_E(tmpdir):
     return filename
 
 
-@pytest.fixture
+@pytest.fixture()
 def generate_sofa_GeneralTF_E(tmpdir):
-    """ Generate the reference sofa files of type GeneralFIR-E."""
+    """Generate the reference sofa files of type GeneralFIR-E."""
     filename = os.path.join(tmpdir, ('GeneralTF-E.sofa'))
 
     sofafile = sf.Sofa('GeneralTF-E', True)
@@ -531,10 +695,10 @@ def generate_sofa_GeneralTF_E(tmpdir):
     return filename
 
 
-@pytest.fixture
+@pytest.fixture()
 def generate_sofa_postype_spherical(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR,
+    """Generate the reference sofa files of type GeneralFIR,
     spherical position type.
     """
 
@@ -554,64 +718,64 @@ def generate_sofa_postype_spherical(
     return filename
 
 
-@pytest.fixture
+@pytest.fixture()
 def views():
-    """ Used for the creation of Orientation objects with
-    `Orientations.from_view_up`
+    """Used for the creation of Orientation objects with
+    `Orientations.from_view_up`.
     """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
 
-@pytest.fixture
+@pytest.fixture()
 def ups():
-    """ Used for the creation of Orientation objects with
-    `Orientations.from_view_up`
+    """Used for the creation of Orientation objects with
+    `Orientations.from_view_up`.
     """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
 
-@pytest.fixture
+@pytest.fixture()
 def positions():
-    """ Used for the visualization of Orientation objects with
-    `Orientations.show`
+    """Used for the visualization of Orientation objects with
+    `Orientations.show`.
     """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 
 
-@pytest.fixture
+@pytest.fixture()
 def orientations(views, ups):
-    """ Orientations object uses fixtures `views` and `ups`.
+    """Orientations object uses fixtures `views` and `ups`.
     """
     return Orientations.from_view_up(views, ups)
 
 
-@pytest.fixture
+@pytest.fixture()
 def coordinates():
-    """ Coordinates object.
+    """Coordinates object.
     """
     return Coordinates([0, 1], [2, 3], [4, 5])
 
 
-@pytest.fixture
+@pytest.fixture()
 def coeffs():
     return np.array([[[1, 0, 0], [1, 0, 0]]])
 
 
-@pytest.fixture
+@pytest.fixture()
 def state():
     return np.array([[[1, 0]]])
 
 
-@pytest.fixture
-def filter(coeffs, state):
-    """ Filter object.
+@pytest.fixture()
+def filterObject(coeffs, state):
+    """Filter object.
     """
     return fo.Filter(coefficients=coeffs, state=state)
 
 
-@pytest.fixture
+@pytest.fixture()
 def filterFIR():
-    """ FilterFIR objectr.
+    """FilterFIR objectr.
     """
     coeff = np.array([
         [1, 1 / 2, 0],
@@ -619,25 +783,25 @@ def filterFIR():
     return fo.FilterFIR(coeff, sampling_rate=2*np.pi)
 
 
-@pytest.fixture
+@pytest.fixture()
 def filterIIR():
-    """ FilterIIR object.
+    """FilterIIR object.
     """
     coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
     return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
 
 
-@pytest.fixture
+@pytest.fixture()
 def filterSOS():
-    """ FilterSOS objectr.
+    """FilterSOS objectr.
     """
     sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
 
 
-@pytest.fixture
+@pytest.fixture()
 def sphericalvoronoi():
-    """ SphericalVoronoi object.
+    """SphericalVoronoi object.
     """
     points = np.array(
         [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
@@ -645,44 +809,44 @@ def sphericalvoronoi():
     return SphericalVoronoi(sampling)
 
 
-@pytest.fixture
+@pytest.fixture()
 def any_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.AnyClass()
 
 
-@pytest.fixture
+@pytest.fixture()
 def no_encode_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.NoEncodeClass()
 
 
-@pytest.fixture
+@pytest.fixture()
 def no_decode_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.NoDecodeClass()
 
 
-@pytest.fixture
+@pytest.fixture()
 def flat_data():
-    """ Class being primarily used as a subclass of the nested data object.
+    """Class being primarily used as a subclass of the nested data object.
     """
     return stub_utils.FlatData()
 
 
-@pytest.fixture
+@pytest.fixture()
 def nested_data():
-    """ General nested data structure primarily used to illustrate mechanism of
+    """General nested data structure primarily used to illustrate mechanism of
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
 
 
-@pytest.fixture
+@pytest.fixture()
 def dict_of_builtins():
-    """ Dictionary that contains builtins with support for writing and reading.
+    """Dictionary that contains builtins with support for writing and reading.
     """
     return stub_utils.dict_of_builtins()

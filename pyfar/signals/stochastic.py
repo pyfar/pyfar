@@ -1,3 +1,4 @@
+"""Module for generating stochastic signals as part of pyfar.signals."""
 import numpy as np
 import pyfar
 from pyfar.dsp import fft

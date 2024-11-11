@@ -1,22 +1,28 @@
+"""This module contains the Orientations class."""
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings
 
 import pyfar as pf
+if np.__version__ < '2.0.0':
+    from numpy import VisibleDeprecationWarning
+else:
+    from numpy.exceptions import VisibleDeprecationWarning
 
 # this warning needs to be caught and appears if numpy array are generated
-# from nested lists containing lists of unequal lengths, e.g.,
-#  [[1, 0, 0], [1, 0]]
-warnings.filterwarnings("error", category=np.VisibleDeprecationWarning)
+# from nested lists containing lists of unequal lengths,
+#  e.g., [[1, 0, 0], [1, 0]]
+warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 
 class Orientations(Rotation):
     """
     This class for Orientations in the three-dimensional space,
-    is a subclass of scipy.spatial.transform.Rotation and equally based on
-    quaternions of shape (N, 4). It inherits all methods of the Rotation class
-    and adds the creation from perpendicular view and up vectors and a
-    convenient plot function.
+    is a subclass of :py:class:`scipy:scipy.spatial.transform.Rotation` and
+    equally based on quaternions of shape (N, 4). It inherits all methods of
+    the Rotation class and adds the creation from perpendicular view and up
+    vectors through :py:func:`~from_view_up` and a convenient plot function
+    :py:func:`~show`.
 
     An orientation can be visualized with the triple of view, up and right
     vectors and it is tied to the object's local coordinate system.
@@ -54,10 +60,10 @@ class Orientations(Rotation):
 
     """
 
-    def __init__(self, quat=None, normalize=True, copy=True):
+    def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy)
+        super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
     def from_view_up(cls, views, ups):
@@ -84,7 +90,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        orientations : `Orientations` instance
+        orientations : Orientations
             Object containing the orientations represented by quaternions.
         """
 
@@ -92,8 +98,9 @@ class Orientations(Rotation):
         try:
             views = np.atleast_2d(views).astype(np.float64)
             ups = np.atleast_2d(ups).astype(np.float64)
-        except np.VisibleDeprecationWarning:
-            raise ValueError("Expected `views` and `ups` to have shape (N, 3)")
+        except VisibleDeprecationWarning as exc:
+            raise ValueError(
+                "Expected `views` and `ups` to have shape (N, 3)") from exc
 
         # check views and ups
         if (views.ndim > 2 or views.shape[-1] != 3 or
@@ -145,10 +152,12 @@ class Orientations(Rotation):
         show_rights: bool
             select wether to show the right vectors or not.
             The default is True.
+        kwargs : dict
+            Additional arguments passed to :py:func:`pyfar.plot.quiver`.
 
         Returns
         -------
-        ax : matplotlib.axes._subplots.Axes3DSubplot
+        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
             The axis used for the plot.
 
         """
@@ -185,11 +194,11 @@ class Orientations(Rotation):
         perpendicular to minimize rounding errors.
 
         Returns
-        ----------
+        -------
         vector_triple: ndarray, shape (N, 3), normalized vectors
-            - views, see `Orientations.from_view_up.__doc__`
-            - ups, see `Orientations.from_view_up.__doc__`
-            - rights, see `Orientations.from_view_up.__doc__`
+            - views, see :py:func:`Orientations.from_view_up`
+            - ups, see :py:func:`Orientations.from_view_up`
+            - rights, see :py:func:`Orientations.from_view_up`
                 A single vector or a stack of vectors, pointing to the right of
                 the object, constructed as a cross product of ups and rights.
         """
@@ -221,8 +230,10 @@ class Orientations(Rotation):
 
         Parameters
         ----------
-        idx : see NumPy Indexing
-        val : array_like quaternion(s), shape (N, 4) or (4,)
+        idx : indexes
+            see NumPy Indexing
+        val : array_like
+            quaternion(s), shape (N, 4) or (4,)
         """
         if isinstance(val, Orientations):
             val = val.as_quat()

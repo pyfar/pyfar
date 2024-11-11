@@ -10,7 +10,7 @@ def _prepare_plot(ax=None, subplots=None):
 
     Parameters
     ----------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.axes.Axes
         Axes to plot on. The default is None in which case the axes are
         obtained from the current figure. A new figure is created if it does
         not exist.
@@ -21,7 +21,7 @@ def _prepare_plot(ax=None, subplots=None):
 
     Returns
     -------
-    ax : matplotlib.pyplot.axes object
+    ax : matplotlib.axes.Axes
         The current axes if `subplots` is ``None`` all axes from the
         current figure as a single axis or array/list of axes otherwise.
     """
@@ -84,7 +84,7 @@ def _set_axlim(ax, setter, low, high, limits):
 
     Parameters
     ----------
-    ax : Matplotlib Axes Object
+    ax : matplotlib.axes.Axes
         axis for which the limits are to be set.
     setter : function
         function for setting the limits, .e.g., `ax.set_xlim`.
@@ -149,7 +149,7 @@ def _return_default_colors_rgb(**kwargs):
 
 
 def _default_color_dict():
-    """pyfar default colors in the order matching the plotstyles"""
+    """Pyfar default colors in the order matching the plotstyles."""
 
     colors = {'b': '#1471B9',  # blue
               'r': '#D83C27',  # red
@@ -179,15 +179,18 @@ def _check_axis_scale(scale, axis='x'):
 
 
 def _get_quad_mesh_from_axis(ax):
-    """get the QuadMesh from an axis, if there is one.
+    """Get the :py:class:`~matplotlib.collections.QuadMesh` from an axis,
+    if there is one.
 
     Parameters
     ----------
-    ax : Matplotlib axes object
+    ax : matplotlib.axes.Axes
+        axis to get the quad mesh from.
 
     Returns
     -------
     cm : Matplotlib QuadMesh object
+        The quad mesh object from the axis.
     """
     quad_mesh_found = False
     for qm in ax.get_children():
@@ -209,7 +212,6 @@ def _time_auto_unit(time_max):
 
     Parameters
     ----------
-
     time_max : float
         Absolute maximum of the time data in seconds
     """
@@ -269,8 +271,8 @@ def _log_prefix(signal):
 
     Parameters
     ----------
-    fft_norm : str
-        FFT normalization
+    signal : Signal
+        Signal from where the FFT normalization is used.
     """
     if isinstance(signal, Signal) and signal.fft_norm in ('power', 'psd'):
         log_prefix = 10
@@ -282,7 +284,7 @@ def _log_prefix(signal):
 def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
                      colorbar, **kwargs):
     """
-    Check and prepare input for 2D plots
+    Check and prepare input for 2D plots.
 
     1. Check for correct instance and cshape of data
     2. Prepare the plot
@@ -292,7 +294,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
     ----------
     data : Signal, FrequencyData, TimeData
         The input data for the plot function
-    instance : tuple of pyfar audio classes
+    instances : tuple of pyfar audio classes
         Tuple of classes that can be used for the plot function that calls this
     min_n_channels : int
         Minimum numbers channels required by the plot (1 for spectrogram, 2
@@ -310,7 +312,7 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
             which might mask the data's resolution.
 
         The default is ``'pcolormesh'``.
-    ax : matplotlib.pyplot.axes
+    ax : matplotlib.axes.Axes
         Axes to plot on.
 
         ``None``
@@ -326,6 +328,8 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
             `colorbar` must be ``True``
     colorbar : bool
         Flag indicating if a colobar should be added to the plot
+    kwargs : keyword arguments
+        Additional keyword arguments for the plot function.
 
     Returns
     -------
@@ -376,17 +380,19 @@ def _prepare_2d_plot(data, instances, min_n_channels, indices, method, ax,
 
 def _add_colorbar(colorbar, fig, ax, qm, label):
     """
-    Add colorbar to 2D plot
+    Add colorbar to 2D plot.
 
     Parameters
     ----------
     colorbar : bool
         Flag indicating if a colobar should be added to the plot
     fig : matplotlib figure object
-    ax : list
+        Figure to plot on.
+    ax : list[matplotlib.axes.Axes], None
         either a list of to axes objects or a list with one axis and None
         object
     qm : matplotlib quadmesh object
+        Quadmesh object to plot.
     label : string
         colorbar label
 
@@ -424,3 +430,78 @@ def _phase_label(unwrap, deg):
         raise ValueError(f"unwrap is {unwrap} but must be True, False, or 360")
 
     return phase_label
+
+
+def _assert_and_match_data_to_side(data, signal, side):
+    """Adjust data and frequency vector for plotting as specified by side."""
+
+    if side == 'left':
+        mask = signal.frequencies <= 0
+    elif side == 'right':
+        mask = signal.frequencies >= 0
+    else:
+        raise ValueError('Invalid `side` parameter, pass either `left` or '
+                         '`right`.')
+
+    if mask.sum() < 2:
+        raise ValueError(f'The {side} side of the spectrum is not defined.')
+
+    # get corresponding data
+    frequencies = signal.frequencies[mask]
+    data = data[..., mask]
+
+    if side == 'left':
+        frequencies = np.flipud(np.abs(frequencies))
+        data = data[..., ::-1]
+
+    if (type(signal) is not FrequencyData) and signal.complex:
+        xlabel = f"Frequency in Hz ({side})"
+    else:
+        xlabel = "Frequency in Hz"
+
+    return data, frequencies, xlabel
+
+
+def _assert_and_match_spectrogram_to_side(spectrogram, frequencies, signal,
+                                          side):
+    """Adjust data and frequency vector for plotting as specified by side."""
+
+    if side == 'left':
+        mask = frequencies <= 0
+    elif side == 'right':
+        mask = frequencies >= 0
+    else:
+        raise ValueError('Invalid `side` parameter, pass either `left` or '
+                         '`right`.')
+
+    # get corresponding data
+    frequencies = frequencies[mask]
+    spectrogram = spectrogram[..., mask, :]
+
+    if side == 'left':
+        frequencies = np.flipud(np.abs(frequencies))
+        spectrogram = spectrogram[::-1, ...]
+
+    if (type(signal) is not FrequencyData) and signal.complex:
+        xlabel = f"Frequency in Hz ({side})"
+    else:
+        xlabel = "Frequency in Hz"
+
+    return spectrogram, frequencies, xlabel
+
+
+def _assert_and_match_data_to_mode(data, signal, mode):
+    """Adjust data and y-label for plotting according to specified mode."""
+
+    if mode == 'real':
+        if signal.complex:
+            return np.real(data), 'Amplitude (real)'
+        else:
+            return np.real(data), 'Amplitude'
+    elif mode == 'imag':
+        return np.imag(data), 'Amplitude (imaginary)'
+    elif mode == 'abs':
+        return np.abs(data), 'Amplitude (absolute)'
+    else:
+        raise ValueError('`mode` has to be `real`, `imag`, or '
+                         f'`abs`, but is {mode}.')

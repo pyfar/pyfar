@@ -1,8 +1,12 @@
+"""Gammatone filter bank for pyfar."""
 import numpy as np
 import scipy.signal as sgn
 from copy import deepcopy
 from deepdiff import DeepDiff
 import pyfar as pf
+import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
+from pyfar._utils import rename_arg
 
 
 class GammatoneBands():
@@ -19,14 +23,14 @@ class GammatoneBands():
     reconstruction of the input signal (see examples below).
 
     Calling ``GFB = GammatoneBands()`` constructs the filter bank. Afterwards
-    the class methods ``GFB.process()`` and ``GFB.reconstruct`` can be used to
-    filter and reconstruct signals. All relevant data such as the filter
+    the class methods ``GFB.process()`` and ``GFB.reconstruct()`` can be used
+    to filter and reconstruct signals. All relevant data such as the filter
     coefficients can be obtained for example through ``GFB.coefficients``. See
     below for more documentation.
 
     Parameters
     ----------
-    freq_range : array like
+    frequency_range : array_like
         The upper and lower frequency in Hz between which the filter bank is
         constructed. Values must be larger than 0 and not exceed half the
         sampling rate.
@@ -46,11 +50,15 @@ class GammatoneBands():
     sampling_rate : number
         The sampling rate of the filter bank in Hz. The default is ``44100``
         Hz.
-
+    freq_range: array_like
+        The upper and lower frequency in Hz between which the filter bank is
+        constructed. Values must be larger than 0 and not exceed half the
+        sampling rate.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
     Examples
     --------
-
     .. plot::
 
         >>> import pyfar as pf
@@ -115,21 +123,25 @@ class GammatoneBands():
     .. [#] https://amtoolbox.org/
     """
 
-    def __init__(self, freq_range, resolution=1, reference_frequency=1000,
-                 delay=0.004, sampling_rate=44100):
+    @rename_arg({"freq_range": "frequency_range"},
+                "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+                "favor of frequency_range")
+    def __init__(self, frequency_range, resolution=1,
+                 reference_frequency=1000, delay=0.004, sampling_rate=44100):
 
         # check input (remaining checks done in erb_frequencies)
-        freq_range = np.asarray(freq_range)
-        if np.any(freq_range < 0) or np.any(freq_range > sampling_rate / 2):
-            raise ValueError(("Values in freq_range must be between 0 Hz and "
-                              "sampling_rate/2"))
+        frequency_range = np.asarray(frequency_range)
+        if np.any(frequency_range < 0) or np.any(frequency_range >
+                                                 sampling_rate / 2):
+            raise ValueError(("Values in frequency_range must be between 0 Hz"
+                              " and sampling_rate/2"))
         if delay <= 0:
             raise ValueError("The delay must be larger than zero")
         if resolution <= 0:
             raise ValueError("The resolution must be larger than zero")
 
         # store user values
-        self._freq_range = freq_range
+        self._frequency_range = frequency_range
         self._resolution = resolution
         self._reference_frequency = reference_frequency
         self._delay = delay
@@ -137,7 +149,7 @@ class GammatoneBands():
 
         # compute center frequencies
         self._frequencies = erb_frequencies(
-            freq_range, resolution, reference_frequency)
+            frequency_range, resolution, reference_frequency)
         # compute filter coefficients
         self._coefficients, self._normalizations = self._get_coefficients()
         # initialize the internal filter state
@@ -149,9 +161,10 @@ class GammatoneBands():
         self._gains = self._get_gains()
 
     def __repr__(self):
-        """Nice string representation of class instances"""
+        """Nice string representation of class instances."""
         return (f"Reconstructing Gammatone filter bank with {self.n_bands} "
-                f"bands between {self.freq_range[0]} and {self.freq_range[1]} "
+                f"bands between {self.frequency_range[0]} "
+                f"and {self.frequency_range[1]} "
                 f"Hz spaced by {self.resolution} ERB units @ "
                 f"{self.sampling_rate} Hz sampling rate")
 
@@ -161,37 +174,51 @@ class GammatoneBands():
 
     @property
     def freq_range(self):
-        """Get the frequency range of the filter bank in Hz"""
-        return self._freq_range
+        """Get the frequency range of the filter bank in Hz.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
+        """
+
+        # Deprecation warning for freq_range parameter
+        warnings.warn((
+            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
+            ' of frequency_range'),
+                PyfarDeprecationWarning, stacklevel=2)
+        return self._frequency_range
+
+    @property
+    def frequency_range(self):
+        """Get the frequency range of the filter bank in Hz."""
+        return self._frequency_range
 
     @property
     def resolution(self):
-        """Get the resolution of the filter bank in ERB units"""
+        """Get the resolution of the filter bank in ERB units."""
         return self._resolution
 
     @property
     def reference_frequency(self):
-        """Get the reference frequency of the filter bank in Hz"""
+        """Get the reference frequency of the filter bank in Hz."""
         return self._reference_frequency
 
     @property
     def frequencies(self):
-        """Get the center frequencies of the Gammatone filters in Hz"""
+        """Get the center frequencies of the Gammatone filters in Hz."""
         return self._frequencies
 
     @property
     def n_bands(self):
-        """Get the number of bands in the filter bank"""
+        """Get the number of bands in the filter bank."""
         return len(self.frequencies)
 
     @property
     def delay(self):
-        """Get the desired delay of the filter bank in seconds"""
+        """Get the desired delay of the filter bank in seconds."""
         return self._delay
 
     @property
     def sampling_rate(self):
-        """Get the sampling rate of the filter bank in Hz"""
+        """Get the sampling rate of the filter bank in Hz."""
         return self._sampling_rate
 
     @property
@@ -237,7 +264,7 @@ class GammatoneBands():
 
     def _get_coefficients(self):
         """
-        Compute the Gammatone filter coefficients
+        Compute the Gammatone filter coefficients.
 
         Returns
         -------
@@ -283,7 +310,7 @@ class GammatoneBands():
             delay_samples + 3, sampling_rate=self.sampling_rate))
 
         # compute the envelope
-        ir = real.time + 1j * imag.time
+        ir = real.time[:, 0, :] + 1j * imag.time[:, 0, :]
         env = np.abs(ir)
 
         # sample at which the maximum occurs
@@ -329,7 +356,7 @@ class GammatoneBands():
 
         # iteratively find gains
         gains = np.ones((self.n_bands, 1))
-        for ii in range(100):
+        for _ii in range(100):
             h_fin = np.matmul(h, gains)
             gains /= np.abs(h_fin)
 
@@ -418,10 +445,6 @@ class GammatoneBands():
         time_out = np.reshape(time_out,
                               (self.n_bands, ) + signal.cshape + (-1, ))
 
-        # squeeze dimension of single channel signal
-        if signal.cshape == (1, ):
-            time_out = np.squeeze(time_out)
-
         # return real and immaginary part of output as pyfar Signal objects
         real = signal.copy()
         real.time = np.real(time_out)
@@ -481,7 +504,7 @@ class GammatoneBands():
         # get dictionary representation
         obj_dict = self.copy().__dict__
         # define required data
-        keep = ["_freq_range", "_resolution", "_reference_frequency",
+        keep = ["_frequency_range", "_resolution", "_reference_frequency",
                 "_delay", "_sampling_rate", "_state"]
         # check if all required data is contained
         for k in keep:
@@ -497,7 +520,7 @@ class GammatoneBands():
     @classmethod
     def _decode(cls, obj_dict):
         # initialize new clas instance
-        obj = cls(obj_dict["_freq_range"], obj_dict["_resolution"],
+        obj = cls(obj_dict["_frequency_range"], obj_dict["_resolution"],
                   obj_dict["_reference_frequency"], obj_dict["_delay"],
                   obj_dict["_sampling_rate"])
         # set internal parameters
@@ -506,7 +529,10 @@ class GammatoneBands():
         return obj
 
 
-def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):
+@rename_arg({"freq_range": "frequency_range"},
+            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
+            "favor of frequency_range")
+def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
     """
     Get frequencies that are linearly spaced on the ERB frequency scale.
 
@@ -523,7 +549,7 @@ def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):
 
     Parameters
     ----------
-    freq_range : array like
+    frequency_range : array_like
         The upper and lower frequency limits in Hz between which the frequency
         vector is computed.
     resolution : number, optional
@@ -533,6 +559,11 @@ def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):
     reference_frequency : number, optional
         The reference frequency in Hz relative to which the frequency vector
         is constructed. The default is ``1000``.
+    freq_range: array_like
+        The upper and lower frequency limits in Hz between which the frequency
+        vector is computed.
+        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
+        of ``'frequency_range'``.
 
     Returns
     -------
@@ -556,19 +587,19 @@ def erb_frequencies(freq_range, resolution=1, reference_frequency=1000):
     """
 
     # check input
-    if not isinstance(freq_range, (list, tuple, np.ndarray)) \
-            or len(freq_range) != 2:
-        raise ValueError("freq_range must be an array like of length 2")
-    if freq_range[0] > freq_range[1]:
-        raise ValueError(("The first value of freq_range must be smaller "
+    if not isinstance(frequency_range, (list, tuple, np.ndarray)) \
+            or len(frequency_range) != 2:
+        raise ValueError("frequency_range must be an array like of length 2")
+    if frequency_range[0] > frequency_range[1]:
+        raise ValueError(("The first value of frequency_range must be smaller "
                           "than the second value"))
     if resolution <= 0:
         raise ValueError("Resolution must be larger than zero")
 
     # convert the frequency range and reference to ERB scale
     # (Hohmann 2002, Eq. 16)
-    erb_range = 9.2645 * np.sign(freq_range) * np.log(
-        1 + np.abs(freq_range) * 0.00437)
+    erb_range = 9.2645 * np.sign(frequency_range) * np.log(
+        1 + np.abs(frequency_range) * 0.00437)
     erb_ref = 9.2645 * np.sign(reference_frequency) * np.log(
         1 + np.abs(reference_frequency) * 0.00437)
 
