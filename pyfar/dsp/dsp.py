@@ -2442,8 +2442,14 @@ def normalize(signal, reference_method='max', domain='auto',
             Compute the mean absolute values per channel.
         ``'energy'``
             Compute the energy per channel using :py:func:`~pyfar.dsp.energy`.
+            Note that the square root of the energy is used as `reference`,
+            which is required for the energy of the normalized signal to match
+            the `target`.
         ``'power'``
             Compute the power per channel using :py:func:`~pyfar.dsp.power`.
+            Note that the square root of the power is used as `reference`,
+            which is required for the power of the normalized signal to match
+            the `target`.
         ``'rms'``
             Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
@@ -2661,6 +2667,12 @@ def normalize(signal, reference_method='max', domain='auto',
     else:
         raise ValueError(("channel_handling must be 'individual', 'max', "
                           "'min' or 'mean'."))
+
+    # scale normalization to achieve target energy and power. This must be
+    # done because they are energetic properties
+    if reference_method in ['energy', 'power']:
+        reference_norm = np.sqrt(reference_norm)
+
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm
     if return_reference:
