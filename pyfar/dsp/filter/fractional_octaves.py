@@ -4,6 +4,7 @@ import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
 from pyfar._utils import rename_arg
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def fractional_octave_frequencies(
@@ -396,7 +397,8 @@ def reconstructing_fractional_octave_bands(
     filter : FilterFIR
         FIR Filter object. Only returned if ``signal = None``.
     frequencies : np.ndarray
-        Center frequencies of the filters.
+        Center frequencies of the filters. ``'frequencies'`` return will be
+        deprecated in pyfar 0.9.0.
 
     References
     ----------
@@ -517,6 +519,9 @@ def reconstructing_fractional_octave_bands(
         "Reconstructing linear phase fractional octave filter bank."
         f"(num_fractions={num_fractions}, frequency_range={frequency_range}, "
         f"overlap={overlap}, slope={slope})")
+
+    warnings.warn(("Return parameter 'frequencies' will be deprecated in pyfar"
+                   " 0.9.0"), PyfarDeprecationWarning, stacklevel=2)
 
     if signal is None:
         # return the filter object
