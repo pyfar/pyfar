@@ -2670,10 +2670,11 @@ def normalize(signal, reference_method='max', domain='auto',
         raise ValueError(("channel_handling must be 'individual', 'max', "
                           "'min' or 'mean'."))
 
-    # scale normalization to achieve target energy and power. This must be
-    # done because they are energetic properties
+    # scale normalization and target to achieve target energy and power. This
+    # must be done because they are energetic properties
     if reference_method in ['energy', 'power']:
         reference_norm = np.sqrt(reference_norm)
+        target = np.sqrt(target)
 
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm

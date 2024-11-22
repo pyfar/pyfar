@@ -27,13 +27,15 @@ def test_normalization_max_mean(reference_method, channel_handling, truth):
 
 @pytest.mark.parametrize(('reference_method', 'reference_function'), [
     ('energy', pf.dsp.energy), ('power', pf.dsp.power), ('rms', pf.dsp.rms)])
+@pytest.mark.parametrize('target', [.5, 1, 2])
 @pytest.mark.parametrize(('channel_handling', 'assert_function'), [
     ('max', np.max),
     ('individual', np.array),
     ('min', np.min),
     ('mean', np.mean)])
 def test_normalization_energy_power_rms(
-    reference_method, reference_function, channel_handling, assert_function):
+    reference_method, reference_function, target, channel_handling,
+    assert_function):
     """
     Parametrized test for all combinations of 'energy', 'power' and 'rms'
     reference_method and channel_handling parameters using impulse signals.
@@ -41,9 +43,10 @@ def test_normalization_energy_power_rms(
     signal = pf.signals.impulse(3, amplitude=[1, 5])
     normalized = pf.dsp.normalize(signal, domain='time',
                               reference_method=reference_method,
-                              channel_handling=channel_handling)
+                              channel_handling=channel_handling,
+                              target=target)
     value = assert_function(reference_function(normalized))
-    npt.assert_almost_equal(value, np.ones(value.shape), 10)
+    npt.assert_almost_equal(value, target * np.ones(value.shape), 10)
 
 
 @pytest.mark.parametrize('is_complex', [False, True])
