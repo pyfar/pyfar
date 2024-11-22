@@ -2443,13 +2443,15 @@ def normalize(signal, reference_method='max', domain='auto',
         ``'energy'``
             Compute the energy per channel using :py:func:`~pyfar.dsp.energy`.
             Note that the square root of the energy is used as `reference`,
-            which is required for the energy of the normalized signal to match
-            the `target`.
+            after handling multi-channel signals (see *channel_handling*
+            below). This is required for the energy of the normalized signal to
+            match the `target`.
         ``'power'``
             Compute the power per channel using :py:func:`~pyfar.dsp.power`.
             Note that the square root of the power is used as `reference`,
-            which is required for the power of the normalized signal to match
-            the `target`.
+            after handling multi-channel signals (see *channel_handling*
+            below). This is required for the power of the normalized signal to
+            match the `target`.
         ``'rms'``
             Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
