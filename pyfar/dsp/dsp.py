@@ -1089,14 +1089,14 @@ def time_shift(
     ----------
     signal : Signal
         The signal to be shifted
-    shift : int, float
+    shift : int, float, array_like
         The time-shift value. A positive value will result in right shift on
         the time axis (delaying of the signal), whereas a negative value
         yields a left shift on the time axis (non-causal shift to a earlier
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
-        can be performed by passing an array matching the signals channel
-        dimensions :py:func:`~pyfar.Signal.cshape`.
+        can be performed by passing an array broadcastable to the signals
+        channel dimensions :py:func:`~pyfar.Signal.cshape`.
     mode : str, optional
         The shifting mode
 
