@@ -351,7 +351,7 @@ def head_related_impulse_responses(
         ``'median'``
             Return median plane HRIRs with an angular resolution of 2 degrees.
         Array like
-            Return HRIRs at azimuth and elevation values in degrees. For example
+            Return HRIRs at azimuth and elevation in degrees. For example
             ``[[30, 0], [330, 0]]`` returns HRIRs on the horizontal plane
             (0 degree elevation) for azimuth angles of 30 and 330 degrees.
         :py:class:`~pyfar.Coordinates`
