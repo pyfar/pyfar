@@ -121,5 +121,5 @@ def test_hrirs_sampling_rate(sampling_rate):
 
 def test_hrirs_assertions():
     """Test assertions for getting HRIRs."""
-    with pytest.raises(ValueError, match="HRIR for azimuth=1"):
+    with pytest.raises(ValueError, match="HRIRs for one or more"):
         pf.signals.files.head_related_impulse_responses([[1, 0]])
