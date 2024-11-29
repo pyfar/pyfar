@@ -403,27 +403,32 @@ def head_related_impulse_responses(
         idx = (idx[np.argsort(polar)], )
     else:
 
-        # get coordinates - required for more verbose error handling below
         if isinstance(position, pf.Coordinates):
-            position = pf.rad2deg(position.spherical_elevation)[..., :2]
+            # force radius to be equal to those of HRIRs
+            position.radius = 1.7
+        else:
+            # convert to pyfar coordinates for convenience
+            position = np.atleast_2d(position) / 180 * np.pi
+            position = pf.Coordinates.from_spherical_elevation(
+                position[:, 0], position[:, 1], 1.7)
 
-        idx = []
-        for pos in position:
-            find = pf.Coordinates.from_spherical_elevation(
-                pos[0] / 180 * np.pi, pos[1] / 180 * np.pi, 1.7)
-            idx_current, distance = sources.find_nearest(
-                find, distance_measure='spherical_radians')
-            if distance < tolerance_rad:
-                idx.append(idx_current[0])
-            else:
-                raise ValueError((
-                    f"HRIR for azimuth={pos[0]} and elevation={pos[1]} degrees"
-                    " is not available. See documentation for more "
-                    "information."))
+        # find requested HRIRs
+        idx, distance = sources.find_nearest(
+            position, distance_measure='spherical_radians')
+
+        if np.any(distance > tolerance_rad):
+            raise ValueError((
+                "HRIRs for one or more requested source positions are not "
+                "available. See documentation for available positions."))
 
     # select data for desired source positions
     hrirs.time = hrirs.time[idx]
     sources = sources[idx]
+
+    # force cdim to be independent of number of requested source positions
+    # must be done due to indexing and numpy broadcasting above
+    if hrirs.cdim == 1:
+        hrirs.time = hrirs.time[None, ...]
 
     # diffuse field compensation
     if diffuse_field_compensation:
