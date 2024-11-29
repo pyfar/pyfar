@@ -350,11 +350,12 @@ def head_related_impulse_responses(
             degrees.
         ``'median'``
             Return median plane HRIRs with an angular resolution of 2 degrees.
-        List of coordinates
-            Return HRIRs at specific positions defined by a list of azimuth
-            and elevation values in degrees. For example
+        Array like
+            Return HRIRs at azimuth and elevation values in degrees. For example
             ``[[30, 0], [330, 0]]`` returns HRIRs on the horizontal plane
             (0 degree elevation) for azimuth angles of 30 and 330 degrees.
+        :py:class:`~pyfar.Coordinates`
+            Return HRIRs at positions defined by a pyfar Coordinates object.
 
         The default is ``[[0, 0]]``, which returns the HRIR for frontal sound
         incidence. A ValueError is raised if the requested position is not
@@ -392,15 +393,20 @@ def head_related_impulse_responses(
     tolerance_rad = 0.1 / 180 * np.pi
 
     # get indices of source positions
-    if position == "horizontal":
+    if isinstance(position, str) and position == "horizontal":
         idx = sources.elevation == 0
-    elif position == "median":
+    elif isinstance(position, str) and position == "median":
         idx = sources.lateral == 0
         idx = np.where(idx)[0]
         # sort positions according to polar angle
         polar = sources.polar[idx].flatten()
         idx = (idx[np.argsort(polar)], )
     else:
+
+        # get coordinates - required for more verbose error handling below
+        if isinstance(position, pf.Coordinates):
+            position = pf.rad2deg(position.spherical_elevation)[..., :2]
+
         idx = []
         for pos in position:
             find = pf.Coordinates.from_spherical_elevation(
