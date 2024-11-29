@@ -13,6 +13,11 @@ import pyfar.signals
 
 from pyfar.testing import stub_utils
 
+collect_ignore_glob = [
+    "private/*",
+    "references/*",
+    "test_plot_data/*",
+    "test_io_data/*"]
 
 @pytest.fixture()
 def sine_stub():
