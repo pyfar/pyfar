@@ -354,6 +354,8 @@ def head_related_impulse_responses(
             (0 degree elevation) for azimuth angles of 30 and 330 degrees.
         :py:class:`~pyfar.Coordinates`
             Return HRIRs at positions defined by a pyfar Coordinates object.
+            Note that the HRIRs were measured at a fixed radius of 1.7 m.
+            Hence, the radius if `position` will be ignored.
 
         The default is ``[[0, 0]]``, which returns the HRIR for frontal sound
         incidence. A ValueError is raised if the requested position is not
