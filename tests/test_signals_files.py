@@ -72,6 +72,29 @@ def test_hrirs_position(position, convention, first, second):
     npt.assert_allclose(second, sg[..., 1].flatten() / np.pi * 180, atol=1e-12)
 
 
+def test_hrirs_position_type():
+    """Test different types of the position argument."""
+
+    # position as list
+    position_list = [[10, 0], [20, 0]]
+    hrirs_list, _ = pf.signals.files.head_related_impulse_responses(
+        position_list)
+
+    # position as array
+    position_array = np.atleast_2d(position_list)
+    hrirs_array, _ = pf.signals.files.head_related_impulse_responses(
+        position_array)
+
+    # position as pyfar coordinates
+    position_coordinates = pf.Coordinates.from_spherical_elevation(
+        np.array([10, 20]) / 180 * np.pi, 0, 1)
+    hrirs_coordinates, _ = pf.signals.files.head_related_impulse_responses(
+        position_coordinates)
+
+    assert hrirs_list == hrirs_array
+    assert hrirs_list == hrirs_coordinates
+
+
 def test_hrirs_diffuse_field_compensation():
     """Test diffuse field compensation for HRIRs."""
     hrirs, _ = pf.signals.files.head_related_impulse_responses(
@@ -98,5 +121,5 @@ def test_hrirs_sampling_rate(sampling_rate):
 
 def test_hrirs_assertions():
     """Test assertions for getting HRIRs."""
-    with pytest.raises(ValueError, match="HRIR for azimuth=1"):
+    with pytest.raises(ValueError, match="HRIRs for one or more"):
         pf.signals.files.head_related_impulse_responses([[1, 0]])
