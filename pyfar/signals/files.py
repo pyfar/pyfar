@@ -357,7 +357,7 @@ def head_related_impulse_responses(
         :py:class:`~pyfar.Coordinates`
             Return HRIRs at positions defined by a pyfar Coordinates object.
             Note that the HRIRs were measured at a fixed radius of 1.7 m.
-            Hence, the radius if `position` will be ignored.
+            Hence, the radius in `position` will be ignored.
 
         The default is ``[[0, 0]]``, which returns the HRIR for frontal sound
         incidence. A ValueError is raised if the requested position is not
@@ -412,7 +412,7 @@ def head_related_impulse_responses(
             # convert to pyfar coordinates for convenience
             position = np.atleast_2d(position) / 180 * np.pi
             position = pf.Coordinates.from_spherical_elevation(
-                position[:, 0], position[:, 1], 1.7)
+                position[..., 0], position[..., 1], 1.7)
 
         # find requested HRIRs
         idx, distance = sources.find_nearest(
