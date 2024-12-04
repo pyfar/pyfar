@@ -115,19 +115,15 @@ class RegularizedSpectrumInversion():
             Convention Paper 6929 Presented at the 121st Convention, 2006
             October 5–8, San Francisco, CA, USA.
     """ # noqa: E501
-
-    def __init__(self, regu_type: str="") -> None:
-
-        self._regu_type = regu_type
+    def __init__(self) -> None:
 
         # throw error if object is instanced without classmethod
-        if regu_type == "":
-            raise RuntimeError("Regularization objects must be created "
-                               "using a classmethod.")
+        raise RuntimeError("Regularization objects must be created "
+                           "using a classmethod.")
 
     def __repr__(self):
         return f"Regularization object with regularization "\
-            f"of type '{self._regu_type}'."
+            f"of type '{self._regularization_type}'."
 
     @classmethod
     def from_frequency_range(cls, frequency_range):
@@ -146,13 +142,14 @@ class RegularizedSpectrumInversion():
         frequency_range : array like
             Array like containing the lower and upper frequency limit in Hz.
         """
-        instance = cls(regu_type = "frequency range")
+        instance = cls.__new__(cls)
 
         if len(frequency_range) != 2:
             raise ValueError(
                 "The frequency range needs to specify lower and upper limits.")
 
         instance._frequency_range = np.asarray(frequency_range)
+        instance._regularization_type = "frequency range"
 
         return instance
 
@@ -174,8 +171,9 @@ class RegularizedSpectrumInversion():
             raise ValueError(
                 "Regularization must be a pyfar.Signal object.")
 
-        instance = cls(regu_type = "magnitude spectrum")
+        instance = cls.__new__(cls)
         instance._regu = regularization
+        instance._regularization_type = "magnitude spectrum"
 
         return instance
 
@@ -271,10 +269,10 @@ class RegularizedSpectrumInversion():
             The frequency dependent regularization.
         """
         # Call private method to get regularization factors
-        if self._regu_type == "frequency range":
+        if self._regularization_type == "frequency range":
             regularization = \
                 self._get_regularization_from_frequency_range(signal)
-        elif self._regu_type == "magnitude spectrum":
+        elif self._regularization_type == "magnitude spectrum":
             regularization =  \
                 self._get_regularization_from_regularization_signal(signal)
 
@@ -327,8 +325,9 @@ class RegularizedSpectrumInversion():
         """Get regularization factors from frequency range."""
 
         if not isinstance(signal, pf.Signal):
-            raise TypeError(f"Regularization of type '{self._regu_type}' "
-                         "requires an input signal of type pyfar.Signal.")
+            raise TypeError("Regularization of type "
+                            f"'{self._regularization_type}' requires an input"
+                            " signal of type pyfar.Signal.")
 
         # arrange regularization factors for inside and outside frequency range
         regu_inside = np.zeros(signal.n_bins, dtype=np.double)
@@ -356,8 +355,9 @@ class RegularizedSpectrumInversion():
         """Get regularization from signal."""
 
         if not isinstance(signal, pf.Signal):
-            raise TypeError(f"Regularization of type '{self._regu_type}' "
-                            "requires an input signal of type pyfar.Signal.")
+            raise TypeError("Regularization of type "
+                            f"'{self._regularization_type}' requires an input"
+                            " signal of type pyfar.Signal.")
 
         if signal.n_bins != self._regu.n_bins:
             raise ValueError(
