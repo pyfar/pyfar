@@ -417,10 +417,10 @@ def reconstructing_fractional_octave_bands(
         >>> import matplotlib.pyplot as plt
         >>> # generate data
         >>> x = pf.signals.impulse(2**12)
-        >>> y, _ = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
+        >>> y = pf.dsp.filter.reconstructing_fractional_octave_bands(x)[0]
         >>> # get center frequencies
-        >>> _, f = pf.dsp.filter.fractional_octave_frequencies(
-        ...    frequency_range=(60, 16000))
+        >>> f = pf.dsp.filter.fractional_octave_frequencies(
+        ...    frequency_range=(60, 16000))[1]
         >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
         >>> # time domain plot
         >>> ax = pf.plot.time_freq(y_sum, color='k', unit='ms')
