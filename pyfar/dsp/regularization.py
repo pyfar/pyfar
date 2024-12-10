@@ -10,10 +10,9 @@ import numbers
 class RegularizedSpectrumInversion():
     r"""Class for frequency-dependent regularized inversion.
 
-    Regularization is used in inverse filtering methods to limit the gain
-    applied by an inverse filter. This, for example, is necessary to
-    avoid extreme amplification to compensate a signal of limited bandwidth or
-    containing notches in the spectrum.
+    Regularized inversion limits the gain applied by an inverse filter.
+    This can be useful to avoid extreme amplification when inverting a signal
+    of limited bandwidth or containing notches in the spectrum.
 
     The inverse is computed as [#]_:
 
@@ -22,20 +21,27 @@ class RegularizedSpectrumInversion():
 
         S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \beta |\epsilon(f)|^2} D(f)
 
-    with :math:`S(f)` being the input signal's spectrum, :math:`(\cdot)^*` the
-    complex conjugate, :math:`\epsilon(f)` the regularization, and
-    :math:`\beta` a scalar to control the influence of the regularization on
-    the inversion. :math:`D(f)` denotes an optional target function.
+    with :math:`f` being the frequency, :math:`S(f)` the spectrum of the signal
+    to be inverted, :math:`(\cdot)^*` the complex conjugate,
+    :math:`\epsilon(f)` the regularization, and :math:`\beta` a scalar to
+    control the amount of regularization. :math:`D(f)` denotes an optional
+    target function.
 
-    The compensated system :math:`C(f) = S(f)S^{-1}(f)` approaches the target
+    The compensated system :math:`C = S(f)S^{-1}(f)` approaches the target
     function in magnitude and phase. In many applications, the target function
     should contain a delay to make sure that :math:`S^{-1}(f)` is causal. The
     larger :math:`\beta` and :math:`\epsilon(f)` are, the larger the deviation
     of :math:`C(f)` from the target :math:`D(f)`.
 
-    Examples
-    --------
-    For examples, see the :ref:`examples section of the invert method <invert-examples>`.
+    The inversion is done in two steps:
+
+    1. Define :math:`S(f)`, :math:`\epsilon(f)`, :math:`\beta`, and
+       :math:`D(f)` using one of the ``from_()`` methods listed below.
+    2. Compute the inverse :math:`S(f)^{-1}` using :py:func:`~invert`
+
+    The parameters that are defined in the first step are often iteratively
+    adjusted. For examples, see the
+    :ref:`examples section of the invert method <invert-examples>`.
 
     References
     ----------
@@ -43,7 +49,7 @@ class RegularizedSpectrumInversion():
             Design Using a Minimal-Phase Target Function from Regularization,”
             Convention Paper 6929 Presented at the 121st Convention, 2006
             October 5–8, San Francisco, CA, USA.
-    """ # noqa: E501
+    """
     def __init__(self) -> None:
 
         # throw error if object is instanced without classmethod
@@ -60,12 +66,12 @@ class RegularizedSpectrumInversion():
         r"""
         Regularization from a given frequency range.
 
-        Defines a frequency range within which the regularization factor is set
-        to ``0``. Outside the frequency range the regularization factor is
-        ``1`` and can be scaled using the `beta` parameter.
-        The regularization factors are cross-faded using a raised cosine
-        window function with a width of :math:`\sqrt{2}f` above and below the
-        given frequency range.
+        Defines a frequency range within which no regularization is applied by
+        setting the regularization :math:`\epsilon(f)=0`. Outside the frequency
+        range the regularization is :math:`\epsilon(f)=1` and can be controlled
+        using the `beta` parameter. The regularization factors are cross-faded
+        using a raised cosine window function with a width of :math:`\sqrt{2}f`
+        above and below the given frequency range.
 
         Parameters
         ----------
@@ -93,8 +99,9 @@ class RegularizedSpectrumInversion():
 
             The default is ``1``.
         target : Signal, optional
-            Target function for the regularization. The default ``None`` uses
-            constant spectrum with an amplitude of 1 as target.
+            Target function for the regularization. The default ``None`` uses a
+            zero-phase spectrum with an amplitude of 1 as target equalling an
+            impulse in the time domain.
         """# noqa: E501
         instance = cls.__new__(cls)
 
@@ -124,8 +131,8 @@ class RegularizedSpectrumInversion():
         signal : Signal
             Signal to be inverted.
         regularization : Signal
-            Signal containing the regularization factors. The signal's
-            magnitude spectrum is used for regularization.
+            Signal defining the regularization :math:`\epsilon(f)` in
+            ``regularization.freq``.
         beta : float, string, optional
             Beta parameter to control the scaling of the regularization as in
             :eq:`regularized_inversion`. Can be a
@@ -146,8 +153,9 @@ class RegularizedSpectrumInversion():
 
             The default is ``1``.
         target : Signal, optional
-            Target function for the regularization. The default ``None`` uses
-            constant spectrum with an amplitude of 1 as target.
+            Target function for the regularization. The default ``None`` uses a
+            zero-phase spectrum with an amplitude of 1 as target equalling an
+            impulse in the time domain.
         """# noqa: E501
         if not isinstance(regularization, pf.Signal):
             raise ValueError(
@@ -164,7 +172,9 @@ class RegularizedSpectrumInversion():
 
     @property
     def beta(self):
-        """Return beta parameter used to scale the regularization."""
+        r"""
+        Get or set the :math:`\beta` to control the amount off regularization.
+        """
         return self._beta
 
     @beta.setter
@@ -187,9 +197,8 @@ class RegularizedSpectrumInversion():
     @property
     def regularization(self):
         r"""
-        Returns the regularization function without scaling.
-
-        Compute the frequency dependent regularization :math:`\epsilon(f)`.
+        Get the regularization :math:`\epsilon(f)` without scaling by
+        :math:`\beta`.
         """
         # Call private method to get regularization factors
         if self._regularization_type == "frequency range":
@@ -203,7 +212,7 @@ class RegularizedSpectrumInversion():
 
     @property
     def signal(self):
-        """Return signal to be inverted"""
+        r"""Get or set the signal :math:`S(f)` to be inverted."""
         return self._signal
 
     @signal.setter
@@ -217,7 +226,7 @@ class RegularizedSpectrumInversion():
 
     @property
     def target(self):
-        """Return target function"""
+        """Get or set the target function :math:`D(f)`."""
         return self._target
 
     @target.setter
