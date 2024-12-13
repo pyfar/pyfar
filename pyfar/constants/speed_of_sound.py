@@ -12,7 +12,7 @@ def speed_of_sound_simple(temperature):
 
     .. math::
 
-        c = 343.2 \cdot \sqrt{\frac{t + 273.15}{293.15}}
+        c = 343.2 \cdot \sqrt{\frac{t + 273.15}{293.15}} m/s
 
     Parameters
     ----------
@@ -36,6 +36,6 @@ def speed_of_sound_simple(temperature):
     if np.any(np.array(temperature) < -20) or np.any(
             np.array(temperature) > 50):
         raise ValueError("Temperature must be between -20°C and +50°C.")
-    temperature = np.array(temperature, dtype=float) if isinstance(temperature, list) else temperature
+    temperature = np.array(temperature, dtype=float) if isinstance(
+        temperature, list) else temperature
     return 343.2*np.sqrt((temperature+273.15)/293.15)
-
