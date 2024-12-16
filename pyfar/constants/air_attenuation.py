@@ -237,4 +237,7 @@ def saturation_vapor_pressure(temperature):
     if np.any(np.array(
             temperature) < -45) or np.any(np.array(temperature) > 60):
         raise ValueError("Temperature must be in the range of -45°C and 60°C.")
+    if isinstance(temperature, (np.ndarray, list, tuple)):
+        temperature = np.asarray(temperature, dtype=float)
+
     return 6.1094 * np.exp((17.625 * temperature) / (temperature + 243.04))

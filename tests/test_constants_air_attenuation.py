@@ -58,3 +58,45 @@ def test_air_attenuation_iso_inputs():
     with pytest.raises(TypeError, match='must be a bool'):
         pf.constants.air_attenuation_iso(
             temperature, frequency, relative_humidity, calculate_accuracy=5)
+
+
+def test_saturation_vapor_pressure_scalar():
+    temperature = 25
+    expected = 31.61736
+    result = pf.constants.saturation_vapor_pressure(temperature)
+    npt.assert_allclose(result, expected, atol=0.001)
+
+
+def test_saturation_vapor_pressure_array():
+    temperature = np.array([0, 10, 20, 30])
+    expected = np.array([6.1094, 12.260206, 23.334406, 42.366503])
+    result = pf.constants.saturation_vapor_pressure(temperature)
+    npt.assert_allclose(result, expected, atol=0.001)
+
+
+def test_saturation_vapor_pressure_list():
+    temperature = [0, 10, 20, 30]
+    expected = [6.1094, 12.260206, 23.334406, 42.366503]
+    result = pf.constants.saturation_vapor_pressure(temperature)
+    npt.assert_allclose(result, expected, atol=0.001)
+
+
+def test_saturation_vapor_pressure_out_of_range_low():
+    with pytest.raises(
+            ValueError,
+            match="Temperature must be in the range of -45°C and 60°C."):
+        pf.constants.saturation_vapor_pressure(-50)
+
+
+def test_saturation_vapor_pressure_out_of_range_high():
+    with pytest.raises(
+            ValueError,
+            match="Temperature must be in the range of -45°C and 60°C."):
+        pf.constants.saturation_vapor_pressure(70)
+
+
+def test_saturation_vapor_pressure_invalid_type():
+    with pytest.raises(
+            TypeError,
+            match="temperature must be a number or array of numbers"):
+        pf.constants.saturation_vapor_pressure("invalid")
