@@ -64,42 +64,21 @@ def air_attenuation_iso(
            propagation outdoors -- Part 1: Calculation of the absorption of
            sound by the atmosphere.
     """
-    all_are_singles = isinstance(temperature, (float, int))
-    all_are_singles = all_are_singles and isinstance(frequency, (float, int))
-    all_are_singles = all_are_singles and isinstance(
-        relative_humidity, (float, int))
-    if not all_are_singles:
-        shape = np.broadcast_shapes(
-            np.array(temperature).shape,
-            np.array(frequency).shape,
-            np.array(relative_humidity).shape,
-            np.array(atmospheric_pressure).shape)
-        try:
-            temperature = np.broadcast_to(
-                np.array(temperature, dtype=float), shape)
-        except ValueError as e:
-            raise TypeError(
-                'Temperature must be a number or array of numbers') from e
-        try:
-            frequency = np.broadcast_to(
-                np.array(frequency, dtype=float), shape)
-        except ValueError as e:
-            raise TypeError(
-                'Frequency must be a number or array of numbers') from e
-        try:
-            relative_humidity = np.broadcast_to(
-                np.array(relative_humidity, dtype=float), shape)
-        except ValueError as e:
-            raise TypeError(
-                'Relative humidity must be a number or array of numbers',
-                ) from e
-        try:
-            atmospheric_pressure = np.broadcast_to(
-                np.array(atmospheric_pressure, dtype=float), shape)
-        except ValueError as e:
-            raise TypeError(
-                'Atmospheric pressure must be a number or array of numbers',
-                ) from e
+    # check inputs
+    if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'temperature must be a number or array of numbers')
+    if not isinstance(frequency, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'frequency must be a number or array of numbers')
+    if not isinstance(
+            relative_humidity, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'relative_humidity must be a number or array of numbers')
+    if not isinstance(
+            atmospheric_pressure, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'atmospheric_pressure must be a number or array of numbers')
     if not isinstance(calculate_accuracy, bool):
         raise TypeError(
             'calculate_accuracy must be a bool.')
@@ -115,6 +94,27 @@ def air_attenuation_iso(
     if np.any(np.array(atmospheric_pressure) > 200000):
         raise ValueError("Atmospheric pressure must less than 200 kPa.")
 
+    # convert arrays
+    all_are_singles = isinstance(temperature, (float, int))
+    all_are_singles = all_are_singles and isinstance(frequency, (float, int))
+    all_are_singles = all_are_singles and isinstance(
+        relative_humidity, (float, int))
+    if not all_are_singles:
+        shape = np.broadcast_shapes(
+            np.array(temperature).shape,
+            np.array(frequency).shape,
+            np.array(relative_humidity).shape,
+            np.array(atmospheric_pressure).shape)
+        temperature = np.broadcast_to(
+            np.array(temperature, dtype=float), shape)
+        frequency = np.broadcast_to(
+            np.array(frequency, dtype=float), shape)
+        relative_humidity = np.broadcast_to(
+            np.array(relative_humidity, dtype=float), shape)
+        atmospheric_pressure = np.broadcast_to(
+            np.array(atmospheric_pressure, dtype=float), shape)
+
+    # calculate air attenuation
     p_atmospheric_ref = 101325
     t_degree_ref = 20
 
@@ -164,17 +164,17 @@ def air_attenuation_iso(
 
 
 def _p_sat_water(temperature):
-    """
+    """Calculate the Water Saturation Pressure.
 
     Parameters
     ----------
-    temperature : _type_
-        _description_
+    temperature : float, array_like
+        Temperature in degree Celsius.
 
     Returns
     -------
-    _type_
-        _description_
+    p_sat : float, array_like
+        Water Saturation Pressure
     """
     temperature = np.atleast_1d(temperature)
     p_sat = np.atleast_1d(np.zeros_like(temperature))
