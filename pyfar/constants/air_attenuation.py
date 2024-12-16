@@ -10,7 +10,9 @@ def air_attenuation_iso(
 
     Calculation is in accordance with ISO 9613-1 [#]_. The shapes of
     ``temperature``, ``frequency``, ``relative_humidity``, and
-    ``atmospheric_pressure`` must be broadcastable.
+    ``atmospheric_pressure`` must be broadcastable. It uses
+    :py:func:`~pyfar.constants.saturation_vapor_pressure` to calculate the
+    saturation vapor pressure of water in hPa.
 
     Parameters
     ----------
@@ -123,18 +125,21 @@ def air_attenuation_iso(
     f = frequency
     T = temperature + 273.15
     T_0 = t_degree_ref + 273.15
-    p_sat_water = _p_sat_water(temperature)
 
+    p_sat_water = saturation_vapor_pressure(temperature)
     p_vapor = relative_humidity*p_sat_water
+
     # molar concentration of water vapor as a percentage
     h = p_vapor/p_a*10000
 
     # Oxygen relaxation frequency (Eq. 3)
     f_rO = (p_a/p_r)*(24+4.04e4*h*(0.02+h)/(0.391+h))
+
     # Nitrogen relaxation frequency (Eq. 4)
     f_rN = (p_a/p_r)*(T/T_0)**(-1/2)*(9+280*h*np.exp(
         -4.17*((T/T_0)**(-1/3)-1)))
 
+    # air attenuation (Eq. 5)
     air_attenuation = 8.686*f**2*((1.84e-11*p_r/p_a*(T/T_0)**(1/2)) + \
         (T/T_0)**(-5/2)*(0.01275*np.exp(-2239.1/T)*(f_rO + (f**2/f_rO))**(-1)
         +0.1068*np.exp(-3352/T) * (f_rN + (f**2/f_rN))**(-1)))
@@ -143,7 +148,7 @@ def air_attenuation_iso(
         return air_attenuation
 
     # calculate accuracy
-    accuracy = np.zeros_like(air_attenuation) - 1
+    accuracy = np.zeros_like(np.atleast_1d(air_attenuation)) - 1
     freq2pressure = frequency/atmospheric_pressure
     vapor_1_mask = 0.05 <= p_vapor <= 5
     vapor_2_mask = not vapor_1_mask and 0.005 <= p_vapor
@@ -175,6 +180,10 @@ def _p_sat_water(temperature):
     -------
     p_sat : float, array_like
         Water Saturation Pressure
+
+    References
+    ----------
+    .. [#] Buck (1996), Buck Research CR-1A User's Manual, Appendix 1.
     """
     temperature = np.atleast_1d(temperature)
     p_sat = np.atleast_1d(np.zeros_like(temperature))
@@ -191,3 +200,41 @@ def _p_sat_water(temperature):
         return p_sat
     else:
         return p_sat[0]
+
+
+def saturation_vapor_pressure(temperature):
+    r"""
+    Calculate the saturation vapor pressure of water in hPa using the
+    Magnus formula.
+
+    The Magnus formula is valid for temperatures between -45°C and 60°C [#]_.
+
+    .. math::
+
+        e_s = 6.1094 \cdot \exp\left(\frac{17.625 \cdot T}{T + 243.04}\right)
+
+
+    Parameters
+    ----------
+    temperature : float, array_like
+        Temperature in degrees Celsius (°C).
+
+    Returns
+    -------
+    p_sat : float, array_like
+        Saturation vapor pressure in hPa.
+
+    References
+    ----------
+    .. [#] O. A. Alduchov and R. E. Eskridge, “Improved Magnus Form
+           Approximation of Saturation Vapor Pressure,” Journal of Applied
+           Meteorology and Climatology, vol. 35, no. 4, pp. 60-609, Apr. 1996
+    """
+
+    if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'temperature must be a number or array of numbers')
+    if np.any(np.array(
+            temperature) < -45) or np.any(np.array(temperature) > 60):
+        raise ValueError("Temperature must be in the range of -45°C and 60°C.")
+    return 6.1094 * np.exp((17.625 * temperature) / (temperature + 243.04))
