@@ -1117,8 +1117,9 @@ class Interaction(object):
             # it still must be done.
             try:
                 self.txt.remove()
-            except NotImplementedError as _:
-                pass
+            except NotImplementedError as e:
+                if e.args[0] not in "cannot remove artist":
+                    raise e
             self.txt = None
             self.draw_canvas()
 
