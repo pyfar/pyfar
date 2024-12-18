@@ -1,16 +1,15 @@
 """Air attenuation calculation."""
 import numpy as np
+import pyfar as pf
 
 
 def air_attenuation_iso(
-        temperature, frequency, relative_humidity,
+        temperature, frequencies, relative_humidity,
         atmospheric_pressure=101325, calculate_accuracy=False):
     """Calculate the pure tone air attenuation of sound in air according to
     ISO 9613-1.
 
-    Calculation is in accordance with ISO 9613-1 [#]_. The shapes of
-    ``temperature``, ``frequency``, ``relative_humidity``, and
-    ``atmospheric_pressure`` must be broadcastable. It uses
+    Calculation is in accordance with ISO 9613-1 [#]_. It uses
     :py:func:`~pyfar.constants.saturation_vapor_pressure` to calculate the
     saturation vapor pressure of water in hPa.
 
@@ -20,10 +19,11 @@ def air_attenuation_iso(
         Temperature in degree Celsius.
         Must be in the range of -20°C to 50°C for accuracy of +/-10% or
         must be greater than -70°C for accuracy of +/-50%.
-    frequency : float, array_like
+    frequencies : float, array_like
         Frequency in Hz. Must be greater than 50 Hz.
+        Just one dimensional array is allowed.
     relative_humidity : float, array_like
-        Relative humidity in the range of 0.1 to 1.
+        Relative humidity in the range of 0 to 1.
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
     calculate_accuracy : bool, optional
@@ -31,9 +31,11 @@ def air_attenuation_iso(
 
     Returns
     -------
-    air_attenuation : float, array_like
+    air_attenuation :  :py:class:`~pyfar.classes.FrequencyData`
         Pure tone air attenuation coefficient in decibels per meter for
-        atmospheric absorption.
+        atmospheric absorption. The cshape of the output is the broadcast
+        from the shapes of the ``temperature``, ``relative_humidity``, and
+        ``atmospheric_pressure``.
     accuracy : float, array_like, optional
         accuracy of the results according to the standard, if
         ``calculate_accuracy`` is True:
@@ -70,13 +72,15 @@ def air_attenuation_iso(
     if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
             'temperature must be a number or array of numbers')
-    if not isinstance(frequency, (int, float, np.ndarray, list, tuple)):
+    if not isinstance(frequencies, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
-            'frequency must be a number or array of numbers')
+            'frequencies must be a number or array of numbers')
     if not isinstance(
             relative_humidity, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
             'relative_humidity must be a number or array of numbers')
+    if np.array(frequencies).ndim > 1:
+        raise ValueError('frequencies must be one dimensional.')
     if not isinstance(
             atmospheric_pressure, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
@@ -85,36 +89,37 @@ def air_attenuation_iso(
         raise TypeError(
             'calculate_accuracy must be a bool.')
 
+    # check if broadcastable
+    try:
+        shape = list(np.broadcast_shapes(
+            np.atleast_1d(temperature).shape,
+            np.atleast_1d(relative_humidity).shape,
+            np.atleast_1d(atmospheric_pressure).shape))
+    except ValueError as e:
+        raise ValueError(
+            'temperature, relative_humidity, and atmospheric_pressure must '
+            'have the same shape or be broadcastable.') from e
+    shape.append(np.array(frequencies).size)
+
     # check limits
     if np.any(np.array(temperature) < -73):
         raise ValueError("Temperature must be between -73°C.")
-    if np.any(np.array(frequency) < 50):
-        raise ValueError("Frequency must be greater than 50 Hz.")
-    if np.any(np.array(relative_humidity) < .1) or np.any(
+    if np.any(np.array(frequencies) < 50):
+        raise ValueError("frequencies must be greater than 50 Hz.")
+    if np.any(np.array(relative_humidity) < 0) or np.any(
             np.array(relative_humidity) > 1):
         raise ValueError("Relative humidity must be between 0.1 and 1.")
     if np.any(np.array(atmospheric_pressure) > 200000):
         raise ValueError("Atmospheric pressure must less than 200 kPa.")
 
     # convert arrays
-    all_are_singles = isinstance(temperature, (float, int))
-    all_are_singles = all_are_singles and isinstance(frequency, (float, int))
-    all_are_singles = all_are_singles and isinstance(
-        relative_humidity, (float, int))
-    if not all_are_singles:
-        shape = np.broadcast_shapes(
-            np.array(temperature).shape,
-            np.array(frequency).shape,
-            np.array(relative_humidity).shape,
-            np.array(atmospheric_pressure).shape)
-        temperature = np.broadcast_to(
-            np.array(temperature, dtype=float), shape)
-        frequency = np.broadcast_to(
-            np.array(frequency, dtype=float), shape)
-        relative_humidity = np.broadcast_to(
-            np.array(relative_humidity, dtype=float), shape)
-        atmospheric_pressure = np.broadcast_to(
-            np.array(atmospheric_pressure, dtype=float), shape)
+    temperature = np.array(
+        temperature, dtype=float)[..., np.newaxis]
+    relative_humidity = np.array(
+        relative_humidity, dtype=float)[..., np.newaxis]
+    atmospheric_pressure = np.array(
+        atmospheric_pressure, dtype=float)[..., np.newaxis]
+    frequencies = np.array(frequencies, dtype=float)
 
     # calculate air attenuation
     p_atmospheric_ref = 101325
@@ -122,7 +127,7 @@ def air_attenuation_iso(
 
     p_a = atmospheric_pressure
     p_r = p_atmospheric_ref
-    f = frequency
+    f = frequencies
     T = temperature + 273.15
     T_0 = t_degree_ref + 273.15
 
@@ -144,27 +149,36 @@ def air_attenuation_iso(
         (T/T_0)**(-5/2)*(0.01275*np.exp(-2239.1/T)*(f_rO + (f**2/f_rO))**(-1)
         +0.1068*np.exp(-3352/T) * (f_rN + (f**2/f_rN))**(-1)))
 
+    air_attenuation = pf.FrequencyData(
+        air_attenuation, frequencies=frequencies)
+
     if not calculate_accuracy:
         return air_attenuation
 
     # calculate accuracy
-    accuracy = np.zeros_like(np.atleast_1d(air_attenuation)) - 1
-    freq2pressure = frequency/atmospheric_pressure
-    vapor_1_mask = 0.05 <= p_vapor <= 5
-    vapor_2_mask = not vapor_1_mask and 0.005 <= p_vapor
-    vapor_3_mask = 0.005 > p_vapor
-    temp_1_mask = -20 <= temperature <= 50
-    temp_2_mask = -70 <= temperature and not temp_1_mask
+    accuracy = np.zeros_like(air_attenuation.freq) - 1
+    atmospheric_pressure = np.broadcast_to(atmospheric_pressure, shape)
+    p_vapor = np.broadcast_to(p_vapor, shape)
+    freq2pressure = frequencies/atmospheric_pressure
+
     atm_mask = atmospheric_pressure <= 200000
-    freq2pressure_mask = 4e-4 <= freq2pressure <= 10
-    common_mask = atm_mask and freq2pressure_mask
-    accuracy_10 = vapor_1_mask and temp_1_mask and common_mask
-    accuracy_20 = vapor_2_mask and temp_1_mask and common_mask
-    accuracy_50 = vapor_3_mask and temp_2_mask and common_mask
+    freq2pressure_mask = (4e-4 <= freq2pressure) & (freq2pressure <= 10)
+    common_mask = atm_mask & freq2pressure_mask
+    vapor_1_mask = (0.05 <= p_vapor) & (p_vapor <= 5)
+    temp_1_mask = (-20 <= temperature) & (temperature <= 50)
+    accuracy_10 = vapor_1_mask & temp_1_mask & common_mask
     accuracy[accuracy_10] = 10
+
+    vapor_2_mask = (vapor_1_mask is False) & (0.005 <= p_vapor)
+    temp_2_mask = (-70 <= temperature) & (temp_1_mask is False)
+    accuracy_20 = vapor_2_mask & temp_1_mask & common_mask
     accuracy[accuracy_20] = 20
+
+    vapor_3_mask = 0.005 > p_vapor
+    accuracy_50 = vapor_3_mask & temp_2_mask & common_mask
     accuracy[accuracy_50] = 50
 
+    accuracy = pf.FrequencyData(accuracy, frequencies=frequencies)
     return air_attenuation, accuracy
 
 
