@@ -1111,7 +1111,14 @@ class Interaction(object):
 
     def delete_current_channel_text(self):
         if self.txt is not None:
-            self.txt.remove()
+            # the behavior of text.remove() changed in Matplotlib 3.10. Even
+            # if the text exists, it can not always be removed. In these cases
+            # setting it to None is sufficient. Funnily, when it can be removed
+            # it still must be done.
+            try:
+                self.txt.remove()
+            except NotImplementedError as _:
+                pass
             self.txt = None
             self.draw_canvas()
 
