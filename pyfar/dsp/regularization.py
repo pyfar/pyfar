@@ -54,24 +54,25 @@ class RegularizedSpectrumInversion():
 
         # throw error if object is instanced without classmethod
         raise RuntimeError("Regularization objects must be created "
-                           "using a classmethod.")
+                           "using one of the 'from_()' classmethods.")
 
     def __repr__(self):
         return f"Regularization object with regularization "\
             f"of type '{self._regularization_type}'."
 
     @classmethod
-    def from_frequency_range(cls, signal, frequency_range, beta=1,
-                             target=None):
+    def from_frequency_range(cls, signal, frequency_range,
+                             regularization_within=0, beta=1, target=None):
         r"""
         Regularization from a given frequency range.
 
-        Defines a frequency range within which no regularization is applied by
-        setting the regularization :math:`\epsilon(f)=0`. Outside the frequency
-        range the regularization is :math:`\epsilon(f)=1` and can be controlled
-        using the `beta` parameter. The regularization factors are cross-faded
-        using a raised cosine window function with a width of :math:`\sqrt{2}f`
-        above and below the given frequency range.
+        Defines a frequency range within which the regularization
+        :math:`\epsilon(f)` is set to ``regularization_within``.
+        Outside the frequency range the regularization is
+        :math:`\epsilon(f)=1` and can be controlled using the `beta` parameter.
+        The regularization factors are cross-faded using a raised cosine window
+        function with a width of :math:`\sqrt{2}f` above and below the given
+        frequency range.
 
         Parameters
         ----------
@@ -79,6 +80,8 @@ class RegularizedSpectrumInversion():
             Signal to be inverted.
         frequency_range : array like
             Array like containing the lower and upper frequency limit in Hz.
+        regularization_within: float
+            Set regularization inside frequency range. The default is ``0``.
         beta : float, string, optional
             Beta parameter to control the scaling of the regularization as in
             :eq:`regularized_inversion`. Can be a
@@ -86,6 +89,10 @@ class RegularizedSpectrumInversion():
             ``numerical value``
                 Usually between ``0`` and ``1``, with ``0`` being no
                 regularization applied.
+            ``'energy'``
+                Normalize the regularization to match the signal's energy.
+
+                :math:`Normalization Factor = \frac{\frac{1}{N}\sum_{k=0}^{N-1}|S[k]|^2}{\frac{1}{N}\sum_{k=0}^{N-1}|\epsilon[k]|^2}`
             ``'max'``
                 Normalize the regularization :math:`\epsilon(f)` to the maximum
                 magnitude of a given signal :math:`S(f)`.
@@ -105,12 +112,14 @@ class RegularizedSpectrumInversion():
         """# noqa: E501
         instance = cls.__new__(cls)
 
-        if len(frequency_range) != 2:
+        instance._frequency_range = np.asarray(frequency_range).flatten()
+
+        if instance._frequency_range.shape != (2, ):
             raise ValueError(
                 "The frequency range needs to specify lower and upper limits.")
 
-        instance._frequency_range = np.asarray(frequency_range)
         instance._regularization_type = "frequency range"
+        instance._regularization_within = regularization_within
         instance.signal = signal
         instance.beta = beta
         instance.target = target
@@ -140,6 +149,10 @@ class RegularizedSpectrumInversion():
             ``numerical value``
                 Usually between ``0`` and ``1``, with ``0`` being no
                 regularization applied.
+            ``'energy'``
+                Normalize the regularization to match the signal's energy.
+
+                :math:`Normalization Factor = \frac{\frac{1}{N}\sum_{k=0}^{N-1}|S[k]|^2}{\frac{1}{N}\sum_{k=0}^{N-1}|\epsilon[k]|^2}`
             ``'max'``
                 Normalize the regularization :math:`\epsilon(f)` to the maximum
                 magnitude of a given signal :math:`S(f)`.
@@ -160,6 +173,10 @@ class RegularizedSpectrumInversion():
         if not isinstance(regularization, pf.Signal):
             raise ValueError(
                 "Regularization must be a pyfar.Signal object.")
+        if signal.n_samples != regularization.n_samples:
+            raise ValueError(
+                "The number of samples in the signal and the regularization "
+                "function differs but must be equal.")
 
         instance = cls.__new__(cls)
         instance._regularization_signal = regularization
@@ -181,8 +198,9 @@ class RegularizedSpectrumInversion():
     def beta(self, beta):
         """Set beta parameter for sacling of regularization function."""
         if not isinstance(beta, numbers.Number) \
-            and beta not in ['mean', 'max']:
-            raise ValueError("Beta must be a scalar or 'mean' or 'max'.")
+            and beta not in ['energy', 'mean', 'max']:
+            raise ValueError("Beta must be a scalar or 'energy', 'mean' or "
+                             "'max'.")
 
         # Set beta
         if beta == 'mean':
@@ -191,6 +209,9 @@ class RegularizedSpectrumInversion():
         elif beta == 'max':
             self._beta = np.max(np.abs(self.signal.freq)) / np.max(
                 np.abs(self.regularization.freq))
+        elif beta == 'energy':
+            self._beta = \
+                pf.dsp.energy(self.signal) / pf.dsp.energy(self.regularization)
         else:
             self._beta = beta
 
@@ -235,8 +256,13 @@ class RegularizedSpectrumInversion():
         if target is not None and not isinstance(target, pf.Signal):
             raise ValueError(
                 "Target function must be a pyfar.Signal object.")
+        if target is not None and target.n_samples != self.signal.n_samples:
+            raise ValueError(
+                "The number of samples in the signal and the target function"
+                " differs but must be equal.")
         self._target = target
 
+    @property
     def invert(self):
         """
         Invert signal using frequency-dependent regularized inversion.
@@ -264,7 +290,7 @@ class RegularizedSpectrumInversion():
             >>> # inversion
             >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
             >>>     sweep, [50, 16e3], beta='max')
-            >>> inverted = Inversion.invert()
+            >>> inverted = Inversion.invert
             ...
             >>> # obtain the scaled regularization function
             >>> regularization = Inversion.regularization * Inversion.beta
@@ -311,7 +337,7 @@ class RegularizedSpectrumInversion():
             >>> # Regulated inversion
             >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
             ...     hptf, regularization, beta=.1, target=target)
-            >>> inverted = Inversion.invert()
+            >>> inverted = Inversion.invert
             >>>
             >>> # Plot the result
             >>> ax = pf.plot.time_freq(hptf, label='HpTF')
@@ -323,29 +349,17 @@ class RegularizedSpectrumInversion():
             >>> ax[1].set_ylim(-40 , 15)
             >>> ax[1].legend(loc='lower center', ncols=3)
         """# noqa: E501
-        target = self.target
-        signal = self.signal
-
-        # zero pad, if target function is given and has different n_samples
-        if target is not None and \
-            target.n_samples != signal.n_samples:
-            n_samples = max(signal.n_samples, target.n_samples)
-            signal = pf.dsp.pad_zeros(signal,
-                                      (n_samples-signal.n_samples))
-            target = pf.dsp.pad_zeros(target,
-                                      (n_samples-target.n_samples))
-
-        data = signal.freq
+        data = self.signal.freq
 
         # calculate inverse filter
-        inverse = signal.copy()
+        inverse = self.signal.copy()
         inverse.freq = \
             np.conj(data) / (np.abs(data)**2 + self.beta *
                              np.abs(self.regularization.freq)**2)
 
         # Apply target function
         if self.target is not None:
-            inverse.freq *= target.freq
+            inverse.freq *= self.target.freq
 
         return inverse
 
@@ -353,7 +367,8 @@ class RegularizedSpectrumInversion():
     def _get_regularization_from_frequency_range(self, signal):
         """Get regularization factors from frequency range."""
         # arrange regularization factors for inside and outside frequency range
-        regu_inside = np.zeros(signal.n_bins, dtype=np.double)
+        regu_inside = \
+            np.ones(signal.n_bins, dtype=np.double)*self._regularization_within
         regu_outside = np.ones(signal.n_bins, dtype=np.double)
 
         # index for crossfade at lower frequency limit
@@ -372,15 +387,10 @@ class RegularizedSpectrumInversion():
             # crossfade regularization factors at frequency limits
             regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
 
-        return pf.FrequencyData(regu_final, signal.frequencies)
+        return pf.Signal(regu_final, signal.sampling_rate, domain='freq')
 
 
     def _get_regularization_from_regularization_signal(self, signal):
         """Get regularization from signal."""
-        if signal.n_bins != self._regularization_signal.n_bins:
-            raise ValueError(
-                "The number of bins in the signal and the regularization "
-                "factors must be equal.")
-
-        return pf.FrequencyData(np.abs(self._regularization_signal.freq),
-                                signal.frequencies)
+        return pf.Signal(np.abs(self._regularization_signal.freq),
+                                signal.sampling_rate, domain='freq')

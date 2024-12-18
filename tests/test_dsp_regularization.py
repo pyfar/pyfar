@@ -2,13 +2,15 @@ import pyfar as pf
 import pytest
 import numpy as np
 import numpy.testing as npt
+import re
 
 
 def test_regularization_errors(impulse):
     """Test errors"""
     with pytest.raises(RuntimeError,
-                       match="Regularization objects must be created using a"
-                       " classmethod."):
+                       match=re.escape("Regularization objects must be created"
+                                       " using one of the 'from_()' "
+                                       "classmethods.")):
         assert pf.dsp.RegularizedSpectrumInversion()
 
     with pytest.raises(ValueError,
@@ -18,7 +20,8 @@ def test_regularization_errors(impulse):
             impulse, (200,))
 
     with pytest.raises(ValueError,
-                       match="Beta must be a scalar or 'mean' or 'max'."):
+                       match="Beta must be a scalar or 'energy', 'mean' or "
+                             "'max'."):
         assert pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
             impulse, (200, 15e3), beta='bla')
 
@@ -28,10 +31,22 @@ def test_regularization_errors(impulse):
             impulse, (200, 20e3), target=1)
 
     with pytest.raises(ValueError,
+                       match="The number of samples in the signal and the "
+                       "target function differs but must be equal."):
+        assert pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
+            impulse, (200, 20e3), target=pf.signals.impulse(12))
+
+    with pytest.raises(ValueError,
                        match="Regularization must be a pyfar.Signal"
                        " object."):
         assert pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
             impulse, 1)
+
+    with pytest.raises(ValueError,
+                       match="The number of samples in the signal and the "
+                       "regularization function differs but must be equal."):
+        assert pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
+            impulse, pf.signals.noise(12))
 
 
 @pytest.mark.parametrize(("beta", "expected"), [(1, 0.5), (0.5, 2/3), (0, 1)])
@@ -40,7 +55,7 @@ def test_regularization_frequency_range(impulse, beta, expected):
     values."""
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(impulse,
         (200, 10e3), beta=beta)
-    inv = Regu.invert()
+    inv = Regu.invert
 
     idx = inv.find_nearest_frequency([200, 10e3])
 
@@ -55,7 +70,7 @@ def test_regularization_normalization(impulse, norm, expected):
     """Test normalization parameter of Regularization."""
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(impulse*2,
         (200, 10e3), beta=norm)
-    inv = Regu.invert()
+    inv = Regu.invert
 
     idx = inv.find_nearest_frequency([200, 10e3])
 
@@ -64,11 +79,26 @@ def test_regularization_normalization(impulse, norm, expected):
     npt.assert_allclose(inv.freq[:, -1], expected)
 
 
+def test_regularization_within(impulse):
+    """Test regularization_within parameter"""
+    Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(impulse,
+        (200, 10e3), regularization_within=.5)
+    inv = Regu.invert
+
+    idx = inv.find_nearest_frequency([200, 10e3])
+
+    npt.assert_allclose(inv.freq[:, idx[0]:idx[1]], 0.8)
+
+
 def test_regularization_beta_mean_max(impulse):
     """Test normalization factor of caclulated during inversion."""
     impulse = impulse*2
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(impulse,
         (200, 10e3))
+
+    Regu.beta = 'energy'
+    assert Regu.beta == \
+        pf.dsp.energy(impulse) / pf.dsp.energy(Regu.regularization)
 
     Regu.beta = 'max'
     assert Regu.beta == \
@@ -90,7 +120,7 @@ def test_regularization_target(impulse):
     ReguTarget = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
         impulse, (20, 15.5e3), target=target)
 
-    inv = ReguTarget.invert()
+    inv = ReguTarget.invert
     idx = inv.find_nearest_frequency([20, 15.5e3])
 
     npt.assert_allclose(np.abs(inv.freq[0, idx]), np.abs(target.freq[0, idx]))
