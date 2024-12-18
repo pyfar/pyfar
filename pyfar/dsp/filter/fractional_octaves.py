@@ -50,7 +50,7 @@ def fractional_octave_frequencies(
         raise ValueError(
             "The second frequency needs to be higher than the first.")
 
-    if num_fractions in [1, 3]:
+    if num_fractions in [1, 3] and (f_lims[0] > 15) and (f_lims[1] < 22e3):
         nominal, exact = _center_frequencies_fractional_octaves_iec(
             num_fractions)
 
