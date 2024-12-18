@@ -40,8 +40,8 @@ class RegularizedSpectrumInversion():
     2. Compute the inverse :math:`S(f)^{-1}` using :py:func:`~invert`
 
     The parameters that are defined in the first step are often iteratively
-    adjusted. For examples, see the
-    :ref:`examples section of the invert method <invert-examples>`.
+    adjusted. Examples are given in the documentation of the `from_()`
+    methods.
 
     References
     ----------
@@ -80,7 +80,7 @@ class RegularizedSpectrumInversion():
             Signal to be inverted.
         frequency_range : array like
             Array like containing the lower and upper frequency limit in Hz.
-        regularization_within: float
+        regularization_within: float, optional
             Set regularization inside frequency range. The default is ``0``.
         beta : float, string, optional
             Beta parameter to control the scaling of the regularization as in
@@ -109,6 +109,48 @@ class RegularizedSpectrumInversion():
             Target function for the regularization. The default ``None`` uses a
             zero-phase spectrum with an amplitude of 1 as target equalling an
             impulse in the time domain.
+
+
+        Examples
+        --------
+
+        Invert a sine sweep with limited bandwidth and apply maximum
+        normalization to the regularization function.
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import matplotlib.pyplot as plt
+            ...
+            >>> sweep = pf.signals.exponential_sweep_freq(
+            ...     2**16, [50, 16e3], 1000, 10e3)
+            ...
+            >>> # inversion
+            >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
+            >>>     sweep, [50, 16e3], beta='max')
+            >>> inverted = Inversion.invert
+            ...
+            >>> # obtain the scaled regularization function
+            >>> regularization = Inversion.regularization * Inversion.beta
+            ...
+            >>> pf.plot.use()
+            >>> fig, axes = plt.subplots(2,1)
+            >>> pf.plot.freq(sweep, ax=axes[0], label='sweep')
+            >>> pf.plot.freq(regularization, ax=axes[0], label='regularization')
+            >>> axes[0].axvline(50, color='k', linestyle='--',
+            ...     label='frequency range')
+            >>> axes[0].axvline(16e3, color='k', linestyle='--')
+            >>> axes[0].legend(loc='lower center')
+            ...
+            >>> pf.plot.freq(inverted, ax=axes[1], color='p',
+            ...     label='inverted with regulariztion')
+            >>> pf.plot.freq(1 / (sweep+1e-10), ax=axes[1], color='y',
+            ...     linestyle=':', label='inverted without regulariztion')
+            >>> axes[1].axvline(50, color='k', linestyle='--',
+            ...     label='frequency range')
+            >>> axes[1].axvline(16e3, color='k', linestyle='--')
+            >>> axes[1].set_ylim(-120, -20)
+            >>> axes[1].legend(loc='lower center')
         """# noqa: E501
         instance = cls.__new__(cls)
 
@@ -169,6 +211,44 @@ class RegularizedSpectrumInversion():
             Target function for the regularization. The default ``None`` uses a
             zero-phase spectrum with an amplitude of 1 as target equalling an
             impulse in the time domain.
+
+        Examples
+        --------
+
+        Invert a headphone transfer function (HpTF), regularize the inversion at
+        high frequencies, and use a band-pass as target function. Note that the
+        equalized HpTF, which is obtained from a convolution of the HpTF with its
+        inverse filter, approaches the target function in both, time and frequency.
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>>
+            >>> # Hedphone transfer function to be inverted
+            >>> hptf = pf.signals.files.headphone_impulse_responses()[0, 0].flatten()
+            >>> # Regularize inversion at high frequencies
+            >>> regularization = pf.dsp.filter.low_shelf(
+            ...     pf.signals.impulse(hptf.n_samples), 4e3, -20, 2, 'II')
+            >>> # Use band-pass as target function
+            >>> target = pf.dsp.filter.butterworth(
+            ...     pf.signals.impulse(hptf.n_samples), 4, [100, 16e3], 'bandpass')
+            >>> target = pf.dsp.time_shift(target, 125, 'cyclic')
+            >>>
+            >>> # Regulated inversion
+            >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
+            ...     hptf, regularization, beta=.1, target=target)
+            >>> inverted = Inversion.invert
+            >>>
+            >>> # Plot the result
+            >>> ax = pf.plot.time_freq(hptf, label='HpTF')
+            >>> pf.plot.time_freq(inverted, label='HpTF inverted')
+            >>> pf.plot.time_freq(hptf * inverted, label='Equalized HpTF')
+            >>> pf.plot.time_freq(target, linestyle='--', label='Target')
+            >>> pf.plot.freq(regularization, ax=ax[1], label='Regularization')
+            >>> ax[0].set_xlim(0 , .005)
+            >>> ax[1].set_ylim(-40 , 15)
+            >>> ax[1].legend(loc='lower center', ncols=3)
         """# noqa: E501
         if not isinstance(regularization, pf.Signal):
             raise ValueError(
@@ -271,83 +351,6 @@ class RegularizedSpectrumInversion():
         -------
         inverse : Signal
             The inverted signal.
-
-        Examples
-        --------
-        .. _invert-examples:
-
-        Invert a sine sweep with limited bandwidth and apply maximum
-        normalization to the regularization function.
-
-        .. plot::
-
-            >>> import pyfar as pf
-            >>> import matplotlib.pyplot as plt
-            ...
-            >>> sweep = pf.signals.exponential_sweep_freq(
-            ...     2**16, [50, 16e3], 1000, 10e3)
-            ...
-            >>> # inversion
-            >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
-            >>>     sweep, [50, 16e3], beta='max')
-            >>> inverted = Inversion.invert
-            ...
-            >>> # obtain the scaled regularization function
-            >>> regularization = Inversion.regularization * Inversion.beta
-            ...
-            >>> pf.plot.use()
-            >>> fig, axes = plt.subplots(2,1)
-            >>> pf.plot.freq(sweep, ax=axes[0], label='sweep')
-            >>> pf.plot.freq(regularization, ax=axes[0], label='regularization')
-            >>> axes[0].axvline(50, color='k', linestyle='--',
-            ...     label='frequency range')
-            >>> axes[0].axvline(16e3, color='k', linestyle='--')
-            >>> axes[0].legend(loc='lower center')
-            ...
-            >>> pf.plot.freq(inverted, ax=axes[1], color='p',
-            ...     label='inverted with regulariztion')
-            >>> pf.plot.freq(1 / (sweep+1e-10), ax=axes[1], color='y',
-            ...     linestyle=':', label='inverted without regulariztion')
-            >>> axes[1].axvline(50, color='k', linestyle='--',
-            ...     label='frequency range')
-            >>> axes[1].axvline(16e3, color='k', linestyle='--')
-            >>> axes[1].set_ylim(-120, -20)
-            >>> axes[1].legend(loc='lower center')
-
-        Invert a headphone transfer function (HpTF), regularize the inversion at
-        high frequencies, and use a band-pass as target function. Note that the
-        equalized HpTF, which is obtained from a convolution of the HpTF with its
-        inverse filter, approaches the target function in both, time and frequency.
-
-        .. plot::
-
-            >>> import pyfar as pf
-            >>> import numpy as np
-            >>>
-            >>> # Hedphone transfer function to be inverted
-            >>> hptf = pf.signals.files.headphone_impulse_responses()[0, 0].flatten()
-            >>> # Regularize inversion at high frequencies
-            >>> regularization = pf.dsp.filter.low_shelf(
-            ...     pf.signals.impulse(hptf.n_samples), 4e3, -20, 2, 'II')
-            >>> # Use band-pass as target function
-            >>> target = pf.dsp.filter.butterworth(
-            ...     pf.signals.impulse(hptf.n_samples), 4, [100, 16e3], 'bandpass')
-            >>> target = pf.dsp.time_shift(target, 125, 'cyclic')
-            >>>
-            >>> # Regulated inversion
-            >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
-            ...     hptf, regularization, beta=.1, target=target)
-            >>> inverted = Inversion.invert
-            >>>
-            >>> # Plot the result
-            >>> ax = pf.plot.time_freq(hptf, label='HpTF')
-            >>> pf.plot.time_freq(inverted, label='HpTF inverted')
-            >>> pf.plot.time_freq(hptf * inverted, label='Equalized HpTF')
-            >>> pf.plot.time_freq(target, linestyle='--', label='Target')
-            >>> pf.plot.freq(regularization, ax=ax[1], label='Regularization')
-            >>> ax[0].set_xlim(0 , .005)
-            >>> ax[1].set_ylim(-40 , 15)
-            >>> ax[1].legend(loc='lower center', ncols=3)
         """# noqa: E501
         data = self.signal.freq
 
