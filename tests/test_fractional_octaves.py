@@ -144,5 +144,3 @@ def test_sum_bands_din():
 
     assert not np.any(diff[:, mask] > 10**(1/10))
     assert not np.any(diff[:, mask] < 10**(-1/10))
-
-
