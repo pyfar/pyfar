@@ -394,3 +394,13 @@ def test_deprecations_audio_io():
     if version.parse(pf.__version__) >= version.parse('0.9.0'):
         with pytest.raises(TypeError):
             pf.io.audio_subtypes(format='wav')
+
+
+def test_deprecations_reconstructing_fractional_octave_bands_frequencies():
+    with pytest.warns(
+        PyfarDeprecationWarning, match="Return parameter 'frequencies' will be"
+        " removed in pyfar 0.9.0. To get the fractional octave center "
+        "frequencies, use `pyfar.dsp.filter.fractional_octave_frequencies` "
+        "instead."):
+        pfilt.reconstructing_fractional_octave_bands(None,
+                                                     sampling_rate=44.1e3)
