@@ -73,6 +73,13 @@ def test_fractional_coeff_oct_filter_iec():
     assert actual.shape == (1, order, 6)
 
 
+def test_fractional_frequencies_non_iec():
+    actual_nominal, actual_exact = filter.fractional_octave_frequencies(
+        num_fractions=1, frequency_range=(4e3, 64e3))
+    npt.assert_allclose(actual_exact, [4e3, 8e3, 16e3, 32e3, 64e3])
+    assert actual_nominal is None
+
+
 def test_fract_oct_filter_iec():
     # Test only Filter object related stuff here, testing of coefficients is
     # done in separate test.
