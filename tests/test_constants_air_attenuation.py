@@ -12,7 +12,8 @@ import numpy.testing as npt
     (10, 100, .005, 0.002094, 10),
 ])
 def test_air_attenuation_iso(
-        temperature, frequency, relative_humidity, expected, expected_accuracy):
+        temperature, frequency, relative_humidity, expected,
+        expected_accuracy):
     temperature = 10
     air_attenuation, accuracy = pf.constants.air_attenuation_iso(
         temperature, frequency, relative_humidity, calculate_accuracy=True)
