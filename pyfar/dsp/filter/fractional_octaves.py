@@ -32,7 +32,7 @@ def fractional_octave_frequencies(
     nominal : array, float
         The nominal center frequencies are only defined for octave bands and
         third octave bands in the range between 25 Hz and 20 kHz.
-        For all other cases, ``None``is returned.
+        For all other cases, ``None`` is returned.
     exact : array, float
         The exact center frequencies in Hz, resulting in a uniform distribution
         of frequency bands over the frequency range.
