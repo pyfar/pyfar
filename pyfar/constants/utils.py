@@ -1,18 +1,17 @@
 """Utils for constant calculation."""
 import numpy as np
-import pyfar as pf
 
 
 def saturation_vapor_pressure(temperature):
     r"""
-    Calculate the saturation vapor pressure of water in hPa using the
+    Calculate the saturation vapor pressure of water in Pa using the
     Magnus formula.
 
     The Magnus formula is valid for temperatures between -45°C and 60°C [#]_.
 
     .. math::
 
-        e_s = 6.1094 \cdot \exp\left(\frac{17.625 \cdot T}{T + 243.04}\right)
+        e_s = 610.94 \cdot \exp\left(\frac{17.625 \cdot T}{T + 243.04}\right)
 
 
     Parameters
@@ -23,7 +22,7 @@ def saturation_vapor_pressure(temperature):
     Returns
     -------
     p_sat : float, array_like
-        Saturation vapor pressure in hPa.
+        Saturation vapor pressure in Pa.
 
     References
     ----------
@@ -41,4 +40,5 @@ def saturation_vapor_pressure(temperature):
     if isinstance(temperature, (np.ndarray, list, tuple)):
         temperature = np.asarray(temperature, dtype=float)
 
-    return 6.1094 * np.exp((17.625 * temperature) / (temperature + 243.04))
+    return 100 * 6.1094 * np.exp(
+        (17.625 * temperature) / (temperature + 243.04))
