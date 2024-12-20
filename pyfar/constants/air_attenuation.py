@@ -1,6 +1,7 @@
 """Air attenuation calculation."""
 import numpy as np
 import pyfar as pf
+from . import utils
 
 
 def air_attenuation_iso(
@@ -131,11 +132,12 @@ def air_attenuation_iso(
     T = temperature + 273.15
     T_0 = t_degree_ref + 273.15
 
-    p_sat_water = saturation_vapor_pressure(temperature)
+    # saturation_vapor_pressure in hPa
+    p_sat_water = utils.saturation_vapor_pressure(temperature)
     p_vapor = relative_humidity*p_sat_water
 
     # molar concentration of water vapor as a percentage
-    h = p_vapor/p_a*10000
+    h = p_vapor/p_a*100
 
     # Oxygen relaxation frequency (Eq. 3)
     f_rO = (p_a/p_r)*(24+4.04e4*h*(0.02+h)/(0.391+h))
