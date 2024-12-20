@@ -7,6 +7,9 @@ from .speed_of_sound import (
 
 from .air_attenuation import (
     air_attenuation_iso,
+)
+
+from .utils import (
     saturation_vapor_pressure,
 )
 
