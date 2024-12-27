@@ -1797,13 +1797,15 @@ class Coordinates():
 
         Examples
         --------
-        Find all point with 1m distance from the frontal point
+        Find all point with 0.5 m distance from the frontal point
 
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
-            >>> find = pf.Coordinates(1, 0, 0)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     np.arange(0, 360, 5)*np.pi/180, 0, 1)
+            >>> find = pf.Coordinates(.5, 0, 0)
             >>> index = coords.find_within(find, 1)
             >>> coords.show(index)
 
