@@ -1853,11 +1853,11 @@ class Coordinates():
                 points, distance + atol, return_sorted=return_sorted)
         if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
-            radius = self.radius
+            radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same "
+                    "find_within only works if all points have the same "
                     f"radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
