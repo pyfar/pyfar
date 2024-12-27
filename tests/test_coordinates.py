@@ -251,6 +251,12 @@ def test___eq___differInShape():
     assert not coordinates == actual
 
 
+def test___eq___differInShape_empty():
+    coordinates = Coordinates()
+    actual = Coordinates(comment="Oh my woooooosh!")
+    assert not coordinates == actual
+
+
 def test_comment_setter_type_error():
     """Test setting the comment with a non-string type."""
     coords = Coordinates()

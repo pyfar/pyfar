@@ -1104,7 +1104,7 @@ class Coordinates():
                 points, distance + atol, return_sorted=return_sorted)
         if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
-            radius = self.radius
+            radius = np.concatenate((self.radius, find.radius))
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > radius_tol:
                 raise ValueError(
@@ -1336,61 +1336,6 @@ class Coordinates():
         # set class variable
         self._weights = weights
 
-    def _find_nearest(self, points_1, points_2, points_3,
-                      domain, convention, unit, show,
-                      value, measure, atol=1e-15, radius=None):
-
-        # get KDTree
-        kdtree = self._make_kdtree()
-
-        # get target point in cartesian coordinates
-        coords = Coordinates(points_1, points_2, points_3,
-                             domain, convention, unit)
-        points = coords.cartesian
-
-        # query nearest neighbors
-        points = points.flatten() if coords.csize == 1 else points
-
-        # get the points depending on measure and value
-        if measure == 'k':
-            # nearest points
-            distance, index = kdtree.query(points, k=value)
-        elif measure == 'cart':
-            # points within euclidean distance
-            index = kdtree.query_ball_point(points, value + atol)
-            distance = None
-        elif measure == 'sph':
-            # get radius and check for equality
-            radius = self.radius
-            delta_radius = np.max(radius) - np.min(radius)
-            if delta_radius > 1e-15:
-                raise ValueError(
-                    "find_nearest_sph only works if all points have the same \
-                    radius. Differences are larger than 1e-15")
-            radius = np.max(radius)
-
-            # convert great circle to euclidean distance
-            x, y, z = sph2cart([0, value / 180 * np.pi],
-                               [np.pi / 2, np.pi / 2],
-                               [radius, radius])
-            value = np.sqrt((x[0] - x[1])**2
-                            + (y[0] - y[1])**2
-                            + (z[0] - z[1])**2)
-            # points within great circle distance
-            index = kdtree.query_ball_point(points, value + atol)
-            distance = None
-
-        # mask for scatter plot
-        mask = np.full((self.csize), False)
-        mask[index] = True
-        mask = mask.reshape(self.cshape)
-
-        # plot all and returned points
-        if show:
-            self.show(mask)
-
-        return distance, index, mask
-
     def _make_kdtree(self):
         """Make a numpy KDTree for fast search of nearest points."""
 
@@ -1451,7 +1396,7 @@ class Coordinates():
         eq_z = self._z == other._z
         eq_weights = self._weights == other._weights
         eq_comment = self._comment == other._comment
-        if self._x.shape == ():
+        if self._x.shape == (0, ):
             return eq_x & eq_y & eq_z & eq_weights & eq_comment
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment
 

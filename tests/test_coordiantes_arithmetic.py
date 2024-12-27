@@ -53,6 +53,7 @@ def test_arithmetic_coordinates(other, operator, order):
     [
         5,
         5.0,
+        pf.Coordinates(5, 5, 5),
     ],
 )
 @pytest.mark.parametrize(
@@ -142,3 +143,19 @@ def test_cross_product():
     coords_2 = pf.Coordinates(0, 1, 0)
     cross = pf.cross(coords_1, coords_2)
     npt.assert_array_equal(cross.cartesian, [[0, 0, 1]])
+
+
+def test___div__():
+    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+    new = coords.__div__(5)
+    desired = pf.Coordinates([0, .2], [0, .2], [0, .2])
+    assert isinstance(new, pf.Coordinates)
+    npt.assert_array_equal(new.cartesian, desired.cartesian)
+
+
+def test___truediv__():
+    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+    new = coords.__truediv__(5)
+    desired = pf.Coordinates([0, .2], [0, .2], [0, .2])
+    assert isinstance(new, pf.Coordinates)
+    npt.assert_array_equal(new.cartesian, desired.cartesian)

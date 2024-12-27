@@ -609,4 +609,9 @@ def test__repr__comment_empty():
     coords = Coordinates()
     x = coords.__repr__()
     assert 'Empty Coordinates object' in x
+
+
+def test__repr__weights():
+    coords = Coordinates(0, 0, 0, weights=1)
+    x = coords.__repr__()
     assert 'Contains sampling weights' in x
