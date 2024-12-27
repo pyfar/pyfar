@@ -35,7 +35,6 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
-from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class _Audio():

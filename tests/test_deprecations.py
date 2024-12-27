@@ -12,7 +12,6 @@ Test deprecations. For each deprecation two things must be tested:
 """
 import numpy as np
 from packaging import version
-import re
 
 import pytest
 
