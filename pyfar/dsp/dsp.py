@@ -1043,13 +1043,6 @@ def pad_zeros(signal, pad_width, mode='end'):
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    if mode in ['before', 'after']:
-        warnings.warn(('Mode "before" and "after" will be renamed into '
-                       '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=2)
-
-        mode = 'beginning' if mode == 'before' else 'end'
-
     padded_signal = signal.flatten()
 
     if mode in ['end', 'center']:

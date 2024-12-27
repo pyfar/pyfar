@@ -63,10 +63,6 @@ def test__check_time_unit():
 
 # deprecate in 0.8.0 ----------------------------------------------------------
 def test_pad_zero_modi():
-    with pytest.warns(PyfarDeprecationWarning,
-                      match='Mode "before" and "after" will be renamed into'):
-        pf.dsp.pad_zeros(pf.Signal([1], 44100), 5, 'before')
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         match = 'Unknown padding mode.'
         with pytest.raises(ValueError, match=match):
