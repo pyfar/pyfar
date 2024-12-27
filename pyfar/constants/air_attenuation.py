@@ -160,7 +160,7 @@ def air_attenuation_iso(
     # calculate accuracy
     accuracy = np.zeros_like(air_attenuation.freq) - 1
     atmospheric_pressure = np.broadcast_to(atmospheric_pressure, shape)
-    p_vapor = np.broadcast_to(p_vapor, shape)
+    p_vapor = np.broadcast_to(p_vapor, shape)/100
     freq2pressure = frequencies/atmospheric_pressure
 
     atm_mask = atmospheric_pressure <= 200000
