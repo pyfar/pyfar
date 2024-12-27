@@ -10,7 +10,7 @@ orbs:
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
-
+  browser-tools: circleci/browser-tools@1.2.3
 
 executors:
   python-docker: # declares a reusable executor
