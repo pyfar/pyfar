@@ -945,7 +945,7 @@ class Coordinates():
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > radius_tol:
                 raise ValueError(
-                    f"find_nearest_sph only works if all points have the same \
+                    f"find_nearest only works if all points have the same \
                     radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
@@ -1108,7 +1108,7 @@ class Coordinates():
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > radius_tol:
                 raise ValueError(
-                    "find_nearest_sph only works if all points have the same "
+                    "find_within only works if all points have the same "
                     f"radius. Differences are larger than {radius_tol}")
             radius = np.max(radius)
 
@@ -1396,8 +1396,6 @@ class Coordinates():
         eq_z = self._z == other._z
         eq_weights = self._weights == other._weights
         eq_comment = self._comment == other._comment
-        if self._x.shape == (0, ):
-            return eq_x & eq_y & eq_z & eq_weights & eq_comment
         return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment
 
     def __add__(self, other):
@@ -1439,7 +1437,6 @@ class Coordinates():
     def __rdiv__(self, other):
         """Divide number with Coordinates object."""
         return _arithmetics(other, self, 'div')
-
 
     def _check_empty(self):
         """Check if object is empty."""

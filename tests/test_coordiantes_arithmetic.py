@@ -47,13 +47,11 @@ def test_arithmetic_coordinates(other, operator, order):
     npt.assert_array_equal(new.cartesian, desired.cartesian)
 
 
-
 @pytest.mark.parametrize(
     "other",
     [
         5,
         5.0,
-        pf.Coordinates(5, 5, 5),
     ],
 )
 @pytest.mark.parametrize(
@@ -159,3 +157,44 @@ def test___truediv__():
     desired = pf.Coordinates([0, .2], [0, .2], [0, .2])
     assert isinstance(new, pf.Coordinates)
     npt.assert_array_equal(new.cartesian, desired.cartesian)
+
+
+def test___rdiv__():
+    coords = pf.Coordinates(5, 5, 5)
+    new = coords.__rdiv__(1)
+    desired = pf.Coordinates(.2, .2, .2)
+    assert isinstance(new, pf.Coordinates)
+    npt.assert_array_equal(new.cartesian, desired.cartesian)
+
+
+def test___rtruediv__():
+    coords = pf.Coordinates(5, 5, 5)
+    new = coords.__rtruediv__(1)
+    desired = pf.Coordinates(.2, .2, .2)
+    assert isinstance(new, pf.Coordinates)
+    npt.assert_array_equal(new.cartesian, desired.cartesian)
+
+
+def test_arithmetic_coordinates_error_mat_div():
+    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+
+    match = "Multiplication is only possible with Coordinates or number."
+    with pytest.raises(TypeError, match=match):
+        coords * 'wrong'
+
+    match = "Division is only possible with Coordinates or number."
+    with pytest.raises(TypeError, match=match):
+        coords / 'wrong'
+
+
+def test_arithmetic_coordinates_error_mat_div_2_obj():
+    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+
+    match = (
+        "Multiplication and division are only possible with one "
+        "Coordinates object.")
+    with pytest.raises(TypeError, match=match):
+        coords * coords
+
+    with pytest.raises(TypeError, match=match):
+        coords / coords

@@ -282,3 +282,38 @@ def test_comment_empty_string():
     coords = Coordinates()
     coords.comment = ''
     assert coords.comment == ''
+
+
+def test__check_empty():
+    """Test the check_empty method."""
+    coords = Coordinates()
+    with pytest.raises(ValueError, match="Object is empty."):
+        coords._check_empty()
+    coords = Coordinates(1, 1, 1)
+    coords._check_empty()
+
+
+@pytest.mark.parametrize(
+    ("values", "lower_limit", "upper_limit", "expected"),
+    [
+        (np.array([0, np.pi]), 0.0, np.pi, np.array([0, np.pi])),
+        (np.array([np.pi+np.finfo(float).eps]), 0.0, np.pi, np.array([0, np.pi])),
+    ],
+)
+def test_check_array_limits(values, lower_limit, upper_limit, expected):
+    """Test _check_array_limits with valid inputs."""
+    result = coordinates._check_array_limits(values, lower_limit, upper_limit)
+    npt.assert_allclose(result, expected)
+
+
+@pytest.mark.parametrize(
+    ("values", "lower_limit", "upper_limit"),
+    [
+        (np.array([0.1, 0.2, -0.3]), 0.0, 1.0),
+        (np.array([0.1, 0.2, 1.3]), 0.0, 1.0),
+    ],
+)
+def test_check_array_limits_raises_value_error(values, lower_limit, upper_limit):
+    """Test _check_array_limits raises ValueError for out of range values."""
+    with pytest.raises(ValueError):
+        coordinates._check_array_limits(values, lower_limit, upper_limit)

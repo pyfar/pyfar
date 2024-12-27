@@ -29,6 +29,24 @@ def test_getter_radii_from_cart(x, y, z, radius, radius_z):
 
 
 @pytest.mark.parametrize(
+    ("x", "y", "z", "radius", "radius_z"), [
+        (1, 0, 0, 1, 1),
+        (-1, 0, 0, 1, 1),
+        (0, 2, 0, 2, 2),
+        (0, 3, 4, 5, 3),
+        (0, 0, 0, 0, 0),
+    ])
+def test_setter_radii_from_cart(x, y, z, radius, radius_z):
+    coords = Coordinates(0, 0, 0)
+    coords.x = x
+    coords.y = y
+    coords.z = z
+    np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
+    np.testing.assert_allclose(coords.rho, radius_z, atol=1e-15)
+    np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
+
+
+@pytest.mark.parametrize(
     ("x", "y", "z", "azimuth", "elevation"), [
         (1, 0, 0, 0, 0),
         (-1, 0, 0, np.pi, 0),
