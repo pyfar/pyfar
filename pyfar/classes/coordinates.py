@@ -1797,7 +1797,7 @@ class Coordinates():
 
         Examples
         --------
-        Find all point with 0.5 m distance from the frontal point
+        Find all point with 0.2 m distance from the frontal point
 
         .. plot::
 
@@ -1805,7 +1805,7 @@ class Coordinates():
             >>> import numpy as np
             >>> coords = pf.Coordinates.from_spherical_elevation(
             >>>     np.arange(0, 360, 5)*np.pi/180, 0, 1)
-            >>> find = pf.Coordinates(.5, 0, 0)
+            >>> find = pf.Coordinates(.2, 0, 0)
             >>> index = coords.find_within(find, 1)
             >>> coords.show(index)
 
