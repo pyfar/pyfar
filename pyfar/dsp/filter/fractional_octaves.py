@@ -3,7 +3,6 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
-from pyfar._utils import rename_arg
 from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
