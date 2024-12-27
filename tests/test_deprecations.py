@@ -221,7 +221,7 @@ def test_deprecations_freq_range_parameter_warnings():
     gt = pf.dsp.filter.GammatoneBands(frequency_range=(20, 20e3))
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(TypeError):
+        with pytest.raises(AttributeError):
             npt.assert_equal((20, 20e3), gt.freq_range)
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
