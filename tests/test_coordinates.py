@@ -73,13 +73,6 @@ def test_coordinates_init_val_and_weights():
         Coordinates([1, 2], 0, 0, weights=.5)
 
 
-def test_coordinates_init_sh_order():
-    """Test initialization with spherical harmonics order."""
-    coords = Coordinates(sh_order=5)
-    assert isinstance(coords, Coordinates)
-    assert coords.sh_order == 5
-
-
 def test_show():
     """Test if possible calls of show() pass."""
     coords = Coordinates([-1, 0, 1], 0, 0)
@@ -124,13 +117,6 @@ def test_setter_weights():
     coords = Coordinates([1, 2], 0, 0)
     coords.weights = [.5, .5]
     assert (coords.weights == np.array([.5, .5])).all()
-
-
-def test_setter_sh_order():
-    """Test setting the SH order."""
-    coords = Coordinates()
-    coords.sh_order = 10
-    assert coords.sh_order == 10
 
 
 def test_setter_comment():
@@ -464,12 +450,6 @@ def test___eq___differInUnit_notEqual():
 def test___eq___differInWeights_notEqual():
     coordinates = Coordinates(1, 2, 3, weights=.5)
     actual = Coordinates(1, 2, 3, weights=0.0)
-    assert not coordinates == actual
-
-
-def test___eq___differInShOrder_notEqual():
-    coordinates = Coordinates(1, 2, 3, sh_order=2)
-    actual = Coordinates(1, 2, 3, sh_order=8)
     assert not coordinates == actual
 
 

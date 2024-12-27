@@ -1448,13 +1448,10 @@ class Coordinates():
         eq_y = self._y == other._y
         eq_z = self._z == other._z
         eq_weights = self._weights == other._weights
-        eq_sh_order = self._sh_order == other._sh_order
         eq_comment = self._comment == other._comment
         if self._x.shape == ():
-            return eq_x & eq_y & eq_z & eq_weights & eq_comment \
-                & eq_sh_order
-        return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment \
-            & eq_sh_order
+            return eq_x & eq_y & eq_z & eq_weights & eq_comment
+        return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment
 
     def __add__(self, other):
         """Add two numbers/Coordinates objects."""
