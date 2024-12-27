@@ -4,7 +4,6 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
-from pyfar.classes.warnings import PyfarDeprecationWarning
 from pyfar._utils import rename_arg
 import warnings
 import scipy.fft as sfft
