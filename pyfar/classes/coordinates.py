@@ -1617,10 +1617,12 @@ class Coordinates():
         .. plot::
 
             >>> import pyfar as pf
-            >>> coords = pf.samplings.sph_lebedev(sh_order=10)
+            >>> import numpy as np
+            >>> coords = pf.Coordinates.from_spherical_elevation(
+            >>>     np.arange(0, 360, 10)*np.pi/180, 0, 1)
             >>> to_find = pf.Coordinates(1, 0, 0)
             >>> index, distance = coords.find_nearest(to_find)
-            >>> coords.show(index)
+            >>> ax = coords.show(index)
             >>> distance
             0.0
 
