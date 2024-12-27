@@ -603,3 +603,10 @@ def test_angle_conversion_deg2rad():
     rad = deg2rad(deg)
     # check output values
     npt.assert_allclose(rad, np.atleast_2d([np.pi, 2*np.pi, 1]))
+
+
+def test__repr__comment_empty():
+    coords = Coordinates()
+    x = coords.__repr__()
+    assert 'Empty Coordinates object' in x
+    assert 'Contains sampling weights' in x

@@ -243,3 +243,36 @@ def test___eq___differInShComment_notEqual():
     coordinates = Coordinates(1, 2, 3, comment="Madre mia!")
     actual = Coordinates(1, 2, 3, comment="Oh my woooooosh!")
     assert not coordinates == actual
+
+
+def test___eq___differInShape():
+    coordinates = Coordinates([1, 1], 2, 3)
+    actual = Coordinates(1, 2, 3)
+    assert not coordinates == actual
+
+
+def test_comment_setter_type_error():
+    """Test setting the comment with a non-string type."""
+    coords = Coordinates()
+    with pytest.raises(TypeError, match="comment has to be of type string"):
+        coords.comment = 123  # non-string type
+
+
+def test_comment_setter_valid():
+    """Test setting the comment with a valid string."""
+    coords = Coordinates()
+    coords.comment = 'This is a valid comment'
+    assert coords.comment == 'This is a valid comment'
+
+
+def test_comment_init():
+    """Test initializing Coordinates with a comment."""
+    coords = Coordinates(comment='Initial comment')
+    assert coords.comment == 'Initial comment'
+
+
+def test_comment_empty_string():
+    """Test setting the comment to an empty string."""
+    coords = Coordinates()
+    coords.comment = ''
+    assert coords.comment == ''
