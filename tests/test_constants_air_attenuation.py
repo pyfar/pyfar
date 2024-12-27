@@ -77,21 +77,21 @@ def test_air_attenuation_iso_inputs():
 
 def test_saturation_vapor_pressure_scalar():
     temperature = 25
-    expected = 31.61736
+    expected = 3161.736
     result = pf.constants.saturation_vapor_pressure(temperature)
     npt.assert_allclose(result, expected, atol=0.001)
 
 
 def test_saturation_vapor_pressure_array():
     temperature = np.array([0, 10, 20, 30])
-    expected = np.array([6.1094, 12.260206, 23.334406, 42.366503])
+    expected = np.array([610.94, 1226.0206, 2333.4406, 4236.6503])
     result = pf.constants.saturation_vapor_pressure(temperature)
     npt.assert_allclose(result, expected, atol=0.001)
 
 
 def test_saturation_vapor_pressure_list():
     temperature = [0, 10, 20, 30]
-    expected = [6.1094, 12.260206, 23.334406, 42.366503]
+    expected = [610.94, 1226.0206, 2333.4406, 4236.6503]
     result = pf.constants.saturation_vapor_pressure(temperature)
     npt.assert_allclose(result, expected, atol=0.001)
 
