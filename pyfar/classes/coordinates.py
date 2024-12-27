@@ -1934,7 +1934,7 @@ def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
         Clipped input values
     """
     if variable_name is None:
-        variable_name = 'value'
+        variable_name = 'values'
     if any(values < lower_limit):
         mask = values < lower_limit
         eps = np.finfo(float).eps
