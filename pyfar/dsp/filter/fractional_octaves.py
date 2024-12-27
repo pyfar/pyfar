@@ -161,9 +161,6 @@ def _center_frequencies_fractional_octaves_iec(num_fractions):
     return nominal, exact
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def fractional_octave_bands(
         signal,
         num_fractions,
@@ -205,12 +202,6 @@ def fractional_octave_bands(
         ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
-    freq_range: array, tuple, optional
-        The lower and upper frequency limits. The default is
-        ``frequency_range=(20, 20e3)``.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-
 
     Returns
     -------
