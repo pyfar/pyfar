@@ -157,7 +157,7 @@ jobs:
 
   coverage:
     docker:
-    - image: cimg/python:3.10-browsers
+    - image: cimg/python:3.11-browsers
     steps:
     - checkout
     - browser-tools/install-browser-tools
@@ -165,6 +165,7 @@ jobs:
         name: Setup testing environment
         command: |
           pip install '.[test]' --user
+          pip install coverage
           echo $HOME
     - run:
         name: Run Tests
