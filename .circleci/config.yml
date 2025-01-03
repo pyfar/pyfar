@@ -204,6 +204,8 @@ workflows:
             parameters:
               version:
                 - "3.11-browsers"
+          requires:
+            - build_and_test
 
       - ruff:
           matrix:
