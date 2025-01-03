@@ -203,7 +203,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.11-browsers"
+                - "3.12-browsers"
           requires:
             - build_and_test
 
