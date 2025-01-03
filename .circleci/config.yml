@@ -170,9 +170,9 @@ jobs:
     - run:
         name: Run Tests
         command: |
-          $HOME/.local/bin/coverage run -m pytest
-          $HOME/.local/bin/coverage report
-          $HOME/.local/bin/coverage html  # open htmlcov/index.html in a browser
+          coverage run -m pytest
+          coverage report
+          coverage html  # open htmlcov/index.html in a browser
     - store_artifacts:
         path: htmlcov
 
