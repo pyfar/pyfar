@@ -156,14 +156,8 @@ jobs:
             twine upload dist/*
 
   coverage:
-    parameters:
-      version:
-        description: "version tag"
-        default: "latest"
-        type: string
-    executor:
-      name: python-docker
-      version: <<parameters.version>>
+    docker:
+    - image: cimg/python:3.10-browsers
     steps:
     - checkout
     - browser-tools/install-browser-tools
