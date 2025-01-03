@@ -164,7 +164,7 @@ jobs:
     - run:
         name: Setup testing environment
         command: |
-          pip install '.[test]' --user
+          pip install ".[tests]" --user
           pip install coverage
           echo $HOME
     - run:
