@@ -192,7 +192,7 @@ workflows:
                 - "3.12"
                 - "3.13"
 
-      - coverage:
+      - coverage
 
       - ruff:
           matrix:
