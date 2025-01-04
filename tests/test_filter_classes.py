@@ -396,8 +396,10 @@ def test_blockwise_processing(Filter):
     block_a = Filter.process(pf.Signal(signal.time[0, :3], 44100), reset=False)
     block_b = Filter.process(pf.Signal(signal.time[0, 3:], 44100), reset=False)
     # outputs have to be identical in this case
-    npt.assert_array_equal(np.atleast_2d(complete.time[0, :3]), block_a.time)
-    npt.assert_array_equal(np.atleast_2d(complete.time[0, 3:]), block_b.time)
+    npt.assert_allclose(np.atleast_2d(complete.time[0, :3]), block_a.time,
+                        atol=1e-15)
+    npt.assert_allclose(np.atleast_2d(complete.time[0, 3:]), block_b.time,
+                        atol=1e-15)
 
 
 def test_blockwise_processing_with_coefficients_exchange():

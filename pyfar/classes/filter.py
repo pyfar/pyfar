@@ -389,7 +389,22 @@ class FilterFIR(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
-        return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
+        if zi is None:
+            # dynamically add new dimensions to b to match ndims of data
+            # for convolution
+            b = coefficients[0]
+            new_dims = data.ndim - b.ndim
+
+            for _i in range(new_dims):
+                b = b[np.newaxis, ...]
+
+            out_full = spsignal.oaconvolve(data, b, mode='full')
+            # Ensure that the output has the same shape as the input
+            idx = out_full.shape[-1] - len(coefficients[0]) + 1
+            out = out_full[..., 0:idx]
+            return out
+        else:
+            return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
     def __repr__(self):
         """Representation of the filter object."""
