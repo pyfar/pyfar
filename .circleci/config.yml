@@ -10,7 +10,6 @@ orbs:
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
-  browser-tools: circleci/browser-tools@1.5.0
 
 executors:
   python-docker: # declares a reusable executor
@@ -166,7 +165,6 @@ jobs:
       version: <<parameters.version>>
     steps:
     - checkout
-    - browser-tools/install-browser-tools
     - run:
         name: Setup testing environment
         command: |
@@ -209,7 +207,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12-browsers"
+                - "3.12"
           requires:
             - build_and_test
 
