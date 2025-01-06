@@ -168,17 +168,11 @@ jobs:
     - run:
         name: Setup testing environment
         command: |
-          pip install ".[tests]" --user
-          pip install coverage --user
-          echo $HOME
+          pip install ".[tests]"
     - run:
         name: Run Tests
         command: |
           coverage run -m pytest
-    - run:
-        name: Print report
-        command: |
-          coverage report
     - run:
         name: generate html report
         command: |
@@ -208,6 +202,8 @@ workflows:
             parameters:
               version:
                 - "3.12"
+          requires:
+            - build_and_test
 
       - ruff:
           matrix:
