@@ -208,8 +208,6 @@ workflows:
             parameters:
               version:
                 - "3.12"
-          requires:
-            - build_and_test
 
       - ruff:
           matrix:
