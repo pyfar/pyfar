@@ -389,8 +389,6 @@ class FilterFIR(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
-        print(data.shape)
-
         if zi is None:
             # dynamically add new dimensions to b to match ndims of data
             # for convolution
