@@ -208,10 +208,12 @@ def test_find_within_error():
         coords.find_within(find, 1, return_sorted=-1)
 
     find.radius = .1
-    match = 'find_within only works if all points have the same'
+    radius_tol = 0.1
+    match = 'find_within only works if all points have the same radius. '
+            f'Differences are larger than {radius_tol}'
     with pytest.raises(ValueError, match=match):
         coords.find_within(
-            find, distance_measure='spherical_radians', radius_tol=0.1)
+            find, distance_measure='spherical_radians', radius_tol=radius_tol)
 
 
 @pytest.mark.parametrize('distance_measure', [
