@@ -7,7 +7,7 @@ from . import utils
 def air_attenuation_iso(
         temperature, frequencies, relative_humidity,
         atmospheric_pressure=101325, calculate_accuracy=False):
-    """Calculate the pure tone air attenuation of sound in air according to
+    r"""Calculate the pure tone air attenuation of sound in air according to
     ISO 9613-1.
 
     Calculation is in accordance with ISO 9613-1 [#]_. It uses
@@ -32,11 +32,17 @@ def air_attenuation_iso(
 
     Returns
     -------
-    air_attenuation :  :py:class:`~pyfar.classes.FrequencyData`
+    alpha :  :py:class:`~pyfar.classes.FrequencyData`
         Pure tone air attenuation coefficient in decibels per meter for
         atmospheric absorption. The cshape of the output is the broadcast
         from the shapes of the ``temperature``, ``relative_humidity``, and
         ``atmospheric_pressure``.
+    m : :py:class:`~pyfar.classes.FrequencyData`
+        Pure tone air attenuation coefficient per meter for
+        atmospheric absorption. The cshape of the output is the broadcast
+        from the shapes of the ``temperature``, ``relative_humidity``, and
+        ``atmospheric_pressure``. The parameter ``m`` is calculated as
+        :math:`m = 10 \cdot \log(\exp(1)) \cdot \alpha`.
     accuracy : float, array_like, optional
         accuracy of the results according to the standard, if
         ``calculate_accuracy`` is True:
@@ -151,11 +157,10 @@ def air_attenuation_iso(
         (T/T_0)**(-5/2)*(0.01275*np.exp(-2239.1/T)*(f_rO + (f**2/f_rO))**(-1)
         +0.1068*np.exp(-3352/T) * (f_rN + (f**2/f_rN))**(-1)))
 
-    air_attenuation = pf.FrequencyData(
+    alpha = pf.FrequencyData(
         air_attenuation, frequencies=frequencies)
 
-    if not calculate_accuracy:
-        return air_attenuation
+    m = alpha * 10*np.log(np.exp(1))
 
     # calculate accuracy
     accuracy = np.zeros_like(air_attenuation.freq) - 1
@@ -181,7 +186,7 @@ def air_attenuation_iso(
     accuracy[accuracy_50] = 50
 
     accuracy = pf.FrequencyData(accuracy, frequencies=frequencies)
-    return air_attenuation, accuracy
+    return alpha, m, accuracy
 
 
 def _p_sat_water(temperature):
