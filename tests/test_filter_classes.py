@@ -178,7 +178,7 @@ def test_filter_fir_process_state(impulse):
     state = filt.state
 
     npt.assert_allclose([[[0, 0, 0, 0, 0]]], state)
-    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff))
+    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff), atol=1e-16)
 
 
 def test_filter_fir_init_state(impulse):
