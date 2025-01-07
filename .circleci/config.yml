@@ -170,7 +170,7 @@ jobs:
         command: |
           pip install ".[tests]"
     - run:
-        name: Run Tests
+        name: Run Tests with coverage and create html report
         command: |
           coverage run -m pytest
           coverage html  # open htmlcov/index.html in a browser
