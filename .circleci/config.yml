@@ -173,9 +173,6 @@ jobs:
         name: Run Tests
         command: |
           coverage run -m pytest
-    - run:
-        name: generate html report
-        command: |
           coverage html  # open htmlcov/index.html in a browser
     - store_artifacts:
         path: htmlcov
