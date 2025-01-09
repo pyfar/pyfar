@@ -6,7 +6,7 @@ import re
 
 
 def test_regularization_errors(impulse):
-    """Test errors"""
+    """Test errors."""
     with pytest.raises(RuntimeError,
                        match=re.escape("Regularization objects must be created"
                                        " using one of the 'from_()' "
@@ -65,7 +65,8 @@ def test_regularization_errors(impulse):
 @pytest.mark.parametrize(("beta", "expected"), [(1, 0.5), (0.5, 2/3), (0, 1)])
 def test_regularization_frequency_range(impulse, beta, expected):
     """Test Regularization from a frequency range using different beta
-    values."""
+    values.
+    """
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(impulse,
         (200, 10e3), beta=beta)
     inv = Regu.invert
@@ -93,7 +94,7 @@ def test_regularization_normalization(impulse, norm, expected):
 
 
 def test_regularization_within(impulse):
-    """Test regularization_within parameter"""
+    """Test regularization_within parameter."""
     Regu = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(impulse,
         (200, 10e3), regularization_within=.5)
     inv = Regu.invert
@@ -125,7 +126,8 @@ def test_regularization_beta_mean_max(impulse):
 
 def test_regularization_target(impulse):
     """Test Regularization from a frequency range using a bandpass filter
-    target function."""
+    target function.
+    """
     bp = pf.dsp.filter.butterworth(None, 4, (20, 15.5e3), 'bandpass',
                                    impulse.sampling_rate)
     target = bp.process(impulse)

@@ -50,6 +50,7 @@ class RegularizedSpectrumInversion():
             Convention Paper 6929 Presented at the 121st Convention, 2006
             October 5–8, San Francisco, CA, USA.
     """
+
     def __init__(self) -> None:
 
         # throw error if object is instanced without classmethod
@@ -57,6 +58,7 @@ class RegularizedSpectrumInversion():
                            "using one of the 'from_()' classmethods.")
 
     def __repr__(self):
+        """String representation of RegularizedSpectrumInversion class."""
         return f"Regularization object with regularization "\
             f"of type '{self._regularization_type}'."
 
@@ -113,7 +115,6 @@ class RegularizedSpectrumInversion():
 
         Examples
         --------
-
         Invert a sine sweep with limited bandwidth and apply maximum
         normalization to the regularization function.
 
@@ -215,7 +216,6 @@ class RegularizedSpectrumInversion():
 
         Examples
         --------
-
         Invert a headphone transfer function (HpTF), regularize the inversion at
         high frequencies, and use a band-pass as target function. Note that the
         equalized HpTF, which is obtained from a convolution of the HpTF with its
@@ -323,7 +323,7 @@ class RegularizedSpectrumInversion():
 
     @signal.setter
     def signal(self, signal):
-        """Set signal to be inverted"""
+        """Set signal to be inverted."""
         if not isinstance(signal, pf.Signal):
             raise TypeError("Regularization of type "
                             f"'{self._regularization_type}' requires an input"
@@ -337,7 +337,7 @@ class RegularizedSpectrumInversion():
 
     @target.setter
     def target(self, target):
-        """Set target function"""
+        """Set target function."""
         if target is not None and not isinstance(target, pf.Signal):
             raise ValueError(
                 "Target function must be a pyfar.Signal object.")
