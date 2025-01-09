@@ -1,3 +1,85 @@
+[project]
+name = "pyfar"
+version = "0.7.1"
+description = "Project for data formats in acoustics."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+authors = [
+    { name = "The pyfar developers", email = "info@pyfar.org" },
+]
+keywords = [
+    "pyfar",
+    "acoustics",
+    "Fourier transforms",
+    "audio signal processing",
+    "filterbanks",
+    "parametric filters",
+    "audio signal visualization",
+    "read and write audio signals",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "numpy>=1.23.0",
+    "scipy>=1.5.0",
+    "matplotlib",
+    "sofar>=0.1.2",
+    "urllib3",
+    "deepdiff",
+    "soundfile>=0.11.0",
+]
+
+[project.optional-dependencies]
+deploy = [
+    "twine",
+    "wheel",
+    "build",
+    "setuptools",
+    "bump-my-version",
+    ]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "watchdog",
+    "ruff==0.4.1",
+    "coverage",
+]
+docs = [
+    "sphinx",
+    "autodocsumm>=0.2.14",
+    "pydata-sphinx-theme",
+    "sphinx_mdinclude",
+    "sphinx-design",
+    "sphinx-favicon",
+    "sphinx-reredirects",
+]
+dev = ["pyfar[deploy,tests,docs]"]
+
+[project.urls]
+Tracker = "https://github.com/pyfar/pyfar/issues"
+Documentation = "https://pyfar.readthedocs.io/"
+Download = "https://pypi.org/project/pyfar/"
+Homepage = "https://pyfar.org/"
+Source = "https://github.com/pyfar/pyfar"
+Changelog = "https://github.com/pyfar/pyfar/blob/main/HISTORY.rst"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = {}  # Scan the project directory with the default parameters
+
 [tool.ruff]
 exclude = [
     ".git",
@@ -8,25 +90,74 @@ exclude = [
 ]
 line-length = 79
 lint.ignore = [
-    "B006",
-    "B008",
-    "PT018", # Assertion should be broken down into multiple parts
-    "PT019", # Fixture `_` without value is injected as parameter
+    "D200",   # One-line docstring should fit on one line with quotes
+    "D202",   # No blank lines allowed after function docstring
+    "D205",   # 1 blank line required between summary line and description
+    "D401",   # First line should be in imperative mood
+    "D404",   # First word of the docstring should not be "This"
+    "B006",   # Do not use mutable data structures for argument defaults
+    "B008",   # Do not perform calls in argument defaults
+    "PT018",  # Assertion should be broken down into multiple parts
+    "PT019",  # Fixture `_` without value is injected as parameter
+
 ]
 lint.select = [
-    "B",
-    "ARG",
-    "C4",
-    "E",
-    "F",
-    "W",
-    "PT", # Pytest style
-    "A",
-    "ERA",
-    "NPY",
-    "COM",
-    "I002",
-    "TID252",
-    "FIX",
+    "B",      # bugbear extension
+    "ARG",    # Remove unused function/method arguments
+    "C4",     # Check for common security issues
+    "E",      # PEP8 errors
+    "F",      # Pyflakes
+    "W",      # PEP8 warnings
+    "D",      # Docstring guidelines
+    "NPY",    # Check all numpy related deprecations
+    "D417",   # Missing argument descriptions in the docstring
+    "PT",     # Pytest style
+    "A",      # Avoid builtin function and type shadowing
+    "ERA",    # No commented out code
+    "NPY",    # Check all numpy related deprecations
+    "COM",    # trailing comma rules
+    "I002",   # missing required import
+    "TID252", # Use absolute over relative imports
+    "FIX",    # Code should not contain FIXME, TODO, etc
 ]
+# Ignore missing docstrings in tests
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "D100",
+    "D101",
+    "D103",
+    "D104",
+]
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
+[tool.bumpversion]
+current_version = "0.7.1"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = true
+ignore_missing_version = false
+ignore_missing_files = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+commit_args = ""
+setup_hooks = []
+pre_commit_hooks = []
+post_commit_hooks = []
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = '\nversion = "{current_version}"'
+replace = '\nversion = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "pyfar/__init__.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"

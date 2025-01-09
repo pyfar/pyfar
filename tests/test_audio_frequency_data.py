@@ -44,7 +44,7 @@ def test_data_frequency_with_non_monotonously_increasing_frequencies():
 def test_data_frequency_init_dtype():
     """
     Test casting and assertions of dtype (also test freq setter because
-    it is called during initialization)
+    it is called during initialization).
     """
 
     # integer to float casting
@@ -278,7 +278,7 @@ def test___eq___notEqual():
 
 
 def test__repr__(capfd):
-    """Test string representation"""
+    """Test string representation."""
     print(FrequencyData([1, 2, 3], [1, 2, 3]))
     out, _ = capfd.readouterr()
     assert ("FrequencyData:\n"

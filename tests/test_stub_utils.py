@@ -7,7 +7,7 @@ from pyfar.testing import stub_utils
 
 
 def test_signal_stub_properties():
-    """ Test comparing properties of Signal stub
+    """Test comparing properties of Signal stub
     with actual Signal implementation.
     """
     time = np.ones((1, 1024))
@@ -23,7 +23,7 @@ def test_signal_stub_properties():
 
 
 def test_signal_stub_times():
-    """ Test times vector of Signal stub.
+    """Test times vector of Signal stub.
     """
     time = np.ones((1, 4))
     freq = np.ones((1, 3))
@@ -37,7 +37,7 @@ def test_signal_stub_times():
 
 
 def test_signal_stub_frequencies_even():
-    """ Test frequencies vector of Signal stub,
+    """Test frequencies vector of Signal stub,
     even number of samples.
     """
     time = np.ones((1, 4))
@@ -52,7 +52,7 @@ def test_signal_stub_frequencies_even():
 
 
 def test_signal_stub_frequencies_odd():
-    """ Test frequencies vector of Signal stub,
+    """Test frequencies vector of Signal stub,
     odd number of samples.
     """
     time = np.ones((1, 5))
@@ -67,7 +67,7 @@ def test_signal_stub_frequencies_odd():
 
 
 def test_time_data_stub_properties():
-    """ Test comparing properties of TimeData stub
+    """Test comparing properties of TimeData stub
     with actual TimeData implementation.
     """
     time = [1, 0, -1]
@@ -106,7 +106,7 @@ def test_time_data_stub_slice():
 
 
 def test_frequency_data_stub_properties():
-    """ Test comparing properties of FrequencyData stub
+    """Test comparing properties of FrequencyData stub
     with actual FrequencyData implementation.
     """
     freq = [1, 0, -1]
@@ -214,7 +214,7 @@ def test_impulse_func_multi_channel():
 
 
 def test_normalization_none():
-    """ Test unitary FFT normalization implemented in stubs_utils.py"""
+    """Test unitary FFT normalization implemented in stubs_utils.py."""
     n_samples = 4
     freq = np.array([1, 1, 1], dtype=complex)
     freq_norm = stub_utils._normalization(freq, n_samples, 'none')
@@ -222,8 +222,9 @@ def test_normalization_none():
 
 
 def test_normalization_rms_even():
-    """ Test RMS FFT normalization implemented in stubs_utils.py,
-    even number of samples."""
+    """Test RMS FFT normalization implemented in stubs_utils.py,
+    even number of samples.
+    """
     n_samples = 4
     freq = np.array([1, 1, 1], dtype=complex)
     freq_norm_truth = np.array([1, np.sqrt(2), 1], dtype=complex)
@@ -233,8 +234,9 @@ def test_normalization_rms_even():
 
 
 def test_normalization_rms_odd():
-    """ Test RMS FFT normalization implemented in stubs_utils.py,
-    odd number of samples."""
+    """Test RMS FFT normalization implemented in stubs_utils.py,
+    odd number of samples.
+    """
     n_samples = 5
     freq = np.array([1, 1, 1], dtype=complex)
     freq_norm_truth = np.array([1, np.sqrt(2), np.sqrt(2)], dtype=complex)
@@ -417,12 +419,12 @@ def test_noise_func_multi_channel():
 
 
 def test__eq___dict__flat_data(flat_data):
-    """ Test equality for stub. """
+    """Test equality for stub."""
     actual = flat_data.copy()
     assert actual == flat_data
 
 
 def test__eq___dict__nested_data(nested_data):
-    """ Test equality for stub. """
+    """Test equality for stub."""
     actual = nested_data.copy()
     assert actual == nested_data

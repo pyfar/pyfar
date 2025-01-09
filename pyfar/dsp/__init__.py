@@ -1,3 +1,5 @@
+"""Digital signal processing functions."""
+
 from .dsp import (
     minimum_phase,
     phase,
@@ -22,6 +24,7 @@ from .dsp import (
     rms,
     normalize,
     average,
+    correlate,
 )
 
 from .interpolation import (
@@ -67,5 +70,6 @@ __all__ = [
     'average',
     'normalize',
     'fractional_time_shift',
+    'correlate',
     'RegularizedSpectrumInversion',
 ]

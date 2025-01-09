@@ -1,3 +1,4 @@
+"""Utilities for the pyfar plot module."""
 import matplotlib.style as mpl_style
 import os
 import json
@@ -23,7 +24,7 @@ def plotstyle(style='light'):
     style : str
         Full path to the pyfar plotstyle.
 
-    See also
+    See Also
     --------
     pyfar.plot.use
     pyfar.plot.context
@@ -67,13 +68,12 @@ def context(style='light', after_reset=False):
         If ``True``, apply style after resetting settings to their defaults;
         otherwise, apply style on top of the current settings.
 
-    See also
+    See Also
     --------
     pyfar.plot.plotstyle
 
     Examples
     --------
-
     Generate customizable subplots with the default pyfar plot style
 
     >>> import pyfar as pf
@@ -119,7 +119,7 @@ def use(style="light"):
         |      | first to last in the list.                                  |
         +------+-------------------------------------------------------------+
 
-    See also
+    See Also
     --------
     pyfar.plot.plotstyle
 
@@ -130,7 +130,6 @@ def use(style="light"):
 
     Examples
     --------
-
     Permanently use the pyfar default plot style
 
     >>> import pyfar as pf

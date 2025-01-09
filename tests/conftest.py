@@ -13,6 +13,11 @@ import pyfar.signals
 
 from pyfar.testing import stub_utils
 
+collect_ignore_glob = [
+    "private/*",
+    "references/*",
+    "test_plot_data/*",
+    "test_io_data/*"]
 
 @pytest.fixture()
 def sine_stub():
@@ -438,7 +443,7 @@ def noise():
 
 @pytest.fixture()
 def noise_two_by_three_channel():
-    """ 2-by-3 channel gaussian white noise signal.
+    """2-by-3 channel gaussian white noise signal.
 
     Returns
     -------
@@ -463,7 +468,7 @@ def noise_two_by_three_channel():
 @pytest.fixture()
 def handsome_signal():
     """
-    Windows 200 Hz sine signal for testing plots
+    Windows 200 Hz sine signal for testing plots.
 
     Returns
     -------
@@ -480,7 +485,7 @@ def handsome_signal():
 @pytest.fixture()
 def handsome_signal_v2():
     """
-    Windowed 1kHz sine signal for testing plots
+    Windowed 1kHz sine signal for testing plots.
 
     Returns
     -------
@@ -497,7 +502,7 @@ def handsome_signal_v2():
 @pytest.fixture()
 def handsome_complex_signal():
     """
-    Windows 200 Hz sine signal, with complex valued data for testing plots
+    Windows 200 Hz sine signal, with complex valued data for testing plots.
 
     Returns
     -------
@@ -516,7 +521,7 @@ def handsome_complex_signal():
 @pytest.fixture()
 def handsome_complex_signal_v2():
     """
-    Windowed 1kHz sine signal for testing plots
+    Windowed 1kHz sine signal for testing plots.
 
     Returns
     -------
@@ -535,7 +540,7 @@ def handsome_complex_signal_v2():
 def handsome_signal_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
-    for testing 2D plots
+    for testing 2D plots.
 
     Returns
     -------
@@ -556,7 +561,7 @@ def handsome_signal_2d():
 def handsome_signal_complex_2d():
     """
     45 channel signal with delayed, scaled and bell-filtered impulses
-    for testing 2D plots
+    for testing 2D plots.
 
     Returns
     -------
@@ -631,7 +636,7 @@ def sofa_reference_coordinates(noise_two_by_three_channel):
 @pytest.fixture()
 def generate_sofa_GeneralFIR(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR."""
+    """Generate the reference sofa files of type GeneralFIR."""
     filename = os.path.join(tmpdir, ('GeneralFIR' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR', True)
@@ -651,7 +656,7 @@ def generate_sofa_GeneralFIR(
 @pytest.fixture()
 def generate_sofa_GeneralTF(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralTF."""
+    """Generate the reference sofa files of type GeneralTF."""
     filename = os.path.join(tmpdir, ('GeneralTF' + '.sofa'))
 
     sofafile = sf.Sofa('GeneralTF', True)
@@ -668,7 +673,7 @@ def generate_sofa_GeneralTF(
 
 @pytest.fixture()
 def generate_sofa_GeneralFIR_E(tmpdir):
-    """ Generate the reference sofa files of type GeneralFIR-E."""
+    """Generate the reference sofa files of type GeneralFIR-E."""
     filename = os.path.join(tmpdir, ('GeneralFIR-E.sofa'))
 
     sofafile = sf.Sofa('GeneralFIR-E', True)
@@ -682,7 +687,7 @@ def generate_sofa_GeneralFIR_E(tmpdir):
 
 @pytest.fixture()
 def generate_sofa_GeneralTF_E(tmpdir):
-    """ Generate the reference sofa files of type GeneralFIR-E."""
+    """Generate the reference sofa files of type GeneralFIR-E."""
     filename = os.path.join(tmpdir, ('GeneralTF-E.sofa'))
 
     sofafile = sf.Sofa('GeneralTF-E', True)
@@ -698,7 +703,7 @@ def generate_sofa_GeneralTF_E(tmpdir):
 @pytest.fixture()
 def generate_sofa_postype_spherical(
         tmpdir, noise_two_by_three_channel, sofa_reference_coordinates):
-    """ Generate the reference sofa files of type GeneralFIR,
+    """Generate the reference sofa files of type GeneralFIR,
     spherical position type.
     """
 
@@ -720,38 +725,38 @@ def generate_sofa_postype_spherical(
 
 @pytest.fixture()
 def views():
-    """ Used for the creation of Orientation objects with
-    `Orientations.from_view_up`
+    """Used for the creation of Orientation objects with
+    `Orientations.from_view_up`.
     """
     return [[1, 0, 0], [2, 0, 0], [-1, 0, 0]]
 
 
 @pytest.fixture()
 def ups():
-    """ Used for the creation of Orientation objects with
-    `Orientations.from_view_up`
+    """Used for the creation of Orientation objects with
+    `Orientations.from_view_up`.
     """
     return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
 
 
 @pytest.fixture()
 def positions():
-    """ Used for the visualization of Orientation objects with
-    `Orientations.show`
+    """Used for the visualization of Orientation objects with
+    `Orientations.show`.
     """
     return [[0, 0.5, 0], [0, -0.5, 0], [1, 1, 1]]
 
 
 @pytest.fixture()
 def orientations(views, ups):
-    """ Orientations object uses fixtures `views` and `ups`.
+    """Orientations object uses fixtures `views` and `ups`.
     """
     return Orientations.from_view_up(views, ups)
 
 
 @pytest.fixture()
 def coordinates():
-    """ Coordinates object.
+    """Coordinates object.
     """
     return Coordinates([0, 1], [2, 3], [4, 5])
 
@@ -768,14 +773,14 @@ def state():
 
 @pytest.fixture()
 def filterObject(coeffs, state):
-    """ Filter object.
+    """Filter object.
     """
     return fo.Filter(coefficients=coeffs, state=state)
 
 
 @pytest.fixture()
 def filterFIR():
-    """ FilterFIR objectr.
+    """FilterFIR objectr.
     """
     coeff = np.array([
         [1, 1 / 2, 0],
@@ -785,7 +790,7 @@ def filterFIR():
 
 @pytest.fixture()
 def filterIIR():
-    """ FilterIIR object.
+    """FilterIIR object.
     """
     coeff = np.array([[1, 1 / 2, 0], [1, 0, 0]])
     return fo.FilterIIR(coeff, sampling_rate=2 * np.pi)
@@ -793,7 +798,7 @@ def filterIIR():
 
 @pytest.fixture()
 def filterSOS():
-    """ FilterSOS objectr.
+    """FilterSOS objectr.
     """
     sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
@@ -801,7 +806,7 @@ def filterSOS():
 
 @pytest.fixture()
 def sphericalvoronoi():
-    """ SphericalVoronoi object.
+    """SphericalVoronoi object.
     """
     points = np.array(
         [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
@@ -811,35 +816,35 @@ def sphericalvoronoi():
 
 @pytest.fixture()
 def any_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.AnyClass()
 
 
 @pytest.fixture()
 def no_encode_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.NoEncodeClass()
 
 
 @pytest.fixture()
 def no_decode_obj():
-    """ Any object acting as placeholder for non-PyFar-objects.
+    """Any object acting as placeholder for non-PyFar-objects.
     """
     return stub_utils.NoDecodeClass()
 
 
 @pytest.fixture()
 def flat_data():
-    """ Class being primarily used as a subclass of the nested data object.
+    """Class being primarily used as a subclass of the nested data object.
     """
     return stub_utils.FlatData()
 
 
 @pytest.fixture()
 def nested_data():
-    """ General nested data structure primarily used to illustrate mechanism of
+    """General nested data structure primarily used to illustrate mechanism of
     `io.write` and `io.read`.
     """
     return stub_utils.NestedData.create()
@@ -847,6 +852,6 @@ def nested_data():
 
 @pytest.fixture()
 def dict_of_builtins():
-    """ Dictionary that contains builtins with support for writing and reading.
+    """Dictionary that contains builtins with support for writing and reading.
     """
     return stub_utils.dict_of_builtins()

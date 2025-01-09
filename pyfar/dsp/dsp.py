@@ -1,3 +1,4 @@
+"""Digital signal processing functions."""
 import multiprocessing
 import numpy as np
 from scipy import signal as sgn
@@ -147,15 +148,15 @@ def wrap_to_2pi(x):
 
 
 def linear_phase(signal, group_delay, unit="samples"):
-    """
+    r"""
     Set the phase to a linear phase with a specified group delay.
 
     The linear phase signal is computed as
 
-    .. math:: H_{\\mathrm{lin}} = |H| \\mathrm{e}^{-j \\omega \\tau}\\,,
+    .. math:: H_{\mathrm{lin}} = |H| \mathrm{e}^{-j \omega \tau}\,,
 
-    with :math:`H` the complex spectrum of the input data, :math:`|\\cdot|` the
-    absolute values, :math:`\\omega` the frequency in radians and :math:`\\tau`
+    with :math:`H` the complex spectrum of the input data, :math:`|\cdot|` the
+    absolute values, :math:`\omega` the frequency in radians and :math:`\tau`
     the group delay in seconds.
 
     Parameters
@@ -201,12 +202,12 @@ def linear_phase(signal, group_delay, unit="samples"):
 
 
 def zero_phase(signal):
-    """Calculate zero phase signal.
+    r"""Calculate zero phase signal.
 
     The zero phase signal is obtained by taking the absolute values of the
     spectrum
 
-    .. math:: H_z = |H| = \\sqrt{\\mathrm{real}(H)^2 + \\mathrm{imag}(H)^2},
+    .. math:: H_z = |H| = \sqrt{\mathrm{real}(H)^2 + \mathrm{imag}(H)^2},
 
     where :math:`H` is the complex valued spectrum of the input data and
     :math:`H_z` the real valued zero phase spectrum.
@@ -446,7 +447,6 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
     Examples
     --------
-
     Options for parameter `shape`.
 
     .. plot::
@@ -564,7 +564,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 
 
 def kaiser_window_beta(A):
-    """ Return a shape parameter beta to create kaiser window based on desired
+    """Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
 
     This function can be used to call :py:func:`~pyfar.dsp.time_window` with
@@ -597,7 +597,7 @@ def kaiser_window_beta(A):
 
 
 def _time_window_symmetric_interval_two(interval, window):
-    """ Symmetric time window between 2 values given in interval.
+    """Symmetric time window between 2 values given in interval.
 
     Parameters
     ----------
@@ -623,7 +623,7 @@ def _time_window_symmetric_interval_two(interval, window):
 
 
 def _time_window_left(n_samples, interval, window):
-    """ Left-sided time window. ""
+    """Left-sided time window.
 
     Parameters
     ----------
@@ -653,7 +653,7 @@ def _time_window_left(n_samples, interval, window):
 
 
 def _time_window_right(interval, window):
-    """ Right-sided time window. ""
+    """Right-sided time window.
 
     Parameters
     ----------
@@ -681,7 +681,7 @@ def _time_window_right(interval, window):
 
 
 def _time_window_symmetric_zero(n_samples, interval, window):
-    """ Symmetric time window with respect to t=0. ""
+    """Symmetric time window with respect to t=0.
 
     Parameters
     ----------
@@ -714,7 +714,7 @@ def _time_window_symmetric_zero(n_samples, interval, window):
 
 
 def _time_window_symmetric_interval_four(interval, window):
-    """ Symmetric time window with two fades and constant range in between.
+    """Symmetric time window with two fades and constant range in between.
 
     Parameters
     ----------
@@ -945,7 +945,6 @@ def minimum_phase(signal, n_fft=None, truncate=True):
 
     Examples
     --------
-
     Create a minimum phase equivalent of a linear phase FIR low-pass filter
 
     .. plot::
@@ -1090,14 +1089,14 @@ def time_shift(
     ----------
     signal : Signal
         The signal to be shifted
-    shift : int, float
+    shift : int, float, array_like
         The time-shift value. A positive value will result in right shift on
         the time axis (delaying of the signal), whereas a negative value
         yields a left shift on the time axis (non-causal shift to a earlier
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
-        can be performed by passing an array matching the signals channel
-        dimensions :py:func:`~pyfar.Signal.cshape`.
+        can be performed by passing an array broadcastable to the signals
+        channel dimensions :py:func:`~pyfar.Signal.cshape`.
     mode : str, optional
         The shifting mode
 
@@ -1119,7 +1118,7 @@ def time_shift(
         for seconds. By default ``'samples'`` is used. Note that in the case
         of specifying the shift time in seconds, the value is rounded to the
         next integer sample value to perform the shift.
-    pad_type : numeric, optional
+    pad_value : numeric, optional
         The pad value for linear shifts, by default ``0.`` is used.
         Pad :py:data:`numpy.nan` to the respective channels if the rms value
         of the signal is to be maintained for block-wise rms estimation of the
@@ -1251,7 +1250,6 @@ def find_impulse_response_delay(impulse_response, N=1):
 
     References
     ----------
-
     .. [#]  N. S. M. Tamim and F. Ghani, “Hilbert transform of FFT pruned
             cross correlation function for optimization in time delay
             estimation,” in Communications (MICC), 2009 IEEE 9th Malaysia
@@ -1555,7 +1553,7 @@ def deconvolve(system_output, system_input, fft_length=None,
         The ``fft_norm`` of is set to ``'none'``.
 
     References
-    -----------
+    ----------
     .. [#] S. Mueller and P. Masserani "Transfer function measurement with
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
@@ -1810,6 +1808,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
         If return_prefix is ``True``, the function will also return the
         `log_prefix` value. This can be used to delogrithmize the data. The
         default is ``False``.
+
     Returns
     -------
     decibel : numpy.ndarray
@@ -1917,7 +1916,6 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
     Examples
     --------
-
     Illustrate effect of limit and knee
 
     .. plot ::
@@ -2014,7 +2012,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
         >>> ax.legend(loc='upper left')
 
     References
-    -----------
+    ----------
     .. [#] B. Bernschütz, Microphone arrays and sound field decomposition for
            dynamic binaural synthesis, Ph.D Thesis, (Berlin, Germany,
            TU Berlin, 2016).
@@ -2113,7 +2111,7 @@ def soft_limit_spectrum(signal, limit, knee, frequency_range=None,
 
 def energy(signal):
     r"""
-    Computes the channel wise energy in the time domain
+    Computes the channel wise energy in the time domain.
 
     .. math::
 
@@ -2140,7 +2138,7 @@ def energy(signal):
     to compute the power and the rms of a signal.
 
     References
-    -----------
+    ----------
     .. [#] A. V. Oppenheim and R. W. Schafer, Discrete-time signal processing,
            (Upper Saddle et al., Pearson, 2010), Third edition.
     """
@@ -2254,7 +2252,6 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     signal: Signal, TimeData, FrequencyData
         Input signal.
     mode: string
-
         ``'linear'``
             Average ``signal.time`` if the signal is in the time domain and
             ``signal.freq`` if the signal is in the frequency domain. Note that
@@ -2307,7 +2304,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         The default is ``'raise'``.
 
     Returns
-    --------
+    -------
     averaged_signal: Signal, TimeData, FrequencyData
         Averaged input Signal.
 
@@ -2445,8 +2442,16 @@ def normalize(signal, reference_method='max', domain='auto',
             Compute the mean absolute values per channel.
         ``'energy'``
             Compute the energy per channel using :py:func:`~pyfar.dsp.energy`.
+            Note that the square root of the energy is used as `reference`,
+            after handling multi-channel signals (see *channel_handling*
+            below). This is required for the energy of the normalized signal to
+            match the `target`.
         ``'power'``
             Compute the power per channel using :py:func:`~pyfar.dsp.power`.
+            Note that the square root of the power is used as `reference`,
+            after handling multi-channel signals (see *channel_handling*
+            below). This is required for the power of the normalized signal to
+            match the `target`.
         ``'rms'``
             Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
@@ -2664,9 +2669,207 @@ def normalize(signal, reference_method='max', domain='auto',
     else:
         raise ValueError(("channel_handling must be 'individual', 'max', "
                           "'min' or 'mean'."))
+
+    # scale normalization and target to achieve target energy and power. This
+    # must be done because they are energetic properties
+    if reference_method in ['energy', 'power']:
+        reference_norm = np.sqrt(reference_norm)
+        target = np.sqrt(target)
+
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm
     if return_reference:
         return normalized_signal, reference_norm
     else:
         return normalized_signal
+
+
+def correlate(signal_1, signal_2, mode='full', normalize=False):
+    r"""
+    Compute the channel-wise correlation function between signals.
+
+    The correlation function of the time signals :math:`x_1[n]` and
+    :math:`x_2[n]` is given by
+
+    .. math:: c[l] = \sum_n x_1[n] x_2[n-l]
+
+    with the index :math:`n` and time lag :math:`l` in samples. The computation
+    is realized in the frequency domain using the corresponding spectra
+    :math:`X_1[k]` and :math:`X_2[k]`
+
+    .. math:: c = \mathrm{IFFT\{X_1 X_2^-\}}
+
+    with the inverse fourier transform denoted by IFFT and :math:`X^-` denoting
+    the spectrum of a time-reversed and complex conjugated time signal, i.e.,
+    ``X_minus = fft(conj(x[::-1]))`` where the conjugate is required if the
+    input has complex-valued time data.
+
+    Parameters
+    ----------
+    signal_1 : Signal
+        The first input signal. It must have the same sample rate as
+        `signal_2` and its ``cshape`` must be broadcastable to that of
+        `signal_2`.
+    signal_2 : Signal
+        The second input signal. It must have the same sample rate as
+        `signal_1` and its ``cshape`` must be broadcastable to that of
+        `signal_1`.
+    mode : str, optional
+        Specifies how the correlation is computed.
+
+        ``'full'``
+            Computes the full correlation function by zero padding the input
+            signals to a length of
+            ``signal_1.n_samples + signal_2.n_samples - 1`` before applying the
+            Fourier transform (see equations above).
+        ``'cyclic'``
+            Computes the cyclic correlation function, which uses the input
+            signals as they are. In this case `signal_1` and `signal_2` must
+            have the same number of samples (length).
+
+        The default is ``'full'``.
+    normalize : bool, optional
+        If ``True``, the correlation function is normalized to force
+        :math:`|c[l]|\leq1`. This is done by the division
+        :math:`c[l]/\sqrt{E(x_1[n])\,E(x_2[n])}`, where :math:`E(\cdot)`
+        denotes the :py:func:`~energy`. The default ``False`` does not apply
+        any normalization. Normalization is not available for complex-valued
+        time signals.
+
+    Returns
+    -------
+    correlation : TimeData
+        The correlation function :math:`c[l]` is contained in
+        ``correlation.time`` and the lags in seconds, i.e., the delays applied
+        to `signal_2` (see equations above) are contained in
+        ``correlation.times``. ``correlation.time`` is complex if one of the
+        input signals has complex-valued time data. The cshape of `correlation`
+        matches the cshape to which `signal_1` and `signal_2` were broadcasted.
+        The lags can be converted to samples by multiplication with
+        ``signal_1.sampling_rate``. In this case, they are in the interval
+        ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]`` if the full
+        correlation was computed. In case of the cyclic correlation, they are
+        in the interval
+        ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]``
+        if the signals have an even number of samples, and in the interval
+        ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]``
+        if the signals have an odd number of samples.
+
+    Examples
+    --------
+    Compute the lags (delay) that are required to maximize the
+    cross-correlation between a one and multi-dimensional signal
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>>
+        >>> # one-dimensional signal: impulse with zero delay
+        >>> signal_1 = pf.signals.impulse(5, 0)
+        >>>
+        >>> # multi-dimension signal with cshape = (2, 2):
+        >>> # impulses with non-zero delays
+        >>> delays = np.array([[0, 1], [2, 3]], dtype=int)
+        >>> signal_2 = pf.signals.impulse(5, delays)
+        >>>
+        >>> cor = pf.dsp.correlate(signal_1, signal_2, 'full')
+        >>>
+        >>> # compute the lags in samples
+        >>> argmax = cor.times[np.argmax(cor.time, axis=-1)]
+        >>>
+        >>> # plot correlation and indicate maximum
+        >>> ax = pf.plot.time(cor, unit='ms')
+        >>> ax.set_title('Correlation and position of maxima (dots)')
+        >>> ax.set_xlabel('Time lag in ms')
+        >>> ax.set_ylabel('Auto correlation')
+        >>> for amax, color in zip(argmax.flatten(), 'bryp'):
+        >>>     ax.axvline(amax, color=pf.plot.color(color), linestyle=':')
+
+    Linear and cyclic auto-correlation of a perfect sequence. Perfect sequences
+    have unit auto-correlation for :math:`l=0` and zero auto-correlation
+    otherwise
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.linear_perfect_sweep(2**7)
+        >>>
+        >>> for mode in ['full', 'cyclic']:
+        >>>     line = '--' if mode == 'cyclic' else '-'
+        >>>     cor = pf.dsp.correlate(signal, signal, mode, normalize=True)
+        >>>     ax = pf.plot.time(cor, unit='ms', label=mode, ls=line)
+        >>>
+        >>> ax.set_xlabel('Time lag in ms')
+        >>> ax.set_ylabel('Auto correlation')
+        >>> ax.legend()
+    """
+
+    # check input
+    if type(signal_1) is not pyfar.Signal or \
+            type(signal_2) is not pyfar.Signal:
+        raise TypeError("signal_1 and signal_2 must be pyfar.Signal objects")
+
+    if signal_1.sampling_rate != signal_2.sampling_rate:
+        raise ValueError("Both signals must have the same sampling rate.")
+
+    if mode not in ['full', 'cyclic']:
+        raise ValueError(f"mode is '{mode}' but must be 'full' or 'cyclic'")
+
+    # copy input to avoid changing mutual data
+    signal_1 = signal_1.copy()
+    signal_2 = signal_2.copy()
+
+    # check for complex signals
+    if signal_1.complex and not signal_2.complex:
+        signal_2.complex = True
+    if signal_2.complex and not signal_1.complex:
+        signal_1.complex = True
+
+    # compute normalization factor before zero padding
+    if normalize:
+        normalization = np.sqrt(energy(signal_1) * energy(signal_2))
+
+    # determine signal length for the FFT
+    n_samples = np.array([signal_1.n_samples, signal_2.n_samples], dtype=int)
+    if mode == 'cyclic':
+        if n_samples[0] != n_samples[1]:
+            raise ValueError(("signal_1 and signal_2 must be of the same "
+                              "length in 'cyclic' mode"))
+        n_fft = n_samples[0]
+    else:
+        n_fft = np.sum(n_samples) - 1
+
+        # zero pad signals to match lengths
+        if signal_1.n_samples < n_fft:
+            signal_1 = pyfar.dsp.pad_zeros(
+                signal_1, n_fft - signal_1.n_samples, 'end')
+        if signal_2.n_samples < n_fft:
+            signal_2 = pyfar.dsp.pad_zeros(
+                signal_2, n_fft - signal_2.n_samples, 'beginning')
+
+    # compute correlation as frequency domain convolution
+    # with time flipped and conjugate values for second signal
+    signal_2.time = signal_2.time[..., ::-1].conj()
+    correlation = signal_1 * signal_2
+    correlation = correlation.time
+
+    # apply normalization
+    if normalize:
+        correlation /= normalization
+
+    # compute lags, i.e., times that the second signal was shifted
+    # with respect to the first
+    if mode == 'cyclic':
+        roll = n_fft // 2
+        correlation = np.roll(correlation, -roll, -1)
+        if n_fft % 2:
+            lags = np.arange(-roll, roll + 1)
+        else:
+            lags = np.arange(-roll + 1, roll + 1)
+    else:
+        lags = np.arange(-n_samples[1] + 1, n_samples[0])
+
+    return pyfar.TimeData(correlation, lags / signal_1.sampling_rate,
+                          is_complex=signal_1.complex)

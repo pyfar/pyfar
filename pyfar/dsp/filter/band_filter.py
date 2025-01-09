@@ -1,3 +1,4 @@
+"""Module for creating and applying digital IIR filters."""
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
@@ -453,14 +454,15 @@ def crossover(signal, N, frequency, sampling_rate=None):
 
 
 def notch(signal, center_frequency, quality, sampling_rate=None):
-    """
+    r"""
     Create and apply or return a second order IIR notch filter.
 
     A notch filter is a band-stop filter with a narrow bandwidth
     (high quality factor). It rejects a narrow frequency band around the
-    center frequency with a gain of 0 (:math:`-\\infty` dB) at the center
+    center frequency with a gain of 0 (:math:`-\infty` dB) at the center
     frequency and leaves the rest of the spectrum little changed
-    with gains close to 1 (0 dB). Wrapper for :py:func:`scipy.signal.iirnotch`.
+    with gains close to 1 (0 dB) [#]_. Wrapper for
+    :py:func:`scipy.signal.iirnotch`.
 
     Parameters
     ----------
@@ -469,7 +471,7 @@ def notch(signal, center_frequency, quality, sampling_rate=None):
         applying it.
     center_frequency : number
         Frequency in Hz at which the magnitude response will be 0
-        (:math:`-\\infty` dB).
+        (:math:`-\infty` dB).
     quality : number
         The quality characterizes notch filter -3 dB bandwidth relative to its
         center frequency (both in Hz), i.e,

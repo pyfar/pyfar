@@ -1,8 +1,10 @@
+"""Fractional octave filter bank."""
 import warnings
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
 from pyfar._utils import rename_arg
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def fractional_octave_frequencies(
@@ -22,13 +24,16 @@ def fractional_octave_frequencies(
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
         ``frequency_range=(20, 20e3)``.
+    return_cutoff : bool, optional
+        If ``True``, the lower and upper critical frequencies of the bandpass
+        filters for each band are returned. The default is ``False``.
 
     Returns
     -------
     nominal : array, float
-        The nominal center frequencies in Hz specified in the standard.
-        Nominal frequencies are only returned for octave bands and third octave
-        bands.
+        The nominal center frequencies are only defined for octave bands and
+        third octave bands in the range between 25 Hz and 20 kHz.
+        For all other cases, ``None`` is returned.
     exact : array, float
         The exact center frequencies in Hz, resulting in a uniform distribution
         of frequency bands over the frequency range.
@@ -46,9 +51,11 @@ def fractional_octave_frequencies(
         raise ValueError(
             "The second frequency needs to be higher than the first.")
 
-    if num_fractions in [1, 3]:
+    within_iec_limits = (f_lims[0] > 25*2**(-1/3)) and (
+        f_lims[1] < 20e3*2**(1/6))
+    if num_fractions in [1, 3] and within_iec_limits:
         nominal, exact = _center_frequencies_fractional_octaves_iec(
-            nominal, num_fractions)
+            num_fractions)
 
         mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
         nominal = nominal[mask]
@@ -96,7 +103,7 @@ def _exact_center_frequencies_fractional_octaves(
     return exact
 
 
-def _center_frequencies_fractional_octaves_iec(nominal, num_fractions):
+def _center_frequencies_fractional_octaves_iec(num_fractions):
     """Returns the exact center frequencies for fractional octave bands
     according to the IEC 61260:1:2014 standard.
     octave ratio
@@ -392,7 +399,9 @@ def reconstructing_fractional_octave_bands(
     filter : FilterFIR
         FIR Filter object. Only returned if ``signal = None``.
     frequencies : np.ndarray
-        Center frequencies of the filters.
+        Center frequencies of the filters. Return variable will be removed
+        in pyfar 0.9.0. To get the fractional octave center frequencies, use
+        :py:func:`~pyfar.dsp.filter.fractional_octave_frequencies` instead.
 
     References
     ----------
@@ -401,7 +410,6 @@ def reconstructing_fractional_octave_bands(
 
     Examples
     --------
-
     Filter and re-synthesize an impulse signal.
 
     .. plot::
@@ -411,7 +419,10 @@ def reconstructing_fractional_octave_bands(
         >>> import matplotlib.pyplot as plt
         >>> # generate data
         >>> x = pf.signals.impulse(2**12)
-        >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
+        >>> y = pf.dsp.filter.reconstructing_fractional_octave_bands(x)[0]
+        >>> # get center frequencies
+        >>> f = pf.dsp.filter.fractional_octave_frequencies(
+        ...    frequency_range=(60, 16000))[1]
         >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
         >>> # time domain plot
         >>> ax = pf.plot.time_freq(y_sum, color='k', unit='ms')
@@ -514,6 +525,11 @@ def reconstructing_fractional_octave_bands(
         "Reconstructing linear phase fractional octave filter bank."
         f"(num_fractions={num_fractions}, frequency_range={frequency_range}, "
         f"overlap={overlap}, slope={slope})")
+
+    warnings.warn(("Return parameter 'frequencies' will be removed in pyfar"
+                   " 0.9.0. To get the fractional octave center frequencies,"
+                   " use `pyfar.dsp.filter.fractional_octave_frequencies` "
+                   "instead."), PyfarDeprecationWarning, stacklevel=2)
 
     if signal is None:
         # return the filter object

@@ -1,3 +1,4 @@
+"""This module contains the Orientations class."""
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings
@@ -151,6 +152,8 @@ class Orientations(Rotation):
         show_rights: bool
             select wether to show the right vectors or not.
             The default is True.
+        kwargs : dict
+            Additional arguments passed to :py:func:`pyfar.plot.quiver`.
 
         Returns
         -------
@@ -191,7 +194,7 @@ class Orientations(Rotation):
         perpendicular to minimize rounding errors.
 
         Returns
-        ----------
+        -------
         vector_triple: ndarray, shape (N, 3), normalized vectors
             - views, see :py:func:`Orientations.from_view_up`
             - ups, see :py:func:`Orientations.from_view_up`
@@ -227,8 +230,10 @@ class Orientations(Rotation):
 
         Parameters
         ----------
-        idx : see NumPy Indexing
-        val : array_like quaternion(s), shape (N, 4) or (4,)
+        idx : indexes
+            see NumPy Indexing
+        val : array_like
+            quaternion(s), shape (N, 4) or (4,)
         """
         if isinstance(val, Orientations):
             val = val.as_quat()

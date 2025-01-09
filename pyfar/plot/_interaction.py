@@ -58,9 +58,10 @@ from pyfar.plot import _utils
 
 
 class Cycle(object):
-    """ Cycle class implementation inspired by itertools.cycle. Supports
+    """Cycle class implementation inspired by itertools.cycle. Supports
     circular iterations into two directions.
     """
+
     def __init__(self, cshape, index=0):
         """
         Parameters
@@ -131,6 +132,7 @@ class PlotParameter(object):
     `self.update` for more information.
 
     """
+
     def __init__(self, plot,
                  dB_time=False, dB_freq=True,              # dB properties
                  log_prefix_time=20, log_prefix_freq=20,
@@ -503,7 +505,8 @@ class PlotParameter(object):
     def toggle_x(self):
         """Toggle the x-axis type.
 
-        For example toggle between lin and log frequency axis."""
+        For example toggle between lin and log frequency axis.
+        """
         changed = False
         if self.x_type is not None:
             if len(self._x_type) > 1:
@@ -516,7 +519,8 @@ class PlotParameter(object):
     def toggle_y(self):
         """Toggle the y-axis type.
 
-        For example toggle between showing lin and log time signals."""
+        For example toggle between showing lin and log time signals.
+        """
         changed = False
         if self.y_type is not None:
             if len(self._y_type) > 1:
@@ -529,7 +533,8 @@ class PlotParameter(object):
     def toggle_colormap(self):
         """Toggle the color map type.
 
-        For example toggle between showing lin and log magnitude."""
+        For example toggle between showing lin and log magnitude.
+        """
         changed = False
         if self.cm_type is not None:
             if len(self._cm_type) > 1:
@@ -540,12 +545,12 @@ class PlotParameter(object):
         return changed
 
     def toggle_orientation(self):
-        """Toggle the orientation of 2D plots"""
+        """Toggle the orientation of 2D plots."""
         self.orientation = "horizontal" if self.orientation == "vertical" \
             else "vertical"
 
     def cycle_plot_types(self):
-        """Cycle the plot types"""
+        """Cycle the plot types."""
         self._plot_type = np.roll(self._plot_type, -1)
 
     def toggle_mode(self):
@@ -570,7 +575,7 @@ class PlotParameter(object):
 
     @property
     def plot_type(self):
-        """Return current the plot type"""
+        """Return the current plot type."""
         return self._plot_type[0]
 
     @property
@@ -600,6 +605,7 @@ class Interaction(object):
     Toggle between plots; move or zoom axis or color map; toggle axis types;
     cycle channels.
     """
+
     def __init__(self, signal, axes, colorbars, style, plot_parameter,
                  **kwargs):
         """
@@ -613,12 +619,17 @@ class Interaction(object):
             axes objects of all axes in the plot holding data
         colorbars : Matplotlib colorbar, array like
             all colorbar objects in the plot
-        style : plot style
-            E.g. 'light'
+        style : str
+            ``light`` or ``dark`` to use the pyfar plot styles or a plot style
+            from :py:data:`matplotlib.style.available`. Pass a dictionary
+            to set specific plot parameters, for example
+            ``style = {'axes.facecolor':'black'}``. Pass an empty dictionary
+            ``style = {}`` to use the currently active plotstyle. The default
+            is ``light``.
         plot_parameter : PlotParameter
             An object of the PlotParameter class
-
-        **kwargs are passed to the plot functions
+        kwargs : arguments, optional
+            **kwargs are passed to the plot functions.
         """
 
         # save input arguments
@@ -665,7 +676,7 @@ class Interaction(object):
 
     def select_action(self, event):
         """
-        Select what to do based on the keyboard event
+        Select what to do based on the keyboard event.
 
         Parameters
         ----------
@@ -1100,7 +1111,18 @@ class Interaction(object):
 
     def delete_current_channel_text(self):
         if self.txt is not None:
-            self.txt.remove()
+            # the behavior of text.remove() changed in Matplotlib 3.10. Even
+            # if the text exists, it can not always be removed. In these cases
+            # setting it to None is sufficient. Funnily, when it can be removed
+            # it still must be done.
+            # Note that the remove() function currently contains to-dos. The
+            # issue might be solved by them. This should be checked again at
+            # a later point.
+            try:
+                self.txt.remove()
+            except NotImplementedError as e:
+                if e.args[0] not in "cannot remove artist":
+                    raise e
             self.txt = None
             self.draw_canvas()
 

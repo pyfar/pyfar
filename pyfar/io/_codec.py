@@ -1,5 +1,5 @@
 """
-Brief
+Brief.
 =====
 
 This module is not part of the public API. It contains encoding and decoding
@@ -153,9 +153,9 @@ def _decode(obj, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
-    zipfile: zipfile-object.
+    obj : PyFar-object
+        PyFar-objects are decoded by calling their class method `_decode`.
+    zipfile: zipfile-object
         The zipfile object is looped in the recursive structure
         e.g. to decode ndarrays when they occur.
     """
@@ -180,13 +180,14 @@ def _inner_decode(obj, key, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
+    obj : PyFar-object
+        The object that is currently being encoded.
     key :  str or int
         The key provided by the dict or list over which currently is being
         iterated.
-
     zipfile: zipfile
+        The zipfile object is looped in the recursive structure
+        e.g. to encode ndarrays when they occur
     """
     if not _is_type_hint(obj[key]):
         _decode(obj[key], zipfile)
@@ -213,7 +214,7 @@ def _inner_decode(obj, key, zipfile):
 
 
 def _decode_numpy_scalar(obj, key):
-    """ This function is exclusively used by `io._inner_decode` and
+    """This function is exclusively used by `io._inner_decode` and
     decodes numpy scalars e.g. of type `numpy.int32`.
     """
     try:
@@ -225,7 +226,7 @@ def _decode_numpy_scalar(obj, key):
 
 
 def _decode_ndarray(obj, zipfile):
-    """ This function is exclusively used by `io._inner_decode` and
+    """This function is exclusively used by `io._inner_decode` and
     decodes `numpy.ndarrays` from a memfile.
     """
     # Numpy.load is applied on a memory file instead of a physical file
@@ -266,13 +267,12 @@ def _encode(obj, zip_path, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
-    zip_path: str.
-        zipfile acceps a path-like-string to know where to write
+    obj : PyFar-object
+        The object that is currently being encoded.
+    zip_path: str
+        zipfile accepts a path-like-string to know where to write
         special types e.g. ndarrays into the archive.
-
-    zipfile: zipfile-object.
+    zipfile: zipfile-object
         The zipfile object is looped in the recursive structure
         e.g. to encode ndarrays when they occur.
 
@@ -310,16 +310,16 @@ def _inner_encode(obj, key, zip_path, zipfile):
 
     Parameters
     ----------
-    obj : PyFar-object.
-
+    obj : PyFar-object
+        The object that is currently being encoded.
     key :  str or int
         The key provided by the dict or list over which currently is being
         iterated.
-
-    zip_path: str
+    zip_path : str
         The potential zip path looped through all recursions.
-
     zipfile: zipfile
+        The zipfile object is looped in the recursive structure
+        e.g. to encode ndarrays when they occur.
     """
     if _is_dtype(obj[key]):
         obj[key] = ['$dtype', obj[key].__name__]
@@ -348,12 +348,13 @@ def _encode_ndarray(ndarray):
 
     Parameters
     ----------
-    ndarray: numpy.array.
+    ndarray: numpy.array
+        The numpy array that should be encoded.
 
     Returns
     -------
-    bytes.
-        They bytes that where written by `numpy.save` into a memfile.
+    bytes : bytes
+        The bytes that were written by `numpy.save` into a memfile.
 
     Note
     ----
@@ -391,7 +392,7 @@ def _encode_object_json_aided(obj, name, zipfile):
 
 
 def _is_pyfar_type(obj):
-    """ True if object is a Pyfar-type.
+    """True if object is a Pyfar-type.
     """
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
@@ -430,27 +431,27 @@ def _supported_builtin_types():
 
 
 def _is_numpy_type(obj):
-    """ True if object is a Numpy-type.
+    """True if object is a Numpy-type.
     """
     return type(obj).__module__ == np.__name__
 
 
 def _is_dtype(obj):
-    """ True if object is `numpy.dtype`.
+    """True if object is `numpy.dtype`.
     """
     return isinstance(obj, type) and (
         obj.__module__ == 'numpy' or obj == complex)
 
 
 def _is_numpy_scalar(obj):
-    """ True if object is any numpy.dtype scalar e.g. `numpy.int32`.
+    """True if object is any numpy.dtype scalar e.g. `numpy.int32`.
     """
     return type(obj).__module__ == 'numpy'
 
 
 def _is_type_hint(obj):
-    """ Check if object is stored along with its type in the typical format:
-            [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)]
+    """Check if object is stored along with its type in the typical format:
+    [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)].
     """
     return isinstance(obj, list) \
         and len(obj) == 2 \
@@ -471,7 +472,7 @@ def _str_to_type(type_as_string, module='pyfar'):
         The default is 'pyfar'.
 
     Returns
-    ----------
+    -------
     PyfarType: type.
         A valid PyfarType.
     """
@@ -496,6 +497,7 @@ class BuiltinsWrapper(dict):
     `_encode` and `_decode` methods, which are called polymorphically
     in `io.write` and `io.read`.
     """
+
     def copy(self):
         return deepcopy(self)
 

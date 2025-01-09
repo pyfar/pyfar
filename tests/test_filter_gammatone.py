@@ -129,7 +129,7 @@ def test_gammatone_bands_reset_state():
 
 
 def test_gammatone_bands_assertions():
-    """Test all assertions"""
+    """Test all assertions."""
 
     # wrong values in freq_range
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
@@ -156,7 +156,7 @@ def test_gammatone_bands_assertions():
 
 
 def test_gammatone_bands_repr():
-    """Test string representation"""
+    """Test string representation."""
 
     GFB = pf.dsp.filter.GammatoneBands([0, 22050])
     assert str(GFB) == ("Reconstructing Gammatone filter bank with 42 bands "
@@ -166,7 +166,7 @@ def test_gammatone_bands_repr():
 
 @pytest.mark.parametrize('shape', [(4, 1), (1, 4), (1,), (1, 1)])
 def test_gammatone_bands_shape(shape):
-    """Test the shape of GammatoneBands-filtered signals"""
+    """Test the shape of GammatoneBands-filtered signals."""
     impulse = pf.signals.impulse(2048, 0, np.ones(shape))
     GFB = pf.dsp.filter.GammatoneBands([0, 22050])
 
@@ -177,7 +177,7 @@ def test_gammatone_bands_shape(shape):
 
 
 def test_erb_frequencies():
-    """Test erb_frequencies against reference from the AMT toolbox"""
+    """Test erb_frequencies against reference from the AMT toolbox."""
 
     frequencies = pf.dsp.filter.erb_frequencies([0, 22050], .5)
 
@@ -193,7 +193,7 @@ def test_erb_frequencies():
 
 
 def test_erb_frequencies_assertions():
-    """Test assertions for erb_frequencies"""
+    """Test assertions for erb_frequencies."""
 
     # freq_range must be an array of length 2
     with pytest.raises(ValueError, match="frequency_range must be an array"):
