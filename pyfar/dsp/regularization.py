@@ -36,11 +36,11 @@ class RegularizedSpectrumInversion():
     The inversion is done in two steps:
 
     1. Define :math:`S(f)`, :math:`\epsilon(f)`, :math:`\beta`, and
-       :math:`D(f)` using one of the ``from_()`` methods listed below.
+       :math:`D(f)` using one of the ``from_...()`` methods listed below.
     2. Compute the inverse :math:`S(f)^{-1}` using :py:func:`~invert`
 
     The parameters that are defined in the first step are often iteratively
-    adjusted. Examples are given in the documentation of the `from_()`
+    adjusted. Examples are given in the documentation of the `from_()...`
     methods.
 
     References
@@ -92,17 +92,17 @@ class RegularizedSpectrumInversion():
             ``'energy'``
                 Normalize the regularization to match the signal's energy.
 
-                :math:`Normalization Factor = \frac{\frac{1}{N}\sum_{k=0}^{N-1}|S[k]|^2}{\frac{1}{N}\sum_{k=0}^{N-1}|\epsilon[k]|^2}`
+                :math:`\beta = \frac{\frac{1}{N}\sum_{k=0}^{N-1}|S[k]|^2}{\frac{1}{N}\sum_{k=0}^{N-1}|\epsilon[k]|^2}`
             ``'max'``
                 Normalize the regularization :math:`\epsilon(f)` to the maximum
                 magnitude of a given signal :math:`S(f)`.
 
-                :math:`Normalization Factor = \frac{\max(|S(f)|)}{\max(|\epsilon(f)|)}`
+                :math:`\beta = \frac{\max(|S(f)|)}{\max(|\epsilon(f)|)}`
             ``'mean'``
                 Normalize the regularization :math:`\epsilon(f)` to the mean
                 magnitude of a given signal :math:`S(f).`
 
-                :math:`Normalization Factor = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
+                :math:`\beta = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
 
             The default is ``1``.
         target : Signal, optional
@@ -125,12 +125,12 @@ class RegularizedSpectrumInversion():
             >>> sweep = pf.signals.exponential_sweep_freq(
             ...     2**16, [50, 16e3], 1000, 10e3)
             ...
-            >>> # inversion
+            >>> # Inversion
             >>> Inversion = pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
             >>>     sweep, [50, 16e3], beta='max')
             >>> inverted = Inversion.invert
             ...
-            >>> # obtain the scaled regularization function
+            >>> # Obtain the scaled regularization function
             >>> regularization = Inversion.regularization * Inversion.beta
             ...
             >>> pf.plot.use()
@@ -174,8 +174,9 @@ class RegularizedSpectrumInversion():
         r"""
         Regularization from a given magnitude spectrum.
 
-        Regularization passed as :py:class:`~pyfar.Signal`. The length of
-        `regularization` must match the length of the signal to be inverted.
+        Regularization passed as :py:class:`~pyfar.Signal`. The length and
+        sampling rate of `regularization` must match the length and sampling
+        rate of the signal to be inverted.
 
         Parameters
         ----------
@@ -194,17 +195,17 @@ class RegularizedSpectrumInversion():
             ``'energy'``
                 Normalize the regularization to match the signal's energy.
 
-                :math:`Normalization Factor = \frac{\frac{1}{N}\sum_{k=0}^{N-1}|S[k]|^2}{\frac{1}{N}\sum_{k=0}^{N-1}|\epsilon[k]|^2}`
+                :math:`\beta = \frac{\frac{1}{N}\sum_{k=0}^{N-1}|S[k]|^2}{\frac{1}{N}\sum_{k=0}^{N-1}|\epsilon[k]|^2}`
             ``'max'``
                 Normalize the regularization :math:`\epsilon(f)` to the maximum
                 magnitude of a given signal :math:`S(f)`.
 
-                :math:`Normalization Factor = \frac{\max(|S(f)|)}{\max(|\epsilon(f)|)}`
+                :math:`\beta = \frac{\max(|S(f)|)}{\max(|\epsilon(f)|)}`
             ``'mean'``
                 Normalize the regularization :math:`\epsilon(f)` to the mean
                 magnitude of a given signal :math:`S(f).`
 
-                :math:`Normalization Factor = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
+                :math:`\beta = \frac{\text{mean}(|S(f)|)}{\text{mean}(|\epsilon(f)|)}`
 
             The default is ``1``.
         target : Signal, optional
@@ -225,7 +226,7 @@ class RegularizedSpectrumInversion():
             >>> import pyfar as pf
             >>> import numpy as np
             >>>
-            >>> # Hedphone transfer function to be inverted
+            >>> # Headphone transfer function to be inverted
             >>> hptf = pf.signals.files.headphone_impulse_responses()[0, 0].flatten()
             >>> # Regularize inversion at high frequencies
             >>> regularization = pf.dsp.filter.low_shelf(
@@ -257,6 +258,10 @@ class RegularizedSpectrumInversion():
             raise ValueError(
                 "The number of samples in the signal and the regularization "
                 "function differs but must be equal.")
+        if signal.sampling_rate != regularization.sampling_rate:
+            raise ValueError(
+                "The sampling rate of the signal and the regularization "
+                "function differs but must be equal.")
 
         instance = cls.__new__(cls)
         instance._regularization_signal = regularization
@@ -270,7 +275,7 @@ class RegularizedSpectrumInversion():
     @property
     def beta(self):
         r"""
-        Get or set the :math:`\beta` to control the amount off regularization.
+        Get or set the :math:`\beta` to control the amount of regularization.
         """
         return self._beta
 
@@ -339,6 +344,11 @@ class RegularizedSpectrumInversion():
         if target is not None and target.n_samples != self.signal.n_samples:
             raise ValueError(
                 "The number of samples in the signal and the target function"
+                " differs but must be equal.")
+        if (target is not None and
+            target.sampling_rate != self.signal.sampling_rate):
+            raise ValueError(
+                "The sampling rate of the signal and the target function"
                 " differs but must be equal.")
         self._target = target
 

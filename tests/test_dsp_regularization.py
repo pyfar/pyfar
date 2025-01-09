@@ -37,6 +37,13 @@ def test_regularization_errors(impulse):
             impulse, (200, 20e3), target=pf.signals.impulse(12))
 
     with pytest.raises(ValueError,
+                       match="The sampling rate of the signal and the "
+                       "target function differs but must be equal."):
+        assert pf.dsp.RegularizedSpectrumInversion.from_frequency_range(
+            impulse, (200, 20e3),
+            target=pf.signals.impulse(impulse.n_samples, sampling_rate=48e3))
+
+    with pytest.raises(ValueError,
                        match="Regularization must be a pyfar.Signal"
                        " object."):
         assert pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
@@ -47,6 +54,12 @@ def test_regularization_errors(impulse):
                        "regularization function differs but must be equal."):
         assert pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
             impulse, pf.signals.noise(12))
+
+    with pytest.raises(ValueError,
+                       match="The sampling rate of the signal and the "
+                       "regularization function differs but must be equal."):
+        assert pf.dsp.RegularizedSpectrumInversion.from_magnitude_spectrum(
+            impulse, pf.signals.noise(impulse.n_samples, sampling_rate=48e3))
 
 
 @pytest.mark.parametrize(("beta", "expected"), [(1, 0.5), (0.5, 2/3), (0, 1)])
