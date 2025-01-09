@@ -163,6 +163,17 @@ def test_filter_fir_process(impulse):
     npt.assert_allclose(res.time[0, :3], coeff)
 
 
+@pytest.mark.parametrize('shape', [(2,), (4, 1), (1, 2, 3)])
+def test_filter_fir_process_multichannel_signal(shape):
+    impulse = pf.signals.impulse(44100, amplitude=np.ones(shape))
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+    desired = np.tile(coeff, (*shape, 1))
+
+    npt.assert_allclose(res.time[..., :3], desired)
+
+
 def test_filter_fir_process_complex(impulse_complex):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse_complex.sampling_rate)

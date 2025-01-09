@@ -392,7 +392,7 @@ class FilterFIR(Filter):
         b = coefficients[0]
 
         # broadcast b to match ndim of data for convolution
-        b = np.broadcast_to(b, (data.ndim - 1, *b.shape))
+        b = np.broadcast_to(b, (*np.ones(data.ndim-1, int), *b.shape))
 
         out_full = spsignal.oaconvolve(data, b, mode='full')
 
