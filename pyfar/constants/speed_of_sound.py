@@ -56,7 +56,6 @@ def speed_of_sound_ideal_gas(
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : float, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
-        It must be between ?? to ?? Pa.
 
     Returns
     -------
