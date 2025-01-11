@@ -4,7 +4,7 @@ import pyfar as pf
 from . import utils
 
 
-def air_attenuation_iso(
+def air_attenuation(
         temperature, frequencies, relative_humidity,
         atmospheric_pressure=101325):
     r"""Calculate the pure tone air attenuation of sound in air according to
