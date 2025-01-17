@@ -436,7 +436,7 @@ class FilterIIR(Filter):
         """The order of the filter."""
         return np.max(self._coefficients.shape[-2:]) - 1
 
-    def init_state(self, cshape, state):
+    def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
 
         Parameters
