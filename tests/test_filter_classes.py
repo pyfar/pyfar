@@ -43,6 +43,50 @@ def test_filter_comment():
         pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
 
+@pytest.mark.parametrize('filter_object', [
+    # FIR filter, single-channel
+    fo.FilterFIR(np.array([[1, -1, .1, -.1]]), 48000),
+    # FIR filter, multi-channel
+    fo.FilterFIR(np.array([[1, -1, .1, -.1], [2, -2, .2, -.2]]), 48000),
+    # IIR filter, single-channel
+    fo.FilterIIR(np.array([[[1, -1, .1, -.1], [1, .1, -.1, 0]]]), 48000),
+    # IIR filter, multi-channel
+    fo.FilterIIR(np.array([[[1, -1, .1, -.1], [1, .1, -.1, 0]],
+                           [[1, -2, .2, -.2], [1, .2, -.2, 0]]]), 48000),
+    # SOS filter, single-channel
+    fo.FilterSOS(np.array([[[1, -1, .1, 1, .1, -.1]]]), 48000),
+    # SOS filter, multi-channel
+    fo.FilterSOS(np.array([[[1, -1, .1, 1, .1, -.1]],
+                           [[2, -2, .2, 1, .2, -.2]]]), 48000),
+])
+def test_filter_impulse_response(filter_object):
+    """Test 'impulse_response' class methods for all Filter types."""
+
+    # test signal
+    n_samples = 256
+    impulse = pf.signals.impulse(n_samples, sampling_rate=48000)
+
+    # filter without state
+    impulse_response = filter_object.impulse_response(n_samples)
+    # test output
+    assert isinstance(impulse_response, pf.Signal)
+    assert impulse_response.n_samples == n_samples
+    npt.assert_equal(impulse_response, filter_object.process(impulse))
+    assert filter_object.state is None
+
+    # filter with state
+    filter_object.init_state(impulse.cshape, 'zeros')
+    state_before = filter_object.state.copy()
+    impulse_response_2 = filter_object.impulse_response(n_samples)
+    state_after = filter_object.state.copy()
+    # test output
+    assert isinstance(impulse_response, pf.Signal)
+    assert impulse_response.n_samples == n_samples
+    npt.assert_equal(impulse_response_2, impulse_response)
+    assert filter_object.state is not None
+    npt.assert_equal(state_after, state_before)
+
+
 def test_filter_iir_init():
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterIIR(coeff, sampling_rate=2*np.pi)

@@ -262,6 +262,38 @@ class Filter(object):
 
         return filtered_signal
 
+    def impulse_response(self, n_samples):
+        """
+        Compute the impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples up to which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+
+        # track the sate (better than copying the entire filter)
+        if self.state is not None:
+            state = self.state.copy()
+            self._state = None
+        else:
+            state = None
+
+        # get impulse response
+        impulse_response = self.process(pf.signals.impulse(
+            n_samples, sampling_rate=self.sampling_rate), reset=True)
+
+        # reset the state if required
+        if state is not None:
+            self._state = state
+
+        return impulse_response
+
     def reset(self):
         """Reset the filter state by filling it with zeros."""
         if self._state is not None:
