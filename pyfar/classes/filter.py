@@ -277,7 +277,7 @@ class Filter(object):
             The impulse response of the filter.
         """
 
-        # track the sate (better than copying the entire filter)
+        # track the state (better than copying the entire filter)
         if self.state is not None:
             state = self.state.copy()
             self._state = None
