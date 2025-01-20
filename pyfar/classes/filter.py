@@ -277,6 +277,14 @@ class Filter(object):
             The impulse response of the filter.
         """
 
+        # check the impulse response length for FIR filters
+        if type(self) == FilterFIR:
+            if self.coefficients.shape[-1] > n_samples:
+                warnings.warn(
+                    ('n_samples should be at least as long as the filter, '
+                     f'which is 4 {self.coefficients.shape[-1]}'),
+                    stacklevel=1)
+
         # track the state (better than copying the entire filter)
         if self.state is not None:
             state = self.state.copy()

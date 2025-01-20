@@ -3,6 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pyfar.classes.filter as fo
 import pyfar as pf
+import re
 from scipy import signal as spsignal
 
 
@@ -85,6 +86,13 @@ def test_filter_impulse_response(filter_object):
     npt.assert_equal(impulse_response_2, impulse_response)
     assert filter_object.state is not None
     npt.assert_equal(state_after, state_before)
+
+
+def test_filter_impules_respones_n_samples():
+    filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
+    match = "n_samples should be at least as long as the filter, which is 4"
+    with pytest.warns(UserWarning, match=re.escape(match)):
+        _ = filter_object.impulse_response(2)
 
 
 def test_filter_iir_init():
