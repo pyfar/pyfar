@@ -164,6 +164,15 @@ class Filter(object):
         self._state = state
         self._initialized = True
 
+    @staticmethod
+    def _check_state_keyword(state):
+        """
+        Check the value of the state keyword for 'ini_state' class methods.
+        """
+        if state not in ['zeros', 'step']:
+            raise ValueError(
+                f"state is '{state}' but must be 'zeros' or 'step'")
+
     @property
     def coefficients(self):
         """
@@ -377,6 +386,8 @@ class FilterFIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
@@ -449,6 +460,8 @@ class FilterIIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
@@ -543,6 +556,8 @@ class FilterSOS(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.n_sections, 2))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
