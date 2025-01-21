@@ -43,7 +43,8 @@ def speed_of_sound_simple(temperature):
 
 
 def speed_of_sound_ideal_gas(
-        temperature, relative_humidity, atmospheric_pressure):
+        temperature, relative_humidity, atmospheric_pressure,
+        saturation_vapor_pressure=None):
     """Calculate speed of sound in air using the ideal gas law.
 
     The speed of sound in air can be calculated based on chapter 6.3 in [#]_.
@@ -54,8 +55,12 @@ def speed_of_sound_ideal_gas(
         Temperature in degree Celsius.
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
-    atmospheric_pressure : float, optional
+    atmospheric_pressure : float, array_like, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
+    saturation_vapor_pressure : float, array_like, optional
+        Saturation vapor pressure in Pa, if not given the function
+        :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
+        Note that the valid range for temperature is therefore reduced.
 
     Returns
     -------
@@ -68,20 +73,42 @@ def speed_of_sound_ideal_gas(
            Media, 2nd ed. London: CRC Press, 2015. doi: 10.1201/b18922.
 
     """
-
-    P = atmospheric_pressure
+    # check inputs
+    if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'Temperature must be a number or array of numbers')
+    if not isinstance(
+            relative_humidity, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'Relative humidity must be a number or array of numbers')
+    if not isinstance(
+            atmospheric_pressure, (int, float, np.ndarray, list, tuple)):
+        raise TypeError(
+            'Atmospheric pressure must be a number or array of numbers')
     temperature_kelvin = temperature + 273.15
+    if np.any(np.array(temperature_kelvin) < 0):
+        raise ValueError("Temperature must be above -273.15°C.")
+    if np.any(np.array(relative_humidity) < 0) or np.any(
+            np.array(relative_humidity) > 1):
+        raise ValueError("Relative humidity must be between 0 and 1.")
+    if np.any(np.array(atmospheric_pressure) < 0):
+        raise ValueError("Atmospheric pressure must be larger than 1.")
+
+    P = atmospheric_pressure  # Pa
 
     # Constants according to 6.3.2
     R = 8.314  # J/(K mol)
     gamma_a = 1.400
     gamma_w = 1.330
-    mu_a = 28.97  # g/mol
-    mu_w = 18.02  # g/mol
+    mu_a = 28.97*1e-3  # kg/mol
+    mu_w = 18.02*1e-3  # kg/mol
     R_a = R/mu_a
 
     # partial pressure of water vapor in Pa
-    p = utils.saturation_vapor_pressure(temperature)  # Pa
+    if saturation_vapor_pressure is None:
+        p = utils.saturation_vapor_pressure(temperature)  # Pa
+    else:
+        p = saturation_vapor_pressure  # Pa
     e = relative_humidity * p  # Pa
 
     # next to Equation 6.69

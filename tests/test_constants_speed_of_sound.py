@@ -42,8 +42,20 @@ def test_speed_of_sound_ideal_gas_typical_values():
     atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = np.sqrt(1.4 * 8.314 / 28.97 * (20.0 + 273.15))
+    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
     assert np.isclose(result, expected, rtol=1e-2)
+
+
+def test_speed_of_sound_ideal_gas_values_p_water():
+    temperature = 20.0  # Celsius
+    relative_humidity = 0.5  # 50%
+    atmospheric_pressure = 101325  # Pa
+    p_water = pf.constants.saturation_vapor_pressure(temperature)
+    result = pf.constants.speed_of_sound_ideal_gas(
+        temperature, relative_humidity, atmospheric_pressure, p_water)
+    expected = pf.constants.speed_of_sound_ideal_gas(
+        temperature, relative_humidity, atmospheric_pressure)
+    assert np.isclose(result, expected)
 
 
 def test_speed_of_sound_ideal_gas_edge_temperature():
@@ -52,7 +64,7 @@ def test_speed_of_sound_ideal_gas_edge_temperature():
     atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = np.sqrt(1.4 * 8.314 / 28.97 * (-20.0 + 273.15))
+    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
     assert np.isclose(result, expected, rtol=1e-2)
 
 
@@ -62,8 +74,9 @@ def test_speed_of_sound_ideal_gas_edge_humidity():
     atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = np.sqrt(1.4 * 8.314 / 28.97 * (20.0 + 273.15))
+    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
     assert np.isclose(result, expected, rtol=1e-2)
+
 
 def test_speed_of_sound_ideal_gas_edge_pressure():
     temperature = 20.0  # Celsius
@@ -71,29 +84,32 @@ def test_speed_of_sound_ideal_gas_edge_pressure():
     atmospheric_pressure = 90000  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = np.sqrt(1.4 * 8.314 / 28.97 * (20.0 + 273.15))
+    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
     assert np.isclose(result, expected, rtol=1e-2)
 
+
 def test_speed_of_sound_ideal_gas_invalid_temperature():
-    temperature = -30.0  # Celsius, out of valid range
+    temperature = -300.0  # Celsius, out of valid range
     relative_humidity = 0.5  # 50%
     atmospheric_pressure = 101325  # Pa
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Temperature must be"):
         pf.constants.speed_of_sound_ideal_gas(
             temperature, relative_humidity, atmospheric_pressure)
+
 
 def test_speed_of_sound_ideal_gas_invalid_humidity():
     temperature = 20.0  # Celsius
     relative_humidity = 1.5  # 150%, out of valid range
     atmospheric_pressure = 101325  # Pa
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Relative humidity must be"):
         pf.constants.speed_of_sound_ideal_gas(
             temperature, relative_humidity, atmospheric_pressure)
+
 
 def test_speed_of_sound_ideal_gas_invalid_pressure():
     temperature = 20.0  # Celsius
     relative_humidity = 0.5  # 50%
     atmospheric_pressure = -50000  # Pa, out of valid range
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Atmospheric pressure must be"):
         pf.constants.speed_of_sound_ideal_gas(
             temperature, relative_humidity, atmospheric_pressure)
