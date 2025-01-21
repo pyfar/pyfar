@@ -70,6 +70,7 @@ def speed_of_sound_ideal_gas(
     """
 
     P = atmospheric_pressure
+    temperature_kelvin = temperature + 273.15
 
     # Constants according to 6.3.2
     R = 8.314  # J/(K mol)
@@ -80,9 +81,10 @@ def speed_of_sound_ideal_gas(
     R_a = R/mu_a
 
     # partial pressure of water vapor in Pa
-    p = utils.saturation_vapor_pressure(temperature)
-    e = relative_humidity * p
+    p = utils.saturation_vapor_pressure(temperature)  # Pa
+    e = relative_humidity * p  # Pa
 
+    # next to Equation 6.69
     alpha = mu_a / mu_w
     # Equation 6.80
     delta = (1 - (1/gamma_a)) / (1 - (1/gamma_w))
@@ -92,5 +94,6 @@ def speed_of_sound_ideal_gas(
     C = (e/P) / (alpha * (1 - e/P))
 
     return np.sqrt(
-        gamma_a * R_a * temperature * (1 + (alpha * (1 + delta - nu) - 1) * C),
+        gamma_a * R_a * temperature_kelvin * (
+            1 + (alpha * (1 + delta - nu) - 1) * C),
     )
