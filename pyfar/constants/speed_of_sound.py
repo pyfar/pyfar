@@ -48,6 +48,7 @@ def speed_of_sound_ideal_gas(
     """Calculate speed of sound in air using the ideal gas law.
 
     The speed of sound in air can be calculated based on chapter 6.3 in [#]_.
+    All input parameters must be broadcastable to the same shape.
 
     Parameters
     ----------
@@ -85,6 +86,7 @@ def speed_of_sound_ideal_gas(
             atmospheric_pressure, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
             'Atmospheric pressure must be a number or array of numbers')
+    temperature = np.array(temperature, dtype=float)
     temperature_kelvin = temperature + 273.15
     if np.any(np.array(temperature_kelvin) < 0):
         raise ValueError("Temperature must be above -273.15°C.")
@@ -94,7 +96,8 @@ def speed_of_sound_ideal_gas(
     if np.any(np.array(atmospheric_pressure) < 0):
         raise ValueError("Atmospheric pressure must be larger than 1.")
 
-    P = atmospheric_pressure  # Pa
+    P = np.array(atmospheric_pressure, dtype=float)  # Pa
+    relative_humidity = np.array(relative_humidity, dtype=float)
 
     # Constants according to 6.3.2
     R = 8.314  # J/(K mol)
@@ -108,7 +111,7 @@ def speed_of_sound_ideal_gas(
     if saturation_vapor_pressure is None:
         p = utils.saturation_vapor_pressure(temperature)  # Pa
     else:
-        p = saturation_vapor_pressure  # Pa
+        p = np.array(saturation_vapor_pressure, dtype=float)  # Pa
     e = relative_humidity * p  # Pa
 
     # next to Equation 6.69

@@ -46,6 +46,31 @@ def test_speed_of_sound_ideal_gas_typical_values():
     assert np.isclose(result, expected, rtol=1e-2)
 
 
+@pytest.mark.parametrize("temperature", [  # Celsius
+    [20, 20.0],
+    np.array([20, 20.0]),
+    (20, 20.0),
+    20,
+])
+@pytest.mark.parametrize("relative_humidity", [
+    [.5, .5],
+    np.array([.5, .5]),
+    (.5, .5),
+    .5,
+])
+@pytest.mark.parametrize("atmospheric_pressure", [  # Pa
+    [101325, 101325],
+    np.array([101325, 101325]),
+    (101325, 101325),
+    101325,
+])
+def test_speed_of_sound_ideal_gas_array_like(
+        temperature, relative_humidity, atmospheric_pressure):
+    result = pf.constants.speed_of_sound_ideal_gas(
+        temperature, relative_humidity, atmospheric_pressure)
+    npt.assert_almost_equal(result, 343.8278399)
+
+
 def test_speed_of_sound_ideal_gas_values_p_water():
     temperature = 20.0  # Celsius
     relative_humidity = 0.5  # 50%
