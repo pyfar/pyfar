@@ -4,10 +4,10 @@ import pyfar as pf
 from . import utils
 
 
-def air_attenuation_iso(
+def air_attenuation(
         temperature, frequencies, relative_humidity,
-        atmospheric_pressure=101325, calculate_accuracy=False):
-    """Calculate the pure tone air attenuation of sound in air according to
+        atmospheric_pressure=101325):
+    r"""Calculate the pure tone air attenuation of sound in air according to
     ISO 9613-1.
 
     Calculation is in accordance with ISO 9613-1 [#]_. It uses
@@ -27,19 +27,22 @@ def air_attenuation_iso(
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
-    calculate_accuracy : bool, optional
-        Weather to compute the accuracy or not. Default is not.
 
     Returns
     -------
-    air_attenuation :  :py:class:`~pyfar.classes.FrequencyData`
+    alpha :  :py:class:`~pyfar.classes.FrequencyData`
         Pure tone air attenuation coefficient in decibels per meter for
         atmospheric absorption. The cshape of the output is the broadcast
         from the shapes of the ``temperature``, ``relative_humidity``, and
         ``atmospheric_pressure``.
-    accuracy : float, array_like, optional
-        accuracy of the results according to the standard, if
-        ``calculate_accuracy`` is True:
+    m : :py:class:`~pyfar.classes.FrequencyData`
+        Pure tone air attenuation coefficient per meter for
+        atmospheric absorption. The cshape of the output is the broadcast
+        from the shapes of the ``temperature``, ``relative_humidity``, and
+        ``atmospheric_pressure``. The parameter ``m`` is calculated as
+        :math:`m = 10 \cdot \log(\exp(1)) \cdot \alpha`.
+    accuracy : float, array_like
+        accuracy of the results according to the standard:
 
         ``10``, +/- 10% accuracy
             - molar concentration of water vapour: 0,05% to 5 %.
@@ -86,9 +89,6 @@ def air_attenuation_iso(
             atmospheric_pressure, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
             'atmospheric_pressure must be a number or array of numbers')
-    if not isinstance(calculate_accuracy, bool):
-        raise TypeError(
-            'calculate_accuracy must be a bool.')
 
     # check if broadcastable
     try:
@@ -104,12 +104,13 @@ def air_attenuation_iso(
 
     # check limits
     if np.any(np.array(temperature) < -73):
-        raise ValueError("Temperature must be between -73°C.")
+        raise ValueError("Temperature must be greater than -73°C.")
     if np.any(np.array(frequencies) < 50):
         raise ValueError("frequencies must be greater than 50 Hz.")
+    print(relative_humidity)
     if np.any(np.array(relative_humidity) < 0) or np.any(
             np.array(relative_humidity) > 1):
-        raise ValueError("Relative humidity must be between 0.1 and 1.")
+        raise ValueError("Relative humidity must be between 0 and 1.")
     if np.any(np.array(atmospheric_pressure) > 200000):
         raise ValueError("Atmospheric pressure must less than 200 kPa.")
 
@@ -151,14 +152,13 @@ def air_attenuation_iso(
         (T/T_0)**(-5/2)*(0.01275*np.exp(-2239.1/T)*(f_rO + (f**2/f_rO))**(-1)
         +0.1068*np.exp(-3352/T) * (f_rN + (f**2/f_rN))**(-1)))
 
-    air_attenuation = pf.FrequencyData(
+    alpha = pf.FrequencyData(
         air_attenuation, frequencies=frequencies)
 
-    if not calculate_accuracy:
-        return air_attenuation
+    m = alpha / (10*np.log10(np.exp(1)))
 
     # calculate accuracy
-    accuracy = np.zeros_like(air_attenuation.freq) - 1
+    accuracy = np.zeros(shape) - 1
     atmospheric_pressure = np.broadcast_to(atmospheric_pressure, shape)
     p_vapor = np.broadcast_to(p_vapor, shape)/100
     freq2pressure = frequencies/atmospheric_pressure
@@ -181,38 +181,4 @@ def air_attenuation_iso(
     accuracy[accuracy_50] = 50
 
     accuracy = pf.FrequencyData(accuracy, frequencies=frequencies)
-    return air_attenuation, accuracy
-
-
-def _p_sat_water(temperature):
-    """Calculate the Water Saturation Pressure.
-
-    Parameters
-    ----------
-    temperature : float, array_like
-        Temperature in degree Celsius.
-
-    Returns
-    -------
-    p_sat : float, array_like
-        Water Saturation Pressure
-
-    References
-    ----------
-    .. [#] Buck (1996), Buck Research CR-1A User's Manual, Appendix 1.
-    """
-    temperature = np.atleast_1d(temperature)
-    p_sat = np.atleast_1d(np.zeros_like(temperature))
-    mask_temp = temperature < 0
-    mask_temp_neg = temperature >= 0
-    p_sat[mask_temp] = 6.1115*np.exp((
-        23.036-temperature[mask_temp]/333.7)*(
-            temperature[mask_temp]/(279.82+temperature[mask_temp])))
-    p_sat[mask_temp_neg] = 6.1121*np.exp((
-        18.678-temperature[mask_temp_neg]/234.5)*(
-            temperature[mask_temp_neg]/(257.14+temperature[mask_temp_neg])))
-    print(p_sat)
-    if isinstance(temperature, np.ndarray):
-        return p_sat
-    else:
-        return p_sat[0]
+    return alpha, m, accuracy

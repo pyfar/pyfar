@@ -15,9 +15,9 @@ def test_air_attenuation_iso(
         temperature, frequency, relative_humidity, expected,
         expected_accuracy):
     temperature = 10
-    air_attenuation, accuracy = pf.constants.air_attenuation_iso(
-        temperature, frequency, relative_humidity, calculate_accuracy=True)
-    npt.assert_allclose(air_attenuation.freq, expected, atol=1e-3)
+    alpha, m, accuracy = pf.constants.air_attenuation(
+        temperature, frequency, relative_humidity)
+    npt.assert_allclose(alpha.freq, expected, atol=1e-3)
     npt.assert_allclose(accuracy.freq, expected_accuracy)
 
 
@@ -43,12 +43,16 @@ def test_air_attenuation_iso(
 ])
 def test_air_attenuation_iso_array(
         temperature, frequency, relative_humidity, atmospheric_pressure):
-    result, accuracy = pf.constants.air_attenuation_iso(
-        temperature, frequency, relative_humidity, atmospheric_pressure, True)
-    # test air attenuation
-    expected = 2.16e1*1e-3 + np.zeros_like(result.freq[..., 0])
-    npt.assert_allclose(result.freq[..., 0], expected, atol=1e-3)
-    npt.assert_allclose(result.frequencies, frequency, atol=1e-3)
+    alpha, m, accuracy = pf.constants.air_attenuation(
+        temperature, frequency, relative_humidity, atmospheric_pressure)
+    # test air attenuation alpha
+    expected = 2.16e1*1e-3 + np.zeros_like(alpha.freq[..., 0])
+    npt.assert_allclose(alpha.freq[..., 0], expected, atol=1e-3)
+    npt.assert_allclose(alpha.frequencies, frequency, atol=1e-3)
+    # test air attenuation factor m
+    expected = 2.16e1*1e-3/4.34 + np.zeros_like(alpha.freq[..., 0])
+    npt.assert_allclose(m.freq[..., 0], expected, atol=1e-3)
+    npt.assert_allclose(m.frequencies, frequency, atol=1e-3)
     # test accuracy
     expected_accuracy = 10 + np.zeros_like(accuracy.freq)
     npt.assert_allclose(accuracy.freq, expected_accuracy, atol=1e-3)
@@ -60,58 +64,53 @@ def test_air_attenuation_iso_inputs():
     frequency = 1000
     relative_humidity = .1
     with pytest.raises(TypeError, match='must be a number or'):
-        pf.constants.air_attenuation_iso(
-            'test', frequency, relative_humidity, calculate_accuracy=True)
+        pf.constants.air_attenuation(
+            'test', frequency, relative_humidity)
     with pytest.raises(TypeError, match='must be a number or'):
-        pf.constants.air_attenuation_iso(
-            temperature, 'frequency', relative_humidity,
-            calculate_accuracy=True)
+        pf.constants.air_attenuation(
+            temperature, 'frequency', relative_humidity)
     with pytest.raises(TypeError, match='must be a number or'):
-        pf.constants.air_attenuation_iso(
-            temperature, frequency, 'relative_humidity',
-            calculate_accuracy=True)
-    with pytest.raises(TypeError, match='must be a bool'):
-        pf.constants.air_attenuation_iso(
-            temperature, frequency, relative_humidity, calculate_accuracy=5)
-
-
-def test_saturation_vapor_pressure_scalar():
-    temperature = 25
-    expected = 3161.736
-    result = pf.constants.saturation_vapor_pressure(temperature)
-    npt.assert_allclose(result, expected, atol=0.001)
-
-
-def test_saturation_vapor_pressure_array():
-    temperature = np.array([0, 10, 20, 30])
-    expected = np.array([610.94, 1226.0206, 2333.4406, 4236.6503])
-    result = pf.constants.saturation_vapor_pressure(temperature)
-    npt.assert_allclose(result, expected, atol=0.001)
-
-
-def test_saturation_vapor_pressure_list():
-    temperature = [0, 10, 20, 30]
-    expected = [610.94, 1226.0206, 2333.4406, 4236.6503]
-    result = pf.constants.saturation_vapor_pressure(temperature)
-    npt.assert_allclose(result, expected, atol=0.001)
-
-
-def test_saturation_vapor_pressure_out_of_range_low():
+        pf.constants.air_attenuation(
+            temperature, frequency, 'relative_humidity')
     with pytest.raises(
-            ValueError,
-            match="Temperature must be in the range of -45°C and 60°C."):
-        pf.constants.saturation_vapor_pressure(-50)
-
-
-def test_saturation_vapor_pressure_out_of_range_high():
-    with pytest.raises(
-            ValueError,
-            match="Temperature must be in the range of -45°C and 60°C."):
-        pf.constants.saturation_vapor_pressure(70)
-
-
-def test_saturation_vapor_pressure_invalid_type():
+            ValueError, match='frequencies must be one dimensional'):
+        pf.constants.air_attenuation(
+            temperature, [[1, 1]], relative_humidity)
     with pytest.raises(
             TypeError,
-            match="temperature must be a number or array of numbers"):
-        pf.constants.saturation_vapor_pressure("invalid")
+            match='atmospheric_pressure must be a number or array of numbers'):
+        pf.constants.air_attenuation(
+            temperature, frequency, relative_humidity, 'test')
+
+
+def test_air_attenuation_iso_broadcastable():
+    frequency = 1000
+    with pytest.raises(ValueError, match='same shape or be broadcastable'):
+        pf.constants.air_attenuation(
+            [10, 10], frequency, [.1, .1, .1])
+
+
+def test_air_attenuation_iso_limits():
+    temperature = 10
+    frequency = 1000
+    relative_humidity = .1
+    atmospheric_pressure = 101325
+    match = 'Temperature must be greater than -73°C.'
+    with pytest.raises(ValueError,match=match):
+        pf.constants.air_attenuation(
+            -100, frequency, relative_humidity, atmospheric_pressure)
+    match = 'frequencies must be greater than 50 Hz'
+    with pytest.raises(ValueError,match=match):
+        pf.constants.air_attenuation(
+            temperature, 20, relative_humidity, atmospheric_pressure)
+    match = 'Relative humidity must be between 0 and 1.'
+    with pytest.raises(ValueError, match=match):
+        pf.constants.air_attenuation(
+            temperature, frequency, -.1, atmospheric_pressure)
+    with pytest.raises(ValueError, match=match):
+        pf.constants.air_attenuation(
+            temperature, frequency, 1.1, atmospheric_pressure)
+    match = 'Atmospheric pressure must less than 200 kPa.'
+    with pytest.raises(ValueError, match=match):
+        pf.constants.air_attenuation(
+            temperature, frequency, relative_humidity, 200001)
