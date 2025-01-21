@@ -52,7 +52,6 @@ def speed_of_sound_cramer(
     - atmospheric pressures from 75 000 Pa to 102000 Pa
     - up to 0.06 H20 mole fraction
     - CO2 concentrations up to 10 000 ppm
-    https://www.kane.co.uk/knowledge-centre/what-are-safe-levels-of-co-and-co2-in-rooms
 
     Parameters
     ----------
@@ -64,7 +63,8 @@ def speed_of_sound_cramer(
         Atmospheric pressure in pascal, by default 101325 Pa.
         It must be between 75 000 Pa to 102000 Pa.
     c02_ppm : float, array_like
-        co2 concentration in parts per million.
+        co2 concentration in parts per million. The default is 315 ppm as a
+        reasonable amount based on [#]_.
 
 
     References
@@ -73,6 +73,7 @@ def speed_of_sound_cramer(
            speed of sound in air with temperature, pressure, humidity, and CO2
            concentration,” The Journal of the Acoustical Society of America,
            vol. 93, no. 5, pp. 2510-2516, May 1993, doi: 10.1121/1.405827.
+    .. [#] https://www.kane.co.uk/knowledge-centre/what-are-safe-levels-of-co-and-co2-in-rooms
 
     """
     rel_hum = relative_humidity
@@ -82,7 +83,7 @@ def speed_of_sound_cramer(
     x_c = c02_ppm / 1e6
 
     # calculate saturation_vapor_pressure from Magnus Formula
-    pws = utils.saturation_vapor_pressure(temperature) * 100
+    pws = utils.saturation_vapor_pressure(temperature)
 
     # water vapor mole fraction
     xw = rel_hum * pws / p_stat

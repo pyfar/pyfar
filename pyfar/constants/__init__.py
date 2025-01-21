@@ -3,6 +3,7 @@
 
 from .speed_of_sound import (
     speed_of_sound_simple,
+    speed_of_sound_cramer,
 )
 
 from .air_attenuation import (
@@ -15,6 +16,7 @@ from .utils import (
 
 __all__ = [
     'speed_of_sound_simple',
+    'speed_of_sound_cramer',
     'air_attenuation',
     'saturation_vapor_pressure',
 ]
