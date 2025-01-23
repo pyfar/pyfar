@@ -4,6 +4,17 @@ import pyfar as pf
 import numpy.testing as npt
 
 
+def _simplified_ideal_gas(temperature):
+    """Calculate the speed of sound in air using a simplified version of the
+    ideal gas law. See :py:func:`~pyfar.constants.speed_of_sound_simple`
+    for more details.
+
+    It is used for testing other speed of sound methods, to see if the
+    results are with a senseful range.
+    """
+    return 343.2*np.sqrt((temperature+273.15)/293.15)
+
+
 def test_speed_of_sound_simple_scalar():
     temperature = 20
     expected = 343.2 * np.sqrt((temperature + 273.15) / 293.15)
@@ -42,7 +53,7 @@ def test_speed_of_sound_ideal_gas_typical_values():
     atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
+    expected = _simplified_ideal_gas(temperature)
     assert np.isclose(result, expected, rtol=1e-2)
 
 
@@ -89,7 +100,7 @@ def test_speed_of_sound_ideal_gas_edge_temperature():
     atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
+    expected = _simplified_ideal_gas(temperature)
     assert np.isclose(result, expected, rtol=1e-2)
 
 
@@ -99,7 +110,7 @@ def test_speed_of_sound_ideal_gas_edge_humidity():
     atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
+    expected = _simplified_ideal_gas(temperature)
     assert np.isclose(result, expected, rtol=1e-2)
 
 
@@ -109,7 +120,7 @@ def test_speed_of_sound_ideal_gas_edge_pressure():
     atmospheric_pressure = 90000  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = 343.2*np.sqrt((temperature+273.15)/293.15)
+    expected = _simplified_ideal_gas(temperature)
     assert np.isclose(result, expected, rtol=1e-2)
 
 

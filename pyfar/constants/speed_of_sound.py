@@ -72,7 +72,6 @@ def speed_of_sound_ideal_gas(
     ----------
     .. [#] V. E. Ostashev and D. K. Wilson, Acoustics in Moving Inhomogeneous
            Media, 2nd ed. London: CRC Press, 2015. doi: 10.1201/b18922.
-
     """
     # check inputs
     if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
@@ -94,7 +93,7 @@ def speed_of_sound_ideal_gas(
             np.array(relative_humidity) > 1):
         raise ValueError("Relative humidity must be between 0 and 1.")
     if np.any(np.array(atmospheric_pressure) < 0):
-        raise ValueError("Atmospheric pressure must be larger than 1.")
+        raise ValueError("Atmospheric pressure must be larger than 0 Pa.")
 
     P = np.array(atmospheric_pressure, dtype=float)  # Pa
     relative_humidity = np.array(relative_humidity, dtype=float)
@@ -105,7 +104,7 @@ def speed_of_sound_ideal_gas(
     gamma_w = 1.330
     mu_a = 28.97*1e-3  # kg/mol
     mu_w = 18.02*1e-3  # kg/mol
-    R_a = R/mu_a
+    R_a = R / mu_a
 
     # partial pressure of water vapor in Pa
     if saturation_vapor_pressure is None:
