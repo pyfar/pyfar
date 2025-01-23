@@ -419,7 +419,7 @@ class FilterFIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
-    def impulse_response(self, n_samples='auto'):
+    def impulse_response(self, n_samples=None):
         """
         Compute the impulse response of the filter.
 
@@ -430,7 +430,7 @@ class FilterFIR(Filter):
         ----------
         n_samples : int, str, optional
             Length in samples up to which the impulse response is computed. The
-            default is ``'auto'`` in which case the length of the impulse
+            default is ``None`` in which case the length of the impulse
             response is determined from the filter :py:func:`~FilterFIR.order`.
 
         Returns
@@ -440,7 +440,7 @@ class FilterFIR(Filter):
         """
 
         # set or check the impulse response length
-        if n_samples == 'auto':
+        if n_samples is None:
             n_samples = self.coefficients.shape[-1]
         elif self.coefficients.shape[-1] > n_samples:
             warnings.warn(
