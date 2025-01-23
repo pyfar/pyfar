@@ -88,11 +88,19 @@ def test_filter_impulse_response(filter_object):
     npt.assert_equal(state_after, state_before)
 
 
-def test_filter_impules_respones_n_samples():
+def test_filter_fir_impulse_response_n_samples_warning():
+    """Test warning if impulse response length is less then filter length."""
     filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
     match = "n_samples should be at least as long as the filter, which is 4"
     with pytest.warns(UserWarning, match=re.escape(match)):
         _ = filter_object.impulse_response(2)
+
+
+def test_filter_fir_impulse_response_n_samples_default():
+    """Test default value for impulse response length."""
+    filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
+    impulse_response = filter_object.impulse_response()
+    assert impulse_response.n_samples == 4
 
 
 def test_filter_iir_init():
