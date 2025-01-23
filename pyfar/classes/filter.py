@@ -388,9 +388,26 @@ class FilterFIR(Filter):
         """Process a single filter channel.
         This is a hidden static method required for a shared processing
         function in the parent class.
+
+        Parameters
+        ----------
+        coefficients : array
+            Coefficients of the filter channel.
+        data : array
+            The data to be filtered of shape ``(cshape, n_samples)``.
+        zi : array, optional
+            The initial filter state of shape ``(cshape, order)`` where
+            ``cshape`` is the channel shape of the signal to be filtered.
+            The default is ``None``.
+
+        Returns
+        -------
+        out : array
+            The filtered data.
+        zf : array
+            The final filter state. Only returned if ``zi is not None``.
         """
         b = coefficients[0]
-
         # broadcast b to match ndim of data for convolution
         b = np.broadcast_to(b, (1, ) * (data.ndim - b.ndim) + b.shape)
 
