@@ -266,6 +266,9 @@ class Filter(object):
         """
         Compute the impulse response of the filter.
 
+        The state of the filter is reset before computing the impulse response
+        and restored afterwards.
+
         Parameters
         ----------
         n_samples : int
@@ -277,27 +280,20 @@ class Filter(object):
             The impulse response of the filter.
         """
 
-        # check the impulse response length for FIR filters
-        if type(self) == FilterFIR:
-            if self.coefficients.shape[-1] > n_samples:
-                warnings.warn(
-                    ('n_samples should be at least as long as the filter, '
-                     f'which is 4 {self.coefficients.shape[-1]}'),
-                    stacklevel=1)
-
         # track the state (better than copying the entire filter)
         if self.state is not None:
             state = self.state.copy()
             self._state = None
+            reset = True
         else:
-            state = None
+            reset = False
 
         # get impulse response
         impulse_response = self.process(pf.signals.impulse(
-            n_samples, sampling_rate=self.sampling_rate), reset=True)
+            n_samples, sampling_rate=self.sampling_rate), reset=reset)
 
         # reset the state if required
-        if state is not None:
+        if reset:
             self._state = state
 
         return impulse_response
@@ -422,6 +418,36 @@ class FilterFIR(Filter):
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
+
+    def impulse_response(self, n_samples='auto'):
+        """
+        Compute the impulse response of the filter.
+
+        The state of the filter is reset before computing the impulse response
+        and restored afterwards.
+
+        Parameters
+        ----------
+        n_samples : int, str, optional
+            Length in samples up to which the impulse response is computed. The
+            default is ``'auto'`` in which case the length of the impulse
+            response is determined from the filter :py:func:`~FilterFIR.order`.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+
+        # set or check the impulse response length
+        if n_samples == 'auto':
+            n_samples = self.coefficients.shape[-1]
+        elif self.coefficients.shape[-1] > n_samples:
+            warnings.warn(
+                ('n_samples should be at least as long as the filter, '
+                 f'which is {self.coefficients.shape[-1]}'), stacklevel=1)
+
+        return super().impulse_response(n_samples)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
