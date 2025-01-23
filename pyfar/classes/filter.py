@@ -159,8 +159,13 @@ class Filter(object):
         self._sampling_rate = sampling_rate
         self.comment = comment
 
-    def init_state(self, state='zeros'):
-        """Initialize the buffer elements to pre-defined initial conditions."""
+    def init_state(self, state):
+        """
+        Initialize the buffer elements to pre-defined initial conditions.
+
+        This method is overwritten in the child classes and called after
+        setting the state there.
+        """
         self._state = state
         self._initialized = True
 
