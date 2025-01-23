@@ -10,7 +10,7 @@ def _simplified_ideal_gas(temperature):
     for more details.
 
     It is used for testing other speed of sound methods, to see if the
-    results are with a senseful range.
+    results are within a reasonable range.
     """
     return 343.2*np.sqrt((temperature+273.15)/293.15)
 
