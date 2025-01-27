@@ -207,7 +207,7 @@ def design_frequency_weighting_filter(sampling_rate: float,
     sos = sps.zpk2sos(z, p, k)
     weighting_filter = pf.FilterSOS([sos], sampling_rate)
 
-    # ensure the filter is correct
+    # check if the filter is class 1 compliant
     is_class_1, max_err, mean_err = _check_filter(
         weighting_filter, target_weighting)
     if not is_class_1:
