@@ -34,6 +34,10 @@ from .interpolation import (
     InterpolateSpectrum,
 )
 
+from .levels import (
+    time_weighted_levels,
+)
+
 from . import filter
 from . import fft
 
@@ -69,4 +73,5 @@ __all__ = [
     'normalize',
     'fractional_time_shift',
     'correlate',
+    'time_weighted_levels',
 ]
