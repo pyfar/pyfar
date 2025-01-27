@@ -120,7 +120,7 @@ def design_frequency_weighting_filter(sampling_rate: float,
         array as output containing the weights.
         The default value is None, in which case the errors of all
         (logarithmically spaced) frequencies are equally weighted. This
-        usually leds to larger errors in the higher frequencies. By passing
+        usually leads to larger errors for higher frequencies. By passing
         a function that emphasizes high frequencies, it is possible to reduce
         this effect and get a filter potentially closer to the target curve.
         Example: `error_weighting=lambda nf: 100**nf`. This example often
