@@ -129,7 +129,7 @@ def design_frequency_weighting_filter(sampling_rate: float,
 
     **kwargs: dict
         Keyword args that are passed to the
-        scipy.optimize.least_squares() call.
+        :py:func:`scipy.optimize.least_squares` call.
 
     Returns
     -------
