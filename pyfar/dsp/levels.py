@@ -20,7 +20,7 @@ def time_weighted_levels(signal, weighting: str,
 
     type: str
         The time weighting type. Options are "F" (="fast") and "S" (="slow"),
-        which correspond to level decays of -34.7 dB and -4.3 dB,
+        which correspond to level decays of -34.7 dB/s and -4.3 dB/s,
         respectively.
 
     reference: float
