@@ -146,16 +146,8 @@ class Filter(object):
         else:
             self._coefficients = None
 
-        if state is not None:
-            if coefficients is None:
-                raise ValueError(
-                    "Cannot set a state without filter coefficients")
-            state = _atleast_3d_first_dim(state)
-            self._initialized = True
-        else:
-            self._initialized = False
+        self.state = state
 
-        self._state = state
         self._sampling_rate = sampling_rate
         self.comment = comment
 
@@ -199,6 +191,20 @@ class Filter(object):
         corresponding to the order of the filter and number of filter channels.
         """
         return self._state
+
+    @state.setter
+    def state(self, state):
+        """Set state of the filter."""
+        if state is not None:
+            if self.coefficients is None:
+                raise ValueError(
+                    "Cannot set a state without filter coefficients")
+            state = _atleast_3d_first_dim(state)
+            self._initialized = True
+        else:
+            self._initialized = False
+
+        self._state = state
 
     @staticmethod
     def _process(coefficients, data, zi=None):

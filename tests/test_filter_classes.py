@@ -33,6 +33,13 @@ def test_filter_init_with_state():
     npt.assert_array_equal(filt._coefficients, coeff)
     npt.assert_array_equal(filt.state, state)
 
+def test_filter_state_setter():
+    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
+    state = np.array([[[1, 0]]])
+    filt = fo.Filter(coefficients=coeff)
+    filt.state = state
+    npt.assert_array_equal(filt.state, state)
+
 
 def test_filter_comment():
     filt = fo.Filter(coefficients=None, state=None, comment='Bla')
