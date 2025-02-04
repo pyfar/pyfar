@@ -202,99 +202,32 @@ def test_deprecations_find_nearest_sph():
 def test_deprecations_freq_range_parameter_warnings():
     sweep = pfs.exponential_sweep_time(256, (100, 10000))
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range"):
-        pf.dsp.deconvolve(sweep, sweep, 256, freq_range=(20, 20e3))
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             pf.dsp.deconvolve(sweep, sweep, 256, freq_range=(20, 20e3))
-
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range"):
-        pf.dsp.regularized_spectrum_inversion(sweep, freq_range=(20, 20e3))
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             pf.dsp.regularized_spectrum_inversion(sweep, freq_range=(20, 20e3))
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range"):
-        gt = pf.dsp.filter.GammatoneBands(freq_range=(20, 20e3))
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             gt = pf.dsp.filter.GammatoneBands(freq_range=(20, 20e3))
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range"):
-        npt.assert_equal((20, 20e3), gt.freq_range)
+    gt = pf.dsp.filter.GammatoneBands(frequency_range=(20, 20e3))
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(TypeError):
+        with pytest.raises(AttributeError):
             npt.assert_equal((20, 20e3), gt.freq_range)
-
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range"):
-        pf.dsp.filter.erb_frequencies(freq_range=(20, 20e3))
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             pf.dsp.filter.erb_frequencies(freq_range=(20, 20e3))
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range"):
-        pf.dsp.filter.fractional_octave_bands(sweep, 8, freq_range=(20, 20e3))
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
             pf.dsp.filter.fractional_octave_bands(sweep, 8,
                                                   freq_range=(20, 20e3))
-
-
-def test_deprecations_freq_range_parameter_renaming_results():
-    sweep = pfs.exponential_sweep_time(256, (100, 10000))
-
-    np.testing.assert_allclose(
-        pf.dsp.deconvolve(sweep, sweep, 256, freq_range=(20, 20e3)).time,
-        pf.dsp.deconvolve(sweep, sweep, 256, frequency_range=(20, 20e3)).time,
-        rtol=0)
-
-    np.testing.assert_allclose(
-        pf.dsp.regularized_spectrum_inversion(sweep,
-                                              freq_range=(20, 20e3)).time,
-        pf.dsp.regularized_spectrum_inversion(sweep,
-                                              frequency_range=(20, 20e3)).time,
-        rtol=0)
-
-    np.testing.assert_allclose(
-        pf.dsp.filter.GammatoneBands(freq_range=(20, 20e3)).frequencies,
-        pf.dsp.filter.GammatoneBands(frequency_range=(20, 20e3)).frequencies,
-        rtol=0)
-
-    np.testing.assert_allclose(
-        pf.dsp.filter.erb_frequencies(freq_range=(20, 20e3)),
-        pf.dsp.filter.erb_frequencies(frequency_range=(20, 20e3)),
-        rtol=0)
-
-    np.testing.assert_allclose(
-        pf.dsp.filter.fractional_octave_bands(sweep, 8,
-                                              freq_range=(20, 20e3)).time,
-        pf.dsp.filter.fractional_octave_bands(sweep, 8,
-                                              frequency_range=(20, 20e3)).time,
-        rtol=0)
 
 
 def test_deprecation_shelve_functions():
