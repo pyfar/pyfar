@@ -9,15 +9,17 @@ import numpy.testing as npt
         "expected_accuracy"), [
     (10, 1000, .1, 2.16e1*1e-3, 10),
     (10, 100, .1, 5.85e-1*1e-3, 10),
-    (10, 100, .005, 0.002094, 10),
+    (-20, 800, .3, 4.92e-3, 10),
+    (35, 4000, .6, 2.58*10e-3, 10),
+    (50, 1000, .7, 8.03e-3, 10),
 ])
-def test_air_attenuation_iso(
+def test_air_attenuation_after_table_iso(
         temperature, frequency, relative_humidity, expected,
         expected_accuracy):
-    temperature = 10
+    """Check result after value table in the standard."""
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity)
-    npt.assert_allclose(alpha.freq, expected, atol=1e-3)
+    npt.assert_allclose(alpha.freq, expected, rtol=.01)
     npt.assert_allclose(accuracy.freq, expected_accuracy)
 
 
@@ -114,3 +116,89 @@ def test_air_attenuation_iso_limits():
     with pytest.raises(ValueError, match=match):
         pf.constants.air_attenuation(
             temperature, frequency, relative_humidity, 200001)
+
+
+@pytest.mark.parametrize((
+        "concentration_water_vapour", "expected_accuracy"), [
+    (0.05, 10),
+    (5, 10),
+    (1, 10),
+    (10, 20),
+    (0.005, 20),
+    (0.006, 20),
+    (0.0006, 50),
+    (100, 20),
+])
+def test_calculate_accuracy_concentration_water_vapour(
+        concentration_water_vapour, expected_accuracy):
+    shape = (1,)
+    temperature = 10
+    atmospheric_pressure = 101325
+    frequencies = 1e3
+    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+        concentration_water_vapour, temperature, atmospheric_pressure,
+        frequencies, shape)
+    npt.assert_array_equal(accuracy.freq, expected_accuracy)
+
+
+@pytest.mark.parametrize((
+        "temperature", "expected_accuracy"), [
+    (-20, 10),
+    (50, 10),
+    (0, 10),
+    (-100, -1),
+    (-50, 50),
+    (100, 50),
+])
+def test_calculate_accuracy_temperature(
+        temperature, expected_accuracy):
+    shape = (1,)
+    concentration_water_vapour = 1
+    atmospheric_pressure = 101325
+    frequencies = 1e3
+    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+        concentration_water_vapour, temperature, atmospheric_pressure,
+        frequencies, shape)
+    npt.assert_array_equal(accuracy.freq, expected_accuracy)
+
+
+@pytest.mark.parametrize((
+        "atmospheric_pressure", "expected_accuracy"), [
+    (101325, 10),
+    (20000-1, 10),
+    (20000, -1),
+    (300000, -1),
+])
+def test_calculate_accuracy_atmospheric_pressure(
+        atmospheric_pressure, expected_accuracy):
+    shape = (1,)
+    temperature = 0
+    concentration_water_vapour = 1
+    frequencies = 1e3
+    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+        concentration_water_vapour, temperature, atmospheric_pressure,
+        frequencies, shape)
+    npt.assert_array_equal(accuracy.freq, expected_accuracy)
+
+
+
+@pytest.mark.parametrize((
+        "frequency_pressure_ratio", "expected_accuracy"), [
+    (4e-4, 10),
+    (10, 10),
+    (1, 10),
+    (3e-4, -1),
+    (11, -1),
+])
+def test_calculate_accuracy_frequency_pressure_ratio(
+        frequency_pressure_ratio, expected_accuracy):
+    shape = (1,)
+    temperature = 0
+    concentration_water_vapour = 1
+    atmospheric_pressure = 101325
+    frequencies = frequency_pressure_ratio * atmospheric_pressure
+    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+        concentration_water_vapour, temperature, atmospheric_pressure,
+        frequencies, shape)
+    npt.assert_array_equal(accuracy.freq, expected_accuracy)
+

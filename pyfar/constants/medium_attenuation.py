@@ -6,13 +6,11 @@ from . import utils
 
 def air_attenuation(
         temperature, frequencies, relative_humidity,
-        atmospheric_pressure=101325):
+        atmospheric_pressure=101325, saturation_vapor_pressure=None):
     r"""Calculate the pure tone air attenuation of sound in air according to
     ISO 9613-1.
 
-    Calculation is in accordance with ISO 9613-1 [#]_. It uses
-    :py:func:`~pyfar.constants.saturation_vapor_pressure` to calculate the
-    saturation vapor pressure of water in hPa.
+    Calculation is in accordance with ISO 9613-1 [#]_.
 
     Parameters
     ----------
@@ -27,6 +25,10 @@ def air_attenuation(
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
+    saturation_vapor_pressure : float, array_like, optional
+        Saturation vapor pressure in Pa, if not given the function
+        :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
+        Note that the valid range for temperature is therefore reduced.
 
     Returns
     -------
@@ -107,7 +109,6 @@ def air_attenuation(
         raise ValueError("Temperature must be greater than -73°C.")
     if np.any(np.array(frequencies) < 50):
         raise ValueError("frequencies must be greater than 50 Hz.")
-    print(relative_humidity)
     if np.any(np.array(relative_humidity) < 0) or np.any(
             np.array(relative_humidity) > 1):
         raise ValueError("Relative humidity must be between 0 and 1.")
@@ -134,8 +135,10 @@ def air_attenuation(
     T_0 = t_degree_ref + 273.15
 
     # saturation_vapor_pressure in hPa
-    p_sat_water = utils.saturation_vapor_pressure(temperature)
-    p_vapor = relative_humidity*p_sat_water
+    if saturation_vapor_pressure is None:
+        saturation_vapor_pressure = utils.saturation_vapor_pressure(
+            temperature)
+    p_vapor = relative_humidity*saturation_vapor_pressure
 
     # molar concentration of water vapor as a percentage
     h = p_vapor/p_a*100
@@ -158,27 +161,79 @@ def air_attenuation(
     m = alpha / (10*np.log10(np.exp(1)))
 
     # calculate accuracy
-    accuracy = np.zeros(shape) - 1
+    accuracy = _calculate_accuracy(
+        h, temperature, atmospheric_pressure, frequencies, shape)
+
+    return alpha, m, accuracy
+
+
+def _calculate_accuracy(
+        concentration_water_vapour, temperature, atmospheric_pressure,
+        frequencies, shape):
+    """Calculate the accuracy of the results.
+
+    Parameters
+    ----------
+    concentration_water_vapour : float, array_like
+        Molar concentration of water vapor as a percentage.
+    temperature : float, array_like
+        Temperature in degree Celsius.
+    atmospheric_pressure : float, array_like
+        Atmospheric pressure in pascal.
+    frequencies : float, array_like
+        Frequency in Hz.
+    shape : tuple
+        Shape of the output.
+
+    Returns
+    -------
+    accuracy : :py:class:`~pyfar.classes.FrequencyData`
+        accuracy of the results according to the standard:
+
+            ``10``, +/- 10% accuracy
+                - molar concentration of water vapour: 0,05% to 5 %.
+                - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
+                - atmospheric pressure: less than 200 Pa (2 atm)
+                - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
+
+            ``20``, +/- 20% accuracy
+                - molar concentration of water vapour: 0,005 % to 0,05 %,
+                    and greater than 5%
+                - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
+                - air temperature: greater than 200 K (- 73 °C)
+                - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
+
+            ``50``, +/- 50% accuracy
+                - molar concentration of water vapour: less than 0,005%
+                - air temperature: greater than 200 K (- 73 °C)
+                - atmospheric pressure: less than 200 kPa (2 atm)
+                - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
+
+            ``-1``, no valid result
+                else.
+    """
+
     atmospheric_pressure = np.broadcast_to(atmospheric_pressure, shape)
-    p_vapor = np.broadcast_to(p_vapor, shape)/100
-    freq2pressure = frequencies/atmospheric_pressure
+    h_water_vapor = np.broadcast_to(concentration_water_vapour, shape)
+    frequency_pressure_ratio = frequencies/atmospheric_pressure
+    accuracy = np.zeros(shape) - 1
 
     atm_mask = atmospheric_pressure <= 200000
-    freq2pressure_mask = (4e-4 <= freq2pressure) & (freq2pressure <= 10)
+    freq2pressure_mask = (4e-4 <= frequency_pressure_ratio) & (frequency_pressure_ratio <= 10)
     common_mask = atm_mask & freq2pressure_mask
-    vapor_1_mask = (0.05 <= p_vapor) & (p_vapor <= 5)
+    vapor_1_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5)
     temp_1_mask = (-20 <= temperature) & (temperature <= 50)
     accuracy_10 = vapor_1_mask & temp_1_mask & common_mask
     accuracy[accuracy_10] = 10
 
-    vapor_2_mask = (vapor_1_mask is False) & (0.005 <= p_vapor)
+    vapor_2_mask = (vapor_1_mask == False) & (
+        (5 < h_water_vapor) | (h_water_vapor >= 0.005))
     temp_2_mask = (-70 <= temperature) & (temp_1_mask is False)
     accuracy_20 = vapor_2_mask & temp_1_mask & common_mask
     accuracy[accuracy_20] = 20
 
-    vapor_3_mask = 0.005 > p_vapor
-    accuracy_50 = vapor_3_mask & temp_2_mask & common_mask
+    vapor_3_mask = 0.005 > h_water_vapor
+    accuracy_50 = vapor_3_mask & (temp_2_mask | temp_1_mask ) & common_mask
     accuracy[accuracy_50] = 50
+    return pf.FrequencyData(accuracy, frequencies=frequencies)
 
-    accuracy = pf.FrequencyData(accuracy, frequencies=frequencies)
-    return alpha, m, accuracy
