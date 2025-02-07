@@ -264,7 +264,9 @@ class Filter(object):
 
     def impulse_response(self, n_samples):
         """
-        Compute the finite impulse response of the filter.
+        Compute or approximate the impulse response of the filter.
+
+        See `impulse_response` methods in derived classes for more details.
 
         Parameters
         ----------
@@ -426,6 +428,8 @@ class FilterFIR(Filter):
             Length in samples for which the impulse response is computed. The
             default is ``None`` in which case the length of the impulse
             response is determined from the filter :py:func:`~FilterFIR.order`.
+            A warning is returned if ``n_samples`` is to short to compute the
+            entire impulse response.
 
         Returns
         -------
