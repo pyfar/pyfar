@@ -1,4 +1,4 @@
-name: PR Check Label for version Label
+name: PR Check for any Label
 
 on:
   pull_request:
@@ -12,9 +12,9 @@ jobs:
   check-labels:
     runs-on: ubuntu-latest
     steps:
-      - name: Check for version label
+      - name: Check for label
         run: |
-          echo "Checking for version label on pull request..."
+          echo "Checking for label on pull request..."
           PR_DATA=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
           LABEL_NAMES=$(echo "$PR_DATA" | jq -r '.labels[].name')
           echo "Labels: $LABEL_NAMES"
