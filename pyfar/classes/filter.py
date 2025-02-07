@@ -517,16 +517,17 @@ class FilterIIR(Filter):
 
     def impulse_response(self, n_samples):
         """
-        Compute the infinite impulse response of the filter for a length of
-        `n_samples`.
+        Approximate the infinite impulse response of the filter by a finite
+        impulse response.
+
+        Note that the number of samples must be sufficiently long for
+        `impulse_response` to be a good approximation of the theoretically
+        infinitely long impulse response of the filter.
 
         Parameters
         ----------
         n_samples : int
-            Length in samples for which the impulse response is computed. Note
-            that this must be sufficiently large for `impulse_response` to be
-            a good estimate of the theoretically infinitely long impulse
-            response of the filter.
+            Length in samples for which the impulse response is computed.
 
         Returns
         -------
@@ -634,13 +635,14 @@ class FilterSOS(Filter):
         Approximate the infinite impulse response of the filter by a finite
         impulse response.
 
+        Note that the number of samples must be sufficiently long for
+        `impulse_response` to be a good approximation of the theoretically
+        infinitely long impulse response of the filter.
+
         Parameters
         ----------
         n_samples : int
-            Length in samples for which the impulse response is computed. Note
-            that this must be sufficiently large for `impulse_response` to be
-            a good estimate of the theoretically infinitely long impulse
-            response of the filter.
+            Length in samples for which the impulse response is computed.
 
         Returns
         -------
