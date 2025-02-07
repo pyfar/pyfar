@@ -43,7 +43,7 @@ def speed_of_sound_simple(temperature):
 
 
 def speed_of_sound_ideal_gas(
-        temperature, relative_humidity, atmospheric_pressure,
+        temperature, relative_humidity, atmospheric_pressure=101325,
         saturation_vapor_pressure=None):
     """Calculate speed of sound in air using the ideal gas law.
 
