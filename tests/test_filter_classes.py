@@ -44,6 +44,56 @@ def test_filter_comment():
         pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
 
+@pytest.mark.parametrize(('filter_object', 'actual_length'), [
+    # FIR filter ---------------------------------------------
+    # single-channel filter
+    (pf.FilterFIR([[1, 0, 1]], 44100), np.atleast_1d([3])),
+    (pf.FilterFIR([[1, 1, 0]], 44100), np.atleast_1d([2])),
+    # multi-channel filter
+    (pf.FilterFIR([[1, 0, 1], [1, 1, 0]], 44100), np.atleast_1d([3, 2])),
+    # single-channel FIR filter disguised as IIR filter
+    (pf.FilterIIR([[[1, 0, 1], [1, 0, 0]]], 44100), np.array([3])),
+    # IIR filter (see code for tested options) ----------------
+    # stable / pure oscillation / no pre-delay / any(abs(poles - 1) < 1e-5
+    (pf.FilterIIR([[[1, 0], [1, -1]]], 44100), np.array([10])),
+    # stable / no oscillation / no pre-delay / all(abs(poles - 1) >= 1e-5
+    (pf.FilterIIR([[[1, 0, 0], [1, .5, .25]]], 44100), np.array([14])),
+    # stable / no oscillation / pre-delay / all(abs(poles - 1) >= 1e-5
+    (pf.FilterIIR([[[0, 1, 0], [1, .5, .25]]], 44100), np.array([15])),
+    # stable / mix of both / no pre-delay / any(abs(poles - 1) < 1e-5
+    (pf.FilterIIR([[[1, 0, 0], [1, -1, 0]]], 44100), np.array([10])),
+    # instable / - / no-predelay / all(abs(poles - 1) >= 1e-5
+    (pf.FilterIIR([[[1, 0, 0], [1, 0, -9]]], 44100), np.array([12])),
+    # multichannel (combinations of the above)
+    (pf.FilterIIR([[[1, 0, 1], [1, 0, 0]],
+                                  [[1, 0, 0], [1, .5, .25]],
+                                  [[0, 1, 0], [1, .5, .25]]], 44100),
+     np.array([3, 14, 15])),
+    # SOS filter ---------------------------------------------
+    # single-channel, two sections, all IIR
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .1]]], 44100), np.array([28])),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .9]]], 44100), np.array([187])),
+    # single-channel, two sections, all FIR
+    (pf.FilterSOS([[[1, 0, 1, 1, 0, 0],
+                    [1, 2, 0, 1, 0, 0]]], 44100), np.array([5])),
+    # single-channel, two sections, mixed
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 1, 1, 0, 0]]], 44100), np.array([28])),
+    # multi-channel, one section, all IIR
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5]],
+                   [[1, 0, 0, 1, 0, .9]]], 44100), np.array([28, 187])),
+])
+def test_filter_impulse_response_length(filter_object, actual_length):
+    """Test impulse_response_length class method for all classes and cases."""
+
+    estimated_length = filter_object.impulse_response_length()
+    npt.assert_equal(estimated_length, actual_length)
+    assert estimated_length.shape == actual_length.shape
+    assert estimated_length.dtype == int
+
+
 @pytest.mark.parametrize('filter_object', [
     # FIR filter, single-channel
     fo.FilterFIR(np.array([[1, -1, .1, -.1]]), 48000),
@@ -88,19 +138,45 @@ def test_filter_impulse_response(filter_object):
     npt.assert_equal(state_after, state_before)
 
 
-def test_filter_fir_impulse_response_n_samples_warning():
-    """Test warning if impulse response length is less then filter length."""
-    filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
-    match = "n_samples should be at least as long as the filter, which is 4"
+@pytest.mark.parametrize(('filter_object', 'actual'), [
+    (fo.FilterFIR([[1, 0, 0, 1]], 48000), 4),
+    (pf.FilterIIR([[[1, 0], [1, -1]]], 44100), 10),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .9]]], 44100), 187),
+])
+def test_filter_impulse_response_warning(filter_object, actual):
+    """
+    Test warning if user values for impulse response length are too small.
+    """
+
+    match = ("n_samples should be at least as long as the filter, "
+             f"which is {actual}")
+
     with pytest.warns(UserWarning, match=re.escape(match)):
         _ = filter_object.impulse_response(2)
 
 
-def test_filter_fir_impulse_response_n_samples_default():
-    """Test default value for impulse response length."""
-    filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
+@pytest.mark.parametrize(('filter_object', 'actual'), [
+    (fo.FilterFIR([[1, 0, 0, 1]], 48000), 4),
+    (pf.FilterIIR([[[1, 0], [1, -1]]], 44100), 10),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .9]]], 44100), 187),
+])
+def test_filter_impulse_response_n_samples_default(filter_object, actual):
+    """Test default value for impulse_response_length class methods."""
     impulse_response = filter_object.impulse_response()
-    assert impulse_response.n_samples == 4
+    assert impulse_response.n_samples == actual
+
+
+@pytest.mark.parametrize(('filter_object'), [
+    (pf.FilterIIR([[[1, 0, 0], [1, 0, .9]]], 44100)),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .9]]], 44100)),
+])
+def test_filter_impulse_response_length_tolerance(filter_object):
+    """Test tolerance parameter for estimating the impulse response length."""
+    low = filter_object.impulse_response_length(tolerance=5e-5)
+    high = filter_object.impulse_response_length(tolerance=5e-6)
+    assert low[0] < high[0]
 
 
 def test_filter_iir_init():

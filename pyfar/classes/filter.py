@@ -278,6 +278,14 @@ class Filter(object):
         impulse_response : Signal
             The impulse response of the filter.
         """
+        # set or check the impulse response length
+        impulse_response_length = int(np.max(self.impulse_response_length()))
+        if n_samples is None:
+            n_samples = impulse_response_length
+        elif impulse_response_length > n_samples:
+            warnings.warn(
+                ('n_samples should be at least as long as the filter, '
+                 f'which is {impulse_response_length}'), stacklevel=2)
 
         # track the state (better than copying the entire filter)
         if self.state is not None:
@@ -418,33 +426,50 @@ class FilterFIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
+    def impulse_response_length(self):
+        """
+        Get the length of filter impulse response in samples.
+
+        The length is computed from the last non-zero coefficient per channel.
+
+        Returns
+        -------
+        impulse_response_length : array
+            An integer array of shape (C, ) containing the length in samples
+            where `C` denotes the number of channels of the filter.
+        """
+
+        # get filter coefficients
+        b = self.coefficients
+
+        # find last non-zero entry per channel
+        estimated_length = np.apply_along_axis(
+            lambda b: np.max(np.nonzero(b)), axis=-1, arr=b) + 1
+
+        # restore input data shape
+        estimated_length = np.reshape(estimated_length, b.shape[:-1])
+
+        return estimated_length.astype(int)
+
     def impulse_response(self, n_samples=None):
         """
-        Compute the finite impulse response of the filter.
+        Compute the impulse response of the filter.
 
         Parameters
         ----------
-        n_samples : int, str, optional
+        n_samples : int, optional
             Length in samples for which the impulse response is computed. The
-            default is ``None`` in which case the length of the impulse
-            response is determined from the filter :py:func:`~FilterFIR.order`.
-            A warning is returned if ``n_samples`` is to short to compute the
+            default is ``None`` in which case ``n_samples`` is computed as the
+            maximum value returned by :py:func:`~impulse_response_length`.
+            A warning is returned if ``n_samples`` is too short to compute the
             entire impulse response.
 
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter.
+            The impulse response of the filter of with a ``cshape = (C, )``
+            where `C` denotes the number of channels of the filter.
         """
-
-        # set or check the impulse response length
-        if n_samples is None:
-            n_samples = self.coefficients.shape[-1]
-        elif self.coefficients.shape[-1] > n_samples:
-            warnings.warn(
-                ('n_samples should be at least as long as the filter, '
-                 f'which is {self.coefficients.shape[-1]}'), stacklevel=1)
-
         return super().impulse_response(n_samples)
 
     @staticmethod
@@ -519,26 +544,123 @@ class FilterIIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         return super().init_state(state=new_state)
 
-    def impulse_response(self, n_samples):
+    def impulse_response(self, n_samples=None):
         """
-        Approximate the infinite impulse response of the filter by a finite
-        impulse response.
-
-        Note that the number of samples must be sufficiently long for
-        `impulse_response` to be a good approximation of the theoretically
-        infinitely long impulse response of the filter.
+        Compute the impulse response of the filter.
 
         Parameters
         ----------
-        n_samples : int
-            Length in samples for which the impulse response is computed.
+        n_samples : int, optional
+            Length in samples for which the impulse response is computed. The
+            default is ``None`` in which case ``n_samples`` is computed as the
+            maximum value returned by :py:func:`~impulse_response_length`.
+            A warning is returned if ``n_samples`` is too short to approximate
+            the theoretically infinitely long impulse response.
 
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter.
+            The impulse response of the filter of with a ``cshape = (C, )``
+            where `C` denotes the number of channels of the filter.
         """
         return super().impulse_response(n_samples)
+
+    def impulse_response_length(self, tolerance=5e-5):
+        """
+        Get the estimated length of filter impulse response in samples.
+
+        The length is estimated from the positions of the poles of the filter.
+        The closer the poles are to the unit circle, the longer the estimated
+        length.
+
+        Parameters
+        ----------
+        tolerance : float, optional
+            Tolerance for the accuracy. Smaller tolerances will result in
+            larger impulse response lengths. The default is ``5e-5``.
+
+        Returns
+        -------
+        impulse_response_length : array
+            An integer array of shape (C, ) containing the length in samples
+            where `C` denotes the number of channels of the filter.
+        """
+
+        channels = self.coefficients.shape[0]
+        estimated_length = np.zeros(channels)
+
+        for channel in range(channels):
+
+            b = self.coefficients[channel, 0]
+            a = self.coefficients[channel, 1]
+
+            # this is an FIR filter
+            if self.order == 0 or np.all(a[1:] == 0):
+                estimated_length[channel] = np.max(np.nonzero(b)) + 1
+                continue
+
+            # This is an IIR filter. Delay of non-recursive part
+            estimated_length[channel] = np.min(np.nonzero(b))
+
+            # poles of the transfer function
+            poles = np.roots(a)
+
+            if np.any(np.abs(poles) > 1.0001):
+                # This is an unstable filter. The closer the outmost pole is to
+                # the unit circle, the longer the impulse response.
+                estimated_length[channel] += \
+                    6 / np.log10(np.max(np.abs(poles[np.abs(poles) > 1])))
+            else:
+                # This is a stable filter. Minimum height is 1e-5 of original
+                # amplitude
+                idx = np.abs(poles - 1) < 1e-5
+                poles[idx] = -poles[idx]
+
+                # poles on and close to unit circls
+                idx_oscillation = np.argwhere(np.abs(np.abs(poles)-1) < 1e-5)
+                # poles further away from unit circle
+                idx_damped = np.argwhere(np.abs(np.abs(poles)-1) >= 1e-5)
+
+                if len(idx_oscillation) == len(poles):
+                    # pure oscillation
+                    estimated_length[channel] += \
+                        5 * np.max(2 * np.pi / np.abs(np.angle(poles)))
+                elif len(idx_damped) == len(poles):
+                    # no oscillation
+                    idx = np.argmax(np.abs(poles))
+                    pole_multiplicity = self._pole_multiplicity(poles, idx)
+                    estimated_length[channel] += \
+                        pole_multiplicity * np.log10(tolerance) / \
+                        np.log10(np.abs(poles[idx]))
+                else:
+                    # mixture of both
+                    periods = 5 * np.max(2 * np.pi / \
+                        np.abs(np.angle(poles[idx_oscillation[0]])))
+                    poles_damped = poles[idx_damped[0]]
+                    idx = np.argmax(np.abs(poles_damped))
+                    multiplicity = self._pole_multiplicity(poles_damped, idx)
+                    estimated_length[channel] += np.maximum(
+                        periods,
+                        multiplicity * np.log10(tolerance) / \
+                            np.log10(np.abs(poles_damped[idx])))
+
+            estimated_length[channel] = np.maximum(
+                len(a) + len(b) - 1, estimated_length[channel])
+
+        return estimated_length.astype(int)
+
+    @staticmethod
+    def _pole_multiplicity(poles, index, tolerance=.001):
+        """
+        Find multiplicity of a pole.
+
+        Required for impulse_response_length.
+        """
+
+        if np.all(poles != 0):
+            tolerance *= np.abs(poles[index])
+
+        return np.sum(np.abs(poles - poles[index]) < tolerance)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -634,7 +756,7 @@ class FilterSOS(Filter):
                 new_state[idx, ...] = spsignal.sosfilt_zi(coeff)
         return super().init_state(state=new_state)
 
-    def impulse_response(self, n_samples):
+    def impulse_response(self, n_samples=None):
         """
         Approximate the infinite impulse response of the filter by a finite
         impulse response.
@@ -646,7 +768,11 @@ class FilterSOS(Filter):
         Parameters
         ----------
         n_samples : int
-            Length in samples for which the impulse response is computed.
+            Length in samples for which the impulse response is computed. The
+            default is ``None`` in which case ``n_samples`` is computed as the
+            maximum value returned by :py:func:`~impulse_response_length`.
+            A warning is returned if ``n_samples`` is too short to approximate
+            the theoretically infinitely long impulse response.
 
         Returns
         -------
@@ -654,6 +780,63 @@ class FilterSOS(Filter):
             The impulse response of the filter.
         """
         return super().impulse_response(n_samples)
+
+    def impulse_response_length(self, tolerance=5e-5):
+        """
+        Get the estimated length of filter impulse response in samples.
+
+        The length is estimated separately per second order section using
+        :py:func:`FilterIIR.impulse_response_length`. The final length is given
+        by the length of the longest section.
+
+        Parameters
+        ----------
+        tolerance : float, optional
+            Tolerance for the accuracy. Smaller tolerances will result in
+            larger impulse response lengths. The default is ``5e-5``.
+
+        Returns
+        -------
+        impulse_response_length : array
+            An integer array of shape (C, ) containing the length in samples
+            where `C` denotes the number of channels of the filter.
+        """
+
+        channels = self.coefficients.shape[0]
+        sections = self.coefficients.shape[1]
+        estimated_length = np.zeros(channels)
+
+        for channel in range(channels):
+
+            # initialize length for FIR and IIR sections
+            # Note: Matlab uses 1 for initialization, which does not make sense
+            #       for FIR sections. Using 0 should be better there and does
+            #       not change anything for IIR sections
+            length_fir = 0
+            length_iir = 0
+
+            for section in range(sections):
+
+                # estimate length of each section and channel
+                b = self.coefficients[channel, section, :3]
+                a = self.coefficients[channel, section, 3:]
+
+                if np.all(a[1:] == 0):
+                    # FIR sections: accumulate FIR length
+                    length_fir += np.max(np.nonzero(b)) + 1
+                else:
+                    # IIR section: track maximum IIR length
+                    # (assuming this dominates the impulse response length)
+                    filter_iir = FilterIIR([b, a], self.sampling_rate)
+
+                    length_iir = np.maximum(
+                        length_iir,
+                        filter_iir.impulse_response_length(tolerance)[0])
+
+            # use maximum of FIR and IIR length for final estimate
+            estimated_length[channel] = np.maximum(length_fir, length_iir)
+
+        return estimated_length.astype(int)
 
     @staticmethod
     def _process(sos, data, zi=None):
