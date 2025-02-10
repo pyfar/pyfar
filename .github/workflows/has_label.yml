@@ -1,4 +1,4 @@
-name: PR Check for any Label
+name: pull_request: label
 
 on:
   pull_request:
