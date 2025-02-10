@@ -151,10 +151,24 @@ class Filter(object):
         self._sampling_rate = sampling_rate
         self.comment = comment
 
-    def init_state(self, state='zeros'):
-        """Initialize the buffer elements to pre-defined initial conditions."""
+    def init_state(self, state):
+        """
+        Initialize the buffer elements to pre-defined initial conditions.
+
+        This method is overwritten in the child classes and called after
+        setting the state there.
+        """
         self._state = state
         self._initialized = True
+
+    @staticmethod
+    def _check_state_keyword(state):
+        """
+        Check the value of the state keyword for 'ini_state' class methods.
+        """
+        if state not in ['zeros', 'step']:
+            raise ValueError(
+                f"state is '{state}' but must be 'zeros' or 'step'")
 
     @property
     def coefficients(self):
@@ -412,6 +426,8 @@ class FilterFIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
@@ -500,7 +516,7 @@ class FilterIIR(Filter):
 
         Filter.state.fset(self, state)
 
-    def init_state(self, cshape, state):
+    def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
 
         Parameters
@@ -513,6 +529,8 @@ class FilterIIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
@@ -636,6 +654,8 @@ class FilterSOS(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.n_sections, 2))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
