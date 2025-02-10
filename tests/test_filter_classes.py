@@ -3,6 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pyfar.classes.filter as fo
 import pyfar as pf
+import re
 from scipy import signal as spsignal
 
 
@@ -44,6 +45,65 @@ def test_filter_comment():
 
 
 @pytest.mark.parametrize('filter_object', [
+    # FIR filter, single-channel
+    fo.FilterFIR(np.array([[1, -1, .1, -.1]]), 48000),
+    # FIR filter, multi-channel
+    fo.FilterFIR(np.array([[1, -1, .1, -.1], [2, -2, .2, -.2]]), 48000),
+    # IIR filter, single-channel
+    fo.FilterIIR(np.array([[[1, -1, .1, -.1], [1, .1, -.1, 0]]]), 48000),
+    # IIR filter, multi-channel
+    fo.FilterIIR(np.array([[[1, -1, .1, -.1], [1, .1, -.1, 0]],
+                           [[1, -2, .2, -.2], [1, .2, -.2, 0]]]), 48000),
+    # SOS filter, single-channel
+    fo.FilterSOS(np.array([[[1, -1, .1, 1, .1, -.1]]]), 48000),
+    # SOS filter, multi-channel
+    fo.FilterSOS(np.array([[[1, -1, .1, 1, .1, -.1]],
+                           [[2, -2, .2, 1, .2, -.2]]]), 48000),
+])
+def test_filter_impulse_response(filter_object):
+    """Test 'impulse_response' class methods for all Filter types."""
+
+    # test signal
+    n_samples = 256
+    impulse = pf.signals.impulse(n_samples, sampling_rate=48000)
+
+    # filter without state
+    impulse_response = filter_object.impulse_response(n_samples)
+    # test output
+    assert isinstance(impulse_response, pf.Signal)
+    assert impulse_response.n_samples == n_samples
+    npt.assert_equal(impulse_response, filter_object.process(impulse))
+    assert filter_object.state is None
+
+    # filter with state
+    filter_object.init_state(impulse.cshape, 'zeros')
+    state_before = filter_object.state.copy()
+    impulse_response_2 = filter_object.impulse_response(n_samples)
+    state_after = filter_object.state.copy()
+    # test output
+    assert isinstance(impulse_response, pf.Signal)
+    assert impulse_response.n_samples == n_samples
+    npt.assert_equal(impulse_response_2, impulse_response)
+    assert filter_object.state is not None
+    npt.assert_equal(state_after, state_before)
+
+
+def test_filter_fir_impulse_response_n_samples_warning():
+    """Test warning if impulse response length is less then filter length."""
+    filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
+    match = "n_samples should be at least as long as the filter, which is 4"
+    with pytest.warns(UserWarning, match=re.escape(match)):
+        _ = filter_object.impulse_response(2)
+
+
+def test_filter_fir_impulse_response_n_samples_default():
+    """Test default value for impulse response length."""
+    filter_object = fo.FilterFIR([[1, 0, 0, 1]], 48000)
+    impulse_response = filter_object.impulse_response()
+    assert impulse_response.n_samples == 4
+
+
+@pytest.mark.parametrize('filter_object', [
     (fo.FilterFIR([[1, -1]], 48000)),
     (fo.FilterIIR([[1, -1], [1, -1]], 48000)),
     (fo.FilterSOS([[[1, -1, 1, 1, -1, 1]]], 48000)),
@@ -66,7 +126,6 @@ def test_filter_init_state_default_and_error(filter_object):
     # test raising the error for an invalid value
     with pytest.raises(ValueError, match="state is 'random' but must be"):
         filter_object.init_state((1, ), 'random')
-
 
 
 def test_filter_iir_init():

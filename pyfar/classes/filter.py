@@ -276,6 +276,41 @@ class Filter(object):
 
         return filtered_signal
 
+    def impulse_response(self, n_samples):
+        """
+        Compute or approximate the impulse response of the filter.
+
+        See `impulse_response` methods in derived classes for more details.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples for which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+
+        # track the state (better than copying the entire filter)
+        if self.state is not None:
+            state = self.state.copy()
+            self._state = None
+            reset = True
+        else:
+            reset = False
+
+        # get impulse response
+        impulse_response = self.process(pf.signals.impulse(
+            n_samples, sampling_rate=self.sampling_rate), reset=reset)
+
+        # reset the state if required
+        if reset:
+            self._state = state
+
+        return impulse_response
+
     def reset(self):
         """Reset the filter state by filling it with zeros."""
         if self._state is not None:
@@ -399,6 +434,35 @@ class FilterFIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
+    def impulse_response(self, n_samples=None):
+        """
+        Compute the finite impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int, optional
+            Length in samples for which the impulse response is computed. The
+            default is ``None`` in which case the length of the impulse
+            response is determined from the filter :py:func:`~FilterFIR.order`.
+            A warning is returned if ``n_samples`` is to short to compute the
+            entire impulse response.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+
+        # set or check the impulse response length
+        if n_samples is None:
+            n_samples = self.coefficients.shape[-1]
+        elif self.coefficients.shape[-1] > n_samples:
+            warnings.warn(
+                ('n_samples should be at least as long as the filter, '
+                 f'which is {self.coefficients.shape[-1]}'), stacklevel=1)
+
+        return super().impulse_response(n_samples)
+
     @staticmethod
     def _process(coefficients, data, zi=None):
         """Process a single filter channel.
@@ -472,6 +536,27 @@ class FilterIIR(Filter):
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         return super().init_state(state=new_state)
+
+    def impulse_response(self, n_samples):
+        """
+        Approximate the infinite impulse response of the filter by a finite
+        impulse response.
+
+        Note that the number of samples must be sufficiently long for
+        `impulse_response` to be a good approximation of the theoretically
+        infinitely long impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples for which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+        return super().impulse_response(n_samples)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -568,6 +653,27 @@ class FilterSOS(Filter):
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.sosfilt_zi(coeff)
         return super().init_state(state=new_state)
+
+    def impulse_response(self, n_samples):
+        """
+        Approximate the infinite impulse response of the filter by a finite
+        impulse response.
+
+        Note that the number of samples must be sufficiently long for
+        `impulse_response` to be a good approximation of the theoretically
+        infinitely long impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples for which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+        return super().impulse_response(n_samples)
 
     @staticmethod
     def _process(sos, data, zi=None):
