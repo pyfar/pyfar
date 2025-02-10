@@ -196,7 +196,10 @@ def _sofa_pos(pos_type, coordinates):
             coordinates[:, 2],
         )
     else:
-        raise ValueError("Position:Type {pos_type} is not supported.")
+        raise ValueError(
+            f"Position: Type '{pos_type}' is not supported."
+            "Allowed types are 'cartesian' and 'spherical'.",
+            )
 
 
 def read(filename):

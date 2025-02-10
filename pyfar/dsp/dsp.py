@@ -1416,7 +1416,7 @@ def find_impulse_response_start(
 
     """
     modes = ['real', 'complex'] if impulse_response.complex else ['real']
-    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape))
+    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape), dtype=int)
     for idx, mode in enumerate(modes):
         ir = impulse_response.time
         ir_squared = np.real(ir)**2 if mode == 'real' else np.imag(ir)**2
