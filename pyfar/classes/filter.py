@@ -187,8 +187,14 @@ class Filter(object):
     @property
     def state(self):
         """
-        The current state of the filter as an array with dimensions
-        corresponding to the order of the filter and number of filter channels.
+        The state of the filter as an array with dimensions
+        corresponding to filter structure and the cshape of the
+        signal to be filtered.
+
+        The state sets the initial conditions for the filter delays and can
+        be used to change the filter's transient.
+
+        Details about the required shape are contained in the class docstring.
         """
         return self._state
 
@@ -377,7 +383,7 @@ class FilterFIR(Filter):
         Parameters
         ----------
         state : array, double
-            The state of the filter from with dimensions
+            The state of the filter with dimensions
             ``(n_channels, *cshape, order)``, where ``cshape`` is
             the channel shape of the :py:class:`~pyfar.Signal`
             to be filtered.
@@ -418,6 +424,11 @@ class FilterFIR(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
+        if zi is not None and zi.shape[0:-1] != data.shape[0:-1]:
+            raise ValueError("The initial state does not match the cshape of "
+                             "the signal. Required shape for `state` in "
+                             "FilterFIR is (n_channels, *cshape, order).")
+
         return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
 
     def __repr__(self):
@@ -473,7 +484,7 @@ class FilterIIR(Filter):
         Parameters
         ----------
         state : array, double
-            The state of the filter from with dimensions
+            The state of the filter with dimensions
             ``(n_channels, *cshape, order)``, where ``cshape`` is
             the channel shape of the :py:class:`~pyfar.Signal`
             to be filtered.
@@ -514,6 +525,10 @@ class FilterIIR(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
+        if zi is not None and zi.shape[0:-1] != data.shape[0:-1]:
+            raise ValueError("The initial state does not match the cshape of "
+                             "the signal. Required shape for `state` in "
+                             "FilterIIR is (n_channels, *cshape, order).")
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
     def __repr__(self):
@@ -591,7 +606,7 @@ class FilterSOS(Filter):
         Parameters
         ----------
         state : array, double
-            The state of the filter from with dimensions
+            The state of the filter with dimensions
             ``(n_channels, *cshape, n_sections, 2)``, where ``cshape`` is
             the channel shape of the :py:class:`~pyfar.Signal`
             to be filtered.
@@ -633,6 +648,11 @@ class FilterSOS(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
+        if zi is not None and zi.shape[0:-2] != data.shape[0:-1]:
+            raise ValueError("The initial state does not match the cshape of "
+                             "the signal. Required shape for `state` in "
+                             "FilterSOS is (n_channels, *cshape, n_sections,"
+                             " 2).")
         if zi is not None:
             zi = zi.transpose(1, 0, 2)
         res = spsignal.sosfilt(sos, data, zi=zi, axis=-1)
