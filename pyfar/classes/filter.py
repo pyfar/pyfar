@@ -199,7 +199,6 @@ class Filter(object):
             if self.coefficients is None:
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
-            state = _atleast_3d_first_dim(state)
             self._initialized = True
         else:
             self._initialized = False
@@ -370,6 +369,30 @@ class FilterFIR(Filter):
         coeff = np.stack((b, a), axis=-2)
         self._coefficients = _atleast_3d_first_dim(coeff)
 
+    @Filter.state.setter
+    def state(self, state):
+        """
+        Set initial state of FIR filter.
+
+        Parameters
+        ----------
+        state : array, double
+            The state of the filter from with dimensions
+            ``(n_channels, *cshape, order)``, where ``cshape`` is
+            the channel shape of the :py:class:`~pyfar.Signal`
+            to be filtered.
+        """
+        if state is not None:
+            state = _atleast_3d_first_dim(state)
+            if (state.shape[-1] != self.order
+                or state.shape[0] != self.n_channels):
+                raise ValueError(
+                    "The state does not match the filter order or number of "
+                    "filter channels. Required shape for FilterFIR is"
+                    " (n_channels, *cshape, order).")
+
+        Filter.state.fset(self, state)
+
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
 
@@ -441,6 +464,30 @@ class FilterIIR(Filter):
     def order(self):
         """The order of the filter."""
         return np.max(self._coefficients.shape[-2:]) - 1
+
+    @Filter.state.setter
+    def state(self, state):
+        """
+        Set initial state of IIR filter.
+
+        Parameters
+        ----------
+        state : array, double
+            The state of the filter from with dimensions
+            ``(n_channels, *cshape, order)``, where ``cshape`` is
+            the channel shape of the :py:class:`~pyfar.Signal`
+            to be filtered.
+        """
+        if state is not None:
+            state = _atleast_3d_first_dim(state)
+            if (state.shape[-1] != self.order
+                or state.shape[0] != self.n_channels):
+                raise ValueError(
+                    "The state does not match the filter order or number of "
+                    "filter channels. Required shape for FilterIIR is"
+                    " (n_channels, *cshape, order).")
+
+        Filter.state.fset(self, state)
 
     def init_state(self, cshape, state):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -535,6 +582,31 @@ class FilterSOS(Filter):
     def n_sections(self):
         """The number of sections."""
         return self._coefficients.shape[-2]
+
+    @Filter.state.setter
+    def state(self, state):
+        """
+        Set initial state of SOS filter.
+
+        Parameters
+        ----------
+        state : array, double
+            The state of the filter from with dimensions
+            ``(n_channels, *cshape, n_sections, 2)``, where ``cshape`` is
+            the channel shape of the :py:class:`~pyfar.Signal`
+            to be filtered.
+        """
+        if state is not None:
+            state = _atleast_3d_first_dim(state)
+            if (state.shape[-1] != 2
+                or state.shape[-2] != self.n_sections
+                or state.shape[0] != self.n_channels):
+                raise ValueError(
+                    "The state does not match the filter structure."
+                    " Required shape for FilterSOS is"
+                    " (n_channels, *cshape, n_sections, 2).")
+
+        Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.

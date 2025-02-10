@@ -3,6 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import pyfar.classes.filter as fo
 import pyfar as pf
+import re
 from scipy import signal as spsignal
 
 
@@ -33,12 +34,37 @@ def test_filter_init_with_state():
     npt.assert_array_equal(filt._coefficients, coeff)
     npt.assert_array_equal(filt.state, state)
 
+
 def test_filter_state_setter():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     state = np.array([[[1, 0]]])
     filt = fo.Filter(coefficients=coeff)
     filt.state = state
     npt.assert_array_equal(filt.state, state)
+
+
+def test_filter_state_errors():
+    fs = 44100
+    coeff_iir = np.array([[[1, 0, 0], [1, 0, 0]]])
+    with pytest.raises(ValueError, match=re.escape(
+        "The state does not match the filter order or number of filter "
+        "channels. Required shape for FilterIIR is "
+        "(n_channels, *cshape, order).")):
+        fo.FilterIIR(coeff_iir, fs, state=[[[1, 0, 0]]])
+
+    coeff_fir = np.array([1, 0, 0])
+    with pytest.raises(ValueError, match=re.escape(
+        "The state does not match the filter order or number of filter "
+        "channels. Required shape for FilterFIR "
+        "is (n_channels, *cshape, order).")):
+        fo.FilterFIR(coeff_fir, fs, state=[[[1, 0, 0]]])
+
+    coeff_sos = [[[1, .5, .25, 1, .5, .25], [1, .5, .25, 1, .5, .25]]]
+    with pytest.raises(ValueError, match=re.escape(
+        "The state does not match the filter structure."
+         " Required shape for FilterSOS is "
+         "(n_channels, *cshape, n_sections, 2).")):
+        fo.FilterSOS(coeff_sos, fs, state=[[[[0], [1]]]])
 
 
 def test_filter_comment():
