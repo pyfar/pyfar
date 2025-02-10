@@ -424,7 +424,7 @@ class FilterFIR(Filter):
 
         Parameters
         ----------
-        n_samples : int, str, optional
+        n_samples : int, optional
             Length in samples for which the impulse response is computed. The
             default is ``None`` in which case the length of the impulse
             response is determined from the filter :py:func:`~FilterFIR.order`.
