@@ -1,4 +1,4 @@
-name: pull_request: label
+name: pull_request label
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ jobs:
   check-labels:
     runs-on: ubuntu-latest
     steps:
-      - name: pull_request: label
+      - name: pull_request label
         run: |
           echo "Checking for label on pull request..."
           PR_DATA=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
