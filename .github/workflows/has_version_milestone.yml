@@ -1,4 +1,4 @@
-name: PR Check for version milestone
+name: pull_request: version milestone
 
 on:
   pull_request:
