@@ -103,6 +103,31 @@ def test_filter_fir_impulse_response_n_samples_default():
     assert impulse_response.n_samples == 4
 
 
+@pytest.mark.parametrize('filter_object', [
+    (fo.FilterFIR([[1, -1]], 48000)),
+    (fo.FilterIIR([[1, -1], [1, -1]], 48000)),
+    (fo.FilterSOS([[[1, -1, 1, 1, -1, 1]]], 48000)),
+])
+def test_filter_init_state_default_and_error(filter_object):
+    """
+    Test the default for the state keyword and if an error is raised if passing
+    an invalid value.
+    """
+
+    # set state explicitly
+    filter_object.init_state((1, ), 'zeros')
+    state_explicit = filter_object.state.copy()
+    # set state implicitly using the default
+    filter_object.init_state((1, ))
+    state_implicit = filter_object.state.copy()
+    # assert states
+    npt.assert_equal(state_implicit, state_explicit)
+
+    # test raising the error for an invalid value
+    with pytest.raises(ValueError, match="state is 'random' but must be"):
+        filter_object.init_state((1, ), 'random')
+
+
 def test_filter_iir_init():
     coeff = np.array([[1, 1/2, 0], [1, 0, 0]])
     filt = fo.FilterIIR(coeff, sampling_rate=2*np.pi)
