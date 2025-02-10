@@ -56,7 +56,6 @@ def air_attenuation(
             - molar concentration of water vapour: 0,005 % to 0,05 %,
               and greater than 5%
             - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
-            - air temperature: greater than 200 K (- 73 °C)
             - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
         ``50``, +/- 50% accuracy
@@ -198,9 +197,8 @@ def _calculate_accuracy(
 
             ``20``, +/- 20% accuracy
                 - molar concentration of water vapour: 0,005 % to 0,05 %,
-                    and greater than 5%
+                  and greater than 5%
                 - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
-                - air temperature: greater than 200 K (- 73 °C)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``50``, +/- 50% accuracy
@@ -218,22 +216,28 @@ def _calculate_accuracy(
     frequency_pressure_ratio = frequencies/atmospheric_pressure
     accuracy = np.zeros(shape) - 1
 
-    atm_mask = atmospheric_pressure <= 200000
+    atm_mask = atmospheric_pressure < 200000
     freq2pressure_mask = (4e-4 <= frequency_pressure_ratio) & (frequency_pressure_ratio <= 10)
     common_mask = atm_mask & freq2pressure_mask
-    vapor_1_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5)
+
+    vapor_1_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5) & (h_water_vapor <= 100)
+    vapor_2_mask = (5 < h_water_vapor) | (h_water_vapor >= 0.005)
+    vapor_2_mask = vapor_2_mask & (h_water_vapor <= 100)
+    vapor_2_mask = vapor_2_mask | vapor_1_mask
+    vapor_3_mask = (0.005 > h_water_vapor) | vapor_2_mask
+
+
+    temp_3_mask = (-73 <= temperature)
+    accuracy_50 = vapor_3_mask & common_mask & temp_3_mask
+    accuracy[accuracy_50] = 50
+
+    accuracy_20 = vapor_2_mask & common_mask & temp_3_mask
+    accuracy[accuracy_20] = 20
+
     temp_1_mask = (-20 <= temperature) & (temperature <= 50)
     accuracy_10 = vapor_1_mask & temp_1_mask & common_mask
     accuracy[accuracy_10] = 10
 
-    vapor_2_mask = (vapor_1_mask == False) & (
-        (5 < h_water_vapor) | (h_water_vapor >= 0.005))
-    temp_2_mask = (-70 <= temperature) & (temp_1_mask is False)
-    accuracy_20 = vapor_2_mask & temp_1_mask & common_mask
-    accuracy[accuracy_20] = 20
 
-    vapor_3_mask = 0.005 > h_water_vapor
-    accuracy_50 = vapor_3_mask & (temp_2_mask | temp_1_mask ) & common_mask
-    accuracy[accuracy_50] = 50
     return pf.FrequencyData(accuracy, frequencies=frequencies)
 

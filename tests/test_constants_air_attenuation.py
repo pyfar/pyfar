@@ -128,6 +128,7 @@ def test_air_attenuation_iso_limits():
     (0.006, 20),
     (0.0006, 50),
     (100, 20),
+    (200, -1), # 200% does not make sense
 ])
 def test_calculate_accuracy_concentration_water_vapour(
         concentration_water_vapour, expected_accuracy):
@@ -165,8 +166,8 @@ def test_calculate_accuracy_temperature(
 @pytest.mark.parametrize((
         "atmospheric_pressure", "expected_accuracy"), [
     (101325, 10),
-    (20000-1, 10),
-    (20000, -1),
+    (200000-1, 10),
+    (200000, -1),
     (300000, -1),
 ])
 def test_calculate_accuracy_atmospheric_pressure(
