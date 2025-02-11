@@ -30,7 +30,8 @@ def air_attenuation(
     saturation_vapor_pressure : float, array_like, optional
         Saturation vapor pressure in Pa, if not given the function
         :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
-        Note that the valid range for temperature is therefore reduced.
+        Note that the valid temperature range is therefore also dependent on
+        :py:func:`~pyfar.constants.saturation_vapor_pressure`.
 
     Returns
     -------
