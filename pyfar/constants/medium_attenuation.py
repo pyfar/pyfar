@@ -7,11 +7,11 @@ from . import utils
 def air_attenuation(
         temperature, frequencies, relative_humidity,
         atmospheric_pressure=101325, saturation_vapor_pressure=None):
-    r"""Calculate the pure tone air attenuation of sound in air according to
+    r"""Calculate the pure tone attenuation of sound in air according to
     ISO 9613-1.
 
     Calculation is in accordance with ISO 9613-1 [#]_. The cshape of the
-    outputs is broadcast from the shapes of the ``temperature``,
+    outputs is broadcasted from the shapes of the ``temperature``,
     ``relative_humidity``, and ``atmospheric_pressure``.
 
     Parameters
@@ -175,12 +175,16 @@ def _calculate_accuracy(
     ----------
     concentration_water_vapour : float, array_like
         Molar concentration of water vapor as a percentage.
+        Must be between 0% and 100%.
     temperature : float, array_like
         Temperature in degree Celsius.
+        Must be above -273.15°C.
     atmospheric_pressure : float, array_like
         Atmospheric pressure in pascal.
+        Must be above 0Pa.
     frequencies : float, array_like
         Frequency in Hz.
+        Must be lager than 0 Hz.
     shape : tuple
         Shape of the output.
 
@@ -211,6 +215,20 @@ def _calculate_accuracy(
             ``-1``, no valid result
                 else.
     """
+    if np.any(np.array(concentration_water_vapour) < 0) or np.any(
+            np.array(concentration_water_vapour) > 100):
+        raise ValueError(
+            r"Concentration of water vapour must be between 0% and 100%.")
+    if np.any(np.array(temperature) < -273.15):
+        raise ValueError(
+            "Temperature must be greater than -273.15°C.")
+    if np.any(np.array(atmospheric_pressure) < 0):
+        raise ValueError(
+            "Atmospheric pressure must be greater than 0 Pa.")
+    if np.any(np.array(frequencies) < 0):
+        raise ValueError(
+            "Frequencies must be positive.")
+
     # broadcast inputs
     atmospheric_pressure = np.broadcast_to(atmospheric_pressure, shape)
     h_water_vapor = np.broadcast_to(concentration_water_vapour, shape)
@@ -220,33 +238,33 @@ def _calculate_accuracy(
     # atmospheric pressure < 200 kPa
     atm_mask = atmospheric_pressure < 200000
     # frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa
-    freq2pressure_mask = (4e-4 <= frequency_pressure_ratio) & (
+    frequency_pressure_ratio_mask = (4e-4 <= frequency_pressure_ratio) & (
         frequency_pressure_ratio <= 10)
-    common_mask = atm_mask & freq2pressure_mask
+    common_mask = atm_mask & frequency_pressure_ratio_mask
 
-    # molar concentration of water vapour: 0% to 100%
-    vapor_com = (0 <= h_water_vapor) & (h_water_vapor <= 100)
-    # molar concentration of water vapour: 0.005% to 0.05 % and greater than 5%
-    vapor_1_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5) & vapor_com
     # molar concentration of water vapour: 0.05% to 5 %
-    vapor_2_mask = ((5 < h_water_vapor) | (h_water_vapor >= 0.005)) & vapor_com
-    vapor_2_mask = vapor_2_mask | vapor_1_mask
+    vapor_10_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5)
+    # molar concentration of water vapour: 0.005% to 0.05 % and greater than 5%
+    vapor_20_mask = (5 < h_water_vapor) | (
+        (0.005 <= h_water_vapor) & (h_water_vapor < 0.05))
     # molar concentration of water vapour: less than 0.005%
-    vapor_3_mask = ((0.005 > h_water_vapor)  & vapor_com) | vapor_2_mask
+    vapor_50_mask = (0.005 > h_water_vapor)
 
     # air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
-    temp_2_mask = (-20 <= temperature) & (temperature <= 50)
+    temp_20_mask = (-20 <= temperature) & (temperature <= 50)
     # air temperature: greater than 200 K (- 73 °C)
-    temp_3_mask = (-73 <= temperature)
+    temp_50_mask = (-73 <= temperature)
 
     # apply masks
-    accuracy_50 = vapor_3_mask & common_mask & temp_3_mask
+    accuracy_50 = common_mask & temp_50_mask & (
+        vapor_10_mask | vapor_20_mask | vapor_50_mask)
     accuracy[accuracy_50] = 50
 
-    accuracy_20 = vapor_2_mask & common_mask & temp_2_mask
+    accuracy_20 = common_mask & temp_20_mask & (
+        vapor_10_mask | vapor_20_mask)
     accuracy[accuracy_20] = 20
 
-    accuracy_10 = vapor_1_mask & common_mask & temp_2_mask
+    accuracy_10 = vapor_10_mask & common_mask & temp_20_mask
     accuracy[accuracy_10] = 10
 
     # return FrequencyData object
