@@ -5,7 +5,7 @@ from . import utils
 def speed_of_sound_simple(temperature):
     r"""
     Calculate the speed of sound in air using a simplified version
-    based on the temperature.
+    of the ideal gas law based on the temperature.
 
     Calculation is in accordance with ISO 9613-1 [#]_, as described in
     ISO 17497-1 [#]_.

@@ -159,10 +159,24 @@ class Filter(object):
         self._sampling_rate = sampling_rate
         self.comment = comment
 
-    def init_state(self, state='zeros'):
-        """Initialize the buffer elements to pre-defined initial conditions."""
+    def init_state(self, state):
+        """
+        Initialize the buffer elements to pre-defined initial conditions.
+
+        This method is overwritten in the child classes and called after
+        setting the state there.
+        """
         self._state = state
         self._initialized = True
+
+    @staticmethod
+    def _check_state_keyword(state):
+        """
+        Check the value of the state keyword for 'ini_state' class methods.
+        """
+        if state not in ['zeros', 'step']:
+            raise ValueError(
+                f"state is '{state}' but must be 'zeros' or 'step'")
 
     @property
     def coefficients(self):
@@ -261,6 +275,41 @@ class Filter(object):
             filtered_signal.time = filtered_signal_data
 
         return filtered_signal
+
+    def impulse_response(self, n_samples):
+        """
+        Compute or approximate the impulse response of the filter.
+
+        See `impulse_response` methods in derived classes for more details.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples for which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+
+        # track the state (better than copying the entire filter)
+        if self.state is not None:
+            state = self.state.copy()
+            self._state = None
+            reset = True
+        else:
+            reset = False
+
+        # get impulse response
+        impulse_response = self.process(pf.signals.impulse(
+            n_samples, sampling_rate=self.sampling_rate), reset=reset)
+
+        # reset the state if required
+        if reset:
+            self._state = state
+
+        return impulse_response
 
     def reset(self):
         """Reset the filter state by filling it with zeros."""
@@ -377,11 +426,42 @@ class FilterFIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
+
+    def impulse_response(self, n_samples=None):
+        """
+        Compute the finite impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int, optional
+            Length in samples for which the impulse response is computed. The
+            default is ``None`` in which case the length of the impulse
+            response is determined from the filter :py:func:`~FilterFIR.order`.
+            A warning is returned if ``n_samples`` is to short to compute the
+            entire impulse response.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+
+        # set or check the impulse response length
+        if n_samples is None:
+            n_samples = self.coefficients.shape[-1]
+        elif self.coefficients.shape[-1] > n_samples:
+            warnings.warn(
+                ('n_samples should be at least as long as the filter, '
+                 f'which is {self.coefficients.shape[-1]}'), stacklevel=1)
+
+        return super().impulse_response(n_samples)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -436,7 +516,7 @@ class FilterIIR(Filter):
         """The order of the filter."""
         return np.max(self._coefficients.shape[-2:]) - 1
 
-    def init_state(self, cshape, state):
+    def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
 
         Parameters
@@ -449,11 +529,34 @@ class FilterIIR(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.order))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         return super().init_state(state=new_state)
+
+    def impulse_response(self, n_samples):
+        """
+        Approximate the infinite impulse response of the filter by a finite
+        impulse response.
+
+        Note that the number of samples must be sufficiently long for
+        `impulse_response` to be a good approximation of the theoretically
+        infinitely long impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples for which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+        return super().impulse_response(n_samples)
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -543,11 +646,34 @@ class FilterSOS(Filter):
             an empty filter, or ``'step'`` which constructs the initial
             conditions for step response steady-state. The default is 'zeros'.
         """
+        self._check_state_keyword(state)
+
         new_state = np.zeros((self.n_channels, *cshape, self.n_sections, 2))
         if state == 'step':
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.sosfilt_zi(coeff)
         return super().init_state(state=new_state)
+
+    def impulse_response(self, n_samples):
+        """
+        Approximate the infinite impulse response of the filter by a finite
+        impulse response.
+
+        Note that the number of samples must be sufficiently long for
+        `impulse_response` to be a good approximation of the theoretically
+        infinitely long impulse response of the filter.
+
+        Parameters
+        ----------
+        n_samples : int
+            Length in samples for which the impulse response is computed.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the filter.
+        """
+        return super().impulse_response(n_samples)
 
     @staticmethod
     def _process(sos, data, zi=None):

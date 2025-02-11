@@ -834,6 +834,7 @@ def test_impulse_response_start():
     ir = pf.Signal(ir, 44100)
 
     start_sample_est = dsp.find_impulse_response_start(ir)
+    assert start_sample_est.dtype == int
     assert start_sample_est == start_sample - 1
 
     ir_awgn = ir + noise

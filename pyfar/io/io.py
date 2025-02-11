@@ -30,6 +30,7 @@ except (ModuleNotFoundError, OSError):
         "help: https://python-soundfile.readthedocs.io")
 
 from pyfar import Signal, FrequencyData, Coordinates, TimeData
+from pyfar._utils import rename_arg
 from . import _codec as codec
 import pyfar.classes.filter as fo
 
@@ -195,7 +196,10 @@ def _sofa_pos(pos_type, coordinates):
             coordinates[:, 2],
         )
     else:
-        raise ValueError("Position:Type {pos_type} is not supported.")
+        raise ValueError(
+            f"Position: Type '{pos_type}' is not supported."
+            "Allowed types are 'cartesian' and 'spherical'.",
+            )
 
 
 def read(filename):
@@ -505,7 +509,7 @@ def audio_formats():
     return soundfile.available_formats()
 
 
-@pf._utils.rename_arg(
+@rename_arg(
         {"format" : "audio_format"},
         "'format' will be deprecated in "
         "pyfar 0.9.0 in favor of 'audio_format'")
