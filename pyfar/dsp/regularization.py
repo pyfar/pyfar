@@ -40,7 +40,7 @@ class RegularizedSpectrumInversion():
     2. Compute the inverse :math:`S(f)^{-1}` using :py:func:`~invert`
 
     The parameters that are defined in the first step are often iteratively
-    adjusted. Examples are given in the documentation of the `from_...()`
+    adjusted. Examples are given in the documentation of the ``from_...()``
     methods.
 
     References
