@@ -7,14 +7,15 @@ def speed_of_sound_simple(temperature):
     Calculate the speed of sound in air using a simplified version
     of the ideal gas law based on the temperature.
 
-    Calculation is in accordance with ISO 9613-1 [#]_, as described in
-    ISO 17497-1 [#]_.
+    The calculation follows ISO 9613-1 [#]_ (Formula A.5).
 
     .. math::
 
-        c = 343.2 \cdot \sqrt{\frac{T + 273.15}{293.15}} m/s
+        c = 343.2 \cdot \sqrt{\frac{t + 293.15}{t_0 + 293.15}} \mathrm{m/s}
 
-    where, T denotes the temperature in °C.
+    where:
+        - :math:`t` is the air temperature (°C)
+        - :math:`t_0=20\mathrm{°C}` is the reference air temperature (°C)
 
     Parameters
     ----------
@@ -31,13 +32,14 @@ def speed_of_sound_simple(temperature):
     .. [#] ISO 9613-1:1993, Acoustics -- Attenuation of sound during
            propagation outdoors -- Part 1: Calculation of the absorption of
            sound by the atmosphere.
-    .. [#] ISO 17497-1:2004, Acoustics -- Sound-scattering properties of
-           surfaces -- Part 1: Measurement of the random-incidence scattering
-           coefficient in a reverberation room.
     """
+    # input validation
     if np.any(np.array(temperature) < -20) or np.any(
             np.array(temperature) > 50):
         raise ValueError("Temperature must be between -20°C and +50°C.")
+    # convert to numpy array if necessary
     temperature = np.array(temperature, dtype=float) if isinstance(
         temperature, list) else temperature
-    return 343.2*np.sqrt((temperature+273.15)/293.15)
+
+    t_0 = 20
+    return 343.2*np.sqrt((temperature+273.15)/(t_0+273.15))
