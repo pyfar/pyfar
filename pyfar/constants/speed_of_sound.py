@@ -61,9 +61,11 @@ def speed_of_sound_ideal_gas(
     atmospheric_pressure : float, array_like, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
     saturation_vapor_pressure : float, array_like, optional
-        Saturation vapor pressure in Pa, if not given the function
+        Saturation vapor pressure in Pa.
+        If not given, the function
         :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
-        Note that the valid range for temperature is therefore reduced.
+        Note that the valid temperature range is therefore also dependent on
+        :py:func:`~pyfar.constants.saturation_vapor_pressure`.
 
     Returns
     -------
@@ -124,6 +126,7 @@ def speed_of_sound_ideal_gas(
     # Equation 6.70
     C = (e/P) / (alpha * (1 - e/P))
 
+    # Equation 6.84
     return np.sqrt(
         gamma_a * R_a * temperature_kelvin * (
             1 + (alpha * (1 + delta - nu) - 1) * C),
