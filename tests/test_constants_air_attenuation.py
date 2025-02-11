@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import pyfar as pf
 import numpy.testing as npt
+import re
 
 
 @pytest.mark.parametrize((
@@ -131,7 +132,6 @@ def test_air_attenuation_limits():
     (0.006, 20),
     (0.0006, 50),
     (100, 20),
-    (200, -1), # 200% does not make sense
 ])
 def test_calculate_accuracy_concentration_water_vapour(
         concentration_water_vapour, expected_accuracy):
@@ -152,6 +152,7 @@ def test_calculate_accuracy_concentration_water_vapour(
     (0, 10),
     (-100, -1),
     (-50, 50),
+    (-73, 50),
     (100, 50),
 ])
 def test_calculate_accuracy_temperature(
@@ -205,4 +206,40 @@ def test_calculate_accuracy_frequency_pressure_ratio(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape)
     npt.assert_array_equal(accuracy.freq, expected_accuracy)
+
+
+def test_calculate_accuracy_invalid_vapor():
+    match = r"Concentration of water vapour must be between 0% and 100%."
+    with pytest.raises(
+            ValueError, match=re.escape(match)):
+        pf.constants.medium_attenuation._calculate_accuracy(
+            101, 20, 101325, 1000, (1,))
+    with pytest.raises(
+            ValueError, match=re.escape(match)):
+        pf.constants.medium_attenuation._calculate_accuracy(
+            -1, 20, 101325, 1000, (1,))
+
+
+def test_calculate_accuracy_invalid_pressure():
+    match = "Atmospheric pressure must be greater than 0 Pa."
+    with pytest.raises(
+            ValueError, match=re.escape(match)):
+        pf.constants.medium_attenuation._calculate_accuracy(
+            .05, 20, -101325, 1000, (1,))
+
+
+def test_calculate_accuracy_invalid_temperature():
+    match = "Temperature must be greater than -273.15°C."
+    with pytest.raises(
+            ValueError, match=re.escape(match)):
+        pf.constants.medium_attenuation._calculate_accuracy(
+            .05, -280, 101325, 1000, (1,))
+
+
+def test_calculate_accuracy_invalid_frequency():
+    match = "Frequencies must be positive."
+    with pytest.raises(
+            ValueError, match=re.escape(match)):
+        pf.constants.medium_attenuation._calculate_accuracy(
+            .05, 20, 101325, -1, (1,))
 
