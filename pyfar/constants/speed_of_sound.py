@@ -12,7 +12,9 @@ def speed_of_sound_simple(temperature):
 
     .. math::
 
-        c = 343.2 \cdot \sqrt{\frac{t + 273.15}{293.15}} m/s
+        c = 343.2 \cdot \sqrt{\frac{T + 273.15}{293.15}} m/s
+        
+        where, T denotes the temperatur in °C.
 
     Parameters
     ----------
