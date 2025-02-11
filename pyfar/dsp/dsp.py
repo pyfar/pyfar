@@ -4,8 +4,6 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
-from pyfar.classes.warnings import PyfarDeprecationWarning
-from pyfar._utils import rename_arg
 import warnings
 import scipy.fft as sfft
 
@@ -748,9 +746,6 @@ def _time_window_symmetric_interval_four(interval, window):
     return win, win_start, win_stop
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def regularized_spectrum_inversion(
         signal, frequency_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
@@ -797,11 +792,6 @@ def regularized_spectrum_inversion(
     normalized : bool
         Flag to indicate if the normalized spectrum (according to
         `signal.fft_norm`) should be inverted. The default is ``True``.
-    freq_range: tuple, array_like, double
-        The upper and lower frequency limits outside of which the
-        regularization factor is to be applied.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
 
     Returns
@@ -1042,13 +1032,6 @@ def pad_zeros(signal, pad_width, mode='end'):
 
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
-
-    if mode in ['before', 'after']:
-        warnings.warn(('Mode "before" and "after" will be renamed into '
-                       '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=2)
-
-        mode = 'beginning' if mode == 'before' else 'end'
 
     padded_signal = signal.flatten()
 
@@ -1433,7 +1416,7 @@ def find_impulse_response_start(
 
     """
     modes = ['real', 'complex'] if impulse_response.complex else ['real']
-    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape))
+    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape), dtype=int)
     for idx, mode in enumerate(modes):
         ir = impulse_response.time
         ir_squared = np.real(ir)**2 if mode == 'real' else np.imag(ir)**2
@@ -1483,9 +1466,6 @@ def find_impulse_response_start(
     return ir_start
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def deconvolve(system_output, system_input, fft_length=None,
                frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
@@ -1535,14 +1515,6 @@ def deconvolve(system_output, system_input, fft_length=None,
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\omega)` are
         passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
-    freq_range: tuple, array_like, double
-        The upper and lower frequency limits outside of which the
-        regularization factor is to be applied. The default ``None``
-        bypasses the regularization, which might cause numerical
-        instabilities in case of band-limited `system_input`. Also see
-        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
 
     Returns
