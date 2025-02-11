@@ -17,7 +17,7 @@ def test_air_attenuation_after_table_iso(
         temperature, frequency, relative_humidity, expected,
         expected_accuracy):
     """
-    Check alpha after value table in the standard. The accuracy is calculated
+    Check alpha after value table in ISO 9613-1. The accuracy is calculated
     manually and not provided by the standard.
     """
     alpha, m, accuracy = pf.constants.air_attenuation(

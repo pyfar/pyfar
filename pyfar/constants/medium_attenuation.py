@@ -7,11 +7,11 @@ from . import utils
 def air_attenuation(
         temperature, frequencies, relative_humidity,
         atmospheric_pressure=101325, saturation_vapor_pressure=None):
-    r"""Calculate the pure tone air attenuation of sound in air according to
+    r"""Calculate the pure tone attenuation of sound in air according to
     ISO 9613-1.
 
     Calculation is in accordance with ISO 9613-1 [#]_. The cshape of the
-    outputs is broadcast from the shapes of the ``temperature``,
+    outputs is broadcasted from the shapes of the ``temperature``,
     ``relative_humidity``, and ``atmospheric_pressure``.
 
     Parameters
