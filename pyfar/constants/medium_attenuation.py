@@ -10,7 +10,9 @@ def air_attenuation(
     r"""Calculate the pure tone air attenuation of sound in air according to
     ISO 9613-1.
 
-    Calculation is in accordance with ISO 9613-1 [#]_.
+    Calculation is in accordance with ISO 9613-1 [#]_. The cshape of the
+    outputs is broadcast from the shapes of the ``temperature``,
+    ``relative_humidity``, and ``atmospheric_pressure``.
 
     Parameters
     ----------
@@ -22,46 +24,45 @@ def air_attenuation(
         Frequency in Hz. Must be greater than 50 Hz.
         Just one dimensional array is allowed.
     relative_humidity : float, array_like
-        Relative humidity in the range of 0 to 1.
+        Relative humidity in the range from 0 to 1.
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
     saturation_vapor_pressure : float, array_like, optional
-        Saturation vapor pressure in Pa, if not given the function
+        Saturation vapor pressure in Pa.
+        If not given, the function
         :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
-        Note that the valid range for temperature is therefore reduced.
+        Note that the valid temperature range is therefore also dependent on
+        :py:func:`~pyfar.constants.saturation_vapor_pressure`.
 
     Returns
     -------
-    alpha :  :py:class:`~pyfar.classes.FrequencyData`
+    alpha : :py:class:`~pyfar.classes.FrequencyData`
         Pure tone air attenuation coefficient in decibels per meter for
-        atmospheric absorption. The cshape of the output is the broadcast
-        from the shapes of the ``temperature``, ``relative_humidity``, and
-        ``atmospheric_pressure``.
+        atmospheric absorption.
     m : :py:class:`~pyfar.classes.FrequencyData`
         Pure tone air attenuation coefficient per meter for
-        atmospheric absorption. The cshape of the output is the broadcast
-        from the shapes of the ``temperature``, ``relative_humidity``, and
-        ``atmospheric_pressure``. The parameter ``m`` is calculated as
+        atmospheric absorption. The parameter ``m`` is calculated as
         :math:`m = 10 \cdot \log(\exp(1)) \cdot \alpha`.
-    accuracy : float, array_like
+    accuracy : :py:class:`~pyfar.classes.FrequencyData`
         accuracy of the results according to the standard:
 
         ``10``, +/- 10% accuracy
-            - molar concentration of water vapour: 0,05% to 5 %.
-            - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
-            - atmospheric pressure: less than 200 Pa (2 atm)
+            - molar concentration of water vapour: 0.05% to 5 %.
+            - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+            - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
         ``20``, +/- 20% accuracy
-            - molar concentration of water vapour: 0,005 % to 0,05 %,
+            - molar concentration of water vapour: 0.005 % to 0.05 %,
               and greater than 5%
-            - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
+            - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+            - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
         ``50``, +/- 50% accuracy
-            - molar concentration of water vapour: less than 0,005%
+            - molar concentration of water vapour: less than 0.005%
             - air temperature: greater than 200 K (- 73 °C)
-            - atmospheric pressure: less than 200 kPa (2 atm)
+            - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
         ``-1``, no valid result
@@ -93,15 +94,14 @@ def air_attenuation(
 
     # check if broadcastable
     try:
-        shape = list(np.broadcast_shapes(
+        _ = np.broadcast_shapes(
             np.atleast_1d(temperature).shape,
             np.atleast_1d(relative_humidity).shape,
-            np.atleast_1d(atmospheric_pressure).shape))
+            np.atleast_1d(atmospheric_pressure).shape)
     except ValueError as e:
         raise ValueError(
             'temperature, relative_humidity, and atmospheric_pressure must '
             'have the same shape or be broadcastable.') from e
-    shape.append(np.array(frequencies).size)
 
     # check limits
     if np.any(np.array(temperature) < -73):
@@ -161,7 +161,7 @@ def air_attenuation(
 
     # calculate accuracy
     accuracy = _calculate_accuracy(
-        h, temperature, atmospheric_pressure, frequencies, shape)
+        h, temperature, atmospheric_pressure, frequencies, alpha.freq.shape)
 
     return alpha, m, accuracy
 
@@ -169,7 +169,7 @@ def air_attenuation(
 def _calculate_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape):
-    """Calculate the accuracy of the results.
+    """Calculate the accuracy of the air attenuation calculation.
 
     Parameters
     ----------
@@ -190,54 +190,65 @@ def _calculate_accuracy(
         accuracy of the results according to the standard:
 
             ``10``, +/- 10% accuracy
-                - molar concentration of water vapour: 0,05% to 5 %.
-                - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
-                - atmospheric pressure: less than 200 Pa (2 atm)
+                - molar concentration of water vapour: 0.05% to 5 %.
+                - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+                - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``20``, +/- 20% accuracy
-                - molar concentration of water vapour: 0,005 % to 0,05 %,
+                - molar concentration of water vapour: 0.005 % to 0.05 %,
                   and greater than 5%
-                - air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
+                - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+                - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``50``, +/- 50% accuracy
-                - molar concentration of water vapour: less than 0,005%
+                - molar concentration of water vapour: less than 0.005%
                 - air temperature: greater than 200 K (- 73 °C)
-                - atmospheric pressure: less than 200 kPa (2 atm)
+                - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``-1``, no valid result
                 else.
     """
-
+    # broadcast inputs
     atmospheric_pressure = np.broadcast_to(atmospheric_pressure, shape)
     h_water_vapor = np.broadcast_to(concentration_water_vapour, shape)
     frequency_pressure_ratio = frequencies/atmospheric_pressure
     accuracy = np.zeros(shape) - 1
 
+    # atmospheric pressure < 200 kPa
     atm_mask = atmospheric_pressure < 200000
-    freq2pressure_mask = (4e-4 <= frequency_pressure_ratio) & (frequency_pressure_ratio <= 10)
+    # frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa
+    freq2pressure_mask = (4e-4 <= frequency_pressure_ratio) & (
+        frequency_pressure_ratio <= 10)
     common_mask = atm_mask & freq2pressure_mask
 
-    vapor_1_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5) & (h_water_vapor <= 100)
-    vapor_2_mask = (5 < h_water_vapor) | (h_water_vapor >= 0.005)
-    vapor_2_mask = vapor_2_mask & (h_water_vapor <= 100)
+    # molar concentration of water vapour: 0% to 100%
+    vapor_com = (0 <= h_water_vapor) & (h_water_vapor <= 100)
+    # molar concentration of water vapour: 0.005% to 0.05 % and greater than 5%
+    vapor_1_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5) & vapor_com
+    # molar concentration of water vapour: 0.05% to 5 %
+    vapor_2_mask = ((5 < h_water_vapor) | (h_water_vapor >= 0.005)) & vapor_com
     vapor_2_mask = vapor_2_mask | vapor_1_mask
-    vapor_3_mask = (0.005 > h_water_vapor) | vapor_2_mask
+    # molar concentration of water vapour: less than 0.005%
+    vapor_3_mask = ((0.005 > h_water_vapor)  & vapor_com) | vapor_2_mask
 
-
+    # air temperature: 253,15 K to 323,15 (-20 °C to +50°C)
+    temp_2_mask = (-20 <= temperature) & (temperature <= 50)
+    # air temperature: greater than 200 K (- 73 °C)
     temp_3_mask = (-73 <= temperature)
+
+    # apply masks
     accuracy_50 = vapor_3_mask & common_mask & temp_3_mask
     accuracy[accuracy_50] = 50
 
-    accuracy_20 = vapor_2_mask & common_mask & temp_3_mask
+    accuracy_20 = vapor_2_mask & common_mask & temp_2_mask
     accuracy[accuracy_20] = 20
 
-    temp_1_mask = (-20 <= temperature) & (temperature <= 50)
-    accuracy_10 = vapor_1_mask & temp_1_mask & common_mask
+    accuracy_10 = vapor_1_mask & common_mask & temp_2_mask
     accuracy[accuracy_10] = 10
 
-
+    # return FrequencyData object
     return pf.FrequencyData(accuracy, frequencies=frequencies)
 
