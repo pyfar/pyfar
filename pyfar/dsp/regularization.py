@@ -40,7 +40,7 @@ class RegularizedSpectrumInversion():
     2. Compute the inverse :math:`S(f)^{-1}` using :py:func:`~invert`
 
     The parameters that are defined in the first step are often iteratively
-    adjusted. Examples are given in the documentation of the `from_()...`
+    adjusted. Examples are given in the documentation of the `from_...()`
     methods.
 
     References
@@ -69,7 +69,7 @@ class RegularizedSpectrumInversion():
         Regularization from a given frequency range.
 
         Defines a frequency range within which the regularization
-        :math:`\epsilon(f)` is set to ``regularization_within``.
+        :math:`\epsilon(f)` is set to `regularization_within`.
         Outside the frequency range the regularization is
         :math:`\epsilon(f)=1` and can be controlled using the `beta` parameter.
         The regularization factors are cross-faded using a raised cosine window
@@ -83,7 +83,7 @@ class RegularizedSpectrumInversion():
         frequency_range : array like
             Array like containing the lower and upper frequency limit in Hz.
         regularization_within: float, optional
-            Set regularization inside frequency range. The default is ``0``.
+            Set regularization inside frequency range. The default is `0`.
         beta : float, string, optional
             Beta parameter to control the scaling of the regularization as in
             :eq:`regularized_inversion`. Can be a
@@ -109,7 +109,7 @@ class RegularizedSpectrumInversion():
             The default is ``1``.
         target : Signal, optional
             Target function for the regularization. The default ``None`` uses a
-            zero-phase spectrum with an amplitude of 1 as target equalling an
+            zero-phase spectrum with an amplitude of 1 as target, equal to an
             impulse in the time domain.
 
 
@@ -211,7 +211,7 @@ class RegularizedSpectrumInversion():
             The default is ``1``.
         target : Signal, optional
             Target function for the regularization. The default ``None`` uses a
-            zero-phase spectrum with an amplitude of 1 as target equalling an
+            zero-phase spectrum with an amplitude of 1 as target, equal to an
             impulse in the time domain.
 
         Examples
@@ -275,7 +275,7 @@ class RegularizedSpectrumInversion():
     @property
     def beta(self):
         r"""
-        Get or set the :math:`\beta` to control the amount of regularization.
+        Amount of regularization :math:`\beta`.
         """
         return self._beta
 
@@ -303,8 +303,7 @@ class RegularizedSpectrumInversion():
     @property
     def regularization(self):
         r"""
-        Get the regularization :math:`\epsilon(f)` without scaling by
-        :math:`\beta`.
+        Regularization :math:`\epsilon(f)` without scaling by :math:`\beta`.
         """
         # Call private method to get regularization factors
         if self._regularization_type == "frequency range":
@@ -318,7 +317,7 @@ class RegularizedSpectrumInversion():
 
     @property
     def signal(self):
-        r"""Get or set the signal :math:`S(f)` to be inverted."""
+        r"""Signal :math:`S(f)` to be inverted."""
         return self._signal
 
     @signal.setter
@@ -332,7 +331,7 @@ class RegularizedSpectrumInversion():
 
     @property
     def target(self):
-        """Get or set the target function :math:`D(f)`."""
+        """Target function :math:`D(f)`."""
         return self._target
 
     @target.setter
