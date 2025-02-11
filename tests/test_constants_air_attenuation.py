@@ -9,14 +9,17 @@ import numpy.testing as npt
         "expected_accuracy"), [
     (10, 1000, .1, 2.16e1*1e-3, 10),
     (10, 100, .1, 5.85e-1*1e-3, 10),
-    (-20, 800, .3, 4.92e-3, 10),
+    (-20, 800, .3, 4.92e-3, 20),
     (35, 4000, .6, 2.58*10e-3, 10),
-    (50, 1000, .7, 8.03e-3, 10),
+    (50, 1000, .7, 8.03e-3, 20),
 ])
 def test_air_attenuation_after_table_iso(
         temperature, frequency, relative_humidity, expected,
         expected_accuracy):
-    """Check result after value table in the standard."""
+    """
+    Check alpha after value table in the standard. The accuracy is calculated
+    manually and not provided by the standard.
+    """
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity)
     npt.assert_allclose(alpha.freq, expected, rtol=.01)
@@ -43,7 +46,7 @@ def test_air_attenuation_after_table_iso(
         [101325, 101325],
         101325,
 ])
-def test_air_attenuation_iso_array(
+def test_air_attenuation_array(
         temperature, frequency, relative_humidity, atmospheric_pressure):
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity, atmospheric_pressure)
@@ -61,7 +64,7 @@ def test_air_attenuation_iso_array(
     npt.assert_allclose(accuracy.frequencies, frequency, atol=1e-3)
 
 
-def test_air_attenuation_iso_inputs():
+def test_air_attenuation_inputs():
     temperature = 10
     frequency = 1000
     relative_humidity = .1
@@ -85,14 +88,14 @@ def test_air_attenuation_iso_inputs():
             temperature, frequency, relative_humidity, 'test')
 
 
-def test_air_attenuation_iso_broadcastable():
+def test_air_attenuation_broadcastable():
     frequency = 1000
     with pytest.raises(ValueError, match='same shape or be broadcastable'):
         pf.constants.air_attenuation(
             [10, 10], frequency, [.1, .1, .1])
 
 
-def test_air_attenuation_iso_limits():
+def test_air_attenuation_limits():
     temperature = 10
     frequency = 1000
     relative_humidity = .1
