@@ -16,7 +16,10 @@ import numpy.testing as npt
 def test_air_attenuation_after_table_iso(
         temperature, frequency, relative_humidity, expected,
         expected_accuracy):
-    """Check result after value table in the standard."""
+    """
+    Check alpha after value table in the standard. The accuracy is calculated
+    manually and not provided by the standard.
+    """
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity)
     npt.assert_allclose(alpha.freq, expected, rtol=.01)

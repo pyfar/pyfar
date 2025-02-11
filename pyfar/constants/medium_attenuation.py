@@ -24,7 +24,7 @@ def air_attenuation(
         Frequency in Hz. Must be greater than 50 Hz.
         Just one dimensional array is allowed.
     relative_humidity : float, array_like
-        Relative humidity in the range of 0 to 1.
+        Relative humidity in the range from 0 to 1.
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
     saturation_vapor_pressure : float, array_like, optional
