@@ -28,7 +28,8 @@ def air_attenuation(
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
     saturation_vapor_pressure : float, array_like, optional
-        Saturation vapor pressure in Pa, if not given the function
+        Saturation vapor pressure in Pa.
+        If not given, the function
         :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
         Note that the valid temperature range is therefore also dependent on
         :py:func:`~pyfar.constants.saturation_vapor_pressure`.
