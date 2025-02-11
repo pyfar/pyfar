@@ -1,6 +1,6 @@
 """File containing all speed of sound calculation functions."""
 import numpy as np
-from . import utils
+
 
 def speed_of_sound_simple(temperature):
     r"""
@@ -45,15 +45,14 @@ def speed_of_sound_simple(temperature):
 
 def speed_of_sound_cramer(
         temperature, relative_humidity, atmospheric_pressure=101325,
-        c02_ppm=315):
+        co2_ppm=314):
     """
-    Get speed of sound using Cramers method described in [#]_.
+    Calculate the speed of sound in air based on temperature, atmospheric
+    pressure, humidity and CO2 concentration.
 
-    The conditions are as follows:
-    - for temperatures from 0°C Cto 30°C
-    - atmospheric pressures from 75 000 Pa to 102000 Pa
-    - up to 0.06 H20 mole fraction
-    - CO2 concentrations up to 10 000 ppm
+    This implements Cramers method described in [#]_.
+    The uncertainty in the speed of sound is similarly estimated to be
+    less than 300 ppm.
 
     Parameters
     ----------
@@ -62,12 +61,16 @@ def speed_of_sound_cramer(
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : int, optional
-        Atmospheric pressure in pascal, by default 101325 Pa.
+        Atmospheric pressure in Pascal, by default 101325 Pa.
         It must be between 75 000 Pa to 102000 Pa.
-    c02_ppm : float, array_like
-        co2 concentration in parts per million. The default is 315 ppm as a
-        reasonable amount based on [#]_.
+    co2_ppm : float, array_like
+        CO2 concentration in parts per million. The default is 314 ppm,
+        based on Table I. It must be at below 10 000 ppm (1%).
 
+    Returns
+    -------
+    speed_of_sound : float, array_like
+        Speed of sound in air in (m/s).
 
     References
     ----------
@@ -75,22 +78,46 @@ def speed_of_sound_cramer(
            speed of sound in air with temperature, pressure, humidity, and CO2
            concentration,” The Journal of the Acoustical Society of America,
            vol. 93, no. 5, pp. 2510-2516, May 1993, doi: 10.1121/1.405827.
-    .. [#] https://www.kane.co.uk/knowledge-centre/what-are-safe-levels-of-co-and-co2-in-rooms
-
     """
-    rel_hum = relative_humidity
-    p_stat = atmospheric_pressure
+    # check inputs:
+    if np.any(np.array(temperature) < 0) or np.any(
+            np.array(temperature) > 30):
+        raise ValueError("Temperature must be between 0°C and 30°C.")
+    if np.any(np.array(relative_humidity) < 0) or np.any(
+            np.array(relative_humidity) > 1):
+        raise ValueError("Relative humidity must be between 0 and 1.")
+    if np.any(np.array(atmospheric_pressure) < 75e3) or np.any(
+            np.array(atmospheric_pressure) > 102e3):
+        raise ValueError(
+            "Atmospheric pressure must be between 75 000 Pa to 102 000 Pa.")
+    if np.any(np.array(co2_ppm) < 0) or np.any(np.array(co2_ppm) > .01e6):
+        raise ValueError(
+            "CO2 concentration (ppm) must be between 0 ppm to 10 000 ppm.")
 
-    # the carbon dioxide mole fraction
-    x_c = c02_ppm / 1e6
+    # mole fraction of CO2 in air
+    x_c = co2_ppm * 1e-6
+    # pressure(atmospheric pressure) in Pa
+    p = atmospheric_pressure
+    # relative humidity as a fraction
+    h = relative_humidity
+    # temperature in Celsius
+    t = temperature
+    # thermodynamic temperature
+    T = t + 273.15
 
-    # calculate saturation_vapor_pressure from Magnus Formula
-    pws = utils.saturation_vapor_pressure(temperature)
+    # enhancement factor f (Equation A2)
+    f = 1.00062+3.14e-8 * p + 5.6e-7*temperature**2
+    # saturation vapor pressure in air (Equation A3)
+    p_sv = np.exp(1.2811805e-5*T**2-1.9509874e-2*T+34.04926034-6.3536311e3/T)
+    # water vapor mole fraction (Equation A1)
+    x_w = h * f * p_sv / p
 
-    # water vapor mole fraction
-    xw = rel_hum * pws / p_stat
+    # check water mole fraction
+    # due to the input checks, this is not possible to reach
+    if np.any(np.array(x_w) < 0) or np.any(np.array(x_w) > 0.06):
+        raise ValueError("Water mole fraction must be between 0 and 0.06.")
 
-    # % Coefficients according to Cramer (Table. III)
+    # Coefficients according to Cramer (Table. III)
     a0 = 331.5024
     a1 = 0.603055
     a2 = -0.000528
@@ -108,11 +135,11 @@ def speed_of_sound_cramer(
     a14 = 29.179762
     a15 = 0.000486
 
-    # % approximation for c according to Cramer (Eq. 15)
-    c1 = a0+a1*temperature+a2*temperature**2
-    c2 = (a3+a4*temperature+a5*temperature**2)*xw
-    c3 = (a6+a7*temperature+a8*temperature**2)*p_stat
-    c4 = (a9+a10*temperature+a11*temperature**2)*x_c
-    c5 = a12*xw**2 + a13*p_stat**2 + a14*x_c**2 + a15*xw*p_stat*x_c
+    # approximation for c according to Cramer (Eq. 15)
+    c1 = a0+a1*t+a2*t**2
+    c2 = (a3+a4*t+a5*t**2)*x_w
+    c3 = (a6+a7*t+a8*t**2)*p
+    c4 = (a9+a10*t+a11*t**2)*x_c
+    c5 = a12*x_w**2 + a13*p**2 + a14*x_c**2 + a15*x_w*p*x_c
 
     return c1 + c2 + c3 + c4 + c5
