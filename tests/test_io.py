@@ -708,3 +708,11 @@ def test_default_audio_subtype(default_audio_subtype_mock):
     subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
+
+
+def test__sofa_pos_error():
+    """Test error message for wrong position type."""
+    error_message = re.escape(
+        "Position: Type 'bla' is not supported")
+    with pytest.raises(ValueError, match=error_message):
+        io.io._sofa_pos('bla', np.array([1, 2, 3]))
