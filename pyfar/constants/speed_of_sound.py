@@ -53,7 +53,7 @@ def speed_of_sound_cramer(
 
     This implements Cramers method described in [#]_.
     The uncertainty in the speed of sound is similarly estimated to be
-    less than 300 ppm.
+    less than 300 parts per million.
 
     Parameters
     ----------
