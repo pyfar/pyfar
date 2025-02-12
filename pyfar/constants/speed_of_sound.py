@@ -95,7 +95,7 @@ def speed_of_sound_cramer(
             atmospheric_pressure > 102e3):
         raise ValueError(
             "Atmospheric pressure must be between 75 000 Pa to 102 000 Pa.")
-    if np.any(co2_ppm < 0) or (co2_ppm > .01e6):
+    if np.any(co2_ppm < 0) or np.any(co2_ppm > .01e6):
         raise ValueError(
             "CO2 concentration (ppm) must be between 0 ppm to 10 000 ppm.")
 
