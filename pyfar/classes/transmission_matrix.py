@@ -8,7 +8,7 @@ fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission
 lines.
 
 System properties like input impedance or transfer functions can directly be
-derived from a T-matrix. Furthermore, systems can be cascaded my multiplying
+derived from a T-matrix. Furthermore, systems can be cascaded by multiplying
 consecutive T-matrices simply using the ``@`` operator:
 
 >>> import numpy as np
