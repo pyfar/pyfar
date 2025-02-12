@@ -124,6 +124,27 @@ def test_speed_of_sound_cramer_figure_1_co2(
     npt.assert_almost_equal(speed, expected, 1)
 
 
+@pytest.mark.parametrize((
+        "temperature", "relative_humidity", "atmospheric_pressure",
+        "co2_ppm", "expected"), [
+            (0, 0, 95070.8, 314, 331.3839),
+            (0, 0, 95070.8, [314], 331.3839),
+            (0, 0, [95070.8], [314], 331.3839),
+            (0, [0], 95070.8, [314], 331.3839),
+            ([0], 0, 95070.8, 314, 331.3839),
+            ([0], 0, (95070.8, ), 314, 331.3839),
+            ([0, 0], 0, 95070.8, 314, 331.3839),
+            (np.array([[0, 0], [0, 0]]), 0, 95070.8, 314, 331.3839),
+        ])
+def test_speed_of_sound_cramer_array_like(
+        temperature, relative_humidity, atmospheric_pressure,
+        co2_ppm, expected):
+    speed = pf.constants.speed_of_sound_cramer(
+        temperature, relative_humidity, atmospheric_pressure, co2_ppm,
+        )
+    npt.assert_almost_equal(speed, expected, 1)
+
+
 def test_speed_of_sound_cramer_invalid_temperature():
     match = 'Temperature must be between 0°C and 30°C.'
     with pytest.raises(ValueError, match=re.escape(match)):

@@ -80,18 +80,22 @@ def speed_of_sound_cramer(
            concentration,” The Journal of the Acoustical Society of America,
            vol. 93, no. 5, pp. 2510-2516, May 1993, doi: 10.1121/1.405827.
     """
+    # convert to array
+    temperature = np.array(temperature)
+    relative_humidity = np.array(relative_humidity)
+    atmospheric_pressure = np.array(atmospheric_pressure)
+    co2_ppm = np.array(co2_ppm)
+
     # check inputs:
-    if np.any(np.array(temperature) < 0) or np.any(
-            np.array(temperature) > 30):
+    if np.any(temperature) or np.any(temperature > 30):
         raise ValueError("Temperature must be between 0°C and 30°C.")
-    if np.any(np.array(relative_humidity) < 0) or np.any(
-            np.array(relative_humidity) > 1):
+    if np.any(relative_humidity < 0) or np.any(relative_humidity > 1):
         raise ValueError("Relative humidity must be between 0 and 1.")
-    if np.any(np.array(atmospheric_pressure) < 75e3) or np.any(
-            np.array(atmospheric_pressure) > 102e3):
+    if np.any(atmospheric_pressure < 75e3) or np.any(
+            atmospheric_pressure > 102e3):
         raise ValueError(
             "Atmospheric pressure must be between 75 000 Pa to 102 000 Pa.")
-    if np.any(np.array(co2_ppm) < 0) or np.any(np.array(co2_ppm) > .01e6):
+    if np.any(co2_ppm < 0) or (co2_ppm > .01e6):
         raise ValueError(
             "CO2 concentration (ppm) must be between 0 ppm to 10 000 ppm.")
 
@@ -115,7 +119,7 @@ def speed_of_sound_cramer(
 
     # check water mole fraction
     # due to the input checks, this is not possible to reach
-    if np.any(np.array(x_w) < 0) or np.any(np.array(x_w) > 0.06):
+    if np.any(x_w < 0) or np.any(x_w > 0.06):
         raise ValueError("Water mole fraction must be between 0 and 0.06.")
 
     # Coefficients according to Cramer (Table. III)
