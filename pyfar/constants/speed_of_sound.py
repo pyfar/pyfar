@@ -87,7 +87,7 @@ def speed_of_sound_cramer(
     co2_ppm = np.array(co2_ppm)
 
     # check inputs:
-    if np.any(temperature) or np.any(temperature > 30):
+    if np.any(temperature < 0) or np.any(temperature > 30):
         raise ValueError("Temperature must be between 0°C and 30°C.")
     if np.any(relative_humidity < 0) or np.any(relative_humidity > 1):
         raise ValueError("Relative humidity must be between 0 and 1.")
