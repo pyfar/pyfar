@@ -11,7 +11,7 @@ def speed_of_sound_simple(temperature):
 
     .. math::
 
-        c = 343.2 \cdot \sqrt{\frac{t + 293.15}{t_0 + 293.15}} \mathrm{m/s}
+        c = 343.2 \cdot \sqrt{\frac{t + 273.15}{t_0 + 273.15}} \mathrm{m/s}
 
     where:
         - :math:`t` is the air temperature (°C)
