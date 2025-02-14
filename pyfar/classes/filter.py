@@ -356,6 +356,13 @@ class FilterFIR(Filter):
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
+        if state is not None and np.asarray(state).ndim < 3:
+            state = _atleast_3d_first_dim(state)
+            warnings.warn(
+                "The state should be of shape (n_channels, *cshape, order). "
+                f"The state has been reshaped to shape=({state.shape}",
+                stacklevel=2)
+
         super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
@@ -403,13 +410,13 @@ class FilterFIR(Filter):
             to be filtered.
         """
         if state is not None:
-            state = _atleast_3d_first_dim(state)
+            state = np.asarray(state)
             if (state.shape[-1] != self.order
+                or state.ndim < 3
                 or state.shape[0] != self.n_channels):
                 raise ValueError(
-                    "The state does not match the filter order or number of "
-                    "filter channels. Required shape for FilterFIR is"
-                    " (n_channels, *cshape, order).")
+                    "The state does not match the filter structure. Required "
+                    "shape for FilterFIR is (n_channels, *cshape, order).")
 
         Filter.state.fset(self, state)
 
@@ -485,6 +492,13 @@ class FilterIIR(Filter):
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
+        if state is not None and np.asarray(state).ndim < 3:
+            state = _atleast_3d_first_dim(state)
+            warnings.warn(
+                "The state should be of shape (n_channels, *cshape, order). "
+                f"The state has been reshaped to shape=({state.shape}",
+                stacklevel=2)
+
         super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
@@ -506,13 +520,13 @@ class FilterIIR(Filter):
             to be filtered.
         """
         if state is not None:
-            state = _atleast_3d_first_dim(state)
+            state = np.asarray(state)
             if (state.shape[-1] != self.order
+                or state.ndim < 3
                 or state.shape[0] != self.n_channels):
                 raise ValueError(
-                    "The state does not match the filter order or number of "
-                    "filter channels. Required shape for FilterIIR is"
-                    " (n_channels, *cshape, order).")
+                    "The state does not match the filter structure. Required "
+                    "shape for FilterIIR is (n_channels, *cshape, order).")
 
         Filter.state.fset(self, state)
 
@@ -587,8 +601,12 @@ class FilterSOS(Filter):
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
-        if state is not None:
+        if state is not None and np.asarray(state).ndim < 4:
             state = _atleast_4d_first_dim(state)
+            warnings.warn(
+                "The state should be of shape (n_channels, *cshape, n_sections"
+                f", 2). The state has been reshaped to shape=({state.shape}",
+                stacklevel=2)
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -630,14 +648,15 @@ class FilterSOS(Filter):
             to be filtered.
         """
         if state is not None:
-            state = _atleast_3d_first_dim(state)
-            if (state.shape[-1] != 2
+            state = np.asarray(state)
+            if (state.shape[0] != self.n_channels
+                or state.shape[-1] != 2
                 or state.shape[-2] != self.n_sections
-                or state.shape[0] != self.n_channels):
+                or state.ndim < 4):
                 raise ValueError(
-                    "The state does not match the filter structure."
-                    " Required shape for FilterSOS is"
-                    " (n_channels, *cshape, n_sections, 2).")
+                    "The state does not match the filter structure. Required "
+                    "shape for FilterSOS is (n_channels, *cshape, "
+                    "n_sections, 2).")
 
         Filter.state.fset(self, state)
 
