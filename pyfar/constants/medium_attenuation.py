@@ -1,12 +1,11 @@
 """Air attenuation calculation."""
 import numpy as np
 import pyfar as pf
-from . import utils
 
 
 def air_attenuation(
         temperature, frequencies, relative_humidity,
-        atmospheric_pressure=101325, saturation_vapor_pressure=None):
+        atmospheric_pressure=101325):
     r"""Calculate the pure tone attenuation of sound in air according to
     ISO 9613-1.
 
@@ -27,12 +26,6 @@ def air_attenuation(
         Relative humidity in the range from 0 to 1.
     atmospheric_pressure : int, optional
         Atmospheric pressure in pascal, by default 101325 Pa.
-    saturation_vapor_pressure : float, array_like, optional
-        Saturation vapor pressure in Pa.
-        If not given, the function
-        :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
-        Note that the valid temperature range is therefore also dependent on
-        :py:func:`~pyfar.constants.saturation_vapor_pressure`.
 
     Returns
     -------
@@ -127,20 +120,20 @@ def air_attenuation(
     p_atmospheric_ref = 101325
     t_degree_ref = 20
 
+    h_r = relative_humidity*100
     p_a = atmospheric_pressure
     p_r = p_atmospheric_ref
     f = frequencies
     T = temperature + 273.15
     T_0 = t_degree_ref + 273.15
 
-    # saturation_vapor_pressure in hPa
-    if saturation_vapor_pressure is None:
-        saturation_vapor_pressure = utils.saturation_vapor_pressure(
-            temperature)
-    p_vapor = relative_humidity*saturation_vapor_pressure
+    # saturation vapour pressure (Equation B.2 and B.3)
+    T_01 = 273.16  # triple-point isotherm temperature of 273.16 K
+    C = -6.8346*(T_01/T)**1.261+4.6151
+    p_sat = 10**C * p_r
 
-    # molar concentration of water vapor as a percentage
-    h = p_vapor/p_a*100
+    # molar concentration of water vapor as a percentage (Equation B.1)
+    h = h_r * (p_sat / p_r) * (p_a / p_r)
 
     # Oxygen relaxation frequency (Eq. 3)
     f_rO = (p_a/p_r)*(24+4.04e4*h*(0.02+h)/(0.391+h))
@@ -269,4 +262,3 @@ def _calculate_accuracy(
 
     # return FrequencyData object
     return pf.FrequencyData(accuracy, frequencies=frequencies)
-

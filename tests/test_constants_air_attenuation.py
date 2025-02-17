@@ -12,6 +12,8 @@ import re
     (10, 100, .1, 5.85e-1*1e-3, 10),
     (-20, 800, .3, 4.92e-3, 20),
     (35, 4000, .6, 2.58*10e-3, 10),
+    (20, 5000, .1, 1.33e2*1e-3, 10),
+    (20, 5000, .8, 3.06e1*1e-3, 10),
     (50, 1000, .7, 8.03e-3, 20),
 ])
 def test_air_attenuation_after_table_iso(
@@ -23,7 +25,7 @@ def test_air_attenuation_after_table_iso(
     """
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity)
-    npt.assert_allclose(alpha.freq, expected, rtol=.01)
+    npt.assert_allclose(alpha.freq, expected, atol=1e-3)
     npt.assert_allclose(accuracy.freq, expected_accuracy)
 
 
