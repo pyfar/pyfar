@@ -201,14 +201,14 @@ class Filter(object):
     @property
     def state(self):
         """
-        The state of the filter as an array with dimensions
-        corresponding to filter structure and the cshape of the
-        signal to be filtered.
+        Get or set the filter state.
 
-        The state sets the initial conditions for the filter delays and can
-        be used to change the filter's transient.
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering. The required shape is
+        described in the Class docstring.
 
-        Details about the required shape are contained in the class docstring.
+        Note that the state can also be initialized with the
+        ``init_state`` method.
         """
         return self._state
 
