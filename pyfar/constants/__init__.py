@@ -68,3 +68,39 @@ References
 ----------
 .. [#] https://en.wikipedia.org/wiki/Absolute_zero
 """
+
+reference_sound_pressure: Final[float] = 20e-6
+r"""
+Reference sound pressure $p_0$ in Pa as defined in [#]_.
+
+.. math::
+    p_{ref} = 20 \mu Pa
+
+Returns
+-------
+float
+    Reference sound pressure in Pa.
+
+References
+----------
+.. [#] https://en.wikipedia.org/wiki/Sound_pressure
+
+"""
+
+reference_sound_power: Final[float] = 1e-12
+r"""
+Reference sound power $P_0$ in W as defined in [#]_.
+
+.. math::
+    P_{ref} = 1 pW = 10^{-12} W
+
+Returns
+-------
+float
+    Reference sound power in W.
+
+References
+----------
+.. [#] https://en.wikipedia.org/wiki/Sound_power
+
+"""
