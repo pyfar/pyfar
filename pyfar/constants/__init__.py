@@ -68,7 +68,7 @@ References
 
 reference_sound_pressure: Final[float] = 20e-6
 r"""
-Reference sound pressure $p_0$ in Pa as defined in [#]_.
+Reference sound pressure :math:`p_0` in Pa as defined in [#]_.
 
 .. math::
     p_{ref} = 20 \mu Pa
@@ -86,7 +86,7 @@ References
 
 reference_sound_power: Final[float] = 1e-12
 r"""
-Reference sound power $P_0$ in W as defined in [#]_.
+Reference sound power :math:`P_0` in W as defined in [#]_.
 
 .. math::
     P_{ref} = 1 pW = 10^{-12} W
