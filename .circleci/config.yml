@@ -11,7 +11,6 @@ orbs:
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
 
-
 executors:
   python-docker: # declares a reusable executor
     parameters:
@@ -155,6 +154,30 @@ jobs:
             twine check dist/*
             twine upload dist/*
 
+  coverage:
+    parameters:
+      version:
+        description: "version tag"
+        default: "latest"
+        type: string
+    executor:
+      name: python-docker
+      version: <<parameters.version>>
+    steps:
+    - checkout
+    - run:
+        name: Setup testing environment
+        command: |
+          pip install ".[tests]"
+    - run:
+        name: Run Tests with coverage and create html report
+        command: |
+          coverage run -m pytest
+          coverage html  # open htmlcov/index.html in a browser
+    - store_artifacts:
+        path: htmlcov
+
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -170,6 +193,15 @@ workflows:
                 - "3.11"
                 - "3.12"
                 - "3.13"
+
+      - coverage:
+          matrix:
+            parameters:
+              version:
+                - "3.12"
+          requires:
+            - build_and_test
+
       - ruff:
           matrix:
             parameters:
