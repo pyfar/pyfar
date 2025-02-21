@@ -19,7 +19,7 @@ standard_atmosphere_pressure: Final[float] = 101325.0
 Standard atmosphere pressure in Pa as defined in [#]_.
 
 .. math::
-    atm = 101325 Pa
+    P_{atm} = 101325 Pa
 
 Returns
 -------
@@ -34,12 +34,12 @@ References
 
 
 standard_air_density: Final[float] = 1.204
-"""
-Standard air density in kg/m^3 at standard atmosphere pressure and 20°C
+r"""
+Standard air density in :math:`kg/m^3` at standard atmosphere pressure and 20°C
 as defined in [#]_.
 
 .. math::
-    T_{atm} = 273.15 K
+    \rho_{atm} = 1.204 \frac{kg}{m^3}
 
 Returns
 -------
