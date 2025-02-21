@@ -127,8 +127,7 @@ def test_speed_of_sound_cramer_invalid_atmospheric_pressure():
     with pytest.raises(ValueError, match=re.escape(match)):
         pf.constants.speed_of_sound_cramer(0, .5, 74999)
     with pytest.raises(ValueError, match=re.escape(match)):
-        pf.constants.speed_of_sound_cramer(
-            1, .5, standard_atmosphere_pressure)
+        pf.constants.speed_of_sound_cramer(1, .5, 102001)
 
 
 def test_speed_of_sound_cramer_invalid_relative_humidity():
