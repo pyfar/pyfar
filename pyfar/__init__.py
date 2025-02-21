@@ -22,6 +22,7 @@ from . import io
 from . import dsp
 from . import signals
 from . import utils
+from . import constants
 
 
 __all__ = [
@@ -48,6 +49,7 @@ __all__ = [
     'dsp',
     'signals',
     'utils',
+    'constants',
     'dot',
     'cross',
     ]
