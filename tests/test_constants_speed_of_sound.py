@@ -4,7 +4,7 @@ import pyfar as pf
 import numpy.testing as npt
 
 
-def _simplified_ideal_gas(temperature):
+def _simplified_ideal_gas(temperature_celsius):
     """Calculate the speed of sound in air using a simplified version of the
     ideal gas law based on the temperature in °C.
     See :py:func:`~pyfar.constants.speed_of_sound_simple`
@@ -13,7 +13,7 @@ def _simplified_ideal_gas(temperature):
     It is used for testing other speed of sound methods, to see if the
     results are within a reasonable range.
     """
-    temperature_kelvin = temperature + 273.15
+    temperature_kelvin = temperature_celsius + 273.15
     return 343.2*np.sqrt((temperature_kelvin)/293.15)
 
 
