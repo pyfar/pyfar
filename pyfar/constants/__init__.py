@@ -11,9 +11,6 @@ __all__ = [
 ]
 
 
-# useful constants for acoustics, physics and engineering
-
-
 standard_atmosphere_pressure: Final[float] = 101325.0
 """
 Standard atmosphere pressure in Pa as defined in [#]_.
