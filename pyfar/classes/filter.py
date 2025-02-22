@@ -603,6 +603,8 @@ class FilterIIR(Filter):
             An integer array of shape (C, ) containing the length in samples
             where `C` denotes the number of channels of the filter.
         """
+        # This is a direct python port of the parts of Matlab's impzlength that
+        # refer to IIR filters
 
         channels = self.coefficients.shape[0]
         estimated_length = np.zeros(channels)
@@ -821,6 +823,8 @@ class FilterSOS(Filter):
             An integer array of shape (C, ) containing the length in samples
             where `C` denotes the number of channels of the filter.
         """
+        # This is a direct python port of the parts of Matlab's impzlength that
+        # refer to SOS filters
 
         channels = self.coefficients.shape[0]
         sections = self.coefficients.shape[1]
