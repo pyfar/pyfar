@@ -12,11 +12,11 @@ __all__ = [
 
 
 standard_atmosphere_pressure: Final[float] = 101325.0
-"""
+r"""
 Standard atmosphere pressure in Pa as defined in [#]_.
 
 .. math::
-    P_{atm} = 101325 Pa
+    P_\text{atm} = 101325 \, \text{Pa}
 
 Returns
 -------
@@ -32,16 +32,16 @@ References
 
 standard_air_density: Final[float] = 1.204
 r"""
-Standard air density in :math:`kg/m^3` at standard atmosphere pressure and 20°C
-as defined in [#]_.
+Standard air density in :math:`\text{kg}/\text{m}^3` at standard
+atmosphere pressure and 20°C as defined in [#]_.
 
 .. math::
-    \rho_{atm} = 1.204 \frac{kg}{m^3}
+    \rho_\text{atm} = 1.204 \, \frac{\text{kg}}{\text{m}^3}
 
 Returns
 -------
 float
-    Standard atmosphere temperature in Kelvin.
+    Standard air density in :math:`\text{kg}/\text{m}^3`.
 
 References
 ----------
@@ -50,16 +50,16 @@ References
 
 
 absolute_zero_celsius: Final[float] = -273.15
-"""
+r"""
 Absolute zero temperature in Celsius as defined in [#]_.
 
 .. math::
-    T_0 = -273.15 °C
+    T_0 = -273.15 \text{°C}
 
 Returns
 -------
 float
-    Absolute zero temperature in Celsius.
+    Absolute zero temperature in degree Celsius.
 
 References
 ----------
@@ -68,15 +68,15 @@ References
 
 reference_sound_pressure: Final[float] = 20e-6
 r"""
-Reference sound pressure :math:`p_0` in Pa as defined in [#]_.
+Reference sound pressure :math:`p_\text{ref}` in Pa as defined in [#]_.
 
 .. math::
-    p_{ref} = 20 \mu Pa
+    p_\text{ref} = 20 \, \mathrm{\mu Pa}
 
 Returns
 -------
 float
-    Reference sound pressure in Pa.
+    Reference sound pressure in Pascal.
 
 References
 ----------
@@ -86,15 +86,15 @@ References
 
 reference_sound_power: Final[float] = 1e-12
 r"""
-Reference sound power :math:`P_0` in W as defined in [#]_.
+Reference sound power :math:`P_\text{ref}` in W as defined in [#]_.
 
 .. math::
-    P_{ref} = 1 pW = 10^{-12} W
+    P_\text{ref} = 1 \, \text{pW} = 10^{-12} \, \text{W}
 
 Returns
 -------
 float
-    Reference sound power in W.
+    Reference sound power in Watt.
 
 References
 ----------
