@@ -1,5 +1,6 @@
 """File containing all speed of sound calculation functions."""
 import numpy as np
+import pyfar as pf
 
 
 def speed_of_sound_simple(temperature):
@@ -11,11 +12,17 @@ def speed_of_sound_simple(temperature):
 
     .. math::
 
-        c = 343.2 \cdot \sqrt{\frac{t + 273.15}{t_0 + 273.15}} \mathrm{m/s}
+        c(t) = c_\text{ref} \cdot \sqrt{\frac{t - t_0}{t_\text{ref} - t_0}}
 
     where:
         - :math:`t` is the air temperature (°C)
-        - :math:`t_0=20\mathrm{°C}` is the reference air temperature (°C)
+        - :math:`t_\text{ref}=20\mathrm{°C}` is the reference air temperature
+          (°C), see
+          :py:attr:`pyfar.constants.reference_air_temperature_celsius`
+        - :math:`t_0=-273.15` °C is the absolute zero temperature (°C), see
+          :py:attr:`pyfar.constants.absolute_zero_celsius`
+        - :math:`c=343.2` m/s is the speed of sound at the reference
+          temperature, see :py:attr:`pyfar.constants.reference_speed_of_sound`
 
     Parameters
     ----------
@@ -41,5 +48,7 @@ def speed_of_sound_simple(temperature):
     temperature = np.array(temperature, dtype=float) if isinstance(
         temperature, list) else temperature
 
-    t_0 = 20
-    return 343.2*np.sqrt((temperature+273.15)/(t_0+273.15))
+    t_ref = pf.constants.reference_air_temperature_celsius
+    t_0 = pf.constants.absolute_zero_celsius
+    c_ref = pf.constants.reference_speed_of_sound
+    return c_ref*np.sqrt((temperature-t_0)/(t_ref-t_0))
