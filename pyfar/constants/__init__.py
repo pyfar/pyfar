@@ -150,7 +150,7 @@ r"""
 Reference air impedance :math:`Z_\text{ref}` in Pa s/m as defined in [#]_.
 
 .. math::
-    Z_\text{ref} = \rho_\text{ref} \cdot c_\text{ref} \aprox 413.2 \text{Pa s/m}
+    Z_\text{ref} = \rho_\text{ref} \cdot c_\text{ref} \approx 413.2 \text{Pa s/m}
 
 Returns
 -------
