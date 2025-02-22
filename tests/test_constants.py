@@ -14,3 +14,15 @@ def test_reference_sound_power():
 
 def test_reference_sound_pressure():
     assert pf.constants.reference_sound_pressure == 20e-6
+
+def test_reference_air_temperature():
+    assert pf.constants.reference_air_temperature_celsius == 20
+
+def test_reference_speed_of_sound():
+    assert pf.constants.reference_speed_of_sound == 343.2
+
+def test_reference_air_impedance():
+    c_ref = pf.constants.reference_speed_of_sound
+    rho_ref = pf.constants.standard_air_density
+    assert pf.constants.reference_air_impedance == c_ref*rho_ref
+    assert pf.constants.reference_air_impedance == 413.21279999999996
