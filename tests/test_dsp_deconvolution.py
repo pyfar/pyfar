@@ -50,7 +50,7 @@ def test_default():
     """Test the default parameters of deconvolution function."""
     res = deconvolve(impulse(6, sampling_rate=44100),
                      impulse(5, sampling_rate=44100),
-                     freq_range=(1, 22050))
+                     frequency_range=(1, 22050))
     assert res.n_samples == 6
     assert res.fft_norm == 'none'
     assert res.sampling_rate == 44100
@@ -58,21 +58,21 @@ def test_default():
 
 def test_output_type():
     """Test Type of returned Signal and basic deconvolution with impulses."""
-    res = deconvolve(impulse(3), impulse(3), freq_range=(1, 22050))
+    res = deconvolve(impulse(3), impulse(3), frequency_range=(1, 22050))
     assert isinstance(res, pf.Signal)
     npt.assert_allclose(impulse(3).time, res.time, rtol=1e-9)
 
 
 def test_output_length():
     """Test if output length is correct."""
-    res = deconvolve(impulse(3), impulse(3), freq_range=(1, 22050))
+    res = deconvolve(impulse(3), impulse(3), frequency_range=(1, 22050))
     assert res.n_samples == 3
-    res = deconvolve(impulse(5), impulse(3), freq_range=(1, 22050))
+    res = deconvolve(impulse(5), impulse(3), frequency_range=(1, 22050))
     assert res.n_samples == 5
-    res = deconvolve(impulse(3), impulse(5), freq_range=(1, 22050))
+    res = deconvolve(impulse(3), impulse(5), frequency_range=(1, 22050))
     assert res.n_samples == 5
     res = deconvolve(impulse(3), impulse(5), fft_length=7,
-                     freq_range=(1, 22050))
+                     frequency_range=(1, 22050))
     assert res.n_samples == 7
 
 
@@ -98,7 +98,7 @@ def test_output_sweep(is_complex_sig1, is_complex_sig2):
 
     res = pf.dsp.dsp.deconvolve(
         sweep_1, sweep_2,
-        freq_range=(1, 44100)).freq[0, eval_range_start+10:-12500]
+        frequency_range=(1, 44100)).freq[0, eval_range_start+10:-12500]
     npt.assert_allclose(np.ones_like(res), res, atol=1e-9)
 
 
@@ -107,16 +107,16 @@ def test_fft_norm():
     for two example inputs.
     """
     sig1 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
-    res = pf.dsp.dsp.deconvolve(sig1, sig1, freq_range=(1, 44100))
+    res = pf.dsp.dsp.deconvolve(sig1, sig1, frequency_range=(1, 44100))
     assert res.fft_norm == 'none'
     sig2 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='none')
     sig3 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
     with pytest.raises(ValueError, match="Either fft_norm_2 "):
-        deconvolve(sig2, sig3, freq_range=(1, 44100))
+        deconvolve(sig2, sig3, frequency_range=(1, 44100))
 
 
-def test_freq_range():
-    """Test if freq_range default is correct."""
-    res1 = deconvolve(impulse(3), impulse(3), freq_range=None)
-    res2 = deconvolve(impulse(3), impulse(3), freq_range=(0, 22050))
+def test_frequency_range():
+    """Test if frequency_range default is correct."""
+    res1 = deconvolve(impulse(3), impulse(3), frequency_range=None)
+    res2 = deconvolve(impulse(3), impulse(3), frequency_range=(0, 22050))
     npt.assert_allclose(res1.time, res2.time, rtol=1e-14)

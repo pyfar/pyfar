@@ -131,7 +131,7 @@ def test_gammatone_bands_reset_state():
 def test_gammatone_bands_assertions():
     """Test all assertions."""
 
-    # wrong values in freq_range
+    # wrong values in frequency_range
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
         pf.dsp.filter.GammatoneBands([-1, 22050])
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
@@ -195,12 +195,12 @@ def test_erb_frequencies():
 def test_erb_frequencies_assertions():
     """Test assertions for erb_frequencies."""
 
-    # freq_range must be an array of length 2
+    # frequency_range must be an array of length 2
     with pytest.raises(ValueError, match="frequency_range must be an array"):
         pf.dsp.filter.erb_frequencies(1)
     with pytest.raises(ValueError, match="frequency_range must be an array"):
         pf.dsp.filter.erb_frequencies([1])
-    # values freq_range must be increasing
+    # values frequency_range must be increasing
     with pytest.raises(ValueError, match="The first value of frequency_range"):
         pf.dsp.filter.erb_frequencies([1, 0])
     # resolution must be > 0
