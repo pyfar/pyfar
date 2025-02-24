@@ -104,10 +104,7 @@ def density_of_air(
     alpha = mu_a / mu_w
 
     # partial pressure of water vapor in Pa
-    if saturation_vapor_pressure is None:
-        p = saturation_vapor_pressure(temperature)  # Pa
-    else:
-        p = np.array(saturation_vapor_pressure, dtype=float)  # Pa
+    p = saturation_vapor_pressure(temperature)  # Pa
     e = relative_humidity * p  # Pa
 
     # Equation 6.70
