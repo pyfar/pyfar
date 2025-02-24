@@ -25,7 +25,6 @@ def test_getter_radii_from_cart(x, y, z, radius, radius_z):
     coords = Coordinates(x, y, z)
     np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
     np.testing.assert_allclose(coords.rho, radius_z, atol=1e-15)
-    np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
 
 
 @pytest.mark.parametrize(
@@ -43,7 +42,6 @@ def test_setter_radii_from_cart(x, y, z, radius, radius_z):
     coords.z = z
     np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
     np.testing.assert_allclose(coords.rho, radius_z, atol=1e-15)
-    np.testing.assert_allclose(coords.radius, radius, atol=1e-15)
 
 
 @pytest.mark.parametrize(
