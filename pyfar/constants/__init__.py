@@ -8,10 +8,12 @@ from .speed_of_sound import (
 
 from .utils import (
     saturation_vapor_pressure,
+    density_of_air,
 )
 
 __all__ = [
     'speed_of_sound_simple',
     'speed_of_sound_ideal_gas',
     'saturation_vapor_pressure',
+    'density_of_air',
 ]
