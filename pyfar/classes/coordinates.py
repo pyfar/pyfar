@@ -941,7 +941,8 @@ class Coordinates():
 
         if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
-            radius = np.concatenate((self.radius, find.radius))
+            radius = np.concatenate(
+                (self.radius.flatten(), find.radius.flatten()))
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > radius_tol:
                 raise ValueError(
@@ -1104,7 +1105,8 @@ class Coordinates():
                 points, distance + atol, return_sorted=return_sorted)
         if distance_measure in ['spherical_radians', 'spherical_meter']:
             # determine validate radius
-            radius = np.concatenate((self.radius, find.radius))
+            radius = np.concatenate(
+                (self.radius.flatten(), find.radius.flatten()))
             delta_radius = np.max(radius) - np.min(radius)
             if delta_radius > radius_tol:
                 raise ValueError(
