@@ -111,10 +111,6 @@ venv.bak/
 # macOS
 .DS_Store
 
-# external data that os loaded from the web
-pyfar/samplings/external/samplings_extremal*
-pyfar/samplings/external/samplings_t_design*
-
 # saved plots from testing
 tests/test_plot_data/output/*.png
 
