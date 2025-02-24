@@ -423,30 +423,6 @@ class Coordinates():
         """Set sampling weights."""
         self._set_weights(value)
 
-
-    @property
-    def sh_order(self):
-        """This function was deprecated in pyfar 0.8.0 in favor
-        of :py:class:`spharpy.samplings.SamplingSphere`.
-        Get the maximum spherical harmonic order.
-        """
-        raise AttributeError(
-            "This function was deprecated in pyfar 0.8.0 in favor "
-            "of spharpy.samplings.SamplingSphere.",
-            stacklevel=2)
-
-    @sh_order.setter
-    def sh_order(self, _):
-        """
-        This function was deprecated in pyfar 0.8.0 in favor
-        of :py:class:`spharpy.samplings.SamplingSphere`.
-        Set the maximum spherical harmonic order.
-        """
-        raise AttributeError(
-            "This function was deprecated in pyfar 0.8.0 in favor "
-            "of spharpy.samplings.SamplingSphere.",
-            stacklevel=2)
-
     @property
     def comment(self):
         """Get comment."""
