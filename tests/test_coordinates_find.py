@@ -122,6 +122,12 @@ def test_find_nearest_error():
                        match="radius_tol must be a non negative number."):
         coords.find_nearest(find, 1, "spherical_radians", -1)
 
+    find.radius = .1
+    match = 'find_nearest only works if all points have the same'
+    with pytest.raises(ValueError, match=match):
+        coords.find_nearest(
+            find, distance_measure='spherical_radians', radius_tol=0.1)
+
 
 def test_find_nearest_radius_tol():
     coords = pf.Coordinates.from_spherical_elevation(
