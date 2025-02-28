@@ -200,16 +200,7 @@ class Filter(object):
 
     @property
     def state(self):
-        """
-        Get or set the filter state.
-
-        The filter state sets the initial condition of the filter and can for
-        example be used for block-wise filtering. The required shape is
-        described in the Class docstring.
-
-        Note that the state can also be initialized with the
-        ``init_state`` method.
-        """
+        """Get or set the filter state."""
         return self._state
 
     @state.setter
@@ -396,7 +387,24 @@ class FilterFIR(Filter):
         coeff = np.stack((b, a), axis=-2)
         self._coefficients = _atleast_3d_first_dim(coeff)
 
-    @Filter.state.setter
+    @property
+    def state(self):
+        """
+        Get or set the filter state.
+
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering.
+
+        Note that the state can also be initialized with the
+        ``init_state`` method.
+
+        Shape of the state for ``FilterFIR``, with ``cshape``
+        being the channel shape of the :py:class:`~pyfar.Signal` to be
+        filtered: ``(n_filter_chan, *cshape, order)``
+        """
+        return self._state
+
+    @state.setter
     def state(self, state):
         """
         Set initial state of FIR filter.
@@ -418,6 +426,7 @@ class FilterFIR(Filter):
                     "The state does not match the filter structure. Required "
                     "shape for FilterFIR is (n_channels, *cshape, order).")
 
+        # sets filter state in parent class
         Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
@@ -506,7 +515,24 @@ class FilterIIR(Filter):
         """The order of the filter."""
         return np.max(self._coefficients.shape[-2:]) - 1
 
-    @Filter.state.setter
+    @property
+    def state(self):
+        """
+        Get or set the filter state.
+
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering.
+
+        Note that the state can also be initialized with the
+        ``init_state`` method.
+
+        Shape of the state for ``FilterIIR``, with ``cshape``
+        being the channel shape of the :py:class:`~pyfar.Signal` to be
+        filtered: ``(n_filter_chan, *cshape, order)``
+        """
+        return self._state
+
+    @state.setter
     def state(self, state):
         """
         Set initial state of IIR filter.
@@ -528,6 +554,7 @@ class FilterIIR(Filter):
                     "The state does not match the filter structure. Required "
                     "shape for FilterIIR is (n_channels, *cshape, order).")
 
+        # sets filter state in parent class
         Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
@@ -634,7 +661,24 @@ class FilterSOS(Filter):
         """The number of sections."""
         return self._coefficients.shape[-2]
 
-    @Filter.state.setter
+    @property
+    def state(self):
+        """
+        Get or set the filter state.
+
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering.
+
+        Note that the state can also be initialized with the
+        ``init_state`` method.
+
+        Shape of the state for ``FilterSOS``, with ``cshape``
+        being the channel shape of the :py:class:`~pyfar.Signal` to be
+        filtered: ``n_filter_chan, *cshape, n_sections, 2)``
+        """
+        return self._state
+
+    @state.setter
     def state(self, state):
         """
         Set initial state of SOS filter.
@@ -658,6 +702,7 @@ class FilterSOS(Filter):
                     "shape for FilterSOS is (n_channels, *cshape, "
                     "n_sections, 2).")
 
+        # sets filter state in parent class
         Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
