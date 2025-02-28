@@ -11,9 +11,9 @@ __all__ = [
 ]
 
 
-standard_atmosphere_pressure: Final[float] = 101325.0
+standard_atmospheric_pressure: Final[float] = 101325.0
 r"""
-Standard atmosphere pressure in Pa as defined in [#]_.
+Standard atmospheric pressure in Pa as defined in [#]_.
 
 .. math::
     P_\text{atm} = 101325 \, \text{Pa}
@@ -21,7 +21,7 @@ Standard atmosphere pressure in Pa as defined in [#]_.
 Returns
 -------
 float
-    Standard atmosphere pressure in Pa.
+    Standard atmospheric pressure in Pa.
 
 References
 ----------
@@ -33,7 +33,7 @@ References
 standard_air_density: Final[float] = 1.204
 r"""
 Standard air density in :math:`\text{kg}/\text{m}^3` at standard
-atmosphere pressure and 20°C as defined in [#]_.
+atmospheric pressure and 20°C [#]_.
 
 .. math::
     \rho_\text{atm} = 1.204 \, \frac{\text{kg}}{\text{m}^3}
@@ -51,7 +51,7 @@ References
 
 absolute_zero_celsius: Final[float] = -273.15
 r"""
-Absolute zero temperature in Celsius as defined in [#]_.
+Absolute zero temperature in Celsius [#]_.
 
 .. math::
     t_0 = -273.15 \text{°C}
@@ -63,15 +63,13 @@ t_0 : float
 
 References
 ----------
-.. [#]  ISO 9613-1:1993, Acoustics -- Attenuation of sound during
-        propagation outdoors -- Part 1: Calculation of the absorption of
-        sound by the atmosphere.
+.. [#]  https://en.wikipedia.org/wiki/Absolute_zero
 """
 
 
 reference_sound_pressure: Final[float] = 20e-6
 r"""
-Reference sound pressure :math:`p_\text{ref}` in Pa as defined in [#]_.
+Reference sound pressure :math:`p_\text{ref}` in Pa [#]_.
 
 .. math::
     p_\text{ref} = 20 \, \mathrm{\mu Pa}
@@ -83,13 +81,13 @@ p_ref : float
 
 References
 ----------
-.. [#] https://en.wikipedia.org/wiki/Sound_pressure
+.. [#] https://asastandards.org/terms/reference-value-for-sound-pressure-2/
 
 """
 
 reference_sound_power: Final[float] = 1e-12
 r"""
-Reference sound power :math:`P_\text{ref}` in W as defined in [#]_.
+Reference sound power :math:`P_\text{ref}` in W [#]_.
 
 .. math::
     P_\text{ref} = 1 \, \text{pW} = 10^{-12} \, \text{W}
@@ -101,7 +99,7 @@ P_ref : float
 
 References
 ----------
-.. [#] https://en.wikipedia.org/wiki/Sound_power
+.. [#] https://asastandards.org/terms/sound-power-level/
 
 """
 
