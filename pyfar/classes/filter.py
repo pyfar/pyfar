@@ -396,11 +396,11 @@ class FilterFIR(Filter):
         example be used for block-wise filtering.
 
         Note that the state can also be initialized with the
-        ``init_state`` method.
+        :py:func:`~pyfar.classes.filter.FilterFIR.init_state` method.
 
-        Shape of the state for ``FilterFIR``, with ``cshape``
-        being the channel shape of the :py:class:`~pyfar.Signal` to be
-        filtered: ``(n_filter_chan, *cshape, order)``
+        Shape of the state must be  ``(n_filter_channels, *cshape, order)``,
+        with ``cshape`` being the channel shape of the
+        :py:class:`~pyfar.Signal` to be filtered.
         """
         return self._state
 
@@ -524,11 +524,11 @@ class FilterIIR(Filter):
         example be used for block-wise filtering.
 
         Note that the state can also be initialized with the
-        ``init_state`` method.
+        :py:func:`~pyfar.classes.filter.FilterIIR.init_state` method.
 
-        Shape of the state for ``FilterIIR``, with ``cshape``
-        being the channel shape of the :py:class:`~pyfar.Signal` to be
-        filtered: ``(n_filter_chan, *cshape, order)``
+        Shape of the state must be  ``(n_filter_channels, *cshape, order)``,
+        with ``cshape`` being the channel shape of the
+        :py:class:`~pyfar.Signal` to be filtered.
         """
         return self._state
 
@@ -670,11 +670,12 @@ class FilterSOS(Filter):
         example be used for block-wise filtering.
 
         Note that the state can also be initialized with the
-        ``init_state`` method.
+        :py:func:`~pyfar.classes.filter.FilterSOS.init_state` method.
 
-        Shape of the state for ``FilterSOS``, with ``cshape``
-        being the channel shape of the :py:class:`~pyfar.Signal` to be
-        filtered: ``n_filter_chan, *cshape, n_sections, 2)``
+        Shape of the state must be
+        ``(n_filter_channels, *cshape, n_sections, 2))``,
+        with ``cshape`` being the channel shape of the
+        :py:class:`~pyfar.Signal` to be filtered.
         """
         return self._state
 
