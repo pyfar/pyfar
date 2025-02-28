@@ -86,7 +86,7 @@ References
 
 reference_air_temperature_celsius: Final[float] = 20
 r"""
-Reference air temperature in degree Celsius as defined in [#]_.
+Reference air temperature in degree Celsius [#]_.
 
 .. math::
     t_\text{ref} = 20 \text{°C}
@@ -105,8 +105,7 @@ References
 
 reference_speed_of_sound: Final[float] = 343.2
 r"""
-Reference speed of sound :math:`c_\text{ref}` in m/s for 20°C and dry air
-as defined in [#]_.
+Reference speed of sound :math:`c_\text{ref}` in m/s for 20°C and dry air [#]_.
 
 .. math::
     c_\text{ref} = 343.2 \, \text{m/s}
