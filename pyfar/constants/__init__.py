@@ -30,25 +30,6 @@ References
 """
 
 
-standard_air_density: Final[float] = 1.204
-r"""
-Standard air density in :math:`\text{kg}/\text{m}^3` at standard
-atmospheric pressure and 20°C [#]_.
-
-.. math::
-    \rho_\text{atm} = 1.204 \, \frac{\text{kg}}{\text{m}^3}
-
-Returns
--------
-float
-    Standard air density in :math:`\text{kg}/\text{m}^3`.
-
-References
-----------
-.. [#] https://en.wikipedia.org/wiki/Density_of_air
-"""
-
-
 absolute_zero_celsius: Final[float] = -273.15
 r"""
 Absolute zero temperature in Celsius [#]_.
@@ -140,23 +121,4 @@ References
 .. [#] ISO 9613-1:1993, Acoustics -- Attenuation of sound during
        propagation outdoors -- Part 1: Calculation of the absorption of
        sound by the atmosphere.
-"""
-
-reference_air_impedance: Final[float] = (
-    reference_speed_of_sound * standard_air_density)
-r"""
-Reference air impedance :math:`Z_\text{ref}` in Pa s/m as defined in [#]_.
-
-.. math::
-    Z_\text{ref} = \rho_\text{ref} \cdot c_\text{ref} \approx 413.2
-    \text{Pa s/m}
-
-Returns
--------
-Z_ref : float
-    Reference air impedance in Pa s/m.
-
-References
-----------
-.. [#] https://en.wikipedia.org/wiki/Acoustic_impedance
 """
