@@ -1,4 +1,5 @@
 import pyfar as pf
+import numpy as np
 
 def test_standard_atmospheric_pressure():
     assert pf.constants.standard_atmospheric_pressure == 101325.0
@@ -17,3 +18,14 @@ def test_reference_air_temperature():
 
 def test_reference_speed_of_sound():
     assert pf.constants.reference_speed_of_sound == 343.2
+
+def test_standard_air_density():
+    assert pf.constants.standard_air_density == 1.204
+
+def test_reference_air_impedance_approximation():
+    assert np.round(pf.constants.reference_air_impedance, 1) == 413.2
+
+def test_reference_air_impedance():
+    c_ref = pf.constants.reference_speed_of_sound
+    rho_atm = pf.constants.standard_air_density
+    assert pf.constants.reference_air_impedance == c_ref * rho_atm
