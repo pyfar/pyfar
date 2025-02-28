@@ -1,6 +1,6 @@
 import pyfar as pf
 
-def test_standard_atmosphere_pressure():
+def test_standard_atmospheric_pressure():
     assert pf.constants.standard_atmospheric_pressure == 101325.0
 
 def test_absolute_zero_celsius():

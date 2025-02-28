@@ -13,7 +13,7 @@ __all__ = [
 
 standard_atmospheric_pressure: Final[float] = 101325.0
 r"""
-Standard atmospheric pressure in Pa as defined in [#]_.
+Standard atmospheric pressure :math:`P_\text{atm}` in Pascal [#]_.
 
 .. math::
     P_\text{atm} = 101325 \, \text{Pa}
@@ -21,7 +21,7 @@ Standard atmospheric pressure in Pa as defined in [#]_.
 Returns
 -------
 float
-    Standard atmospheric pressure in Pa.
+    Standard atmospheric pressure in Pascal.
 
 References
 ----------
@@ -32,7 +32,7 @@ References
 
 absolute_zero_celsius: Final[float] = -273.15
 r"""
-Absolute zero temperature in Celsius [#]_.
+Absolute zero temperature :math:`\mathrm{t_0}` in degree Celsius [#]_.
 
 .. math::
     t_0 = -273.15 \text{°C}
@@ -50,7 +50,7 @@ References
 
 reference_sound_pressure: Final[float] = 20e-6
 r"""
-Reference sound pressure :math:`p_\text{ref}` in Pa [#]_.
+Reference sound pressure :math:`p_\text{ref}` in Pascal [#]_.
 
 .. math::
     p_\text{ref} = 20 \, \mathrm{\mu Pa}
@@ -68,7 +68,7 @@ References
 
 reference_sound_power: Final[float] = 1e-12
 r"""
-Reference sound power :math:`P_\text{ref}` in W [#]_.
+Reference sound power :math:`P_\text{ref}` in Watt [#]_.
 
 .. math::
     P_\text{ref} = 1 \, \text{pW} = 10^{-12} \, \text{W}
@@ -86,7 +86,7 @@ References
 
 reference_air_temperature_celsius: Final[float] = 20
 r"""
-Reference air temperature in degree Celsius [#]_.
+Reference air temperature :math:`t_\text{ref}` in degree Celsius [#]_.
 
 .. math::
     t_\text{ref} = 20 \text{°C}
