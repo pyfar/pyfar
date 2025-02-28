@@ -18,11 +18,11 @@ def speed_of_sound_simple(temperature):
         - :math:`t` is the air temperature (°C)
         - :math:`t_\text{ref}=20\mathrm{°C}` is the reference air temperature
           (°C), see
-          :py:attr:`pyfar.constants.reference_air_temperature_celsius`
+          :py:attr:`reference_air_temperature_celsius`
         - :math:`t_0=-273.15` °C is the absolute zero temperature (°C), see
-          :py:attr:`pyfar.constants.absolute_zero_celsius`
+          :py:attr:`absolute_zero_celsius`
         - :math:`c=343.2` m/s is the speed of sound at the reference
-          temperature, see :py:attr:`pyfar.constants.reference_speed_of_sound`
+          temperature, see :py:attr:`reference_speed_of_sound`
 
     Parameters
     ----------
