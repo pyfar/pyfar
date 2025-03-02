@@ -633,6 +633,19 @@ def test_converters():
     coordinates.cyl2cart(0, 0, 1)
 
 
+def test_disabled_property_slicing():
+    """Test if slicing is disabled for properties."""
+    x = [1, 1]
+    coordinates = Coordinates(x, 0, 0)
+    coordinates.x[0] = 0
+    npt.assert_equal(coordinates.x, x)
+
+    azimuth = [0, 0.3]
+    coordinates = Coordinates.from_spherical_elevation(azimuth, 0, 1)
+    coordinates.azimuth[0] = 1
+    npt.assert_equal(coordinates.azimuth, azimuth)
+
+
 @pytest.mark.parametrize(
     ("points_1", "points_2", "points_3", "actual", "expected"), [
         (1, 1, 1,                Coordinates(1, 1, -1),                 False),

@@ -41,6 +41,17 @@ coordinate systems, e.g., the `azimuth` angle is contained in two coordinate
 systems (`spherical_colatitude` and `spherical_elevation`). The table below
 lists all coordinates.
 
+.. note::
+    All coordinates are returned as copies of the internal data. This means
+    that for example ``coordinates.x[0] = 0`` does not change
+    ``coordinates.x``. This can be done using
+
+    .. code-block:: python
+
+       new_x = coordinates.x
+       new_x[0] = 0
+       coordinates.x = new_x
+
 .. list-table::
    :widths: 25 75
    :header-rows: 1
@@ -1257,7 +1268,7 @@ class Coordinates():
         (:math:`-\infty` < x < :math:`\infty`).
         """
         self._check_empty()
-        return self._x
+        return self._x.copy()
 
     @x.setter
     def x(self, value):
@@ -1270,7 +1281,7 @@ class Coordinates():
         (:math:`-\infty` < y < :math:`\infty`).
         """
         self._check_empty()
-        return self._y
+        return self._y.copy()
 
     @y.setter
     def y(self, value):
@@ -1283,7 +1294,7 @@ class Coordinates():
         (:math:`-\infty` < z < :math:`\infty`).
         """
         self._check_empty()
-        return self._z
+        return self._z.copy()
 
     @z.setter
     def z(self, value):
