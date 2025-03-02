@@ -41,7 +41,7 @@ coordinate systems, e.g., the `azimuth` angle is contained in two coordinate
 systems (`spherical_colatitude` and `spherical_elevation`). The table below
 lists all coordinates.
 
-note.. note::
+note::
     All coordinates are returned as copies of the internal data. This means
     that for example ``coordinates.x[0] = 0`` does not change
     ``coordinates.x``. This can be done using
