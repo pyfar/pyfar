@@ -43,8 +43,14 @@ lists all coordinates.
 
 .. note::
     All coordinates are returned as copies of the internal data. This means
-    that changing values within slices (e.g. ``coordinates.x[0] = 0``)
-    has no effect on the :py:class:`~pyfar.Coordinates` object's data.
+    that for example ``coordinates.x[0] = 0`` does not change
+    ``coordinates.x``. This can be done using
+    
+    .. code-block:: python
+
+       new_x = coordinates.x
+       new_x[0] = 0
+       coordinates.x = new_x
 .. list-table::
    :widths: 25 75
    :header-rows: 1
