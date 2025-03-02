@@ -45,7 +45,7 @@ lists all coordinates.
     All coordinates are returned as copies of the internal data. This means
     that for example ``coordinates.x[0] = 0`` does not change
     ``coordinates.x``. This can be done using
-    
+
     .. code-block:: python
 
        new_x = coordinates.x
