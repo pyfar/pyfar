@@ -37,6 +37,8 @@ from .interpolation import (
 from . import filter
 from . import fft
 
+from .regularization import RegularizedSpectrumInversion
+
 
 __all__ = [
     'fft',
@@ -69,4 +71,5 @@ __all__ = [
     'normalize',
     'fractional_time_shift',
     'correlate',
+    'RegularizedSpectrumInversion',
 ]
