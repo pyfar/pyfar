@@ -111,17 +111,20 @@ def test_regularization_beta_mean_max(impulse):
         (200, 10e3))
 
     Regu.beta = 'energy'
-    assert Regu.beta == \
+    assert Regu.beta_value == \
         pf.dsp.energy(impulse) / pf.dsp.energy(Regu.regularization)
+    assert Regu.beta == 'energy'
 
     Regu.beta = 'max'
-    assert Regu.beta == \
+    assert Regu.beta_value == \
         np.max(np.abs(impulse.freq)) / np.max(np.abs(Regu.regularization.freq))
+    assert Regu.beta == 'max'
 
     Regu.beta = 'mean'
-    assert Regu.beta == \
+    assert Regu.beta_value == \
         np.mean(np.abs(impulse.freq)) / \
             np.mean(np.abs(Regu.regularization.freq))
+    assert Regu.beta == 'mean'
 
 
 def test_regularization_target(impulse):

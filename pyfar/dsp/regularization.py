@@ -22,7 +22,7 @@ class RegularizedSpectrumInversion():
         S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \beta |\epsilon(f)|^2} D(f)
 
     with :math:`f` being the frequency, :math:`S(f)` the spectrum of the signal
-    to be inverted, :math:`(\cdot)^*` the complex conjugate,
+    to be inverted, :math:`*` the complex conjugate,
     :math:`\epsilon(f)` the regularization, and :math:`\beta` a scalar to
     control the amount of regularization. :math:`D(f)` denotes an optional
     target function.
@@ -69,9 +69,10 @@ class RegularizedSpectrumInversion():
         Regularization from a given frequency range.
 
         Defines a frequency range within which the regularization
-        :math:`\epsilon(f)` is set to `regularization_within`.
+        :math:`\epsilon(f)` is set to ``regularization_within``.
         Outside the frequency range the regularization is
-        :math:`\epsilon(f)=1` and can be controlled using the `beta` parameter.
+        :math:`\epsilon(f)=1` and can be controlled using the ``beta``
+        parameter.
         The regularization factors are cross-faded using a raised cosine window
         function with a width of :math:`\sqrt{2}f` above and below the given
         frequency range.
@@ -86,7 +87,7 @@ class RegularizedSpectrumInversion():
             Set regularization inside frequency range. The default is `0`.
         beta : float, string, optional
             Beta parameter to control the scaling of the regularization as in
-            :eq:`regularized_inversion`. Can be a
+            equation :eq:`regularized_inversion`. Can be a
 
             ``numerical value``
                 Usually between ``0`` and ``1``, with ``0`` being no
@@ -176,7 +177,7 @@ class RegularizedSpectrumInversion():
         Regularization from a given magnitude spectrum.
 
         Regularization passed as :py:class:`~pyfar.Signal`. The length and
-        sampling rate of `regularization` must match the length and sampling
+        sampling rate of ``regularization`` must match the length and sampling
         rate of the signal to be inverted.
 
         Parameters
@@ -275,30 +276,41 @@ class RegularizedSpectrumInversion():
     @property
     def beta(self):
         r"""
-        Amount of regularization :math:`\beta`.
+        Scaling :math:`\beta` of regularization function :math:`\epsilon(f)`.
+
+        This can be ``'energy'``, ``'max'``, ``'mean'``, or a number.
+
+        To return the numeric :math:`\beta` value used in the inversion as in
+        equation :eq:`regularized_inversion`, use the property
+        :py:attr:`beta_value`.
         """
         return self._beta
 
     @beta.setter
     def beta(self, beta):
-        """Set beta parameter for sacling of regularization function."""
+        """Set beta parameter for scaling of regularization function."""
         if not isinstance(beta, numbers.Number) \
             and beta not in ['energy', 'mean', 'max']:
             raise ValueError("Beta must be a scalar or 'energy', 'mean' or "
                              "'max'.")
+        self._beta = beta
+        return self._beta
 
-        # Set beta
-        if beta == 'mean':
-            self._beta = np.mean(np.abs(self.signal.freq)) / np.mean(
+    @property
+    def beta_value(self):
+        r"""Numeric :math:`\beta` value."""
+        if self.beta == 'mean':
+            self._beta_value = np.mean(np.abs(self.signal.freq)) / np.mean(
                 np.abs(self.regularization.freq))
-        elif beta == 'max':
-            self._beta = np.max(np.abs(self.signal.freq)) / np.max(
+        elif self.beta == 'max':
+            self._beta_value = np.max(np.abs(self.signal.freq)) / np.max(
                 np.abs(self.regularization.freq))
-        elif beta == 'energy':
-            self._beta = \
+        elif self.beta == 'energy':
+            self._beta_value = \
                 pf.dsp.energy(self.signal) / pf.dsp.energy(self.regularization)
         else:
-            self._beta = beta
+            self._beta_value = self.beta
+        return self._beta_value
 
     @property
     def regularization(self):
@@ -366,7 +378,7 @@ class RegularizedSpectrumInversion():
         # calculate inverse filter
         inverse = self.signal.copy()
         inverse.freq = \
-            np.conj(data) / (np.abs(data)**2 + self.beta *
+            np.conj(data) / (np.abs(data)**2 + self.beta_value *
                              np.abs(self.regularization.freq)**2)
 
         # Apply target function
