@@ -133,7 +133,7 @@ class RegularizedSpectrumInversion():
             >>> inverted = Inversion.invert
             ...
             >>> # Obtain the scaled regularization function
-            >>> regularization = Inversion.regularization * Inversion.beta
+            >>> regularization = Inversion.regularization * Inversion.beta_value
             ...
             >>> pf.plot.use()
             >>> fig, axes = plt.subplots(2,1)
