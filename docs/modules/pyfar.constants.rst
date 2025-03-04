@@ -1,11 +1,6 @@
 pyfar.constants
 ===============
 
-.. automodule:: pyfar.constants
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 **Constants**:
 
 .. autodata:: pyfar.constants.standard_atmospheric_pressure
@@ -16,3 +11,9 @@ pyfar.constants
 .. autodata:: pyfar.constants.reference_speed_of_sound
 .. autodata:: pyfar.constants.standard_air_density
 .. autodata:: pyfar.constants.reference_air_impedance
+
+
+.. automodule:: pyfar.constants
+   :members:
+   :undoc-members:
+   :show-inheritance:
