@@ -11,9 +11,9 @@ __all__ = [
 ]
 
 
-standard_atmospheric_pressure: Final[float] = 101325.0
+reference_atmospheric_pressure: Final[float] = 101325.0
 r"""
-Standard atmospheric pressure :math:`P_\text{atm}` in Pascal [#]_.
+Reference atmospheric pressure :math:`P_\text{atm}` in Pascal [#]_.
 
 .. math::
     P_\text{atm} = 101325 \, \text{Pa}
@@ -21,7 +21,7 @@ Standard atmospheric pressure :math:`P_\text{atm}` in Pascal [#]_.
 Returns
 -------
 float
-    Standard atmospheric pressure in Pascal.
+    Reference atmospheric pressure in Pascal.
 
 References
 ----------
@@ -123,9 +123,9 @@ References
 """
 
 
-standard_air_density: Final[float] = 1.204
+reference_air_density: Final[float] = 1.204
 r"""
-Standard air density in :math:`\text{kg}/\text{m}^3` at standard
+Reference air density in :math:`\text{kg}/\text{m}^3` at reference
 atmospheric pressure and 20°C [#]_.
 
 .. math::
@@ -136,7 +136,7 @@ atmospheric pressure and 20°C [#]_.
 Returns
 -------
 float
-    Standard air density in :math:`\text{kg}/\text{m}^3`.
+    Reference air density in :math:`\text{kg}/\text{m}^3`.
 
 References
 ----------
@@ -146,7 +146,7 @@ References
 
 
 reference_air_impedance: Final[float] = (
-    reference_speed_of_sound * standard_air_density)
+    reference_speed_of_sound * reference_air_density)
 r"""
 Reference air impedance :math:`Z_\text{ref}` in Pa s/m is calculated based on
 :py:attr:`reference_speed_of_sound` and
