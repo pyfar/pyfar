@@ -1,6 +1,8 @@
 pyfar.constants
 ===============
 
+Module for constants and physical properties of air.
+
 **Constants**:
 
 .. autodata:: pyfar.constants.standard_atmospheric_pressure

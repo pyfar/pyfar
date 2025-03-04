@@ -1,4 +1,4 @@
-"""Module for constants and physical properties of air."""
+# Module for constants and physical properties of air.  # noqa: D104
 
 from typing import Final
 
