@@ -1327,8 +1327,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 # theoretically possible that the absolute maximum of
                 # `impulse_response` is negative but
                 # `correlation_analytic[argmax].real` is positive.
-                if correlation_analytic[argmax].real < 0.0:
-                    search_region *= -1.
+                search_region *= np.sign(correlation_analytic[argmax].real)
 
                 # mask values with a negative gradient
                 mask = np.gradient(search_region, search_region_range) > 0
