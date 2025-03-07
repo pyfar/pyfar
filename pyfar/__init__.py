@@ -17,7 +17,6 @@ from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 from .classes.transmission_matrix import TransmissionMatrix
 
 from . import plot
-from . import samplings
 from . import io
 from . import dsp
 from . import signals
@@ -44,7 +43,6 @@ __all__ = [
     'FilterSOS',
     'TransmissionMatrix',
     'plot',
-    'samplings',
     'io',
     'dsp',
     'signals',
