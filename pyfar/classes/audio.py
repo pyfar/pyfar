@@ -586,7 +586,7 @@ class FrequencyData(_Audio):
         # match shape of frequencies
         if self.frequencies.size != data.shape[-1]:
             raise ValueError(
-                "Number of frequency values does not match the number of"
+                "Number of frequency values does not match the number of "
                 "frequencies.")
         self._data = data
 
