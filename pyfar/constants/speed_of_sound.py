@@ -1,6 +1,6 @@
 """File containing all speed of sound calculation functions."""
 import numpy as np
-from . import utils
+from . import constants
 import pyfar as pf
 
 
@@ -56,7 +56,7 @@ def speed_of_sound_simple(temperature):
 
 
 def speed_of_sound_ideal_gas(
-        temperature, relative_humidity, atmospheric_pressure=101325,
+        temperature, relative_humidity, atmospheric_pressure=None,
         saturation_vapor_pressure=None):
     """Calculate speed of sound in air using the ideal gas law.
 
@@ -70,7 +70,8 @@ def speed_of_sound_ideal_gas(
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : float, array_like, optional
-        Atmospheric pressure in pascal, by default 101325 Pa.
+        Atmospheric pressure in pascal, by default
+        :py:attr:`reference_atmospheric_pressure`
     saturation_vapor_pressure : float, array_like, optional
         Saturation vapor pressure in Pa.
         If not given, the function
@@ -88,6 +89,8 @@ def speed_of_sound_ideal_gas(
     .. [#] V. E. Ostashev and D. K. Wilson, Acoustics in Moving Inhomogeneous
            Media, 2nd ed. London: CRC Press, 2015. doi: 10.1201/b18922.
     """
+    if atmospheric_pressure is None:
+        atmospheric_pressure = pf.constants.reference_atmospheric_pressure
     # check inputs
     if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
@@ -101,7 +104,7 @@ def speed_of_sound_ideal_gas(
         raise TypeError(
             'Atmospheric pressure must be a number or array of numbers')
     temperature = np.array(temperature, dtype=float)
-    temperature_kelvin = temperature + 273.15
+    temperature_kelvin = temperature - pf.constants.absolute_zero_celsius
     if np.any(np.array(temperature_kelvin) < 0):
         raise ValueError("Temperature must be above -273.15°C.")
     if np.any(np.array(relative_humidity) < 0) or np.any(
@@ -123,7 +126,7 @@ def speed_of_sound_ideal_gas(
 
     # partial pressure of water vapor in Pa
     if saturation_vapor_pressure is None:
-        p = utils.saturation_vapor_pressure(temperature)  # Pa
+        p = constants.saturation_vapor_pressure_magnus(temperature)  # Pa
     else:
         p = np.array(saturation_vapor_pressure, dtype=float)  # Pa
     e = relative_humidity * p  # Pa

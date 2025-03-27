@@ -4,19 +4,6 @@ import pyfar as pf
 import numpy.testing as npt
 
 
-def _simplified_ideal_gas(temperature_celsius):
-    """Calculate the speed of sound in air using a simplified version of the
-    ideal gas law based on the temperature in °C.
-    See :py:func:`~pyfar.constants.speed_of_sound_simple`
-    for more details.
-
-    It is used for testing other speed of sound methods, to see if the
-    results are within a reasonable range.
-    """
-    temperature_kelvin = temperature_celsius + 273.15
-    return 343.2*np.sqrt((temperature_kelvin)/293.15)
-
-
 def test_speed_of_sound_simple_scalar():
     temperature = 20
     expected = 343.2 * np.sqrt((temperature + 273.15) / 293.15)
@@ -51,12 +38,11 @@ def test_speed_of_sound_simple_edge_cases():
 
 def test_speed_of_sound_ideal_gas_typical_values():
     temperature = 20.0  # Celsius
-    relative_humidity = 0.5  # 50%
-    atmospheric_pressure = 101325  # Pa
+    relative_humidity = 0  # 0%
     result = pf.constants.speed_of_sound_ideal_gas(
-        temperature, relative_humidity, atmospheric_pressure)
-    expected = _simplified_ideal_gas(temperature)
-    assert np.isclose(result, expected, rtol=1e-2)
+        temperature, relative_humidity)
+    expected = pf.constants.reference_speed_of_sound
+    npt.assert_almost_equal(result, expected, decimal=2)
 
 
 @pytest.mark.parametrize("temperature", [  # Celsius
@@ -87,49 +73,52 @@ def test_speed_of_sound_ideal_gas_array_like(
 def test_speed_of_sound_ideal_gas_values_p_water():
     temperature = 20.0  # Celsius
     relative_humidity = 0.5  # 50%
-    atmospheric_pressure = 101325  # Pa
-    p_water = pf.constants.saturation_vapor_pressure(temperature)
+    atmospheric_pressure = pf.constants.reference_atmospheric_pressure  # Pa
+    p_water = pf.constants.saturation_vapor_pressure_magnus(temperature)
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure, p_water)
     expected = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    assert np.isclose(result, expected)
+    npt.assert_allclose(result, expected)
 
 
 def test_speed_of_sound_ideal_gas_edge_temperature():
     temperature = -20.0  # Celsius
-    relative_humidity = 0.5  # 50%
-    atmospheric_pressure = 101325  # Pa
+    relative_humidity = 0.0  # 50%
+    atmospheric_pressure = pf.constants.reference_atmospheric_pressure  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = _simplified_ideal_gas(temperature)
-    assert np.isclose(result, expected, rtol=1e-2)
+    # calculated using the simplified ideal gas formula 'speed_of_sound_simple'
+    expected = 318.927  # m/s
+    npt.assert_allclose(result, expected, rtol=1e-4)
 
 
-def test_speed_of_sound_ideal_gas_edge_humidity():
+def test_speed_of_sound_ideal_gas_humidity():
     temperature = 20.0  # Celsius
     relative_humidity = 1.0  # 100%
-    atmospheric_pressure = 101325  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
-        temperature, relative_humidity, atmospheric_pressure)
-    expected = _simplified_ideal_gas(temperature)
-    assert np.isclose(result, expected, rtol=1e-2)
+        temperature, relative_humidity)
+    # calculated using the simplified ideal gas formula 'speed_of_sound_simple'
+    expected = pf.constants.reference_speed_of_sound
+    npt.assert_allclose(result, expected, rtol=1e-2)
+    assert result > expected
 
 
 def test_speed_of_sound_ideal_gas_edge_pressure():
     temperature = 20.0  # Celsius
-    relative_humidity = 0.5  # 50%
+    relative_humidity = 0.0  # 0%
     atmospheric_pressure = 90000  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
-    expected = _simplified_ideal_gas(temperature)
-    assert np.isclose(result, expected, rtol=1e-2)
+    expected = pf.constants.reference_speed_of_sound
+    assert result < expected
+    npt.assert_allclose(result, expected, rtol=1e-2)
 
 
 def test_speed_of_sound_ideal_gas_invalid_temperature():
     temperature = -300.0  # Celsius, out of valid range
-    relative_humidity = 0.5  # 50%
-    atmospheric_pressure = 101325  # Pa
+    relative_humidity = 0.0  # 0%
+    atmospheric_pressure = pf.constants.reference_atmospheric_pressure  # Pa
     with pytest.raises(ValueError, match="Temperature must be"):
         pf.constants.speed_of_sound_ideal_gas(
             temperature, relative_humidity, atmospheric_pressure)
@@ -138,7 +127,7 @@ def test_speed_of_sound_ideal_gas_invalid_temperature():
 def test_speed_of_sound_ideal_gas_invalid_humidity():
     temperature = 20.0  # Celsius
     relative_humidity = 1.5  # 150%, out of valid range
-    atmospheric_pressure = 101325  # Pa
+    atmospheric_pressure = pf.constants.reference_atmospheric_pressure  # Pa
     with pytest.raises(ValueError, match="Relative humidity must be"):
         pf.constants.speed_of_sound_ideal_gas(
             temperature, relative_humidity, atmospheric_pressure)
