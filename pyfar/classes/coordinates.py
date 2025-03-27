@@ -123,7 +123,7 @@ class Coordinates():
     see :ref:`coordinate_systems` and :ref:`coordinates` for
     more information.
 
-    If you want to initialize in an other
+    If you want to initialize in another
     domain use :py:func:`from_spherical_colatitude`,
     :py:func:`from_spherical_elevation`, :py:func:`from_spherical_front`,
     :py:func:`from_spherical_side`, or :py:func:`from_cylindrical`
