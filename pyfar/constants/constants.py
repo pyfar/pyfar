@@ -1,4 +1,4 @@
-"""Utils for constant calculation."""
+"""Constant calculation."""
 import numpy as np
 
 
