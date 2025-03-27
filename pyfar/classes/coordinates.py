@@ -138,7 +138,7 @@ class Coordinates():
         meters (:math:`-\infty` < x < :math:`\infty`).
     y : ndarray, number
         Y coordinate of a right handed Cartesian coordinate system in
-        meters ():math:`-\infty` < y < :math:`\infty`).
+        meters (:math:`-\infty` < y < :math:`\infty`).
     z : ndarray, number
         Z coordinate of a right handed Cartesian coordinate system in
         meters (:math:`-\infty` < z < :math:`\infty`).
