@@ -468,8 +468,42 @@ class FilterFIR(Filter):
         """Process a single filter channel.
         This is a hidden static method required for a shared processing
         function in the parent class.
+
+        Parameters
+        ----------
+        coefficients : array
+            Coefficients of the filter channel.
+        data : array
+            The data to be filtered of shape ``(cshape, n_samples)``.
+        zi : array, optional
+            The initial filter state of shape ``(cshape, order)`` where
+            ``cshape`` is the channel shape of the signal to be filtered.
+            The default is ``None``.
+
+        Returns
+        -------
+        out : array
+            The filtered data.
+        zf : array
+            The final filter state. Only returned if ``zi is not None``.
         """
-        return spsignal.lfilter(coefficients[0], 1, data, zi=zi)
+        b = coefficients[0]
+        # broadcast b to match ndim of data for convolution
+        b = np.broadcast_to(b, (1, ) * (data.ndim - b.ndim) + b.shape)
+
+        out_full = spsignal.oaconvolve(data, b, mode='full')
+
+        # Ensure that the output has the same shape as the input
+        out = out_full[..., 0:data.shape[-1]]
+
+        if zi is not None:
+            # add initial filter state to the beginning of the output
+            out[..., 0:zi.shape[-1]] += zi
+            # get new filter state
+            zf = out_full[..., data.shape[-1]:]
+            return out, zf
+        else:
+            return out
 
     def __repr__(self):
         """Representation of the filter object."""

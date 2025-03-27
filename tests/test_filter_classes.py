@@ -248,6 +248,17 @@ def test_filter_fir_process(impulse):
     npt.assert_allclose(res.time[0, :3], coeff)
 
 
+@pytest.mark.parametrize('shape', [(2,), (4, 1), (1, 2, 3)])
+def test_filter_fir_process_multichannel_signal(shape):
+    impulse = pf.signals.impulse(44100, amplitude=np.ones(shape))
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+    desired = np.tile(coeff, (*shape, 1))
+
+    npt.assert_allclose(res.time[..., :3], desired)
+
+
 def test_filter_fir_process_complex(impulse_complex):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse_complex.sampling_rate)
@@ -263,7 +274,7 @@ def test_filter_fir_process_state(impulse):
     state = filt.state
 
     npt.assert_allclose([[[0, 0, 0, 0, 0]]], state)
-    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff))
+    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff), atol=1e-16)
 
 
 def test_filter_fir_init_state(impulse):
@@ -481,8 +492,10 @@ def test_blockwise_processing(Filter):
     block_a = Filter.process(pf.Signal(signal.time[0, :3], 44100), reset=False)
     block_b = Filter.process(pf.Signal(signal.time[0, 3:], 44100), reset=False)
     # outputs have to be identical in this case
-    npt.assert_array_equal(np.atleast_2d(complete.time[0, :3]), block_a.time)
-    npt.assert_array_equal(np.atleast_2d(complete.time[0, 3:]), block_b.time)
+    npt.assert_allclose(np.atleast_2d(complete.time[0, :3]), block_a.time,
+                        atol=1e-15)
+    npt.assert_allclose(np.atleast_2d(complete.time[0, 3:]), block_b.time,
+                        atol=1e-15)
 
 
 def test_blockwise_processing_with_coefficients_exchange():
