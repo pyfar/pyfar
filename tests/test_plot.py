@@ -9,19 +9,15 @@ import numpy as np
 import numpy.testing as npt
 
 """
-Testing plots is difficult, as matplotlib does not create the exact same
-figures on different systems (e.g. single pixels vary).
-Therefore, this file serves several purposes:
-1. The usual call of pytest, which only checks, if the functions do not raise
-errors.
-2. Creating baseline figures. If the global parameter `create_baseline` is
-set to True, figures are created in the corresponding folder. These need to be
-updated and manually inspected and if the plot look changed.
-3. Comparing the created images to the baseline images by setting the global
-parameter `compare_output`. This function should only be activated if intended.
+For general information on testing plot functions see
+https://pyfar-gallery.readthedocs.io/en/latest/contribute/contribution_guidelines.html#testing-plot-functions
 
-IMPORTANT: IN THE REPOSITORY, BOTH `CREATE_BASELINE` AND `COMPARE_OUTPUT` NEED
-TO BE SET TO FALSE, SO THE TRAVIS-CI CHECKS DO NOT FAIL.
+Important:
+- `create_baseline` and `compare_output` must be ``False`` when pushing
+  changes to pyfar.
+- `create_baseline` must only be ``True`` if the behavior of a plot function
+  changed. In this case it is best practice to recreate only the baseline plots
+  of the plot function (plot behavior) that changed.
 """
 # global parameters -----------------------------------------------------------
 create_baseline = False
