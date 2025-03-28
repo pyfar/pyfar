@@ -56,7 +56,7 @@ def speed_of_sound_simple(temperature):
 
 
 def speed_of_sound_cramer(
-        temperature, relative_humidity, atmospheric_pressure=101325,
+        temperature, relative_humidity, atmospheric_pressure=None,
         co2_ppm=314):
     """
     Calculate the speed of sound in air based on temperature, atmospheric
@@ -72,8 +72,9 @@ def speed_of_sound_cramer(
         Temperature in degree Celsius from 0°C Cto 30°C.
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
-    atmospheric_pressure : int, optional
-        Atmospheric pressure in Pascal, by default 101325 Pa.
+    atmospheric_pressure : float, array_like, optional
+        Atmospheric pressure in pascal, by default
+        :py:attr:`reference_atmospheric_pressure`.
         It must be between 75 000 Pa to 102000 Pa.
     co2_ppm : float, array_like
         CO2 concentration in parts per million. The default is 314 ppm,
@@ -91,6 +92,8 @@ def speed_of_sound_cramer(
            concentration,” The Journal of the Acoustical Society of America,
            vol. 93, no. 5, pp. 2510-2516, May 1993, doi: 10.1121/1.405827.
     """
+    if atmospheric_pressure is None:
+        atmospheric_pressure = pf.constants.reference_atmospheric_pressure
     # convert to array
     temperature = np.array(temperature)
     relative_humidity = np.array(relative_humidity)
@@ -119,7 +122,7 @@ def speed_of_sound_cramer(
     # temperature in Celsius
     t = temperature
     # thermodynamic temperature
-    T = t + 273.15
+    T = t - pf.constants.absolute_zero_celsius
 
     # enhancement factor f (Equation A2)
     f = 1.00062+3.14e-8 * p + 5.6e-7*temperature**2
