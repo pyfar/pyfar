@@ -75,9 +75,9 @@ def speed_of_sound_ideal_gas(
     saturation_vapor_pressure : float, array_like, optional
         Saturation vapor pressure in Pa.
         If not given, the function
-        :py:func:`~pyfar.constants.saturation_vapor_pressure` is used.
+        :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus` is used.
         Note that the valid temperature range is therefore also dependent on
-        :py:func:`~pyfar.constants.saturation_vapor_pressure`.
+        :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus`.
 
     Returns
     -------
