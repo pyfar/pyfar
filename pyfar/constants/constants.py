@@ -1,8 +1,8 @@
-"""Utils for constant calculation."""
+"""Constant calculation."""
 import numpy as np
 
 
-def saturation_vapor_pressure(temperature):
+def saturation_vapor_pressure_magnus(temperature):
     r"""
     Calculate the saturation vapor pressure of water in Pa using the
     Magnus formula.
