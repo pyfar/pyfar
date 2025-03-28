@@ -6,7 +6,7 @@ from .speed_of_sound import (
     speed_of_sound_simple,
 )
 
-from .medium_attenuation import (
+from .constants import (
     air_attenuation,
 )
 

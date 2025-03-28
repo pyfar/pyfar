@@ -141,7 +141,7 @@ def test_calculate_accuracy_concentration_water_vapour(
     temperature = 10
     atmospheric_pressure = 101325
     frequencies = 1e3
-    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+    accuracy = pf.constants.constants._calculate_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape)
     npt.assert_array_equal(accuracy.freq, expected_accuracy)
@@ -163,7 +163,7 @@ def test_calculate_accuracy_temperature(
     concentration_water_vapour = 1
     atmospheric_pressure = 101325
     frequencies = 1e3
-    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+    accuracy = pf.constants.constants._calculate_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape)
     npt.assert_array_equal(accuracy.freq, expected_accuracy)
@@ -182,7 +182,7 @@ def test_calculate_accuracy_atmospheric_pressure(
     temperature = 0
     concentration_water_vapour = 1
     frequencies = 1e3
-    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+    accuracy = pf.constants.constants._calculate_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape)
     npt.assert_array_equal(accuracy.freq, expected_accuracy)
@@ -204,7 +204,7 @@ def test_calculate_accuracy_frequency_pressure_ratio(
     concentration_water_vapour = 1
     atmospheric_pressure = 101325
     frequencies = frequency_pressure_ratio * atmospheric_pressure
-    accuracy = pf.constants.medium_attenuation._calculate_accuracy(
+    accuracy = pf.constants.constants._calculate_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape)
     npt.assert_array_equal(accuracy.freq, expected_accuracy)
@@ -214,11 +214,11 @@ def test_calculate_accuracy_invalid_vapor():
     match = r"Concentration of water vapour must be between 0% and 100%."
     with pytest.raises(
             ValueError, match=re.escape(match)):
-        pf.constants.medium_attenuation._calculate_accuracy(
+        pf.constants.constants._calculate_accuracy(
             101, 20, 101325, 1000, (1,))
     with pytest.raises(
             ValueError, match=re.escape(match)):
-        pf.constants.medium_attenuation._calculate_accuracy(
+        pf.constants.constants._calculate_accuracy(
             -1, 20, 101325, 1000, (1,))
 
 
@@ -226,7 +226,7 @@ def test_calculate_accuracy_invalid_pressure():
     match = "Atmospheric pressure must be greater than 0 Pa."
     with pytest.raises(
             ValueError, match=re.escape(match)):
-        pf.constants.medium_attenuation._calculate_accuracy(
+        pf.constants.constants._calculate_accuracy(
             .05, 20, -101325, 1000, (1,))
 
 
@@ -234,7 +234,7 @@ def test_calculate_accuracy_invalid_temperature():
     match = "Temperature must be greater than -273.15°C."
     with pytest.raises(
             ValueError, match=re.escape(match)):
-        pf.constants.medium_attenuation._calculate_accuracy(
+        pf.constants.constants._calculate_accuracy(
             .05, -280, 101325, 1000, (1,))
 
 
@@ -242,6 +242,6 @@ def test_calculate_accuracy_invalid_frequency():
     match = "Frequencies must be positive."
     with pytest.raises(
             ValueError, match=re.escape(match)):
-        pf.constants.medium_attenuation._calculate_accuracy(
+        pf.constants.constants._calculate_accuracy(
             .05, 20, 101325, -1, (1,))
 

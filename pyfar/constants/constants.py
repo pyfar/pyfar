@@ -1,11 +1,12 @@
-"""Air attenuation calculation."""
+"""Constant calculation."""
 import numpy as np
 import pyfar as pf
 
 
+
 def air_attenuation(
         temperature, frequencies, relative_humidity,
-        atmospheric_pressure=101325):
+        atmospheric_pressure=None):
     r"""Calculate the pure tone attenuation of sound in air according to
     ISO 9613-1.
 
@@ -24,8 +25,9 @@ def air_attenuation(
         Just one dimensional array is allowed.
     relative_humidity : float, array_like
         Relative humidity in the range from 0 to 1.
-    atmospheric_pressure : int, optional
-        Atmospheric pressure in pascal, by default 101325 Pa.
+    atmospheric_pressure : float, array_like, optional
+        Atmospheric pressure in pascal, by default
+        :py:attr:`reference_atmospheric_pressure`.
 
     Returns
     -------
@@ -67,6 +69,8 @@ def air_attenuation(
            propagation outdoors -- Part 1: Calculation of the absorption of
            sound by the atmosphere.
     """
+    if atmospheric_pressure is None:
+        atmospheric_pressure = pf.constants.reference_atmospheric_pressure
     # check inputs
     if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
@@ -117,20 +121,18 @@ def air_attenuation(
     frequencies = np.array(frequencies, dtype=float)
 
     # calculate air attenuation
-    p_atmospheric_ref = 101325
-    t_degree_ref = 20
+    p_atmospheric_ref = pf.constants.reference_atmospheric_pressure
+    t_degree_ref = pf.constants.reference_air_temperature_celsius
 
     h_r = relative_humidity*100
     p_a = atmospheric_pressure
     p_r = p_atmospheric_ref
     f = frequencies
-    T = temperature + 273.15
-    T_0 = t_degree_ref + 273.15
+    T = temperature - pf.constants.absolute_zero_celsius
+    T_0 = t_degree_ref - pf.constants.absolute_zero_celsius
 
-    # saturation vapour pressure (Equation B.2 and B.3)
-    T_01 = 273.16  # triple-point isotherm temperature of 273.16 K
-    C = -6.8346*(T_01/T)**1.261+4.6151
-    p_sat = 10**C * p_r
+    # saturation vapour pressure
+    p_sat = _saturation_vapour_pressure_iso(temperature)
 
     # molar concentration of water vapor as a percentage (Equation B.1)
     h = h_r * (p_sat / p_r) * (p_a / p_r)
@@ -262,3 +264,40 @@ def _calculate_accuracy(
 
     # return FrequencyData object
     return pf.FrequencyData(accuracy, frequencies=frequencies)
+
+
+def _saturation_vapour_pressure_iso(temperature):
+    """Calculates the saturation vapour pressure after ISO 9613-1:1993.
+
+    This method is used in the :py:func:`air_attenuation` function to calculate
+    the saturation vapour pressure of water vapour in air as a close
+    approximation to
+    those calculated by the World Meteorological Organization.
+    The method is described in Equation B.2 and B.3 in [#]_.
+
+    Parameters
+    ----------
+    temperature : float, array_like
+        Temperature in degree Celsius.
+        Must be in the range of -20°C to 50°C for accuracy of +/-10% or
+        must be greater than -70°C for accuracy of +/-50%.
+
+    Returns
+    -------
+    p_sat : float, array_like
+        Saturation vapour pressure in pascal.
+
+    References
+    ----------
+    .. [#] ISO 9613-1:1993, Acoustics -- Attenuation of sound during
+           propagation outdoors -- Part 1: Calculation of the absorption of
+           sound by the atmosphere.
+    """
+    T = temperature - pf.constants.absolute_zero_celsius
+    p_r = pf.constants.reference_atmospheric_pressure
+    # triple-point isotherm temperature of 273.16 K
+    T_01 = -pf.constants.absolute_zero_celsius + 0.01
+
+    # saturation vapour pressure (Equation B.2 and B.3)
+    C = -6.8346*(T_01/T)**1.261+4.6151
+    return 10**C * p_r
