@@ -2,12 +2,19 @@
 
 from typing import Final
 
+from .constants import (
+    saturation_vapor_pressure_magnus,
+)
+
 from .speed_of_sound import (
     speed_of_sound_simple,
+    speed_of_sound_ideal_gas,
 )
 
 __all__ = [
+    'saturation_vapor_pressure_magnus',
     'speed_of_sound_simple',
+    'speed_of_sound_ideal_gas',
 ]
 
 
