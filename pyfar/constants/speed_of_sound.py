@@ -69,7 +69,7 @@ def speed_of_sound_cramer(
     Parameters
     ----------
     temperature : float, array_like
-        Temperature in degree Celsius from 0°C Cto 30°C.
+        Temperature in degree Celsius from 0°C to 30°C.
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : float, array_like, optional
