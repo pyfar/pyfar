@@ -6,8 +6,13 @@ from .speed_of_sound import (
     speed_of_sound_simple,
 )
 
+from .constants import (
+    air_attenuation,
+)
+
 __all__ = [
     'speed_of_sound_simple',
+    'air_attenuation',
 ]
 
 
