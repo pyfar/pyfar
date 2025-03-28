@@ -1,5 +1,6 @@
 """Constant calculation."""
 import numpy as np
+import pyfar as pf
 
 
 def saturation_vapor_pressure_magnus(temperature):
@@ -45,7 +46,8 @@ def saturation_vapor_pressure_magnus(temperature):
 
 
 def density_of_air(
-        temperature, relative_humidity, atmospheric_pressure=None):
+        temperature, relative_humidity, atmospheric_pressure=None,
+        saturation_vapor_pressure=None):
     r"""
     Calculate the density of air in kg/m³ based on the temperature,
     relative humidity, and atmospheric pressure.
@@ -62,6 +64,12 @@ def density_of_air(
     atmospheric_pressure : float, array_like, optional
         Atmospheric pressure in pascal (Pa), by default
         :py:attr:`reference_atmospheric_pressure`.
+    saturation_vapor_pressure : float, array_like, optional
+        Saturation vapor pressure in Pa.
+        If not given, the function
+        :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus` is used.
+        Note that the valid temperature range is therefore also dependent on
+        :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus`.
 
     Returns
     -------
@@ -73,6 +81,8 @@ def density_of_air(
     .. [#] V. E. Ostashev and D. K. Wilson, Acoustics in Moving Inhomogeneous
            Media, 2nd ed. London: CRC Press, 2015. doi: 10.1201/b18922.
     """
+    if atmospheric_pressure is None:
+        atmospheric_pressure = pf.constants.reference_atmospheric_pressure
     # check inputs
     if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
         raise TypeError(
@@ -105,7 +115,10 @@ def density_of_air(
     alpha = mu_a / mu_w
 
     # partial pressure of water vapor in Pa
-    p = saturation_vapor_pressure_magnus(temperature)  # Pa
+    if saturation_vapor_pressure is None:
+        p = saturation_vapor_pressure_magnus(temperature)  # Pa
+    else:
+        p = np.array(saturation_vapor_pressure, dtype=float)  # Pa
     e = relative_humidity * p  # Pa
 
     # Equation 6.70
