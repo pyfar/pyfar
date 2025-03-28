@@ -110,9 +110,8 @@ def speed_of_sound_ideal_gas(
     if np.any(np.array(relative_humidity) < 0) or np.any(
             np.array(relative_humidity) > 1):
         raise ValueError("Relative humidity must be between 0 and 1.")
-    if np.any(np.array(atmospheric_pressure) < 0):
-        raise ValueError("Atmospheric pressure must be larger than 0 Pa.")
-
+    if np.any(np.array(atmospheric_pressure) <= 0):
+        raise ValueError("Atmospheric pressure must be greater than 0 Pa.")
     P = np.array(atmospheric_pressure, dtype=float)  # Pa
     relative_humidity = np.array(relative_humidity, dtype=float)
 
