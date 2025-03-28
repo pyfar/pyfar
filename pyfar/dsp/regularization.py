@@ -23,7 +23,7 @@ class RegularizedSpectrumInversion():
         S^{-1}(f) = \frac{S^*(f)}{S^*(f)S(f) + \beta |\epsilon(f)|^2} D(f)
 
     with :math:`f` being the frequency, :math:`S(f)` the spectrum of the signal
-    to be inverted, :math:`*` the complex conjugate,
+    to be inverted, :math:`^*` the complex conjugate,
     :math:`\epsilon(f)` the regularization, and :math:`\beta` a scalar to
     control the amount of regularization. :math:`D(f)` denotes an optional
     target function.
