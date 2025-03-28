@@ -84,7 +84,7 @@ def test_speed_of_sound_ideal_gas_values_p_water():
 
 def test_speed_of_sound_ideal_gas_edge_temperature():
     temperature = -20.0  # Celsius
-    relative_humidity = 0.0  # 50%
+    relative_humidity = 0.0  # 0%
     atmospheric_pressure = pf.constants.reference_atmospheric_pressure  # Pa
     result = pf.constants.speed_of_sound_ideal_gas(
         temperature, relative_humidity, atmospheric_pressure)
