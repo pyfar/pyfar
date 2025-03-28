@@ -45,7 +45,7 @@ def saturation_vapor_pressure_magnus(temperature):
 
 
 def density_of_air(
-        temperature, relative_humidity, atmospheric_pressure):
+        temperature, relative_humidity, atmospheric_pressure=None):
     r"""
     Calculate the density of air in kg/m³ based on the temperature,
     relative humidity, and atmospheric pressure.
@@ -59,8 +59,9 @@ def density_of_air(
         Temperature in degrees Celsius (°C).
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
-    atmospheric_pressure : float, array_like
-        Atmospheric pressure in pascal (Pa).
+    atmospheric_pressure : float, array_like, optional
+        Atmospheric pressure in pascal (Pa), by default
+        :py:attr:`reference_atmospheric_pressure`.
 
     Returns
     -------
@@ -104,7 +105,7 @@ def density_of_air(
     alpha = mu_a / mu_w
 
     # partial pressure of water vapor in Pa
-    p = saturation_vapor_pressure(temperature)  # Pa
+    p = saturation_vapor_pressure_magnus(temperature)  # Pa
     e = relative_humidity * p  # Pa
 
     # Equation 6.70
