@@ -4,6 +4,7 @@ Documentation for regularization class.
 
 import pyfar as pf
 from pyfar.dsp.dsp import _cross_fade
+from pyfar.dsp.fft import _n_samples_from_n_bins
 import numpy as np
 import numbers
 
@@ -69,9 +70,9 @@ class RegularizedSpectrumInversion():
         Regularization from a given frequency range.
 
         Defines a frequency range within which the regularization
-        :math:`\epsilon(f)` is set to ``regularization_within``.
+        :math:`\epsilon(f)` is set to `regularization_within`.
         Outside the frequency range the regularization is
-        :math:`\epsilon(f)=1` and can be controlled using the ``beta``
+        :math:`\epsilon(f)=1` and can be controlled using the `beta`
         parameter.
         The regularization factors are cross-faded using a raised cosine window
         function with a width of :math:`\sqrt{2}f` above and below the given
@@ -177,7 +178,7 @@ class RegularizedSpectrumInversion():
         Regularization from a given magnitude spectrum.
 
         Regularization passed as :py:class:`~pyfar.Signal`. The length and
-        sampling rate of ``regularization`` must match the length and sampling
+        sampling rate of `regularization` must match the length and sampling
         rate of the signal to be inverted.
 
         Parameters
@@ -411,10 +412,17 @@ class RegularizedSpectrumInversion():
             # crossfade regularization factors at frequency limits
             regu_final = _cross_fade(regu_final, regu_outside, idx_xfade_upper)
 
-        return pf.Signal(regu_final, signal.sampling_rate, domain='freq')
+        # get number of samples according to the number of bins
+        n_samples = _n_samples_from_n_bins(signal.n_bins, signal.complex)
+
+        return pf.Signal(regu_final, signal.sampling_rate,
+                         n_samples, domain='freq')
 
 
     def _get_regularization_from_regularization_signal(self, signal):
         """Get regularization from signal."""
+        # get number of samples according to the number of bins
+        n_samples = _n_samples_from_n_bins(signal.n_bins, signal.complex)
+
         return pf.Signal(np.abs(self._regularization_signal.freq),
-                                signal.sampling_rate, domain='freq')
+                         signal.sampling_rate, n_samples, domain='freq')
