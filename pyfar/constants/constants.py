@@ -10,7 +10,7 @@ def air_attenuation(
     r"""Calculate the pure tone attenuation of sound in air according to
     ISO 9613-1.
 
-    Calculation is in accordance with ISO 9613-1 [#]_. The cshape of the
+    Calculation is in accordance with ISO 9613-1 [#]_. The shape of the
     outputs is broadcasted from the shapes of the ``temperature``,
     ``relative_humidity``, and ``atmospheric_pressure``.
 
@@ -109,8 +109,7 @@ def air_attenuation(
             np.array(relative_humidity) > 1):
         raise ValueError("Relative humidity must be between 0 and 1.")
     if np.any(np.array(atmospheric_pressure) > 200000):
-        raise ValueError("Atmospheric pressure must less than 200 kPa.")
-
+        raise ValueError("Atmospheric pressure must be less than 200 kPa.")
     # convert arrays
     temperature = np.array(
         temperature, dtype=float)[..., np.newaxis]

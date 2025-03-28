@@ -118,7 +118,7 @@ def test_air_attenuation_limits():
     with pytest.raises(ValueError, match=match):
         pf.constants.air_attenuation(
             temperature, frequency, 1.1, atmospheric_pressure)
-    match = 'Atmospheric pressure must less than 200 kPa.'
+    match = 'Atmospheric pressure must be less than 200 kPa.'
     with pytest.raises(ValueError, match=match):
         pf.constants.air_attenuation(
             temperature, frequency, relative_humidity, 200001)
