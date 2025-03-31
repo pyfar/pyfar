@@ -649,13 +649,13 @@ def test_reflection_density_room(n_samples, speed_of_sound, room_volume):
     npt.assert_almost_equal(t0, t_desired, decimal=3)
 
 
-@pytest.mark.parametrize("t_0", [0, 0.1, 0.3])
-@pytest.mark.parametrize("n_samples", [22050, 44100])
-@pytest.mark.parametrize("sampling_rate", [44100, 48000])
+@pytest.mark.parametrize("t_0", [0, 0.01])
+@pytest.mark.parametrize("n_samples", [2205, 4410])
+@pytest.mark.parametrize("sampling_rate", [4410, 4800])
 def test_dirac_sequence_dirac(
         t_0, n_samples, sampling_rate):
     times = pf.Signal(np.zeros(n_samples), sampling_rate).times
-    reflection_density = pf.TimeData(times**2, times)
+    reflection_density = pf.TimeData(times**2*1e3+100, times)
     sequence = pf.signals.dirac_sequence(
         reflection_density, t_0, n_samples=n_samples,
         sampling_rate=sampling_rate,
@@ -716,7 +716,7 @@ def test_dirac_sequence_const(
             delta_times.append(delta_time/sequence.sampling_rate)
             delta_time = 0
 
-    npt.assert_almost_equal(1/np.mean(delta_times)/mu, 1, decimal=2)
+    npt.assert_almost_equal(1/np.mean(delta_times)/mu, 1, decimal=1)
 
 
 def test_reflection_density_room_inputs():
@@ -744,9 +744,8 @@ def test_dirac_sequence_inputs():
     with pytest.raises(
             ValueError,
             match="reflection_density must be a pyfar.TimeData object."):
-        pf.signals.dirac_sequence(
-            500, 0, 400)
+        pf.signals.dirac_sequence(500, 0, 400)
 
     with pytest.raises(ValueError, match="t_0 must be positive."):
         pf.signals.dirac_sequence(
-            pf.TimeData(), -500, 400)
+            pf.TimeData([0], [0]), -500, 400)

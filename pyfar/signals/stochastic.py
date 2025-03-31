@@ -322,16 +322,18 @@ def dirac_sequence(
     mu_times = reflection_density.times
     t_current = t_0
     i_current = np.argmin(np.abs(t_current-mu_times))
+    t_max = reflection_density.times[-1]
     while True:
         # calculate next event time
         z = -rng.uniform(-1, 0) # uniform distribution in (0, 1]
         # Equation (5.43) interval size
         delta_ta = 1 / reflection_density.time[..., i_current] * np.log(1 / z)
         t_current += delta_ta
-        i_current = np.argmin(np.abs(t_current-mu_times))
 
-        if i_current == n_samples-1:
+        if t_current > t_max:
             break
+
+        i_current = np.argmin(np.abs(t_current-mu_times))
 
         dirac_sequence.time[..., i_current] = rng.choice([-1, 1], p=[0.5, 0.5])
 
