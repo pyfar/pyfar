@@ -151,3 +151,63 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
         p_noise, sampling_rate, fft_norm="rms", comment=comment)
 
     return signal
+
+
+def poisson_distributed_dirac(
+        room_volume, n_samples, sampling_rate=44100, speed_of_sound=None,
+        max_reflection_density=10000, seed=None):
+    """Dirac generation for impulse response based on .
+
+    Parameters
+    ----------
+    room_volume : float
+        Value for the calculation of the mean reflection ratio in a room.
+    n_samples : int
+        The length of the signal in samples.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is ``44100``.
+    speed_of_sound : float, None, optional
+        Speed of sound in the room.
+        By default, the reference speed of sound in air is used
+        see :py:attr:`pyfar.constants.reference_speed_of_sound`.
+    max_reflection_density : int, optional
+        The maximum reflection density. The default is ``10000``.
+        This value is used to calculate the mean reflection ratio.
+        The mean reflection ratio is calculated as
+        ``4 * pi * speed_of_sound**3 * time**2 / room_volume``.
+    seed : int, None, optional
+        The seed for the random generator. Pass a seed to obtain identical
+        results for multiple calls. The default is ``None``, which will yield
+        different results with every call.
+
+    Returns
+    -------
+    pf.Signal
+        Signal of the generated dirac impulse sequence.
+    """
+    if speed_of_sound is None:
+        speed_of_sound = pyfar.constants.reference_speed_of_sound
+    dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
+    times = dirac_sequence.times
+    rng = np.random.default_rng(seed)
+    # Equation (5.44) mean event occurrence
+    mu_time = 4 * np.pi * speed_of_sound**3 / room_volume
+
+    t_0 = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
+    t_current = t_0
+    while True:
+        mu = np.min((mu_time * t_current**2, max_reflection_density))
+
+        # calculate next event time
+        z = -rng.uniform(-1, 0) # uniform distribution in (0, 1]
+        # Equation (5.43) interval size
+        delta_ta = 1 / mu * np.log(1 / z)
+        t_current += delta_ta
+
+        if t_current >= times[-1]:
+            break
+
+        i_current = int(t_current * sampling_rate)
+        dirac_sequence.time[..., i_current] = rng.choice([-1, 1], p=[0.5, 0.5])
+
+    return dirac_sequence

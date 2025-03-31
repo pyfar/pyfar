@@ -627,3 +627,12 @@ def test_frequency_domain_sweep():
 
     with pytest.warns(UserWarning, match='avoid a division by zero'):
         pfs.exponential_sweep_freq(2*10, [0, 22050], 32, 32)
+
+
+def test_poisson_distributed_dirac_defaults():
+    sequence = pf.signals.poisson_distributed_dirac(
+        room_volume=100, n_samples=44100)
+
+    # test 
+    assert isinstance(sequence, pf.Signal)
+    assert sequence.sampling_rate == 44100
