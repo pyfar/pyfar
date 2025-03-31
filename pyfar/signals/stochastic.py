@@ -153,39 +153,33 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
     return signal
 
 
-def poisson_distributed_dirac(
+def reflection_density_room(
         room_volume, n_samples, sampling_rate=44100, speed_of_sound=None,
-        max_reflection_density=10000, seed=None):
+        max_reflection_density=10000):
     r"""
-    Generate a sequence of Dirac impulses based on the calculated
-    room reflection density.
+    Calculates the reflection density and starting time in a diffuse room.
 
-    The Dirac sequence is generated based on the chapter 5.3.4 of [#]_.
-    The first dirac can just be generated after :math:`t_0`.
+    The reflection density and starting time based on the chapter
+    5.3.4 of [#]_.
+    The starting time :math:`t_0` can be calculated based on:
 
     .. math:: t_0 = \left(\frac{2 V \cdot \ln(2)}{4 \pi c^3}\right)^{1/3}
 
-    The time difference between the diracs in the sequence is Poisson
-    distributed and can be calculated based on:
-
-    .. math:: \Delta t_a = \frac{1}{\mu} \cdot \ln{\frac{1}{z}}
-
-    with z being a random number in the following range :math:`z \in (0, 1]`
-    and :math:`\mu` being the reflection density in a room:
+    where :math:`V` is the room volume in :math:`m^3` and :math:`c` is the
+    speed of sound in the room. TThe reflection density :math:`\mu`
+    is calculated based on the following equation:
 
     .. math:: \mu = \min{\left(\frac{4 \pi c^3 \cdot t^2}{V}, \mu_{max}\right)}
 
-    All dirac impulses have a amplitude of 1 or -1, which is chosen
-    randomly with equal probability.
+    with :math:`t` being the time vector in seconds based on ``sampling_rate``
+    and ``n_samples`` and :math:`\mu_{max}` being the
+    maximum reflection density.
 
-    with:
-
-    - :math:`c` = ``speed_of_sound`` in the room
-    - :math:`V` = ``room_volume`` of the room
-    - :math:`t` = time in seconds
-    - :math:`t_0` = time of the first reflection
-    - :math:`\mu` = reflection density
-    - :math:`\mu_{max}` = ``max_reflection_density``
+    Notes
+    -----
+    This function can be used to generate the Dirac sequence for the
+    room impulse response synthesis using
+    :py:func:`pyfar.signals.dirac_sequence`.
 
     Parameters
     ----------
@@ -202,6 +196,102 @@ def poisson_distributed_dirac(
     max_reflection_density : int, optional
         The maximum reflection density. The default is ``10 000`` as Schröder
         defined it in his thesis.
+
+    Returns
+    -------
+    reflection_density : pyfar.TimeData
+        reflection density :math:`\mu` in :math:`1/s^2` over time.
+    t_0 : float
+        The dirac sequence generation starts after :math:`t_0`.
+
+    References
+    ----------
+    .. [#] D. Schröder, “Physically based real-time auralization of
+           interactive virtual environments,” PhD Thesis, Logos-Verlag,
+           Berlin, 2011. [Online].
+           Available: https://publications.rwth-aachen.de/record/50580
+
+    Examples
+    --------
+    Generate the reflection densities for a room with a different volumes.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> n_samples = 8800
+        >>> sampling_rate = 44100
+        >>> for v in [100, 500, 1000, 5000]:
+        >>>     reflection_density, t_0 = pf.signals.reflection_density_room(
+        ...         v, n_samples, sampling_rate)
+        >>>     ax = pf.plot.time(
+        ...         reflection_density,
+        ...         label=f"V={v} m$^3$ -> $t_0={t_0*1e3:.1f}$ ms")
+        >>> ax.legend()
+        >>> ax.set_title("Reflection density")
+
+    """
+    if speed_of_sound is None:
+        speed_of_sound = pyfar.constants.reference_speed_of_sound
+
+    # check input
+    room_volume = float(room_volume)
+    n_samples = int(n_samples)
+    if max_reflection_density is not None:
+        max_reflection_density = int(max_reflection_density)
+        if max_reflection_density <= 0:
+            raise ValueError("max_reflection_density must be positive.")
+
+    speed_of_sound = float(speed_of_sound)
+    if speed_of_sound <= 0:
+        raise ValueError("speed_of_sound must be positive.")
+    if room_volume <= 0:
+        raise ValueError("room_volume must be positive.")
+    if n_samples <= 0:
+        raise ValueError("n_samples must be positive.")
+
+    times = pyfar.Signal(np.zeros(n_samples), sampling_rate).times
+    # calculate the reflection density
+    mu = 4 * np.pi * speed_of_sound**3 * times**2 / room_volume
+    if max_reflection_density is not None:
+        mu[mu > max_reflection_density] = max_reflection_density
+    mu = pyfar.TimeData(mu, times)
+
+    # calculate the time of the first reflection
+    t_0 = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
+
+    # return the reflection density and the starting time
+    return mu, t_0
+
+
+def dirac_sequence(
+        reflection_density, t_0, n_samples, sampling_rate=44100, seed=None):
+    r"""Dirac sequence based on the reflection density over time.
+
+    The Dirac sequence is generated based on the chapter 5.3.4 of [#]_.
+
+    The time difference between each dirac in the sequence is Poisson
+    distributed and can be calculated based on:
+
+    .. math:: \Delta t_a = \frac{1}{\mu} \cdot \ln{\frac{1}{z}}
+
+    with z being a random number in the following range :math:`z \in (0, 1]`
+    and :math:`\mu` being the ``reflection_density`` in a room.
+    Each dirac has an amplitude of 1 or -1, which is chosen
+    randomly with equal probability.
+    The dirac sequence generation starts after :math:`t_0`.
+
+    Parameters
+    ----------
+    reflection_density : pyfar.TimeData
+        reflection density :math:`\mu` in :math:`1/s^2` over time.
+    t_0 : float
+        The dirac sequence generation starts after :math:`t_0`.
+        The unit is seconds.
+    n_samples : int
+        The length of the dirac sequence in samples.
+    sampling_rate : int, optional
+        The sampling rate of the dirac sequence in Hz.
+        The default is 44100.
     seed : int, None, optional
         The seed for the random generator. Pass a seed to obtain identical
         results for multiple calls. The default is ``None``, which will yield
@@ -219,46 +309,30 @@ def poisson_distributed_dirac(
            interactive virtual environments,” PhD Thesis, Logos-Verlag,
            Berlin, 2011. [Online].
            Available: https://publications.rwth-aachen.de/record/50580
-
     """
-    if speed_of_sound is None:
-        speed_of_sound = pyfar.constants.reference_speed_of_sound
-
     # check input
-    room_volume = float(room_volume)
-    n_samples = int(n_samples)
-    max_reflection_density = int(max_reflection_density)
-    speed_of_sound = float(speed_of_sound)
-    if speed_of_sound <= 0:
-        raise ValueError("speed_of_sound must be positive.")
-    if room_volume <= 0:
-        raise ValueError("room_volume must be positive.")
-    if n_samples <= 0:
-        raise ValueError("n_samples must be positive.")
-    if max_reflection_density <= 0:
-        raise ValueError("max_reflection_density must be positive.")
+    if not isinstance(reflection_density, pyfar.TimeData):
+        raise ValueError(
+            "reflection_density must be a pyfar.TimeData object.")
+    if t_0 < 0:
+        raise ValueError("t_0 must be positive.")
 
-    dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
-    times = dirac_sequence.times
     rng = np.random.default_rng(seed)
-    # Equation (5.44) mean event occurrence
-    mu_time = 4 * np.pi * speed_of_sound**3 / room_volume
-
-    t_0 = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
+    dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
+    mu_times = reflection_density.times
     t_current = t_0
+    i_current = np.argmin(np.abs(t_current-mu_times))
     while True:
-        mu = np.min((mu_time * t_current**2, max_reflection_density))
-
         # calculate next event time
         z = -rng.uniform(-1, 0) # uniform distribution in (0, 1]
         # Equation (5.43) interval size
-        delta_ta = 1 / mu * np.log(1 / z)
+        delta_ta = 1 / reflection_density.time[..., i_current] * np.log(1 / z)
         t_current += delta_ta
+        i_current = np.argmin(np.abs(t_current-mu_times))
 
-        if t_current >= times[-1]:
+        if i_current == n_samples-1:
             break
 
-        i_current = int(t_current * sampling_rate)
         dirac_sequence.time[..., i_current] = rng.choice([-1, 1], p=[0.5, 0.5])
 
     return dirac_sequence
