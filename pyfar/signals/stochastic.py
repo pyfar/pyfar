@@ -166,7 +166,7 @@ def reflection_density_room(
     .. math:: t_0 = \left(\frac{2 V \cdot \ln(2)}{4 \pi c^3}\right)^{1/3}
 
     where :math:`V` is the room volume in :math:`m^3` and :math:`c` is the
-    speed of sound in the room. TThe reflection density :math:`\mu`
+    speed of sound in the room. The reflection density :math:`\mu`
     is calculated based on the following equation:
 
     .. math:: \mu = \min{\left(\frac{4 \pi c^3 \cdot t^2}{V}, \mu_{max}\right)}
