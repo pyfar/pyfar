@@ -338,7 +338,7 @@ def dirac_sequence(
         >>> import numpy as np
         >>> n_samples = 22050
         >>> reflection_density = pf.TimeData(
-        ...     np.ones(n_samples)*44100/2, np.arange(n_samples)/44100)
+        ...     np.ones(n_samples)*10000, np.arange(n_samples)/44100)
         >>> dirac_sequence = pf.signals.dirac_sequence(
         ...     reflection_density, n_samples, t_start=0)
         >>> ax = pf.plot.time(dirac_sequence, linewidth=.5)
