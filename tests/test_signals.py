@@ -657,7 +657,7 @@ def test_dirac_sequence_dirac(
     times = pf.Signal(np.zeros(n_samples), sampling_rate).times
     reflection_density = pf.TimeData(times**2*1e3+100, times)
     sequence = pf.signals.dirac_sequence(
-        reflection_density, t_start, n_samples=n_samples,
+        reflection_density, n_samples=n_samples, t_start=t_start,
         sampling_rate=sampling_rate,
         )
 
@@ -744,8 +744,8 @@ def test_dirac_sequence_inputs():
     with pytest.raises(
             ValueError,
             match="reflection_density must be a pyfar.TimeData object."):
-        pf.signals.dirac_sequence(500, 0, 400)
+        pf.signals.dirac_sequence(500, 400)
 
     with pytest.raises(ValueError, match="t_start must be positive."):
         pf.signals.dirac_sequence(
-            pf.TimeData([0], [0]), -500, 400)
+            pf.TimeData([0], [0]), 500, -400)

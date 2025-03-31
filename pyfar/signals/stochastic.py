@@ -155,15 +155,16 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
 
 def reflection_density_room(
         room_volume, n_samples, speed_of_sound=None,
-        max_reflection_density=10000, sampling_rate=44100):
+        max_reflection_density=None, sampling_rate=44100):
     r"""
     Calculates the reflection density and starting time in a diffuse room.
 
     The reflection density and starting time based on the chapter
     5.3.4 of [#]_.
-    The starting time :math:`t_0` can be calculated based on:
+    The starting time :math:`t_\text{start}` can be calculated based on:
 
-    .. math:: t_0 = \left(\frac{2 V \cdot \ln(2)}{4 \pi c^3}\right)^{1/3}
+    .. math::
+        t_\text{start} = \left(\frac{2 V \cdot \ln(2)}{4 \pi c^3}\right)^{1/3}
 
     where :math:`V` is the room volume in :math:`m^3` and :math:`c` is the
     speed of sound in the room. The reflection density :math:`\mu`
@@ -192,8 +193,8 @@ def reflection_density_room(
         By default, the :py:attr:`~pyfar.constants.reference_speed_of_sound`
         is used.
     max_reflection_density : int, optional
-        The maximum reflection density. The default is ``10 000`` as Schröder
-        defined it in his thesis.
+        The maximum reflection density. The default is None, which means
+        that the reflection density is not limited.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
 
@@ -201,8 +202,8 @@ def reflection_density_room(
     -------
     reflection_density : pyfar.TimeData
         reflection density :math:`\mu` in :math:`1/s^2` over time.
-    t_0 : float
-        The dirac sequence generation starts after :math:`t_0`.
+    t_start : float
+        The dirac sequence generation starts after :math:`t_start`.
 
     References
     ----------
@@ -257,10 +258,10 @@ def reflection_density_room(
     mu = pyfar.TimeData(mu, times)
 
     # calculate the time of the first reflection
-    t_0 = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
+    t_start = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
 
     # return the reflection density and the starting time
-    return mu, t_0
+    return mu, t_start
 
 
 def dirac_sequence(
@@ -284,14 +285,12 @@ def dirac_sequence(
     Parameters
     ----------
     reflection_density : pyfar.TimeData
-        reflection density :math:`\mu` in :math:`1/s^2` over time. Its cshape
-        need to be broadcastable to to shape of ``t_start``.
+        reflection density :math:`\mu` in :math:`1/s^2` over time.
     n_samples : int
         The length of the dirac sequence in samples.
     t_start : float
         The dirac sequence generation starts after :math:`t_\text{start}`
-        in seconds. Its shape need to be broadcastable to the
-        cshape of ``reflection_density``. The default is ``0`` seconds.
+        in seconds. The default is ``0``.
     sampling_rate : int, optional
         The sampling rate of the dirac sequence in Hz.
         The default is 44100.
@@ -318,7 +317,7 @@ def dirac_sequence(
         raise ValueError(
             "reflection_density must be a pyfar.TimeData object.")
     if t_start < 0:
-        raise ValueError("t_0 must be positive.")
+        raise ValueError("t_start must be positive.")
 
     rng = np.random.default_rng(seed)
     dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
