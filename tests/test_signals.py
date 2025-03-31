@@ -749,3 +749,9 @@ def test_dirac_sequence_inputs():
     with pytest.raises(ValueError, match="t_start must be positive."):
         pf.signals.dirac_sequence(
             pf.TimeData([0], [0]), 500, -400)
+
+    with pytest.raises(
+            ValueError,
+            match="The reflection density must be less than sampling_rate/2."):
+        pf.signals.dirac_sequence(
+            pf.TimeData([44100], [0]), 500)

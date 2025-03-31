@@ -176,11 +176,10 @@ def reflection_density_room(
     and ``n_samples`` and :math:`\mu_{max}` being the
     maximum reflection density.
 
-    Notes
-    -----
-    This function can be used to generate the Dirac sequence for the
-    room impulse response synthesis using
-    :py:func:`pyfar.signals.dirac_sequence`.
+    .. note::
+        This function can be used to generate the Dirac sequence for the
+        room impulse response synthesis using
+        :py:func:`pyfar.signals.dirac_sequence`.
 
     Parameters
     ----------
@@ -286,6 +285,9 @@ def dirac_sequence(
     ----------
     reflection_density : pyfar.TimeData
         reflection density :math:`\mu` in :math:`1/s^2` over time.
+        An error is raised if the reflection sensitivity is greater than
+        sampling_rate/2. An maximum reflection density should be less than
+        sampling_rate/4.
     n_samples : int
         The length of the dirac sequence in samples.
     t_start : float
@@ -311,6 +313,36 @@ def dirac_sequence(
            interactive virtual environments,” PhD Thesis, Logos-Verlag,
            Berlin, 2011. [Online].
            Available: https://publications.rwth-aachen.de/record/50580
+
+    Examples
+    --------
+    Generate a Dirac sequence based on the reflection density of a room
+    with a volume of 5000 m³.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> n_samples = 22050
+        >>> reflection_density, t_0 = pf.signals.reflection_density_room(
+        ...     5000, n_samples)
+        >>> dirac_sequence = pf.signals.dirac_sequence(
+        ...     reflection_density, n_samples, t_start=t_0)
+        >>> ax = pf.plot.time(dirac_sequence, linewidth=.5)
+        >>> ax.set_title("Dirac sequence")
+
+    Generate a Dirac sequence based on a custom reflection density.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> n_samples = 22050
+        >>> reflection_density = pf.TimeData(
+        ...     np.ones(n_samples)*44100/2, np.arange(n_samples)/44100)
+        >>> dirac_sequence = pf.signals.dirac_sequence(
+        ...     reflection_density, n_samples, t_start=0)
+        >>> ax = pf.plot.time(dirac_sequence, linewidth=.5)
+        >>> ax.set_title("Dirac sequence")
     """
     # check input
     if not isinstance(reflection_density, pyfar.TimeData):
@@ -318,6 +350,9 @@ def dirac_sequence(
             "reflection_density must be a pyfar.TimeData object.")
     if t_start < 0:
         raise ValueError("t_start must be positive.")
+    if np.any(reflection_density.time > sampling_rate / 2):
+        raise ValueError(
+            "The reflection density must be less than sampling_rate/2.")
 
     rng = np.random.default_rng(seed)
     dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
