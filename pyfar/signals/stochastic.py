@@ -286,7 +286,8 @@ def dirac_sequence(
     reflection_density : pyfar.TimeData
         reflection density :math:`\mu` in :math:`1/s^2` over time.
         An error is raised if the reflection sensitivity is greater than
-        sampling_rate/2.
+        sampling_rate/2. Schröder suggested a maximum reflection density of
+        sampling_rate/4 :math:`1/s^2`.
     n_samples : int
         The length of the dirac sequence in samples.
     t_start : float
