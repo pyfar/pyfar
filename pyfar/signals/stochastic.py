@@ -156,37 +156,88 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
 def poisson_distributed_dirac(
         room_volume, n_samples, sampling_rate=44100, speed_of_sound=None,
         max_reflection_density=10000, seed=None):
-    """Dirac generation for impulse response based on .
+    r"""
+    Generate a sequence of Dirac impulses based on the calculated
+    room reflection density.
+
+    The Dirac sequence is generated based on the chapter 5.3.4 of [#]_.
+    The first dirac can just be generated after :math:`t_0`.
+
+    .. math:: t_0 = \left(\frac{2 V \cdot \ln(2)}{4 \pi c^3}\right)^{1/3}
+
+    The time difference between the diracs in the sequence is Poisson
+    distributed and can be calculated based on:
+
+    .. math:: \Delta t_a = \frac{1}{\mu} \cdot \ln{\frac{1}{z}}
+
+    with z being a random number in the following range :math:`z \in (0, 1]`
+    and :math:`\mu` being the reflection density in a room:
+
+    .. math:: \mu = \min{\left(\frac{4 \pi c^3 \cdot t^2}{V}, \mu_{max}\right)}
+
+    All dirac impulses have a amplitude of 1 or -1, which is chosen
+    randomly with equal probability.
+
+    with:
+
+    - :math:`c` = ``speed_of_sound`` in the room
+    - :math:`V` = ``room_volume`` of the room
+    - :math:`t` = time in seconds
+    - :math:`t_0` = time of the first reflection
+    - :math:`\mu` = reflection density
+    - :math:`\mu_{max}` = ``max_reflection_density``
 
     Parameters
     ----------
     room_volume : float
-        Value for the calculation of the mean reflection ratio in a room.
+        Volume of the room :math:`V` in :math:`m^3`.
     n_samples : int
         The length of the signal in samples.
     sampling_rate : int, optional
         The sampling rate in Hz. The default is ``44100``.
     speed_of_sound : float, None, optional
         Speed of sound in the room.
-        By default, the reference speed of sound in air is used
-        see :py:attr:`pyfar.constants.reference_speed_of_sound`.
+        By default, the :py:attr:`~pyfar.constants.reference_speed_of_sound`
+        is used.
     max_reflection_density : int, optional
-        The maximum reflection density. The default is ``10000``.
-        This value is used to calculate the mean reflection ratio.
-        The mean reflection ratio is calculated as
-        ``4 * pi * speed_of_sound**3 * time**2 / room_volume``.
+        The maximum reflection density. The default is ``10 000`` as Schröder
+        defined it in his thesis.
     seed : int, None, optional
         The seed for the random generator. Pass a seed to obtain identical
         results for multiple calls. The default is ``None``, which will yield
         different results with every call.
+        See :py:func:`numpy.random.default_rng` for more information.
 
     Returns
     -------
-    pf.Signal
+    dirac_sequence : pyfar.Signal
         Signal of the generated dirac impulse sequence.
+
+    References
+    ----------
+    .. [#] D. Schröder, “Physically based real-time auralization of
+           interactive virtual environments,” PhD Thesis, Logos-Verlag,
+           Berlin, 2011. [Online].
+           Available: https://publications.rwth-aachen.de/record/50580
+
     """
     if speed_of_sound is None:
         speed_of_sound = pyfar.constants.reference_speed_of_sound
+
+    # check input
+    room_volume = float(room_volume)
+    n_samples = int(n_samples)
+    max_reflection_density = int(max_reflection_density)
+    speed_of_sound = float(speed_of_sound)
+    if speed_of_sound <= 0:
+        raise ValueError("speed_of_sound must be positive.")
+    if room_volume <= 0:
+        raise ValueError("room_volume must be positive.")
+    if n_samples <= 0:
+        raise ValueError("n_samples must be positive.")
+    if max_reflection_density <= 0:
+        raise ValueError("max_reflection_density must be positive.")
+
     dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
     times = dirac_sequence.times
     rng = np.random.default_rng(seed)

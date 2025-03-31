@@ -630,9 +630,65 @@ def test_frequency_domain_sweep():
 
 
 def test_poisson_distributed_dirac_defaults():
+    room_volume = 500
+    speed_of_sound = 343
     sequence = pf.signals.poisson_distributed_dirac(
-        room_volume=100, n_samples=44100)
+        room_volume=room_volume, speed_of_sound=speed_of_sound,
+        n_samples=44100, seed=1)
 
-    # test 
+    # test if the sequence is a Signal object
     assert isinstance(sequence, pf.Signal)
     assert sequence.sampling_rate == 44100
+
+
+@pytest.mark.parametrize("room_volume", [200, 500])
+@pytest.mark.parametrize("speed_of_sound", [320, 343])
+@pytest.mark.parametrize("n_samples", [22050, 44100])
+@pytest.mark.parametrize("sampling_rate", [44100, 48000])
+def test_poisson_distributed_dirac(
+        room_volume, speed_of_sound, n_samples, sampling_rate):
+    sequence = pf.signals.poisson_distributed_dirac(
+        room_volume=room_volume, speed_of_sound=speed_of_sound,
+        sampling_rate=sampling_rate,
+        n_samples=n_samples, seed=1)
+
+    # test if the sequence is a Signal object
+    assert isinstance(sequence, pf.Signal)
+    assert sequence.sampling_rate == sampling_rate
+
+    # test if the sequence is a 1D array
+    assert sequence.cdim == 1
+    values = set(np.round(sequence.time.flatten(), 3))
+    for value in values:
+        assert value in {0, 1, -1}, f"Unexpected value in sequence: {value}"
+    assert np.sum(np.abs(sequence.time)) < n_samples
+
+    # test if the density is higher at the end of the ir
+    n_center = int(n_samples/2)
+    assert np.sum(np.abs(sequence.time[..., :n_center])) < np.sum(np.abs(
+        sequence.time[..., n_center:]))
+
+    # test if no dirac before t_0
+    t_0 = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
+    n_0 = int(t_0 * sequence.sampling_rate)
+    assert np.sum(np.abs(sequence.time[..., :n_0])) == 0
+
+
+def test_poisson_distributed_dirac_positive_inputs():
+    """Test that inputs must be positive."""
+    with pytest.raises(ValueError, match="speed_of_sound must be positive."):
+        pf.signals.poisson_distributed_dirac(
+            room_volume=500, n_samples=44100, speed_of_sound=-343)
+
+    with pytest.raises(ValueError, match="room_volume must be positive."):
+        pf.signals.poisson_distributed_dirac(
+            room_volume=-500, n_samples=44100)
+
+    with pytest.raises(ValueError, match="n_samples must be positive."):
+        pf.signals.poisson_distributed_dirac(
+            room_volume=500, n_samples=-44100)
+
+    with pytest.raises(
+            ValueError, match="max_reflection_density must be positive."):
+        pf.signals.poisson_distributed_dirac(
+            room_volume=500, n_samples=44100, max_reflection_density=-10000)
