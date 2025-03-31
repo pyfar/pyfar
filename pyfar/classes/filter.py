@@ -284,8 +284,10 @@ class Filter(object):
 
         Parameters
         ----------
-        n_samples : int
-            Length in samples for which the impulse response is computed.
+        n_samples : int, None
+            Length in samples for which the impulse response is computed. If
+            this is ``None``the length is estimated using
+            `impulse_response_length`.
 
         Returns
         -------
