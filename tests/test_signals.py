@@ -633,7 +633,7 @@ def test_frequency_domain_sweep():
 @pytest.mark.parametrize("speed_of_sound", [320, 343])
 @pytest.mark.parametrize("n_samples", [22050, 44100])
 def test_reflection_density_room(n_samples, speed_of_sound, room_volume):
-    reflection_density, t0 = pf.signals.reflection_density_room(
+    reflection_density, t_start = pf.signals.reflection_density_room(
         room_volume, n_samples, speed_of_sound=speed_of_sound,
         max_reflection_density=None)
 
@@ -644,20 +644,20 @@ def test_reflection_density_room(n_samples, speed_of_sound, room_volume):
     npt.assert_almost_equal(
         reflection_density.time.flatten(), desired)
 
-    # test t_0
+    # test t_start
     t_desired = (2*room_volume*np.log(2)/(4*np.pi*speed_of_sound**3))**(1/3)
-    npt.assert_almost_equal(t0, t_desired, decimal=3)
+    npt.assert_almost_equal(t_start, t_desired, decimal=3)
 
 
-@pytest.mark.parametrize("t_0", [0, 0.01])
+@pytest.mark.parametrize("t_start", [0, 0.01])
 @pytest.mark.parametrize("n_samples", [2205, 4410])
 @pytest.mark.parametrize("sampling_rate", [4410, 4800])
 def test_dirac_sequence_dirac(
-        t_0, n_samples, sampling_rate):
+        t_start, n_samples, sampling_rate):
     times = pf.Signal(np.zeros(n_samples), sampling_rate).times
     reflection_density = pf.TimeData(times**2*1e3+100, times)
     sequence = pf.signals.dirac_sequence(
-        reflection_density, t_0, n_samples=n_samples,
+        reflection_density, t_start, n_samples=n_samples,
         sampling_rate=sampling_rate,
         )
 
@@ -677,9 +677,9 @@ def test_dirac_sequence_dirac(
     assert np.sum(np.abs(sequence.time[..., :n_center])) < np.sum(np.abs(
         sequence.time[..., n_center:]))
 
-    # test if no dirac before t_0
-    n_0 = int(t_0 * sequence.sampling_rate)
-    assert np.sum(np.abs(sequence.time[..., :n_0])) == 0
+    # test if no dirac before t_start
+    n_start = int(t_start * sequence.sampling_rate)
+    assert np.sum(np.abs(sequence.time[..., :n_start])) == 0
 
 
 @pytest.mark.parametrize("n_samples", [22050, 44100])
@@ -689,9 +689,9 @@ def test_dirac_sequence_const(
     mu = 200
     times = pf.Signal(np.zeros(n_samples), sampling_rate).times
     reflection_density = pf.TimeData(np.ones(n_samples)*mu, times)
-    t_0 = 0
+    t_start = 0
     sequence = pf.signals.dirac_sequence(
-        reflection_density, t_0, n_samples=n_samples,
+        reflection_density, n_samples, t_start,
         sampling_rate=sampling_rate, seed=2,
         )
 
@@ -746,6 +746,6 @@ def test_dirac_sequence_inputs():
             match="reflection_density must be a pyfar.TimeData object."):
         pf.signals.dirac_sequence(500, 0, 400)
 
-    with pytest.raises(ValueError, match="t_0 must be positive."):
+    with pytest.raises(ValueError, match="t_start must be positive."):
         pf.signals.dirac_sequence(
             pf.TimeData([0], [0]), -500, 400)

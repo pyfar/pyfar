@@ -154,8 +154,8 @@ def pulsed_noise(n_pulse, n_pause, n_fade=90, repetitions=5, rms=1,
 
 
 def reflection_density_room(
-        room_volume, n_samples, sampling_rate=44100, speed_of_sound=None,
-        max_reflection_density=10000):
+        room_volume, n_samples, speed_of_sound=None,
+        max_reflection_density=10000, sampling_rate=44100):
     r"""
     Calculates the reflection density and starting time in a diffuse room.
 
@@ -187,8 +187,6 @@ def reflection_density_room(
         Volume of the room :math:`V` in :math:`m^3`.
     n_samples : int
         The length of the signal in samples.
-    sampling_rate : int, optional
-        The sampling rate in Hz. The default is ``44100``.
     speed_of_sound : float, None, optional
         Speed of sound in the room.
         By default, the :py:attr:`~pyfar.constants.reference_speed_of_sound`
@@ -196,6 +194,8 @@ def reflection_density_room(
     max_reflection_density : int, optional
         The maximum reflection density. The default is ``10 000`` as Schröder
         defined it in his thesis.
+    sampling_rate : int, optional
+        The sampling rate in Hz. The default is ``44100``.
 
     Returns
     -------
@@ -264,7 +264,8 @@ def reflection_density_room(
 
 
 def dirac_sequence(
-        reflection_density, t_0, n_samples, sampling_rate=44100, seed=None):
+        reflection_density, n_samples, t_start=0, sampling_rate=44100,
+        seed=None):
     r"""Dirac sequence based on the reflection density over time.
 
     The Dirac sequence is generated based on the chapter 5.3.4 of [#]_.
@@ -274,21 +275,23 @@ def dirac_sequence(
 
     .. math:: \Delta t_a = \frac{1}{\mu} \cdot \ln{\frac{1}{z}}
 
-    with z being a random number in the following range :math:`z \in (0, 1]`
+    with z being a random number in the range of :math:`z \in (0, 1]`
     and :math:`\mu` being the ``reflection_density`` in a room.
     Each dirac has an amplitude of 1 or -1, which is chosen
     randomly with equal probability.
-    The dirac sequence generation starts after :math:`t_0`.
+    The dirac sequence generation starts after :math:`t_\text{start}`.
 
     Parameters
     ----------
     reflection_density : pyfar.TimeData
-        reflection density :math:`\mu` in :math:`1/s^2` over time.
-    t_0 : float
-        The dirac sequence generation starts after :math:`t_0`.
-        The unit is seconds.
+        reflection density :math:`\mu` in :math:`1/s^2` over time. Its cshape
+        need to be broadcastable to to shape of ``t_start``.
     n_samples : int
         The length of the dirac sequence in samples.
+    t_start : float
+        The dirac sequence generation starts after :math:`t_\text{start}`
+        in seconds. Its shape need to be broadcastable to the
+        cshape of ``reflection_density``. The default is ``0`` seconds.
     sampling_rate : int, optional
         The sampling rate of the dirac sequence in Hz.
         The default is 44100.
@@ -314,13 +317,13 @@ def dirac_sequence(
     if not isinstance(reflection_density, pyfar.TimeData):
         raise ValueError(
             "reflection_density must be a pyfar.TimeData object.")
-    if t_0 < 0:
+    if t_start < 0:
         raise ValueError("t_0 must be positive.")
 
     rng = np.random.default_rng(seed)
     dirac_sequence = pyfar.Signal(np.zeros(n_samples), sampling_rate)
     mu_times = reflection_density.times
-    t_current = t_0
+    t_current = t_start
     i_current = np.argmin(np.abs(t_current-mu_times))
     t_max = reflection_density.times[-1]
     while True:
