@@ -739,6 +739,106 @@ class TransmissionMatrix(FrequencyData):
         frequencies = transducer_constant.frequencies
         return TransmissionMatrix.from_abcd(0, B, C, 0, frequencies)
 
+    @staticmethod
+    def create_transmission_line(
+            wavenumber: complex | FrequencyData,
+            length: float | FrequencyData,
+            characteristic_impedance: complex | FrequencyData,
+            ) -> TransmissionMatrix:
+        r"""Creates a transmission matrix representing a transmission line.
+
+        The transmission matrix is calculated from the wavenumber :math:`k`,
+        length :math:`l`, and characteristic impedance :math:`Z_0` following
+        Equation (5-10) of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                \cos{kl} & j Z_0 \sin{kl} \\
+                j/Z_0 \sin{kl} & \cos{kl}
+                \end{bmatrix}
+
+        If all imaginary parts of the wavenumber are zero, the transmission
+        matrix represents a lossless transmission line.
+        Note that the length may be frequency-dependent by providing it as a
+        FrequencyData object.
+        The inputs need be broadcastable into one `shape`/`cshape`.
+
+        Parameters
+        ----------
+        wavenumber : FrequencyData
+            The wavenumber of the transmission line.
+        length : number | FrequencyData
+            The length of the transmission line.
+        characteristic_impedance : scalar | FrequencyData
+            The characteristic impedance of the transmission line.
+
+        Returns
+        -------
+        tmat :TransmissionMatrix
+            A transmission matrix representing a transmission line.
+
+
+        Example
+        -------
+        Create lossless acoustic duct with approximate ear canal dimensions.
+        Plot its input impedance with rigid termination.
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>> import matplotlib.pyplot as plt
+            >>> frequencies = np.linspace(1e2, 1e4, 100)
+            >>> omega = 2*np.pi*frequencies
+            >>> wavenumber = pf.FrequencyData(
+            >>>                 omega/pf.constants.reference_speed_of_sound,
+            >>>                 frequencies)
+            >>> length = 30e-3
+            >>> cross_section = np.pi*(3.5e-3)**2
+            >>> Z0 = pf.constants.reference_air_impedance/cross_section
+            >>> K = pf.TransmissionMatrix.create_transmission_line(
+            >>>         wavenumber, length, Z0)
+            >>> ax = pf.plot.freq(
+            >>>         K.input_impedance(np.inf), label="Rigid termination")
+            >>> ax.legend()
+
+        """
+        if not isinstance(wavenumber, FrequencyData):
+            raise ValueError("wavenumber must be a FrequencyData object.")
+        if isinstance(length, FrequencyData):
+            if not np.allclose(
+                    wavenumber.frequencies, length.frequencies, atol=1e-15):
+                raise ValueError(
+                    "The frequencies do not match.")
+            else:
+                length = length.freq
+        elif not np.isscalar(length) or isinstance(length, complex):
+            raise ValueError(
+                    "length must be a real-valued number or " \
+                    "FrequencyData object.")
+        if isinstance(characteristic_impedance, FrequencyData):
+            if not np.allclose(
+                    wavenumber.frequencies,
+                    characteristic_impedance.frequencies, atol=1e-15):
+                raise ValueError(
+                    "The frequencies do not match.")
+            else:
+                characteristic_impedance = characteristic_impedance.freq
+        elif not np.isscalar(characteristic_impedance):
+            raise ValueError(
+                "characteristic impedance must be a scalar or " \
+                "FrequencyData object.")
+        # broadcastable shapes are checked by from_abcd
+
+        A = np.cos(wavenumber.freq*length)
+        B = 1j*characteristic_impedance*np.sin(wavenumber.freq*length)
+        C = 1j/characteristic_impedance*np.sin(wavenumber.freq*length)
+        D = A
+
+        return TransmissionMatrix.from_abcd(
+            A, B, C, D, wavenumber.frequencies)
+
+
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
         repr_string = (
