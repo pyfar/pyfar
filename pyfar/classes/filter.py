@@ -664,10 +664,16 @@ class FilterIIR(Filter):
                     poles_damped = poles[idx_damped[0]]
                     idx = np.argmax(np.abs(poles_damped))
                     multiplicity = self._pole_multiplicity(poles_damped, idx)
+                    # catch runtime warning for poles in the origin
+                    if np.abs(poles_damped[idx]) > 0:
+                        multiplicity_factor = np.log10(tolerance) / \
+                            np.log10(np.abs(poles_damped[idx]))
+                    else:
+                        multiplicity_factor = 0
+
                     estimated_length[channel] += np.maximum(
                         periods,
-                        multiplicity * np.log10(tolerance) / \
-                            np.log10(np.abs(poles_damped[idx])))
+                        multiplicity * multiplicity_factor)
 
             estimated_length[channel] = np.maximum(
                 len(a) + len(b) - 1, estimated_length[channel])
