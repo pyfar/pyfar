@@ -445,11 +445,17 @@ class FilterFIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
-    def minimum_impulse_response_length(self):
+    def minimum_impulse_response_length(self, unit='samples'):
         """
         Get the minimum length of filter impulse response.
 
         The length is computed from the last non-zero coefficient per channel.
+
+        Parameters
+        ----------
+        unit : string, optional
+            The unit in which the length is returned. Can be ``'samples'`` or
+            ``'s'`` (seconds). The default is ``'samples'``.
 
         Returns
         -------
@@ -468,7 +474,14 @@ class FilterFIR(Filter):
         # restore input data shape
         estimated_length = np.reshape(estimated_length, b.shape[:-1])
 
-        return estimated_length.astype(int)
+        if unit == 's':
+            estimated_length /= self.sampling_rate
+        elif unit == 'samples':
+            estimated_length = estimated_length.astype(int)
+        else:
+            raise ValueError(f"unit is '{unit}' but must be 'samples' or 's'")
+
+        return estimated_length
 
     def impulse_response(self, n_samples=None):
         """
@@ -588,7 +601,7 @@ class FilterIIR(Filter):
         """
         return super().impulse_response(n_samples)
 
-    def minimum_impulse_response_length(self, tolerance=5e-5):
+    def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
         """
         Estimated the minimum length of filter impulse response.
 
@@ -598,6 +611,9 @@ class FilterIIR(Filter):
 
         Parameters
         ----------
+        unit : string, optional
+            The unit in which the length is returned. Can be ``'samples'`` or
+            ``'s'`` (seconds). The default is ``'samples'``.
         tolerance : float, optional
             Tolerance for the accuracy. Smaller tolerances will result in
             larger impulse response lengths. The default is ``5e-5``.
@@ -678,7 +694,14 @@ class FilterIIR(Filter):
             estimated_length[channel] = np.maximum(
                 len(a) + len(b) - 1, estimated_length[channel])
 
-        return estimated_length.astype(int)
+        if unit == 's':
+            estimated_length /= self.sampling_rate
+        elif unit == 'samples':
+            estimated_length = estimated_length.astype(int)
+        else:
+            raise ValueError(f"unit is '{unit}' but must be 'samples' or 's'")
+
+        return estimated_length
 
     @staticmethod
     def _pole_multiplicity(poles, index, tolerance=.001):
@@ -815,7 +838,7 @@ class FilterSOS(Filter):
         """
         return super().impulse_response(n_samples)
 
-    def minimum_impulse_response_length(self, tolerance=5e-5):
+    def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
         """
         Estimated the minimum length of filter impulse response.
 
@@ -825,6 +848,9 @@ class FilterSOS(Filter):
 
         Parameters
         ----------
+        unit : string, optional
+            The unit in which the length is returned. Can be ``'samples'`` or
+            ``'s'`` (seconds). The default is ``'samples'``.
         tolerance : float, optional
             Tolerance for the accuracy. Smaller tolerances will result in
             larger impulse response lengths. The default is ``5e-5``.
@@ -867,12 +893,20 @@ class FilterSOS(Filter):
 
                     length_iir = np.maximum(
                         length_iir,
-                        filter_iir.minimum_impulse_response_length(tolerance)[0])
+                        filter_iir.minimum_impulse_response_length(
+                            tolerance=tolerance)[0])
 
             # use maximum of FIR and IIR length for final estimate
             estimated_length[channel] = np.maximum(length_fir, length_iir)
 
-        return estimated_length.astype(int)
+        if unit == 's':
+            estimated_length /= self.sampling_rate
+        elif unit == 'samples':
+            estimated_length = estimated_length.astype(int)
+        else:
+            raise ValueError(f"unit is '{unit}' but must be 'samples' or 's'")
+
+        return estimated_length
 
     @staticmethod
     def _process(sos, data, zi=None):
