@@ -86,9 +86,12 @@ def test_filter_comment():
                    [[1, 0, 0, 1, 0, .9]]], 44100), np.array([28, 187])),
 ])
 def test_filter_impulse_response_length(filter_object, actual_length):
-    """Test impulse_response_length class method for all classes and cases."""
+    """
+    Test minimum_impulse_response_length class method for all classes and
+    cases.
+    """
 
-    estimated_length = filter_object.impulse_response_length()
+    estimated_length = filter_object.minimum_impulse_response_length()
     npt.assert_equal(estimated_length, actual_length)
     assert estimated_length.shape == actual_length.shape
     assert estimated_length.dtype == int
@@ -163,7 +166,7 @@ def test_filter_impulse_response_warning(filter_object, actual):
                     [1, 0, 0, 1, 0, .9]]], 44100), 187),
 ])
 def test_filter_impulse_response_n_samples_default(filter_object, actual):
-    """Test default value for impulse_response_length class methods."""
+    """Test default value for minimum_impulse_response_length class methods."""
     impulse_response = filter_object.impulse_response()
     assert impulse_response.n_samples == actual
 
@@ -174,8 +177,8 @@ def test_filter_impulse_response_n_samples_default(filter_object, actual):
 ])
 def test_filter_impulse_response_length_tolerance(filter_object):
     """Test tolerance parameter for estimating the impulse response length."""
-    low = filter_object.impulse_response_length(tolerance=5e-5)
-    high = filter_object.impulse_response_length(tolerance=5e-6)
+    low = filter_object.minimum_impulse_response_length(tolerance=5e-5)
+    high = filter_object.minimum_impulse_response_length(tolerance=5e-6)
     assert low[0] < high[0]
 
 

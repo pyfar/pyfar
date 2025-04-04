@@ -287,7 +287,7 @@ class Filter(object):
         n_samples : int, None
             Length in samples for which the impulse response is computed. If
             this is ``None``the length is estimated using
-            `impulse_response_length`.
+            `minimum_impulse_response_length((`.
 
         Returns
         -------
@@ -295,13 +295,14 @@ class Filter(object):
             The impulse response of the filter.
         """
         # set or check the impulse response length
-        impulse_response_length = int(np.max(self.impulse_response_length()))
+        minimum_impulse_response_length = int(np.max(
+            self.minimum_impulse_response_length()))
         if n_samples is None:
-            n_samples = impulse_response_length
-        elif impulse_response_length > n_samples:
+            n_samples = minimum_impulse_response_length
+        elif minimum_impulse_response_length > n_samples:
             warnings.warn(
                 ('n_samples should be at least as long as the filter, '
-                 f'which is {impulse_response_length}'), stacklevel=2)
+                 f'which is {minimum_impulse_response_length}'), stacklevel=2)
 
         # track the state (better than copying the entire filter)
         if self.state is not None:
@@ -444,15 +445,15 @@ class FilterFIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
-    def impulse_response_length(self):
+    def minimum_impulse_response_length(self):
         """
-        Get the length of filter impulse response in samples.
+        Get the minimum length of filter impulse response.
 
         The length is computed from the last non-zero coefficient per channel.
 
         Returns
         -------
-        impulse_response_length : array
+        minimum_impulse_response_length : array
             An integer array of shape (C, ) containing the length in samples
             where `C` denotes the number of channels of the filter.
         """
@@ -478,9 +479,10 @@ class FilterFIR(Filter):
         n_samples : int, optional
             Length in samples for which the impulse response is computed. The
             default is ``None`` in which case ``n_samples`` is computed as the
-            maximum value returned by :py:func:`~impulse_response_length`.
-            A warning is returned if ``n_samples`` is too short to compute the
-            entire impulse response.
+            maximum value across filter channels returned by
+            :py:func:`~FilterFIR.minimum_impulse_response_length`.
+            A warning is returned if ``n_samples`` is shorter than the value
+            returned by :py:func:`~FilterFIR.minimum_impulse_response_length`.
 
         Returns
         -------
@@ -573,9 +575,10 @@ class FilterIIR(Filter):
         n_samples : int, optional
             Length in samples for which the impulse response is computed. The
             default is ``None`` in which case ``n_samples`` is computed as the
-            maximum value returned by :py:func:`~impulse_response_length`.
-            A warning is returned if ``n_samples`` is too short to approximate
-            the theoretically infinitely long impulse response.
+            maximum value across filter channels returned by
+            :py:func:`~FilterIIR.minimum_impulse_response_length`.
+            A warning is returned if ``n_samples`` is shorter than the value
+            returned by :py:func:`~FilterIIR.minimum_impulse_response_length`.
 
         Returns
         -------
@@ -585,9 +588,9 @@ class FilterIIR(Filter):
         """
         return super().impulse_response(n_samples)
 
-    def impulse_response_length(self, tolerance=5e-5):
+    def minimum_impulse_response_length(self, tolerance=5e-5):
         """
-        Get the estimated length of filter impulse response in samples.
+        Estimated the minimum length of filter impulse response.
 
         The length is estimated from the positions of the poles of the filter.
         The closer the poles are to the unit circle, the longer the estimated
@@ -601,7 +604,7 @@ class FilterIIR(Filter):
 
         Returns
         -------
-        impulse_response_length : array
+        minimum_impulse_response_length : array
             An integer array of shape (C, ) containing the length in samples
             where `C` denotes the number of channels of the filter.
         """
@@ -676,7 +679,7 @@ class FilterIIR(Filter):
         """
         Find multiplicity of a pole.
 
-        Required for impulse_response_length.
+        Required for minimum_impulse_response_length.
         """
 
         if np.all(poles != 0):
@@ -794,9 +797,10 @@ class FilterSOS(Filter):
         n_samples : int
             Length in samples for which the impulse response is computed. The
             default is ``None`` in which case ``n_samples`` is computed as the
-            maximum value returned by :py:func:`~impulse_response_length`.
-            A warning is returned if ``n_samples`` is too short to approximate
-            the theoretically infinitely long impulse response.
+            maximum value across filter channels returned by
+            :py:func:`~FilterSOS.minimum_impulse_response_length`.
+            A warning is returned if ``n_samples`` is shorter than the value
+            returned by :py:func:`~FilterSOS.minimum_impulse_response_length`.
 
         Returns
         -------
@@ -805,13 +809,13 @@ class FilterSOS(Filter):
         """
         return super().impulse_response(n_samples)
 
-    def impulse_response_length(self, tolerance=5e-5):
+    def minimum_impulse_response_length(self, tolerance=5e-5):
         """
-        Get the estimated length of filter impulse response in samples.
+        Estimated the minimum length of filter impulse response.
 
         The length is estimated separately per second order section using
-        :py:func:`FilterIIR.impulse_response_length`. The final length is given
-        by the length of the longest section.
+        :py:func:`~FilterIIR.minimum_impulse_response_length`. The final length
+        is given by the length of the longest section.
 
         Parameters
         ----------
@@ -821,7 +825,7 @@ class FilterSOS(Filter):
 
         Returns
         -------
-        impulse_response_length : array
+        minimum_impulse_response_length : array
             An integer array of shape (C, ) containing the length in samples
             where `C` denotes the number of channels of the filter.
         """
@@ -857,7 +861,7 @@ class FilterSOS(Filter):
 
                     length_iir = np.maximum(
                         length_iir,
-                        filter_iir.impulse_response_length(tolerance)[0])
+                        filter_iir.minimum_impulse_response_length(tolerance)[0])
 
             # use maximum of FIR and IIR length for final estimate
             estimated_length[channel] = np.maximum(length_fir, length_iir)
