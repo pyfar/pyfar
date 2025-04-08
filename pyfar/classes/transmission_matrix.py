@@ -762,7 +762,7 @@ class TransmissionMatrix(FrequencyData):
         matrix represents a lossless transmission line.
         Note that the length may be frequency-dependent by providing it as a
         FrequencyData object.
-        The inputs need be broadcastable into one `shape`/`cshape`.
+        The inputs need to be broadcastable into one `shape`/`cshape`.
 
         Parameters
         ----------
