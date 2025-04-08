@@ -26,7 +26,7 @@ def air_attenuation(
     relative_humidity : float, array_like
         Relative humidity in the range from 0 to 1.
     atmospheric_pressure : float, array_like, optional
-        Atmospheric pressure in pascal, by default
+        Atmospheric pressure in Pascal, by default
         :py:attr:`reference_atmospheric_pressure`.
 
     Returns
@@ -174,11 +174,11 @@ def _calculate_accuracy(
         Temperature in degree Celsius.
         Must be above -273.15°C.
     atmospheric_pressure : float, array_like
-        Atmospheric pressure in pascal.
+        Atmospheric pressure in Pascal.
         Must be above 0Pa.
     frequencies : float, array_like
         Frequency in Hz.
-        Must be lager than 0 Hz.
+        Must be larger than 0 Hz.
     shape : tuple
         Shape of the output.
 
@@ -284,7 +284,7 @@ def _saturation_vapour_pressure_iso(temperature):
     Returns
     -------
     p_sat : float, array_like
-        Saturation vapour pressure in pascal.
+        Saturation vapour pressure in Pascal.
 
     References
     ----------
@@ -295,7 +295,7 @@ def _saturation_vapour_pressure_iso(temperature):
     T = temperature - pf.constants.absolute_zero_celsius
     p_r = pf.constants.reference_atmospheric_pressure
     # triple-point isotherm temperature of 273.16 K
-    T_01 = -pf.constants.absolute_zero_celsius + 0.01
+    T_01 = 273.16
 
     # saturation vapour pressure (Equation B.2 and B.3)
     C = -6.8346*(T_01/T)**1.261+4.6151
