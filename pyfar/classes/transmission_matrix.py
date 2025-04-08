@@ -814,7 +814,8 @@ class TransmissionMatrix(FrequencyData):
                     "The frequencies do not match.")
             else:
                 length = length.freq
-        elif not isinstance(length, numbers.Number) or isinstance(length, complex):
+        elif not isinstance(length, numbers.Number) or \
+                 isinstance(length, complex):
             raise ValueError(
                     "length must be a real-valued number or " \
                     "FrequencyData object.")
