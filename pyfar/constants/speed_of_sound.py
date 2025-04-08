@@ -73,7 +73,7 @@ def speed_of_sound_cramer(
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : float, array_like, optional
-        Atmospheric pressure in pascal, by default
+        Atmospheric pressure in Pascal, by default
         :py:attr:`reference_atmospheric_pressure`.
         It must be between 75 000 Pa to 102000 Pa.
     co2_ppm : float, array_like
