@@ -32,6 +32,7 @@ from __future__ import annotations # required for Python <= 3.9
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
+import numbers
 
 
 class TransmissionMatrix(FrequencyData):
@@ -745,7 +746,7 @@ class TransmissionMatrix(FrequencyData):
             length: float | FrequencyData,
             characteristic_impedance: complex | FrequencyData,
             ) -> TransmissionMatrix:
-        r"""Creates a transmission matrix representing a transmission line.
+        r"""Create a transmission matrix representing a transmission line.
 
         The transmission matrix is calculated from the wavenumber :math:`k`,
         length :math:`l`, and characteristic impedance :math:`Z_0` following
@@ -780,7 +781,7 @@ class TransmissionMatrix(FrequencyData):
 
         Example
         -------
-        Create lossless acoustic duct with approximate ear canal dimensions.
+        Lossless acoustic duct with approximate ear canal dimensions.
         Plot its input impedance with rigid termination.
 
         .. plot::
@@ -801,6 +802,7 @@ class TransmissionMatrix(FrequencyData):
             >>> ax = pf.plot.freq(
             >>>         K.input_impedance(np.inf), label="Rigid termination")
             >>> ax.legend()
+            >>> ax.set_title("Input impedance of a duct")
 
         """
         if not isinstance(wavenumber, FrequencyData):
@@ -812,7 +814,7 @@ class TransmissionMatrix(FrequencyData):
                     "The frequencies do not match.")
             else:
                 length = length.freq
-        elif not np.isscalar(length) or isinstance(length, complex):
+        elif not isinstance(length, numbers.Number) or isinstance(length, complex):
             raise ValueError(
                     "length must be a real-valued number or " \
                     "FrequencyData object.")
@@ -824,7 +826,7 @@ class TransmissionMatrix(FrequencyData):
                     "The frequencies do not match.")
             else:
                 characteristic_impedance = characteristic_impedance.freq
-        elif not np.isscalar(characteristic_impedance):
+        elif not isinstance(characteristic_impedance, numbers.Number):
             raise ValueError(
                 "characteristic impedance must be a scalar or " \
                 "FrequencyData object.")
