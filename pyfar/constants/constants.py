@@ -31,34 +31,34 @@ def air_attenuation(
 
     Returns
     -------
-    alpha : :py:class:`~pyfar.classes.FrequencyData`
+    alpha : :py:class:`~pyfar.FrequencyData`
         Pure tone air attenuation coefficient in decibels per meter for
         atmospheric absorption.
-    m : :py:class:`~pyfar.classes.FrequencyData`
+    m : :py:class:`~pyfar.FrequencyData`
         Pure tone air attenuation coefficient per meter for
         atmospheric absorption. The parameter ``m`` is calculated as
-        :math:`m = 10 \cdot \log(\exp(1)) \cdot \alpha`.
-    accuracy : :py:class:`~pyfar.classes.FrequencyData`
+        :math:`m = \alpha / (10 \cdot \log_{10}(e))`.
+    accuracy : :py:class:`~pyfar.FrequencyData`
         accuracy of the results according to the standard:
 
         ``10``, +/- 10% accuracy
             - molar concentration of water vapour: 0.05% to 5 %.
             - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
-            - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
+            - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
         ``20``, +/- 20% accuracy
             - molar concentration of water vapour: 0.005 % to 0.05 %,
               and greater than 5%
             - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
-            - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
+            - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
         ``50``, +/- 50% accuracy
             - molar concentration of water vapour: less than 0.005%
             - air temperature: greater than 200 K (- 73 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
-            - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
+            - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
         ``-1``, no valid result
             else.
@@ -151,6 +151,7 @@ def air_attenuation(
     alpha = pf.FrequencyData(
         air_attenuation, frequencies=frequencies)
 
+    # Equation 3: ISO 17497-1:2004
     m = alpha / (10*np.log10(np.exp(1)))
 
     # calculate accuracy
@@ -164,6 +165,10 @@ def _calculate_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape):
     """Calculate the accuracy of the air attenuation calculation.
+
+    Calculation is in accordance with ISO 9613-1 [#]_. This method is used in
+    :py:func:`~pyfar.constants.air_attenuation` to calculate the accuracy of
+    the air attenuation calculation.
 
     Parameters
     ----------
@@ -208,6 +213,12 @@ def _calculate_accuracy(
 
             ``-1``, no valid result
                 else.
+
+    References
+    ----------
+    .. [#] ISO 9613-1:1993, Acoustics -- Attenuation of sound during
+           propagation outdoors -- Part 1: Calculation of the absorption of
+           sound by the atmosphere.
     """
     if np.any(np.array(concentration_water_vapour) < 0) or np.any(
             np.array(concentration_water_vapour) > 100):
