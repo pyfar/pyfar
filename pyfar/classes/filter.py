@@ -287,12 +287,13 @@ class Filter(object):
         n_samples : int, None
             Length in samples for which the impulse response is computed. If
             this is ``None``the length is estimated using
-            `minimum_impulse_response_length((`.
+            `minimum_impulse_response_length`.
 
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter.
+            The impulse response of the filter with a ``cshape = (C, )`` where
+            `C` denotes the number of channels of the filter.
         """
         # set or check the impulse response length
         minimum_impulse_response_length = int(np.max(
@@ -447,7 +448,7 @@ class FilterFIR(Filter):
 
     def minimum_impulse_response_length(self, unit='samples'):
         """
-        Get the minimum length of filter impulse response.
+        Get the minimum length of the filter impulse response.
 
         The length is computed from the last non-zero coefficient per channel.
 
@@ -603,7 +604,7 @@ class FilterIIR(Filter):
 
     def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
         """
-        Estimated the minimum length of filter impulse response.
+        Estimate the minimum length of the filter impulse response.
 
         The length is estimated from the positions of the poles of the filter.
         The closer the poles are to the unit circle, the longer the estimated
@@ -657,7 +658,7 @@ class FilterIIR(Filter):
                 idx = np.abs(poles - 1) < 1e-5
                 poles[idx] = -poles[idx]
 
-                # poles on and close to unit circls
+                # poles on and close to unit circle
                 idx_oscillation = np.argwhere(np.abs(np.abs(poles)-1) < 1e-5)
                 # poles further away from unit circle
                 idx_damped = np.argwhere(np.abs(np.abs(poles)-1) >= 1e-5)
@@ -834,13 +835,14 @@ class FilterSOS(Filter):
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter.
+            The impulse response of the filter with a ``cshape = (C, )`` where
+            `C` denotes the number of channels of the filter.
         """
         return super().impulse_response(n_samples)
 
     def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
         """
-        Estimated the minimum length of filter impulse response.
+        Estimate the minimum length of the filter impulse response.
 
         The length is estimated separately per second order section using
         :py:func:`~FilterIIR.minimum_impulse_response_length`. The final length
