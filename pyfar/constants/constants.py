@@ -4,7 +4,7 @@ import numpy as np
 
 def saturation_vapor_pressure_magnus(temperature):
     r"""
-    Calculate the saturation vapor pressure of water in Pa using the
+    Calculate the saturation vapor pressure of water in Pascal using the
     Magnus formula.
 
     The Magnus formula is valid for temperatures between -45°C and 60°C [#]_.
@@ -40,5 +40,6 @@ def saturation_vapor_pressure_magnus(temperature):
     if isinstance(temperature, (np.ndarray, list, tuple)):
         temperature = np.asarray(temperature, dtype=float)
 
-    return 100 * 6.1094 * np.exp(
-        (17.625 * temperature) / (temperature + 243.04))
+    # Eq. (21)
+    e_s = 6.1094 * np.exp((17.625 * temperature) / (temperature + 243.04))
+    return 100 * e_s

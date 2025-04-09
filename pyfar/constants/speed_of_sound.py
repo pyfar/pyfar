@@ -70,19 +70,19 @@ def speed_of_sound_ideal_gas(
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
     atmospheric_pressure : float, array_like, optional
-        Atmospheric pressure in pascal, by default
-        :py:attr:`reference_atmospheric_pressure`
+        Atmospheric pressure in Pascal, by default
+        :py:attr:`reference_atmospheric_pressure`.
     saturation_vapor_pressure : float, array_like, optional
-        Saturation vapor pressure in Pa.
+        Saturation vapor pressure in Pascal.
         If not given, the function
         :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus` is used.
-        Note that the valid temperature range is therefore also dependent on
+        Note that the valid temperature range therefore also depends on
         :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus`.
 
     Returns
     -------
     speed_of_sound : float, array_like
-        Speed of sound in air in (m/s).
+        Speed of sound in air in m/s.
 
     References
     ----------
