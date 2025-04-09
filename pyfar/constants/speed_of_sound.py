@@ -58,9 +58,9 @@ def speed_of_sound_simple(temperature):
 def speed_of_sound_cramer(
         temperature, relative_humidity, atmospheric_pressure=None,
         co2_ppm=314):
-    """
+    r"""
     Calculate the speed of sound in air based on temperature, atmospheric
-    pressure, humidity and CO2 concentration.
+    pressure, humidity and CO\ :sub:`2` concentration.
 
     This implements Cramers method described in [#]_.
     The uncertainty in the speed of sound is similarly estimated to be
@@ -77,7 +77,7 @@ def speed_of_sound_cramer(
         :py:attr:`reference_atmospheric_pressure`.
         It must be between 75 000 Pa to 102000 Pa.
     co2_ppm : float, array_like
-        CO2 concentration in parts per million. The default is 314 ppm,
+        CO\ :sub:`2` concentration in parts per million. The default is 314 ppm,
         based on Table I. It must be at below 10 000 ppm (1%).
 
     Returns
@@ -88,7 +88,7 @@ def speed_of_sound_cramer(
     References
     ----------
     .. [#] O. Cramer, “The variation of the specific heat ratio and the
-           speed of sound in air with temperature, pressure, humidity, and CO2
+           speed of sound in air with temperature, pressure, humidity, and CO\ :sub:`2`
            concentration,” The Journal of the Acoustical Society of America,
            vol. 93, no. 5, pp. 2510-2516, May 1993, doi: 10.1121/1.405827.
     """
@@ -131,8 +131,7 @@ def speed_of_sound_cramer(
     # water vapor mole fraction (Equation A1)
     x_w = h * f * p_sv / p
 
-    # check water mole fraction
-    # due to the input checks, this is not possible to reach
+    # check water mole fraction after Cramer
     if np.any(x_w < 0) or np.any(x_w > 0.06):
         raise ValueError("Water mole fraction must be between 0 and 0.06.")
 
