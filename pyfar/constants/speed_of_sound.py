@@ -77,20 +77,22 @@ def speed_of_sound_cramer(
         :py:attr:`reference_atmospheric_pressure`.
         It must be between 75 000 Pa to 102000 Pa.
     co2_ppm : float, array_like
-        CO\ :sub:`2` concentration in parts per million. The default is 314 ppm,
-        based on Table I in the reference. It must be at below 10 000 ppm (1%).
+        CO\ :sub:`2` concentration in parts per million. The default is
+        314 ppm, based on Table I in the reference. It must be at below
+        10 000 ppm (1%).
 
     Returns
     -------
     speed_of_sound : float, array_like
-        Speed of sound in air in (m/s).
+        Speed of sound in air in m/s.
 
     References
     ----------
     .. [#] O. Cramer, “The variation of the specific heat ratio and the
-           speed of sound in air with temperature, pressure, humidity, and CO\ :sub:`2`
-           concentration,” The Journal of the Acoustical Society of America,
-           vol. 93, no. 5, pp. 2510-2516, May 1993, doi: 10.1121/1.405827.
+           speed of sound in air with temperature, pressure, humidity, and
+           CO\ :sub:`2` concentration,” The Journal of the Acoustical Society
+           of America, vol. 93, no. 5, pp. 2510-2516, May 1993,
+           doi: 10.1121/1.405827.
     """
     if atmospheric_pressure is None:
         atmospheric_pressure = pf.constants.reference_atmospheric_pressure
