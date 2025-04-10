@@ -63,7 +63,7 @@ def speed_of_sound_cramer(
     pressure, humidity and CO\ :sub:`2` concentration.
 
     This implements Cramers method described in [#]_.
-    The uncertainty in the speed of sound is similarly estimated to be
+    The uncertainty in the speed of sound is estimated to be
     less than 300 parts per million.
 
     Parameters
@@ -78,7 +78,7 @@ def speed_of_sound_cramer(
         It must be between 75 000 Pa to 102000 Pa.
     co2_ppm : float, array_like
         CO\ :sub:`2` concentration in parts per million. The default is 314 ppm,
-        based on Table I. It must be at below 10 000 ppm (1%).
+        based on Table I in the reference. It must be at below 10 000 ppm (1%).
 
     Returns
     -------
