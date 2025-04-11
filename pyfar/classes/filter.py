@@ -292,8 +292,10 @@ class Filter(object):
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter with a ``cshape = (C, )`` where
-            `C` denotes the number of channels of the filter.
+            The impulse response of the filter of with a
+            ``cshape = (n_channels, )``, with the channel shape
+            :py:func:`~pyfar.Signal.cshape` and the number of filter channels
+            :py:func:`~n_channels`.
         """
         # set or check the impulse response length
         minimum_impulse_response_length = int(np.max(
@@ -461,8 +463,8 @@ class FilterFIR(Filter):
         Returns
         -------
         minimum_impulse_response_length : array
-            An integer array of shape (C, ) containing the length in samples
-            where `C` denotes the number of channels of the filter.
+            An integer array of shape(n_channels, ) containing the length in
+            samples with the number of filter channels :py:func:`~n_channels`.
         """
 
         # get filter coefficients
@@ -501,8 +503,10 @@ class FilterFIR(Filter):
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter of with a ``cshape = (C, )``
-            where `C` denotes the number of channels of the filter.
+            The impulse response of the filter of with a
+            ``cshape = (n_channels, )``, with the channel shape
+            :py:func:`~pyfar.Signal.cshape` and the number of filter channels
+            :py:func:`~n_channels`.
         """
         return super().impulse_response(n_samples)
 
@@ -597,8 +601,10 @@ class FilterIIR(Filter):
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter of with a ``cshape = (C, )``
-            where `C` denotes the number of channels of the filter.
+            The impulse response of the filter of with a
+            ``cshape = (n_channels, )``, with the channel shape
+            :py:func:`~pyfar.Signal.cshape` and the number of filter channels
+            :py:func:`~n_channels`.
         """
         return super().impulse_response(n_samples)
 
@@ -622,8 +628,8 @@ class FilterIIR(Filter):
         Returns
         -------
         minimum_impulse_response_length : array
-            An integer array of shape (C, ) containing the length in samples
-            where `C` denotes the number of channels of the filter.
+            An integer array of shape(n_channels, ) containing the length in
+            samples with the number of filter channels :py:func:`~n_channels`.
         """
         # This is a direct python port of the parts of Matlab's impzlength that
         # refer to IIR filters
@@ -835,8 +841,10 @@ class FilterSOS(Filter):
         Returns
         -------
         impulse_response : Signal
-            The impulse response of the filter with a ``cshape = (C, )`` where
-            `C` denotes the number of channels of the filter.
+            The impulse response of the filter of with a
+            ``cshape = (n_channels, )``, with the channel shape
+            :py:func:`~pyfar.Signal.cshape` and the number of filter channels
+            :py:func:`~n_channels`.
         """
         return super().impulse_response(n_samples)
 
@@ -860,8 +868,8 @@ class FilterSOS(Filter):
         Returns
         -------
         minimum_impulse_response_length : array
-            An integer array of shape (C, ) containing the length in samples
-            where `C` denotes the number of channels of the filter.
+            An integer array of shape(n_channels, ) containing the length in
+            samples with the number of filter channels :py:func:`~n_channels`.
         """
         # This is a direct python port of the parts of Matlab's impzlength that
         # refer to SOS filters
