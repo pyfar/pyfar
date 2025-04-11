@@ -457,21 +457,14 @@ class FilterFIR(Filter):
         Parameters
         ----------
         tolerance : float, optional
-            A tolerance to estimate the length of noise FIR filters.
-
-            - ``None`` returns the full length by finding the last non-zero
-               coefficient per channel.
-            - ``float`` estimates the length by finding the last coefficient
-              with an absolute value greater or equal to the absolute maximum
-              of the coefficients per channel multiplied by `tolerance`. For
-              example if ``tolerance = 0.001`` trailing values below
-              :math:`20 \log_{10}(0.001)=-60` dB would be ignored in the length
-              estimation.
-
-            The returned lengths using ``tolerance=None`` will always be larger
-            or equal to the returned lengths if `tolerance` is a float value.
-            The default is ``None``.
-
+            Tolerance for estimating the minimum length of noisy FIR filters.
+            The length is estimated by finding the last coefficient with an
+            absolute value greater or equal to the absolute maximum of the
+            filter coefficients per channel multiplied by `tolerance`. For
+            example if ``tolerance = 0.001`` trailing values below
+            :math:`20 \log_{10}(0.001)=-60` dB would be ignored in the length
+            estimation. The default ``None`` uses the numerical precision
+            ``2 * numpy.finfo(float).resolution`` as a strict threshold.
         unit : string, optional
             The unit in which the length is returned. Can be ``'samples'`` or
             ``'s'`` (seconds). The default is ``'samples'``.
@@ -484,10 +477,10 @@ class FilterFIR(Filter):
         """
 
         # get filter coefficients
-        b = self.coefficients
+        b = self.coefficients.astype(float)
 
         if tolerance is None:
-            thresholds = np.zeros(b.shape[0])
+            thresholds = np.ones(b.shape[0]) * 2 * np.finfo(b.dtype).eps
         else:
             thresholds = np.max(np.abs(b), -1) * tolerance
 
