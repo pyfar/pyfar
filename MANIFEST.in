@@ -9,6 +9,5 @@ recursive-exclude * *.py[co]
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 
-recursive-include pyfar/samplings/external *.mat
 recursive-include pyfar/plot/plotstyles *.mplstyle
 recursive-include pyfar/plot/shortcuts *.json

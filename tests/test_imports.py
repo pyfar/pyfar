@@ -34,7 +34,6 @@ def test_import_submodules():
     from pyfar.dsp import filter             # noqa: F401
     from pyfar import io                     # noqa: F401
     from pyfar import plot                   # noqa: F401
-    from pyfar import samplings              # noqa: F401
     from pyfar import signals                # noqa: F401
     from pyfar.signals import files          # noqa: F401
 
