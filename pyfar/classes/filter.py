@@ -302,7 +302,7 @@ class Filter(object):
             self.minimum_impulse_response_length()))
         if n_samples is None:
             n_samples = minimum_impulse_response_length
-        elif minimum_impulse_response_length > n_samples:
+        elif np.any(minimum_impulse_response_length > n_samples):
             warnings.warn(
                 ('n_samples should be at least as long as the filter, '
                  f'which is {minimum_impulse_response_length}'), stacklevel=2)
@@ -448,14 +448,30 @@ class FilterFIR(Filter):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
-    def minimum_impulse_response_length(self, unit='samples'):
-        """
+    def minimum_impulse_response_length(self, unit='samples', tolerance=None):
+        r"""
         Get the minimum length of the filter impulse response.
 
         The length is computed from the last non-zero coefficient per channel.
 
         Parameters
         ----------
+        tolerance : float, optional
+            A tolerance to estimate the length of noise FIR filters.
+
+            - ``None`` returns the full length by finding the last non-zero
+               coefficient per channel.
+            - ``float`` estimates the length by finding the last coefficient
+              with an absolute value greater or equal to the absolute maximum
+              of the coefficients per channel multiplied by `tolerance`. For
+              example if ``tolerance = 0.001`` trailing values below
+              :math:`20 \log_{10}(0.001)=-60` dB would be ignored in the length
+              estimation.
+
+            The returned lengths using ``tolerance=None`` will always be larger
+            or equal to the returned lengths if `tolerance` is a float value.
+            The default is ``None``.
+
         unit : string, optional
             The unit in which the length is returned. Can be ``'samples'`` or
             ``'s'`` (seconds). The default is ``'samples'``.
@@ -470,13 +486,17 @@ class FilterFIR(Filter):
         # get filter coefficients
         b = self.coefficients
 
-        # find last non-zero entry per channel
-        estimated_length = np.apply_along_axis(
-            lambda b: np.max(np.nonzero(b)), axis=-1, arr=b) + 1
+        if tolerance is None:
+            thresholds = np.zeros(b.shape[0])
+        else:
+            thresholds = np.max(np.abs(b), -1) * tolerance
 
-        # restore input data shape
-        estimated_length = np.reshape(estimated_length, b.shape[:-1])
+        # find last entry above tolerance per channel
+        above_threshold = b > np.repeat(thresholds[..., None], b.shape[-1], -1)
+        estimated_length = np.where(above_threshold)[1].reshape(b.shape[0], -1)
+        estimated_length = np.max(estimated_length, -1) + 1
 
+        # convert to desired unit
         if unit == 's':
             estimated_length /= self.sampling_rate
         elif unit == 'samples':

@@ -177,11 +177,21 @@ def test_filter_impulse_response_n_samples_default(filter_object, actual):
     (pf.FilterIIR([[[1, 0, 0], [1, 0, .9]]], 44100)),
     (pf.FilterSOS([[[1, 0, 0, 1, 0, .9]]], 44100)),
 ])
-def test_filter_impulse_response_length_tolerance(filter_object):
+def test_filter_recursive_impulse_response_length_tolerance(filter_object):
     """Test tolerance parameter for estimating the impulse response length."""
     low = filter_object.minimum_impulse_response_length(tolerance=5e-5)
     high = filter_object.minimum_impulse_response_length(tolerance=5e-6)
     assert low[0] < high[0]
+
+
+def test_filter_non_recursive_impulse_response_length_tolerance():
+    coefficients = np.array([[1, 0, .5, .0001, 0, 0],
+                             [2, 0, 0, .5, .0001, 0]])
+    filter_object = pf.FilterFIR(coefficients, 44100)
+
+    n_samples = filter_object.minimum_impulse_response_length(tolerance=.001)
+    assert n_samples.shape == (2, )
+    npt.assert_equal(n_samples, np.array([3, 4]))
 
 
 @pytest.mark.parametrize('filter_object', [
