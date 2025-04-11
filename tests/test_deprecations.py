@@ -102,26 +102,19 @@ def test_deprecations_0_8_0(statement):
 
     # remove statement from pyfar 0.8.0!
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(AttributeError):
+        with pytest.raises((AttributeError, TypeError)):
             eval(statement)
 
 
 def test_deprecations_0_8_0_set_sh_order():
     coords = pf.Coordinates(np.arange(6), 0, 0)
-    # sh_order setter
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="This function will be deprecated"):
-        coords.sh_order = 1
-
-    # sh_order setter
-    with pytest.warns(PyfarDeprecationWarning,
-                      match="0.8.0"):
-        coords.sh_order = 1
 
     # remove statement from pyfar 0.8.0!
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(AttributeError):
             coords.sh_order = 1
+        with pytest.raises(AttributeError):
+            assert coords.sh_order
 
 
 def test_signal_len():
@@ -135,13 +128,8 @@ def test_signal_len():
 def test_deprecations_find_nearest_k():
     coords = pf.Coordinates(np.arange(6), 0, 0)
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0 in favor"):
-        coords.find_nearest_k(1, 0, 0)
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(TypeError):
+        with pytest.raises(AttributeError):
             coords.find_nearest_k(1, 0, 0)
 
 
@@ -149,13 +137,8 @@ def test_deprecations_find_slice():
     coords = pf.Coordinates.from_spherical_elevation(
         np.arange(0, 360, 10)*np.pi/180, 0, 1)
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0. Use "):
-        coords.find_slice('elevation', 'deg', 0, 5)
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(TypeError):
+        with pytest.raises(AttributeError):
             coords.find_slice('elevation', 'deg', 0, 5)
 
 
@@ -163,13 +146,8 @@ def test_deprecations_find_nearest_cart():
     coords = pf.Coordinates.from_spherical_elevation(
         np.arange(0, 360, 10)*np.pi/180, 0, 1)
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0 in favor "):
-        coords.find_nearest_cart(1, 1, 1, 1)
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(TypeError):
+        with pytest.raises(AttributeError):
             coords.find_nearest_cart(1, 1, 1, 1)
 
 
@@ -177,13 +155,8 @@ def test_deprecations_find_nearest_sph():
     coords = pf.Coordinates.from_spherical_elevation(
         np.arange(0, 360, 10)*np.pi/180, 0, 1)
 
-    with pytest.warns(
-            PyfarDeprecationWarning,
-            match="This function will be deprecated in pyfar 0.8.0 in favor "):
-        coords.find_nearest_sph(1, 1, 1, 1)
-
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(TypeError):
+        with pytest.raises(AttributeError):
             coords.find_nearest_sph(1, 1, 1, 1)
 
 
