@@ -742,7 +742,7 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def create_transmission_line(
-            wavenumber: complex | FrequencyData,
+            wavenumber: FrequencyData,
             length: float | FrequencyData,
             characteristic_impedance: complex | FrequencyData,
             ) -> TransmissionMatrix:
