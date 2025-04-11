@@ -147,15 +147,14 @@ def speed_of_sound_ideal_gas(
 
 
 def speed_of_sound_cramer(
-        temperature, relative_humidity, atmospheric_pressure=None,
-        co2_ppm=314):
+        temperature, relative_humidity, co2_ppm=314,
+        atmospheric_pressure=None,
+        ):
     r"""
     Calculate the speed of sound in air based on temperature, atmospheric
     pressure, humidity and CO\ :sub:`2` concentration.
 
     This implements Cramers method described in [#]_.
-    The uncertainty in the speed of sound is estimated to be
-    less than 300 parts per million.
 
     Parameters
     ----------
@@ -163,14 +162,14 @@ def speed_of_sound_cramer(
         Temperature in degree Celsius from 0°C to 30°C.
     relative_humidity : float, array_like
         Relative humidity in the range of 0 to 1.
+    co2_ppm : float, array_like, optional
+        CO\ :sub:`2` concentration in parts per million. The default is
+        425.19 ppm, based on [#]_. It must be at below
+        10 000 ppm (1%).
     atmospheric_pressure : float, array_like, optional
         Atmospheric pressure in Pascal, by default
         :py:attr:`reference_atmospheric_pressure`.
         It must be between 75 000 Pa to 102000 Pa.
-    co2_ppm : float, array_like
-        CO\ :sub:`2` concentration in parts per million. The default is
-        314 ppm, based on Table I in the reference. It must be at below
-        10 000 ppm (1%).
 
     Returns
     -------
@@ -184,6 +183,11 @@ def speed_of_sound_cramer(
            CO\ :sub:`2` concentration,” The Journal of the Acoustical Society
            of America, vol. 93, no. 5, pp. 2510-2516, May 1993,
            doi: 10.1121/1.405827.
+    .. [#] Lan, X., Tans, P. and K.W. Thoning: Trends in globally-averaged
+           CO2 determined from NOAA Global Monitoring Laboratory measurements.
+           Version Friday, 14-Mar-2025 11:33:44 MDT
+           https://doi.org/10.15138/9N0H-ZH07
+
     """
     if atmospheric_pressure is None:
         atmospheric_pressure = pf.constants.reference_atmospheric_pressure

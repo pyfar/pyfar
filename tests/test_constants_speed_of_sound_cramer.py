@@ -28,7 +28,7 @@ def test_speed_of_sound_cramer_figure_1_rel_hum(
     """Test speed_of_sound_cramer with figure 1 vs relative humidity."""
 
     speed = pf.constants.speed_of_sound_cramer(
-        temperature, relative_humidity)
+        temperature, relative_humidity, 314)
     npt.assert_almost_equal(speed, expected, 1)
 
 
@@ -53,7 +53,7 @@ def test_speed_of_sound_cramer_figure_1_pressure(
     relative_humidity = 0
 
     speed = pf.constants.speed_of_sound_cramer(
-        temperature, relative_humidity, atmospheric_pressure)
+        temperature, relative_humidity, 314, atmospheric_pressure)
     npt.assert_almost_equal(speed, expected, 1)
 
 
@@ -104,7 +104,7 @@ def test_speed_of_sound_cramer_array_like(
         temperature, relative_humidity, atmospheric_pressure,
         co2_ppm, expected):
     speed = pf.constants.speed_of_sound_cramer(
-        temperature, relative_humidity, atmospheric_pressure, co2_ppm,
+        temperature, relative_humidity, co2_ppm, atmospheric_pressure,
         )
     npt.assert_almost_equal(speed, expected, 1)
 
@@ -122,9 +122,9 @@ def test_speed_of_sound_cramer_invalid_temperature():
 def test_speed_of_sound_cramer_invalid_atmospheric_pressure():
     match = 'Atmospheric pressure must be between 75 000 Pa to 102 000 Pa.'
     with pytest.raises(ValueError, match=re.escape(match)):
-        pf.constants.speed_of_sound_cramer(0, .5, 74999)
+        pf.constants.speed_of_sound_cramer(0, .5, 341, 74999)
     with pytest.raises(ValueError, match=re.escape(match)):
-        pf.constants.speed_of_sound_cramer(1, .5, 102001)
+        pf.constants.speed_of_sound_cramer(1, .5, 341, 102001)
 
 
 def test_speed_of_sound_cramer_invalid_relative_humidity():
@@ -141,7 +141,7 @@ def test_speed_of_sound_cramer_invalid_co2_ppm():
     match = 'CO2 concentration (ppm) must be between 0 ppm to 10 000 ppm.'
     with pytest.raises(ValueError, match=re.escape(match)):
         pf.constants.speed_of_sound_cramer(
-            0, 0, co2_ppm=-1)
+            0, 0, -1)
     with pytest.raises(ValueError, match=re.escape(match)):
         pf.constants.speed_of_sound_cramer(
-            1, .5, co2_ppm=10001)
+            1, .5, 10001)
