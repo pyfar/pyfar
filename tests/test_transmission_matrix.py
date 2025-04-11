@@ -316,7 +316,10 @@ def test_create_transmission_line_frequency_matching(k, length, Z):
         ValueError, match="The frequencies do not match"):
         TransmissionMatrix.create_transmission_line(k, length, Z)
 
-@pytest.mark.parametrize("length", [2j, np.array([1, 2, 3]), "length"])
+@pytest.mark.parametrize(
+        "length",
+        [2j, np.array([1, 2, 3]), "length",
+         FrequencyData([1j, 2, 3j], [1, 2, 3])])
 def test_create_transmission_line_length_errors(length):
     """Test `create_transmission_line` errors for length parameter."""
     k = FrequencyData([1j, 2, 3j], [1, 2, 3])

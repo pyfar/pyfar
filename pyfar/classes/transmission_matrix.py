@@ -761,7 +761,7 @@ class TransmissionMatrix(FrequencyData):
         If all imaginary parts of the wavenumber are zero, the transmission
         matrix represents a lossless transmission line.
         Note that the length may be frequency-dependent by providing it as a
-        FrequencyData object.
+        real-valued FrequencyData object.
         The inputs need to be broadcastable into one `shape`/`cshape`.
 
         Parameters
@@ -770,6 +770,8 @@ class TransmissionMatrix(FrequencyData):
             The wavenumber of the transmission line.
         length : number | FrequencyData
             The length of the transmission line.
+            If FrequencyData, all imaginary parts of `length.freq`
+            must be zero.
         characteristic_impedance : scalar | FrequencyData
             The characteristic impedance of the transmission line.
 
@@ -814,11 +816,11 @@ class TransmissionMatrix(FrequencyData):
                     "The frequencies do not match.")
             else:
                 length = length.freq
-        elif not isinstance(length, numbers.Number) or \
-                 isinstance(length, complex):
+        if not isinstance(length, numbers.Number) or \
+                 np.any(np.imag(length)!=0):
             raise ValueError(
                     "length must be a real-valued number or " \
-                    "FrequencyData object.")
+                    "real-valued FrequencyData object.")
         if isinstance(characteristic_impedance, FrequencyData):
             if not np.allclose(
                     wavenumber.frequencies,
