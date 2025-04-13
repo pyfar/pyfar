@@ -1,4 +1,5 @@
 from pyfar.classes.warnings import PyfarDeprecationWarning
+import numpy as np
 import warnings
 import functools
 
@@ -52,3 +53,41 @@ def rename_arg(arg_map, warning_message):
             return func(*args, **new_kwargs)
         return wrapper
     return decorator
+
+
+def to_broadcastable_array(dtype, broadcast, *args):
+    """
+    Cast all *args to numpy arrays and check if shapes can be broadcasted.
+
+    Raises a value error if shapes can not be broadcasted
+
+    Parameters
+    ----------
+    dtype : string
+        The dtype for creating the numpy arrays, e.g., ``float``
+    broadcast : Bool
+        If ``True`` broadcasted arrays are returned. If ``False`` it is only
+        checked if arrays can be broadcasted.
+    *args : scalar, array like
+        Scalar and array likes that are converted to numpy arrays
+
+    Returns
+    -------
+    *args : list of numpy arrays
+        The input *args as numpy arrays
+    """
+    arrays = [np.array(arg, dtype=dtype) for arg in args]
+    shapes = [array.shape for array in arrays]
+
+    try:
+        if broadcast:
+            arrays = np.broadcast_arrays(*arrays)
+        else:
+            np.broadcast_shapes(*shapes)
+    except ValueError as e:
+        shapes = [str(shape) for shape in shapes]
+        raise ValueError(
+            f"Input parameters are of shape {', '.join(shapes)} and cannot be "
+            "be broadcasted to a common shape") from e
+
+    return arrays
