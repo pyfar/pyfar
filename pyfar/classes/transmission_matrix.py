@@ -799,7 +799,8 @@ class TransmissionMatrix(FrequencyData):
             >>> T = pf.TransmissionMatrix.create_transmission_line(kl, Z0)
             >>> # Plot input impedance
             >>> ax = pf.plot.freq(T.input_impedance(np.inf))
-            >>> ax.set_title("Input impedance of a duct with rigid termination")
+            >>> ax.set_title("Input impedance of a lossless duct with rigid termination")
+            >>> ax.set_ylim(100, 200)
 
         """
         if not isinstance(kl, FrequencyData):
