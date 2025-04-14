@@ -32,7 +32,7 @@ from __future__ import annotations # required for Python <= 3.9
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
-import numbers
+from numbers import Number
 
 
 class TransmissionMatrix(FrequencyData):
@@ -742,14 +742,14 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def create_transmission_line(
-            wavenumber: FrequencyData,
-            length: float | FrequencyData,
-            characteristic_impedance: complex | FrequencyData,
+            kl: FrequencyData,
+            characteristic_impedance: Number | FrequencyData,
             ) -> TransmissionMatrix:
         r"""Create a transmission matrix representing a transmission line.
 
-        The transmission matrix is calculated from the wavenumber :math:`k`,
-        length :math:`l`, and characteristic impedance :math:`Z_0` following
+        The transmission matrix is calculated from the product :math:`kl` of
+        the wavenumber :math:`k` and length :math:`l`,
+        and characteristic impedance :math:`Z_0` following
         Equation (5-10) of Reference [1]_:
 
         .. math::
@@ -758,21 +758,17 @@ class TransmissionMatrix(FrequencyData):
                 j/Z_0 \sin{kl} & \cos{kl}
                 \end{bmatrix}
 
-        If all imaginary parts of the wavenumber are zero, the transmission
-        matrix represents a lossless transmission line.
-        Note that the length may be frequency-dependent by providing it as a
-        real-valued FrequencyData object.
-        The inputs need to be broadcastable into one `shape`/`cshape`.
+        The inputs need to be broadcastable into one `cshape`.
 
         Parameters
         ----------
-        wavenumber : FrequencyData
-            The wavenumber of the transmission line.
-        length : number | FrequencyData
-            The length of the transmission line.
-            If FrequencyData, all imaginary parts of `length.freq`
-            must be zero.
-        characteristic_impedance : scalar | FrequencyData
+        kl : FrequencyData
+            The product of wavenumber and length,
+            used as argument in the cosine and sine functions to calculate the
+            entries of the matrix.
+            If all imaginary parts of ``kl.freq`` are zero, the transmission
+            matrix represents a lossless transmission line.
+        characteristic_impedance : Number | FrequencyData
             The characteristic impedance of the transmission line.
 
         Returns
@@ -791,57 +787,44 @@ class TransmissionMatrix(FrequencyData):
             >>> import pyfar as pf
             >>> import numpy as np
             >>> import matplotlib.pyplot as plt
-            >>> frequencies = np.linspace(1e2, 1e4, 100)
+            >>> # Transmission line parameters
+            >>> frequencies = np.linspace(20, 20e3, 1000)
             >>> omega = 2*np.pi*frequencies
-            >>> wavenumber = pf.FrequencyData(
-            >>>                 omega/pf.constants.reference_speed_of_sound,
-            >>>                 frequencies)
+            >>> wavenumber = omega/pf.constants.reference_speed_of_sound
             >>> length = 30e-3
+            >>> kl = pf.FrequencyData(wavenumber*length, frequencies)
             >>> cross_section = np.pi*(3.5e-3)**2
             >>> Z0 = pf.constants.reference_air_impedance/cross_section
-            >>> K = pf.TransmissionMatrix.create_transmission_line(
-            >>>         wavenumber, length, Z0)
-            >>> ax = pf.plot.freq(
-            >>>         K.input_impedance(np.inf), label="Rigid termination")
-            >>> ax.legend()
-            >>> ax.set_title("Input impedance of a duct")
+            >>> # Create transmission matrix
+            >>> K = pf.TransmissionMatrix.create_transmission_line(kl, Z0)
+            >>> # Plot input impedance
+            >>> ax = pf.plot.freq(K.input_impedance(np.inf))
+            >>> ax.set_title("Input impedance of a duct with rigid termination")
 
         """
-        if not isinstance(wavenumber, FrequencyData):
-            raise ValueError("wavenumber must be a FrequencyData object.")
-        if isinstance(length, FrequencyData):
-            if not np.allclose(
-                    wavenumber.frequencies, length.frequencies, atol=1e-15):
-                raise ValueError(
-                    "The frequencies do not match.")
-            else:
-                length = length.freq
-        if not isinstance(length, numbers.Number) or \
-                 np.any(np.imag(length)!=0):
-            raise ValueError(
-                    "length must be a real-valued number or " \
-                    "real-valued FrequencyData object.")
+        if not isinstance(kl, FrequencyData):
+            raise ValueError("The input kl must be a FrequencyData object.")
         if isinstance(characteristic_impedance, FrequencyData):
             if not np.allclose(
-                    wavenumber.frequencies,
+                    kl.frequencies,
                     characteristic_impedance.frequencies, atol=1e-15):
                 raise ValueError(
                     "The frequencies do not match.")
             else:
                 characteristic_impedance = characteristic_impedance.freq
-        elif not isinstance(characteristic_impedance, numbers.Number):
+        elif not isinstance(characteristic_impedance, Number):
             raise ValueError(
-                "characteristic impedance must be a scalar or " \
+                "characteristic impedance must be a Number or " \
                 "FrequencyData object.")
         # broadcastable shapes are checked by from_abcd
 
-        A = np.cos(wavenumber.freq*length)
-        B = 1j*characteristic_impedance*np.sin(wavenumber.freq*length)
-        C = 1j/characteristic_impedance*np.sin(wavenumber.freq*length)
-        D = A
+        A = np.cos(kl.freq)
+        B = 1j*characteristic_impedance*np.sin(kl.freq)
+        C = 1j/characteristic_impedance*np.sin(kl.freq)
+        D = A.copy()
 
         return TransmissionMatrix.from_abcd(
-            A, B, C, D, wavenumber.frequencies)
+            A, B, C, D, kl.frequencies)
 
 
     def __repr__(self):
