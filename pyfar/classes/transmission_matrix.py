@@ -796,9 +796,9 @@ class TransmissionMatrix(FrequencyData):
             >>> cross_section = np.pi*(3.5e-3)**2
             >>> Z0 = pf.constants.reference_air_impedance/cross_section
             >>> # Create transmission matrix
-            >>> K = pf.TransmissionMatrix.create_transmission_line(kl, Z0)
+            >>> T = pf.TransmissionMatrix.create_transmission_line(kl, Z0)
             >>> # Plot input impedance
-            >>> ax = pf.plot.freq(K.input_impedance(np.inf))
+            >>> ax = pf.plot.freq(T.input_impedance(np.inf))
             >>> ax.set_title("Input impedance of a duct with rigid termination")
 
         """
