@@ -77,7 +77,8 @@ def test_find_nearest_2d_2d_k5():
 
 def test_find_nearest_2d_k3():
     # 1D spherical, nearest point
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+    coords = pf.Coordinates.from_spherical_elevation(
+        np.arange(0, 360, 10)*np.pi/180, 0, 1)
     k = 5
     find = pf.Coordinates.from_spherical_elevation(
         np.array([[0, np.pi/2], [np.pi, 3*np.pi/2]]), 0, 1)
@@ -92,7 +93,8 @@ def test_find_nearest_2d_k3():
 
 
 def test_find_nearest_error():
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+    coords = pf.Coordinates.from_spherical_elevation(
+        np.arange(0, 360, 10)*np.pi/180, 0, 1)
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
@@ -119,6 +121,12 @@ def test_find_nearest_error():
     with pytest.raises(ValueError,
                        match="radius_tol must be a non negative number."):
         coords.find_nearest(find, 1, "spherical_radians", -1)
+
+    find.radius = .1
+    match = 'find_nearest only works if all points have the same'
+    with pytest.raises(ValueError, match=match):
+        coords.find_nearest(
+            find, distance_measure='spherical_radians', radius_tol=0.1)
 
 
 def test_find_nearest_radius_tol():
@@ -168,7 +176,8 @@ def test_find_within_multiple_dim_points():
 
 
 def test_find_within_error():
-    coords = pf.samplings.sph_gaussian(sh_order=47)
+    coords = pf.Coordinates.from_spherical_elevation(
+        np.arange(0, 360, 10)*np.pi/180, 0, 1)
     find = pf.Coordinates(1, 0, 0)
 
     # test out of range parameters
