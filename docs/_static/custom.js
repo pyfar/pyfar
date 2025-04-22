@@ -8,8 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tocSpans.forEach(span => {
         const original = span.textContent;
-        if (original.includes(".")) {
-            span.textContent = original.split(".").pop(); // Keep only what comes after the last dot
-        }
+        const firstDotIndex = original.indexOf(".");
+        span.textContent = original.slice(firstDotIndex + 1); // Keep everything after the first dot
     });
 });
