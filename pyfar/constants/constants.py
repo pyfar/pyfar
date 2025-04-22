@@ -52,7 +52,7 @@ def density_of_air(
     Calculate the density of air in kg/m³ based on the temperature,
     relative humidity, and atmospheric pressure.
 
-    The density of air can be calculated based on chapter 6.3 in [#]_.
+    The density of air is calculated based on chapter 6.3 in [#]_.
     All input parameters must be broadcastable to the same shape.
 
     Parameters
@@ -66,9 +66,7 @@ def density_of_air(
         :py:attr:`reference_atmospheric_pressure`.
     saturation_vapor_pressure : float, array_like, optional
         Saturation vapor pressure in Pa.
-        If not given, the function
-        :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus` is used.
-        Note that the valid temperature range is therefore also dependent on
+        The default uses the value and valid temperature range from
         :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus`.
 
     Returns
