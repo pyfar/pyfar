@@ -155,13 +155,13 @@ def air_attenuation(
     m = alpha / (10*np.log10(np.exp(1)))
 
     # calculate accuracy
-    accuracy = _calculate_accuracy(
+    accuracy = _air_attenuation_accuracy(
         h, temperature, atmospheric_pressure, frequencies, alpha.freq.shape)
 
     return alpha, m, accuracy
 
 
-def _calculate_accuracy(
+def _air_attenuation_accuracy(
         concentration_water_vapour, temperature, atmospheric_pressure,
         frequencies, shape):
     """Calculate the accuracy of the air attenuation calculation.
