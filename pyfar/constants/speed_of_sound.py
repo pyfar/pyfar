@@ -147,7 +147,7 @@ def speed_of_sound_ideal_gas(
 
 
 def speed_of_sound_cramer(
-        temperature, relative_humidity, co2_ppm=314,
+        temperature, relative_humidity, co2_ppm=425.19,
         atmospheric_pressure=None,
         ):
     r"""
