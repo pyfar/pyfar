@@ -9,7 +9,7 @@ on:
       - synchronize
 
 jobs:
-  check-labels:
+  create-pr-from-cookiecutter:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
