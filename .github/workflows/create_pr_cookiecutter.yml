@@ -40,7 +40,7 @@ jobs:
             token: ${{ secrets.create_pr_secret }}
             commit-message: Update dependencies
             title: Update dependencies
-            base: main
+            base: action/pr-auto
             body: |
               - Dependency updates
   
