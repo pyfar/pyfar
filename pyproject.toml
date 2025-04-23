@@ -1,7 +1,7 @@
 [project]
 name = "pyfar"
 version = "0.7.2"
-description = "Project for data formats in acoustics."
+description = "Python package for acoustics research"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.9"
@@ -9,14 +9,8 @@ authors = [
     { name = "The pyfar developers", email = "info@pyfar.org" },
 ]
 keywords = [
-    "pyfar",
     "acoustics",
-    "Fourier transforms",
-    "audio signal processing",
-    "filterbanks",
-    "parametric filters",
-    "audio signal visualization",
-    "read and write audio signals",
+    "pyfar",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -28,15 +22,14 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    
 ]
 dependencies = [
-    "numpy>=1.23.0",
-    "scipy>=1.5.0",
-    "matplotlib",
-    "sofar>=0.1.2",
-    "urllib3",
-    "deepdiff",
-    "soundfile>=0.11.0",
+    'numpy',
+    'scipy',
+    'matplotlib',
+    'pyfar',
 ]
 
 [project.optional-dependencies]
@@ -51,8 +44,9 @@ tests = [
     "pytest",
     "pytest-cov",
     "watchdog",
-    "ruff==0.4.1",
+    "ruff==0.8.3",
     "coverage",
+    
 ]
 docs = [
     "sphinx",
@@ -80,13 +74,11 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages]
 find = {}  # Scan the project directory with the default parameters
 
+
 [tool.ruff]
 exclude = [
     ".git",
     "docs",
-    "setup.py",
-    "pyfar/dsp/filter/_audiofilter.py",
-    "pyfar/samplings/external",
 ]
 line-length = 79
 lint.ignore = [
@@ -99,7 +91,6 @@ lint.ignore = [
     "B008",   # Do not perform calls in argument defaults
     "PT018",  # Assertion should be broken down into multiple parts
     "PT019",  # Fixture `_` without value is injected as parameter
-
 ]
 lint.select = [
     "B",      # bugbear extension
@@ -120,6 +111,7 @@ lint.select = [
     "TID252", # Use absolute over relative imports
     "FIX",    # Code should not contain FIXME, TODO, etc
 ]
+
 # Ignore missing docstrings in tests
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
@@ -128,8 +120,10 @@ lint.select = [
     "D103",
     "D104",
 ]
+
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
 
 [tool.bumpversion]
 current_version = "0.7.2"
