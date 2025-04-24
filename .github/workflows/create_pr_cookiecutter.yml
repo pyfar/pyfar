@@ -37,7 +37,7 @@ jobs:
             token: ${{ secrets.create_pr_secret }}
             commit-message: apply cookiecutter template
             title: "[Bot]: apply cookiecutter template"
-            base: action/pr-auto
+            base: main
             body: |
               - apply latest changes from cookiecutter master branch
   
