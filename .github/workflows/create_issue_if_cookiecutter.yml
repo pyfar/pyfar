@@ -12,9 +12,6 @@ jobs:
     if: github.event.label.name == 'cookiecutter'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: 'pyfar/cookiecutter-pypackage'
       - uses: dacbd/create-issue-action@v2
         with:
           title: ${{ github.event.pull_request.title  }}
