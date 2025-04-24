@@ -13,10 +13,7 @@ pyfar
 
 Python package for acoustics research
 
-The python package for acoustics research (pyfar) offers classes to store
-audio data, filters, coordinates, and orientations. It also contains functions
-for reading and writing audio data, as well as functions for processing,
-generating, and plotting audio signals.
+The python package for acoustics research (pyfar) offers classes to store audio data, filters, coordinates, and orientations. It also contains functions for reading and writing audio data, as well as functions for processing, generating, and plotting audio signals.
 
 .. grid:: 1 2 2 2
     :gutter: 4
