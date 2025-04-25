@@ -169,7 +169,7 @@ def speed_of_sound_cramer(
     atmospheric_pressure : float, array_like, optional
         Atmospheric pressure in Pascal, by default
         :py:attr:`reference_atmospheric_pressure`.
-        It must be between 75 000 Pa to 102000 Pa.
+        Value must be between 75 000 Pa to 102000 Pa.
 
     Returns
     -------
