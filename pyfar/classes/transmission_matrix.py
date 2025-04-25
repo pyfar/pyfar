@@ -786,7 +786,6 @@ class TransmissionMatrix(FrequencyData):
 
             >>> import pyfar as pf
             >>> import numpy as np
-            >>> import matplotlib.pyplot as plt
             >>> # Transmission line parameters
             >>> frequencies = np.linspace(20, 20e3, 1000)
             >>> omega = 2*np.pi*frequencies
