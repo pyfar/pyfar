@@ -105,6 +105,7 @@ intersphinx_mapping = {
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
+html_js_files = ["custom.js"]
 html_logo = 'resources/logos/pyfar_logos_fixed_size_pyfar.png'
 html_title = "pyfar"
 html_favicon = '_static/favicon.ico'
