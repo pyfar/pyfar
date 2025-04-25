@@ -3,6 +3,8 @@ name: create pr from cookiecutter
 on:
   repository_dispatch:
     types: [pull_master]
+  pull_request:
+    types: [ labeled ]
 
 jobs:
   create-pr-from-cookiecutter:
