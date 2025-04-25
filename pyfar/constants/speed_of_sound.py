@@ -164,7 +164,7 @@ def speed_of_sound_cramer(
         Relative humidity in the range of 0 to 1.
     co2_ppm : float, array_like, optional
         CO\ :sub:`2` concentration in parts per million. The default is
-        425.19 ppm, based on [#]_. It must be at below
+        425.19 ppm, based on [#]_. Value must be below
         10 000 ppm (1%).
     atmospheric_pressure : float, array_like, optional
         Atmospheric pressure in Pascal, by default
