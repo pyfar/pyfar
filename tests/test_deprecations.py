@@ -106,17 +106,6 @@ def test_deprecations_0_8_0(statement):
             eval(statement)
 
 
-def test_deprecations_0_8_0_set_sh_order():
-    coords = pf.Coordinates(np.arange(6), 0, 0)
-
-    # remove statement from pyfar 0.8.0!
-    if version.parse(pf.__version__) >= version.parse('0.8.0'):
-        with pytest.raises(AttributeError):
-            coords.sh_order = 1
-        with pytest.raises(AttributeError):
-            assert coords.sh_order
-
-
 def test_signal_len():
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         match = "object of type 'Signal' has no len"
