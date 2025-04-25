@@ -40,7 +40,6 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-            token: ${{ secrets.create_pr_secret }}
             commit-message: apply cookiecutter template
             title: "[Bot]: apply cookiecutter template"
             base: main
