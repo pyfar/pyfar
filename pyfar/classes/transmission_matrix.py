@@ -773,7 +773,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        tmat :TransmissionMatrix
+        tmat : TransmissionMatrix
             A transmission matrix representing a transmission line.
 
 
