@@ -9,14 +9,21 @@ from .constants import (
 
 from .speed_of_sound import (
     speed_of_sound_simple,
+    speed_of_sound_cramer,
     speed_of_sound_ideal_gas,
+)
+
+from .constants import (
+    air_attenuation,
 )
 
 __all__ = [
     'saturation_vapor_pressure_magnus',
     'density_of_air',
     'speed_of_sound_simple',
+    'speed_of_sound_cramer',
     'speed_of_sound_ideal_gas',
+    'air_attenuation',
 ]
 
 
