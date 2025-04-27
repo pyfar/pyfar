@@ -170,9 +170,11 @@ class LTISystem(object):
         return not deepdiff.DeepDiff(self, other)
 
     def process(self, signal, reset=False):
+        """Abstract method that computes the system's forced response."""
         raise NotImplementedError("Abstract class method.")
 
     def impulse_response(self, n_samples):
+        """Abstract method that computes the system impulse response."""
         raise NotImplementedError("Abstract class method.")
 
 
@@ -221,7 +223,8 @@ class Filter(LTISystem):
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
             state = _atleast_3d_first_dim(state)
-        super().__init__(sampling_rate=sampling_rate, state=state, comment=comment)
+        super().__init__(sampling_rate=sampling_rate,
+                         state=state, comment=comment)
 
     def init_state(self, state):
         """
