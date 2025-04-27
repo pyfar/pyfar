@@ -106,7 +106,77 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
     return representation
 
 
-class Filter(object):
+class LTISystem(object):
+    """Base class for LTI systems."""
+
+    def __init__(self, sampling_rate=None, state=None, comment=""):
+        self._state = state
+        self._sampling_rate = sampling_rate
+        self.comment = comment
+
+    @property
+    def sampling_rate(self):
+        """Sampling rate of the filter in Hz. The sampling rate is set upon
+        initialization and cannot be changed after the object has been created.
+        """
+        return self._sampling_rate
+
+    @property
+    def state(self):
+        """
+        The current state of the filter as an array with dimensions
+        corresponding to the order of the filter and number of filter channels.
+        """
+        return self._state
+
+    def reset(self):
+        """Reset the filter state by filling it with zeros."""
+        if self._state is not None:
+            self._state = np.zeros_like(self._state)
+        else:
+            self._state = None
+
+    @property
+    def comment(self):
+        """Get comment."""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        """Set comment."""
+        if not isinstance(value, str):
+            raise TypeError("comment has to be of type string.")
+        else:
+            self._comment = value
+
+    def copy(self):
+        """Return a copy of the Filter object."""
+        return deepcopy(self)
+
+    def _encode(self):
+        """Return dictionary for the encoding."""
+        return self.copy().__dict__
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        # initializing this way satisfies FIR, IIR and SOS initialization
+        obj = cls(np.zeros((1, 6)), None)
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __eq__(self, other):
+        """Check for equality of two objects."""
+        return not deepdiff.DeepDiff(self, other)
+
+    def process(self, signal, reset=False):
+        raise NotImplementedError("Abstract class method.")
+
+    def impulse_response(self, n_samples):
+        raise NotImplementedError("Abstract class method.")
+
+
+class Filter(LTISystem):
     """
     Container class for digital filters.
     This is an abstract class method, only used for the shared processing
@@ -151,9 +221,7 @@ class Filter(object):
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
             state = _atleast_3d_first_dim(state)
-
-        self._sampling_rate = sampling_rate
-        self.comment = comment
+        super().__init__(sampling_rate=sampling_rate, state=state, comment=comment)
 
     def init_state(self, state):
         """
@@ -190,34 +258,9 @@ class Filter(object):
         self._coefficients = _atleast_3d_first_dim(value)
 
     @property
-    def sampling_rate(self):
-        """Sampling rate of the filter in Hz. The sampling rate is set upon
-        initialization and cannot be changed after the object has been created.
-        """
-        return self._sampling_rate
-
-    @property
     def n_channels(self):
         """The number of channels of the filter."""
         return self._coefficients.shape[0]
-
-    @property
-    def state(self):
-        """Get or set the filter state."""
-        return self._state
-
-    @state.setter
-    def state(self, state):
-        """Set state of the filter."""
-        if state is not None:
-            if self.coefficients is None:
-                raise ValueError(
-                    "Cannot set a state without filter coefficients")
-            self._initialized = True
-        else:
-            self._initialized = False
-
-        self._state = state
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -329,46 +372,6 @@ class Filter(object):
             self._state = state
 
         return impulse_response
-
-    def reset(self):
-        """Reset the filter state by filling it with zeros."""
-        if self._state is not None:
-            self._state = np.zeros_like(self._state)
-        else:
-            self._state = None
-
-    @property
-    def comment(self):
-        """Get comment."""
-        return self._comment
-
-    @comment.setter
-    def comment(self, value):
-        """Set comment."""
-        if not isinstance(value, str):
-            raise TypeError("comment has to be of type string.")
-        else:
-            self._comment = value
-
-    def copy(self):
-        """Return a copy of the Filter object."""
-        return deepcopy(self)
-
-    def _encode(self):
-        """Return dictionary for the encoding."""
-        return self.copy().__dict__
-
-    @classmethod
-    def _decode(cls, obj_dict):
-        """Decode object based on its respective object dictionary."""
-        # initializing this way satisfies FIR, IIR and SOS initialization
-        obj = cls(np.zeros((1, 6)), None)
-        obj.__dict__.update(obj_dict)
-        return obj
-
-    def __eq__(self, other):
-        """Check for equality of two objects."""
-        return not deepdiff.DeepDiff(self, other)
 
 
 class FilterFIR(Filter):
