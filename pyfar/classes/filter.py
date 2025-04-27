@@ -151,9 +151,6 @@ class Filter(object):
                 raise ValueError(
                     "Cannot set a state without filter coefficients")
             state = _atleast_3d_first_dim(state)
-            self._initialized = True
-        else:
-            self._initialized = False
 
         self._state = state
         self._sampling_rate = sampling_rate
@@ -167,7 +164,6 @@ class Filter(object):
         setting the state there.
         """
         self._state = state
-        self._initialized = True
 
     @staticmethod
     def _check_state_keyword(state):
