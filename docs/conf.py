@@ -203,5 +203,3 @@ _, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
 shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
 with open(shortcuts_path, "w") as f_id:
     f_id.writelines(shortcuts)
-
-
