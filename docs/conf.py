@@ -196,4 +196,12 @@ with open("_static/header.rst", "rt") as fin:
 # set dropdown header after gallery headings
 html_theme_options['header_links_before_dropdown'] = count_gallery_headings+1
 
+# -- pyfar specifics -----------------------------------------------------
+
+# write shortcuts to sphinx readable format
+_, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
+shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
+with open(shortcuts_path, "w") as f_id:
+    f_id.writelines(shortcuts)
+
 
