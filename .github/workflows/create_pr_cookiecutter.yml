@@ -50,3 +50,4 @@ jobs:
   
               [1]: https://github.com/peter-evans/create-pull-request
             branch: bot/apply_cookiecutter
+            draft: true
