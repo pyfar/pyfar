@@ -370,12 +370,12 @@ def density_of_air(
     temperature : float, array_like
         Temperature in degrees Celsius (°C).
     relative_humidity : float, array_like
-        Relative humidity in the range of 0 to 1.
+        Relative humidity in the range from 0 to 1.
     atmospheric_pressure : float, array_like, optional
-        Atmospheric pressure in pascal (Pa), by default
+        Atmospheric pressure in Pascal (Pa), by default
         :py:attr:`reference_atmospheric_pressure`.
     saturation_vapor_pressure : float, array_like, optional
-        Saturation vapor pressure in Pa.
+        Saturation vapor pressure in Pascal (Pa).
         The default uses the value and valid temperature range from
         :py:func:`~pyfar.constants.saturation_vapor_pressure_magnus`.
 
@@ -417,9 +417,9 @@ def density_of_air(
     R = 8.314  # J/(K mol)
     mu_a = 28.97*1e-3  # kg/mol
     mu_w = 18.02*1e-3  # kg/mol
-    R_a = R / mu_a
 
     # next to Equation 6.69
+    R_a = R / mu_a
     alpha = mu_a / mu_w
 
     # partial pressure of water vapor in Pa
