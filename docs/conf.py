@@ -56,8 +56,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pyfar'
-copyright = '2020, The pyfar developers'
-author = 'The pyfar developers'
+copyright = "2025, The pyfar developers"
+author = "The pyfar developers"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -95,9 +95,7 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
-    'soundfile': ('https://python-soundfile.readthedocs.io/en/latest/', None),
-    'spharpy': ('https://spharpy.readthedocs.io/en/stable/', None),
-    'gallery': ('https://pyfar-gallery.readthedocs.io/en/latest/', None),
+    'pyfar': ('https://pyfar.readthedocs.io/en/stable/', None),
     }
 
 # -- Options for HTML output -------------------------------------------------
@@ -106,7 +104,6 @@ intersphinx_mapping = {
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
-html_js_files = ["custom.js"]
 html_logo = 'resources/logos/pyfar_logos_fixed_size_pyfar.png'
 html_title = "pyfar"
 html_favicon = '_static/favicon.ico'
@@ -197,10 +194,4 @@ with open("_static/header.rst", "rt") as fin:
 # set dropdown header after gallery headings
 html_theme_options['header_links_before_dropdown'] = count_gallery_headings+1
 
-# -- pyfar specifics -----------------------------------------------------
 
-# write shortcuts to sphinx readable format
-_, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
-shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
-with open(shortcuts_path, "w") as f_id:
-    f_id.writelines(shortcuts)
