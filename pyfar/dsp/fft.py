@@ -224,7 +224,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     Note that the phase is maintained in all cases, i.e., instead of taking
     the squared absolute values for ``'power'`` and ``'psd'``, the complex
     spectra are multiplied with their absolute values to ensure a correct
-    renormalization. Details on the FFT normalization given by ``fft_norm`` are
+    renormalization. Details on the FFT normalization given by `fft_norm` are
     given above.
 
     Parameters
@@ -265,7 +265,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     inverse : bool, optional
         apply the inverse normalization. The default is ``False``.
     single_sided : bool, optional
-        denotes if ``spec`` is a single sided spectrum up to half the sampling
+        denotes if `spec` is a single sided spectrum up to half the sampling
         rate or a both sided (full) spectrum. If ``single_sided=True`` the
         ``'unitary'`` normalization according to [1]_ Eq. (8) is applied unless
         ``fft_norm='none'``.
@@ -273,7 +273,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
     window : None, array like
         window that was applied to the time signal before performing the FFT.
         Affects the normalization as in [1]_ Eqs. (11-13). The window must be
-        an array-like with ``n_samples`` length. The default is ``None``,
+        an array-like with `n_samples` length. The default is ``None``,
         which denotes that no window was applied.
 
     Returns
