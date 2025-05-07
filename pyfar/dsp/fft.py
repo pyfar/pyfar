@@ -261,7 +261,7 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
         Note that the ``'unitary'`` normalization is also applied for
         ``'amplitude'``, ``'rms'``, ``'power'``, and ``'psd'``
         if the input spectrum is single sided (see
-        ``single_sided``).
+        `single_sided`).
     inverse : bool, optional
         apply the inverse normalization. The default is ``False``.
     single_sided : bool, optional
