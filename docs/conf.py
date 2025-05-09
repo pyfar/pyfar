@@ -136,7 +136,7 @@ html_theme_options = {
     "secondary_sidebar_items": ["page-toc"],  # Omit 'show source' link that that shows notebook in json format
     "navigation_with_keys": True,
     # Configure navigation depth for section navigation
-    "navigation_depth": 1,
+    "navigation_depth": 2,
 }
 
 html_context = {
