@@ -4,6 +4,7 @@ from typing import Final
 
 from .constants import (
     saturation_vapor_pressure_magnus,
+    density_of_air,
 )
 
 from .speed_of_sound import (
@@ -18,6 +19,7 @@ from .constants import (
 
 __all__ = [
     'saturation_vapor_pressure_magnus',
+    'density_of_air',
     'speed_of_sound_simple',
     'speed_of_sound_cramer',
     'speed_of_sound_ideal_gas',
