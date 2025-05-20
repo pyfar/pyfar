@@ -2694,7 +2694,9 @@ class Coordinates():
 
     def _set_points(self, x, y, z):
         """
-        Check points and convert to matrix.
+        Convert all points into at least 1d numpy arrays and broadcast them
+        to the same shape by calling ``_check_points``,
+        then assign the points to self._x, self._y and self._z.
 
         Parameters
         ----------
@@ -2705,8 +2707,41 @@ class Coordinates():
         z : array like, number
             Third coordinate of the points in cartesian.
 
-        Set self._points, which is an atleast_2d numpy array of shape
-        [L,M,...,N, 3].
+        Set self._x, self._y and self._z, which are at least 1d numpy arrays
+        of self.cshape.
+        """
+        # check input
+        x, y, z = self._check_points(x, y, z)
+
+        # set values
+        self._x = x
+        self._y = y
+        self._z = z
+
+    def _check_points(self, x, y, z):
+        """
+        Convert all coordinates into at least 1d float64 arrays and
+        broadcast the shape of all three coordinates to the same shape.
+        The returned arrays are explicitly set to be writeable, to make sure
+        that the class does not become read-only.
+
+        Parameters
+        ----------
+        x : array like, number
+            First coordinate of the points in cartesian.
+        y : array like, number
+            Second coordinate of the points in cartesian.
+        z : array like, number
+            Third coordinate of the points in cartesian.
+
+        Returns
+        -------
+        x : np.ndarray[float64]
+            broadcasted first coordinate of the points in cartesian.
+        y : np.ndarray[float64]
+            broadcasted second coordinate of the points in cartesian.
+        z : np.ndarray[float64]
+            broadcasted third coordinate of the points in cartesian.
         """
         # cast to numpy array
         x = np.atleast_1d(np.asarray(x, dtype=np.float64))
@@ -2726,10 +2761,7 @@ class Coordinates():
         y.setflags(write=True)
         z.setflags(write=True)
 
-        # set values
-        self._x = x
-        self._y = y
-        self._z = z
+        return x, y, z
 
     def _set_weights(self, weights):
         """
