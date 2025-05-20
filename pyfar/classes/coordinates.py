@@ -1305,6 +1305,8 @@ class Coordinates():
         """
         Convert all coordinates into at least 1d float64 arrays and
         broadcast the shape of all three coordinates to the same shape.
+        The returned arrays are explicitly set to be writeable, to make sure
+        that the class does not become read-only.
 
         Parameters
         ----------
