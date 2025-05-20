@@ -168,7 +168,7 @@ class Coordinates():
         super(Coordinates, self).__init__()
 
         # init cartesian coordinates
-        self._set_points(x, y, z)
+        self._check_and_set_points(x, y, z)
 
         # save meta data
         self._set_weights(weights)
@@ -485,7 +485,7 @@ class Coordinates():
 
     @cartesian.setter
     def cartesian(self, value):
-        self._set_points(value[..., 0], value[..., 1], value[..., 2])
+        self._check_and_set_points(value[..., 0], value[..., 1], value[..., 2])
 
     @property
     def spherical_elevation(self):
@@ -507,7 +507,7 @@ class Coordinates():
             value[..., 1], -np.pi/2, np.pi/2, 'elevation angle')
         x, y, z = sph2cart(
             value[..., 0], np.pi / 2 - value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._check_and_set_points(x, y, z)
 
     @property
     def spherical_colatitude(self):
@@ -528,7 +528,7 @@ class Coordinates():
         value[..., 1] = _check_array_limits(
             value[..., 1], 0, np.pi, 'colatitude angle')
         x, y, z = sph2cart(value[..., 0], value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._check_and_set_points(x, y, z)
 
     @property
     def spherical_side(self):
@@ -550,7 +550,7 @@ class Coordinates():
             value[..., 0], -np.pi/2, np.pi/2, 'polar angle')
         x, z, y = sph2cart(
             value[..., 1], np.pi / 2 - value[..., 0], value[..., 2])
-        self._set_points(x, y, z)
+        self._check_and_set_points(x, y, z)
 
     @property
     def spherical_front(self):
@@ -570,7 +570,7 @@ class Coordinates():
         value[..., 1] = _check_array_limits(
             value[..., 1], 0, np.pi, 'frontal angle')
         y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._check_and_set_points(x, y, z)
 
     @property
     def cylindrical(self):
@@ -587,7 +587,7 @@ class Coordinates():
     @cylindrical.setter
     def cylindrical(self, value):
         x, y, z = cyl2cart(value[..., 0], value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._check_and_set_points(x, y, z)
 
     @property
     def x(self):
@@ -600,7 +600,7 @@ class Coordinates():
 
     @x.setter
     def x(self, value):
-        self._set_points(value, self.y, self.z)
+        self._check_and_set_points(value, self.y, self.z)
 
     @property
     def y(self):
@@ -613,7 +613,7 @@ class Coordinates():
 
     @y.setter
     def y(self, value):
-        self._set_points(self.x, value, self.z)
+        self._check_and_set_points(self.x, value, self.z)
 
     @property
     def z(self):
@@ -626,7 +626,7 @@ class Coordinates():
 
     @z.setter
     def z(self, value):
-        self._set_points(self.x, self.y, value)
+        self._check_and_set_points(self.x, self.y, value)
 
     @property
     def rho(self):
@@ -1255,7 +1255,7 @@ class Coordinates():
         points = rot.apply(self.cartesian.reshape((self.csize, 3)), inverse)
 
         # set points
-        self._set_points(
+        self._check_and_set_points(
             points[:, 0].reshape(shape),
             points[:, 1].reshape(shape),
             points[:, 2].reshape(shape))
@@ -1275,7 +1275,29 @@ class Coordinates():
         obj.__dict__.update(obj_dict)
         return obj
 
-    def _set_points(self, x, y, z):
+    def _check_and_set_points(self, x, y, z):
+        """
+        Check and set points.
+
+        Parameters
+        ----------
+        x : array like, number
+            First coordinate of the points in cartesian.
+        y : array like, number
+            Second coordinate of the points in cartesian.
+        z : array like, number
+            Third coordinate of the points in cartesian.
+
+        Set self._points, which is an atleast_2d numpy array of shape
+        [L,M,...,N, 3].
+        """
+        # check input
+        x, y, z = self._check_points(x, y, z)
+
+        # set values
+        self._set_points(x, y, z)
+
+    def _check_points(self, x, y, z):
         """
         Check points and convert to matrix.
 
@@ -1309,6 +1331,24 @@ class Coordinates():
         y.setflags(write=True)
         z.setflags(write=True)
 
+        return x, y, z
+
+    def _set_points(self, x, y, z):
+        """
+        Set the points to the internal self._x, self._y and self._z.
+
+        Parameters
+        ----------
+        x : array like, number
+            First coordinate of the points in cartesian.
+        y : array like, number
+            Second coordinate of the points in cartesian.
+        z : array like, number
+            Third coordinate of the points in cartesian.
+
+        Set self._points, which is an atleast_2d numpy array of shape
+        [L,M,...,N, 3].
+        """
         # set values
         self._x = x
         self._y = y
