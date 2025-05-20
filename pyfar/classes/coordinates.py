@@ -2765,16 +2765,41 @@ class Coordinates():
 
     def _set_weights(self, weights):
         """
-        Check and set sampling weights.
+        If not None convert to float64 numpy array and check for size.
+
+        Parameters
+        ----------
+        weights : array like, number
+            the weights for each point.
 
         Set self._weights, which is an atleast_1d numpy array of shape
         [L,M,...,N].
         """
+        # check weights and convert to numpy array if not None
+        weights = self._check_weights(weights)
 
-        # check input
+        # set class variable
+        self._weights = weights
+
+    def _check_weights(self, weights):
+        """
+        Convert weights into float64 numpy array and check versus the csize.
+        It will be reshaped to the cshape if the csize matches.
+
+        Parameters
+        ----------
+        weights : array like, number
+            the weights for each point, should be of size of self.csize.
+
+        Returns
+        -------
+        weights : np.ndarray[float64], None
+            The weights reshaped to the cshape of the coordinates if not None.
+            Otherwise None.
+        """
+        # if None no further checks are needed
         if weights is None:
-            self._weights = weights
-            return
+            return weights
 
         # cast to np.array
         weights = np.asarray(weights, dtype=np.float64)
@@ -2784,8 +2809,7 @@ class Coordinates():
             "weights must have same size as self.csize"
         weights = weights.reshape(self.cshape)
 
-        # set class variable
-        self._weights = weights
+        return weights
 
     def _find_nearest(self, points_1, points_2, points_3,
                       domain, convention, unit, show,
