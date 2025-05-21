@@ -116,7 +116,9 @@ class LTISystem(object):
 
     @property
     def sampling_rate(self):
-        """Sampling rate of the filter in Hz. The sampling rate is set upon
+        """Sampling rate of the filter in Hz.
+        
+        The sampling rate is set upon
         initialization and cannot be changed after the object has been created.
         """
         return self._sampling_rate
