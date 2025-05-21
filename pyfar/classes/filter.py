@@ -6,6 +6,9 @@ Available filters are shown in the
 :doc:`filter types examples<gallery:gallery/interactive/pyfar_filter_types>`
 and documented in :py:mod:`pyfar.dsp.filter`.
 """
+
+from abc import ABC, abstractmethod
+
 import deepdiff
 import warnings
 
@@ -106,8 +109,8 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
     return representation
 
 
-class LTISystem(object):
-    """Base class for LTI systems."""
+class LTISystem(ABC):
+    """Abstract base class for LTI systems."""
 
     def __init__(self, sampling_rate=None, state=None, comment=""):
         self._state = state
@@ -171,21 +174,17 @@ class LTISystem(object):
         """Check for equality of two objects."""
         return not deepdiff.DeepDiff(self, other)
 
+    @abstractmethod
     def process(self, signal, reset=False):
         """Abstract method that computes the system's forced response."""
-        raise NotImplementedError("Abstract class method.")
 
+    @abstractmethod
     def impulse_response(self, n_samples):
         """Abstract method that computes the system impulse response."""
-        raise NotImplementedError("Abstract class method.")
 
 
 class Filter(LTISystem):
-    """
-    Container class for digital filters.
-    This is an abstract class method, only used for the shared processing
-    method used for the application of a filter on a signal.
-    """
+    """Abstract base class for digital filters."""
 
     def __init__(
             self,
@@ -268,8 +267,9 @@ class Filter(LTISystem):
         return self._coefficients.shape[0]
 
     @staticmethod
+    @abstractmethod
     def _process(coefficients, data, zi=None):
-        raise NotImplementedError("Abstract class method.")
+        """Abstract method that defines the actual filtering process."""
 
     def process(self, signal, reset=False):
         """Apply the filter to a signal.
