@@ -2,6 +2,13 @@
 History
 =======
 
+0.7.3 (2025-06-23)
+------------------
+* Enhancement: Separated checking and setting coordinate points and weights in `pyfar.Coordinates` (PR #804 & #805)
+* Docs: Improve TOC depths (PR #795)
+* Docs: Improve docstring formatting (PR #800)
+* Docs: Use dropdown menu in the header of the documentation (PR #789)
+
 0.7.2 (2025-03-07)
 ------------------
 * Fix: `pyfar.dsp.find_impulse_response_delay` crashed when the input impulse response had a large negative peak. This is now fixed (PR #776)
