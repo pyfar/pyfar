@@ -548,7 +548,8 @@ def _load_files(data):
     print(f"Loading {data} data. This is only done once.")
 
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
-    url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
+    url = ('https://github.com/pyfar/files/raw/refs/heads/main/'
+           'pyfar.signals.files/')
 
     for file in files:
 
