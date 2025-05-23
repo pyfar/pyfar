@@ -35,6 +35,61 @@ def test_filter_init_with_state():
     npt.assert_array_equal(filt.state, state)
 
 
+def test_filter_state_setter():
+    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
+    state = np.array([[[1, 0]]])
+    filt = fo.Filter(coefficients=coeff)
+    filt.state = state
+    npt.assert_array_equal(filt.state, state)
+
+
+def test_filter_state_setter_errors():
+    """Test errors when setting a state with wrong shape."""
+    fs = 44100
+    coeff_iir = np.array([[[1, 0, 0], [1, 0, 0]]])
+    with pytest.raises(ValueError, match=re.escape(
+        "The state does not match the filter structure. Required "
+        "shape for FilterIIR is (n_channels, *cshape, order).")):
+        fo.FilterIIR(coeff_iir, fs, state=[[[1, 0, 0]]])
+
+    coeff_fir = np.array([1, 0, 0])
+    with pytest.raises(ValueError, match=re.escape(
+        "The state does not match the filter structure. Required "
+        "shape for FilterFIR is (n_channels, *cshape, order).")):
+        fo.FilterFIR(coeff_fir, fs, state=[[[1, 0, 0]]])
+
+    coeff_sos = [[[1, .5, .25, 1, .5, .25], [1, .5, .25, 1, .5, .25]]]
+    with pytest.raises(ValueError, match=re.escape(
+        "The state does not match the filter structure. Required shape for "
+        "FilterSOS is (n_channels, *cshape, n_sections, 2).")):
+        fo.FilterSOS(coeff_sos, fs, state=[[[[0], [1]]]])
+
+
+def test_filter_state_process_errors():
+    """Test errors when processing a signal with wrong state shape."""
+    fs = 44100
+    impulse = pf.signals.impulse(256, amplitude=np.ones((4, 1)))
+    coeff_iir = np.array([[[1, 0, 0], [1, 0, 0]]])
+    with pytest.raises(ValueError, match=re.escape(
+        "The initial state does not match the cshape of the signal. Required "
+        "shape for `state` in FilterIIR is (n_channels, *cshape, order).")):
+        fo.FilterIIR(coeff_iir, fs, state=[[[1, 0]]]).process(impulse)
+
+    coeff_fir = np.array([1, 0, 0])
+    with pytest.raises(ValueError, match=re.escape(
+        "The initial state does not match the cshape of the signal. Required "
+        "shape for `state` in FilterFIR is (n_channels, *cshape, order).")):
+        fo.FilterFIR(coeff_fir, fs, state=[[[1, 0]]]).process(impulse)
+
+    coeff_sos = [[[1, .5, .25, 1, .5, .25], [1, .5, .25, 1, .5, .25]]]
+    with pytest.raises(ValueError, match=re.escape(
+        "The initial state does not match the cshape of the signal. Required "
+        "shape for `state` in FilterSOS is (n_channels, *cshape, n_sections,"
+        " 2).")):
+        fo.FilterSOS(
+            coeff_sos, fs, state=[[[[0, 0], [1, 0]]]]).process(impulse)
+
+
 def test_filter_comment():
     filt = fo.Filter(coefficients=None, state=None, comment='Bla')
     assert filt.comment == 'Bla'

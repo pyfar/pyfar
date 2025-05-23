@@ -39,5 +39,14 @@ Modules
    modules/pyfar.signals.files
    modules/pyfar.utils
 
+Testing
+-------
+
+.. toctree::
+   :maxdepth: 1
+
+   modules/pyfar.testing.stub_utils
+   modules/pyfar.testing.plot_utils
+
 
 .. _examples gallery: https://pyfar-gallery.readthedocs.io/en/latest/examples_gallery.html

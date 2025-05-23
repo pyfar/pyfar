@@ -1275,7 +1275,8 @@ def find_impulse_response_delay(impulse_response, N=1):
             ir = impulse_response.time[ch]
             ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
-            if np.max(ir) > 1e-16:
+            #Check absolute amximum, because peaks can be positive or negative.
+            if np.max(np.abs(ir)) > 1e-16:
                 # minimum phase warns if the input signal is not symmetric,
                 # which is not critical for this application
                 with warnings.catch_warnings():
@@ -1300,6 +1301,16 @@ def find_impulse_response_delay(impulse_response, N=1):
                 search_region_range = np.arange(argmax-n, argmax+n)
                 search_region = np.imag(
                     correlation_analytic[search_region_range])
+
+                # If this is true, it indicates that `correlation_analytic` has
+                # a negative peak, which can happen if the absolute maximum of
+                # `impulse_response` is negative. Changing the sign of the
+                # search region makes sure that the `mask` generated below
+                # works as intended. Fixing it this way is safer because it is
+                # theoretically possible that the absolute maximum of
+                # `impulse_response` is negative but
+                # `correlation_analytic[argmax].real` is positive.
+                search_region *= np.sign(correlation_analytic[argmax].real)
 
                 # mask values with a negative gradient
                 mask = np.gradient(search_region, search_region_range) > 0

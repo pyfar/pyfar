@@ -146,16 +146,8 @@ class Filter(object):
         else:
             self._coefficients = None
 
-        if state is not None:
-            if coefficients is None:
-                raise ValueError(
-                    "Cannot set a state without filter coefficients")
-            state = _atleast_3d_first_dim(state)
-            self._initialized = True
-        else:
-            self._initialized = False
+        self.state = state
 
-        self._state = state
         self._sampling_rate = sampling_rate
         self.comment = comment
 
@@ -208,11 +200,21 @@ class Filter(object):
 
     @property
     def state(self):
-        """
-        The current state of the filter as an array with dimensions
-        corresponding to the order of the filter and number of filter channels.
-        """
+        """Get or set the filter state."""
         return self._state
+
+    @state.setter
+    def state(self, state):
+        """Set state of the filter."""
+        if state is not None:
+            if self.coefficients is None:
+                raise ValueError(
+                    "Cannot set a state without filter coefficients")
+            self._initialized = True
+        else:
+            self._initialized = False
+
+        self._state = state
 
     @staticmethod
     def _process(coefficients, data, zi=None):
@@ -394,6 +396,13 @@ class FilterFIR(Filter):
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
+        if state is not None and np.asarray(state).ndim < 3:
+            state = _atleast_3d_first_dim(state)
+            warnings.warn(
+                "The state should be of shape (n_channels, *cshape, order). "
+                f"The state has been reshaped to shape=({state.shape}",
+                stacklevel=2)
+
         super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
@@ -426,6 +435,48 @@ class FilterFIR(Filter):
 
         coeff = np.stack((b, a), axis=-2)
         self._coefficients = _atleast_3d_first_dim(coeff)
+
+    @property
+    def state(self):
+        """
+        Get or set the filter state.
+
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering.
+
+        Note that the state can also be initialized with the
+        :py:func:`~pyfar.classes.filter.FilterFIR.init_state` method.
+
+        Shape of the state must be  ``(n_filter_channels, *cshape, order)``,
+        with ``cshape`` being the channel shape of the
+        :py:class:`~pyfar.Signal` to be filtered.
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        """
+        Set initial state of FIR filter.
+
+        Parameters
+        ----------
+        state : array, double
+            The state of the filter with dimensions
+            ``(n_channels, *cshape, order)``, where ``cshape`` is
+            the channel shape of the :py:class:`~pyfar.Signal`
+            to be filtered.
+        """
+        if state is not None:
+            state = np.asarray(state)
+            if (state.shape[-1] != self.order
+                or state.ndim < 3
+                or state.shape[0] != self.n_channels):
+                raise ValueError(
+                    "The state does not match the filter structure. Required "
+                    "shape for FilterFIR is (n_channels, *cshape, order).")
+
+        # sets filter state in parent class
+        Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -547,6 +598,7 @@ class FilterFIR(Filter):
         zf : array
             The final filter state. Only returned if ``zi is not None``.
         """
+
         b = coefficients[0]
         # broadcast b to match ndim of data for convolution
         b = np.broadcast_to(b, (1, ) * (data.ndim - b.ndim) + b.shape)
@@ -557,6 +609,13 @@ class FilterFIR(Filter):
         out = out_full[..., 0:data.shape[-1]]
 
         if zi is not None:
+
+            if zi.shape[0:-1] != data.shape[0:-1]:
+                raise ValueError(
+                    "The initial state does not match the cshape of "
+                    "the signal. Required shape for `state` in "
+                    "FilterFIR is (n_channels, *cshape, order).")
+
             # add initial filter state to the beginning of the output
             out[..., 0:zi.shape[-1]] += zi
             # get new filter state
@@ -603,12 +662,61 @@ class FilterIIR(Filter):
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
+        if state is not None and np.asarray(state).ndim < 3:
+            state = _atleast_3d_first_dim(state)
+            warnings.warn(
+                "The state should be of shape (n_channels, *cshape, order). "
+                f"The state has been reshaped to shape=({state.shape}",
+                stacklevel=2)
+
         super().__init__(coefficients, sampling_rate, state, comment)
 
     @property
     def order(self):
         """The order of the filter."""
         return np.max(self._coefficients.shape[-2:]) - 1
+
+    @property
+    def state(self):
+        """
+        Get or set the filter state.
+
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering.
+
+        Note that the state can also be initialized with the
+        :py:func:`~pyfar.classes.filter.FilterIIR.init_state` method.
+
+        Shape of the state must be  ``(n_filter_channels, *cshape, order)``,
+        with ``cshape`` being the channel shape of the
+        :py:class:`~pyfar.Signal` to be filtered.
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        """
+        Set initial state of IIR filter.
+
+        Parameters
+        ----------
+        state : array, double
+            The state of the filter with dimensions
+            ``(n_channels, *cshape, order)``, where ``cshape`` is
+            the channel shape of the :py:class:`~pyfar.Signal`
+            to be filtered.
+        """
+        if state is not None:
+            state = np.asarray(state)
+            if (state.shape[-1] != self.order
+                or state.ndim < 3
+                or state.shape[0] != self.n_channels):
+                raise ValueError(
+                    "The state does not match the filter structure. Required "
+                    "shape for FilterIIR is (n_channels, *cshape, order).")
+
+        # sets filter state in parent class
+        Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -776,6 +884,10 @@ class FilterIIR(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
+        if zi is not None and zi.shape[0:-1] != data.shape[0:-1]:
+            raise ValueError("The initial state does not match the cshape of "
+                             "the signal. Required shape for `state` in "
+                             "FilterIIR is (n_channels, *cshape, order).")
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
     def __repr__(self):
@@ -816,8 +928,12 @@ class FilterSOS(Filter):
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
 
-        if state is not None:
+        if state is not None and np.asarray(state).ndim < 4:
             state = _atleast_4d_first_dim(state)
+            warnings.warn(
+                "The state should be of shape (n_channels, *cshape, n_sections"
+                f", 2). The state has been reshaped to shape=({state.shape}",
+                stacklevel=2)
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -844,6 +960,51 @@ class FilterSOS(Filter):
     def n_sections(self):
         """The number of sections."""
         return self._coefficients.shape[-2]
+
+    @property
+    def state(self):
+        """
+        Get or set the filter state.
+
+        The filter state sets the initial condition of the filter and can for
+        example be used for block-wise filtering.
+
+        Note that the state can also be initialized with the
+        :py:func:`~pyfar.classes.filter.FilterSOS.init_state` method.
+
+        Shape of the state must be
+        ``(n_filter_channels, *cshape, n_sections, 2))``,
+        with ``cshape`` being the channel shape of the
+        :py:class:`~pyfar.Signal` to be filtered.
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        """
+        Set initial state of SOS filter.
+
+        Parameters
+        ----------
+        state : array, double
+            The state of the filter with dimensions
+            ``(n_channels, *cshape, n_sections, 2)``, where ``cshape`` is
+            the channel shape of the :py:class:`~pyfar.Signal`
+            to be filtered.
+        """
+        if state is not None:
+            state = np.asarray(state)
+            if (state.shape[0] != self.n_channels
+                or state.shape[-1] != 2
+                or state.shape[-2] != self.n_sections
+                or state.ndim < 4):
+                raise ValueError(
+                    "The state does not match the filter structure. Required "
+                    "shape for FilterSOS is (n_channels, *cshape, "
+                    "n_sections, 2).")
+
+        # sets filter state in parent class
+        Filter.state.fset(self, state)
 
     def init_state(self, cshape, state='zeros'):
         """Initialize the buffer elements to pre-defined initial conditions.
@@ -971,6 +1132,11 @@ class FilterSOS(Filter):
         This is a hidden static method required for a shared processing
         function in the parent class.
         """
+        if zi is not None and zi.shape[0:-2] != data.shape[0:-1]:
+            raise ValueError("The initial state does not match the cshape of "
+                             "the signal. Required shape for `state` in "
+                             "FilterSOS is (n_channels, *cshape, n_sections,"
+                             " 2).")
         if zi is not None:
             zi = zi.transpose(1, 0, 2)
         res = spsignal.sosfilt(sos, data, zi=zi, axis=-1)

@@ -41,6 +41,17 @@ coordinate systems, e.g., the `azimuth` angle is contained in two coordinate
 systems (`spherical_colatitude` and `spherical_elevation`). The table below
 lists all coordinates.
 
+.. note::
+    All coordinates are returned as copies of the internal data. This means
+    that for example ``coordinates.x[0] = 0`` does not change
+    ``coordinates.x``. This can be done using
+
+    .. code-block:: python
+
+       new_x = coordinates.x
+       new_x[0] = 0
+       coordinates.x = new_x
+
 .. list-table::
    :widths: 25 75
    :header-rows: 1
@@ -596,7 +607,7 @@ class Coordinates():
         (:math:`-\infty` < x < :math:`\infty`).
         """
         self._check_empty()
-        return self._x
+        return self._x.copy()
 
     @x.setter
     def x(self, value):
@@ -609,7 +620,7 @@ class Coordinates():
         (:math:`-\infty` < y < :math:`\infty`).
         """
         self._check_empty()
-        return self._y
+        return self._y.copy()
 
     @y.setter
     def y(self, value):
@@ -622,7 +633,7 @@ class Coordinates():
         (:math:`-\infty` < z < :math:`\infty`).
         """
         self._check_empty()
-        return self._z
+        return self._z.copy()
 
     @z.setter
     def z(self, value):
@@ -1277,7 +1288,9 @@ class Coordinates():
 
     def _set_points(self, x, y, z):
         """
-        Check points and convert to matrix.
+        Convert all points into at least 1d numpy arrays and broadcast them
+        to the same shape by calling ``_check_points``,
+        then assign the points to self._x, self._y and self._z.
 
         Parameters
         ----------
@@ -1288,8 +1301,41 @@ class Coordinates():
         z : array like, number
             Third coordinate of the points in cartesian.
 
-        Set self._points, which is an atleast_2d numpy array of shape
-        [L,M,...,N, 3].
+        Set self._x, self._y and self._z, which are at least 1d numpy arrays
+        of self.cshape.
+        """
+        # check input
+        x, y, z = self._check_points(x, y, z)
+
+        # set values
+        self._x = x
+        self._y = y
+        self._z = z
+
+    def _check_points(self, x, y, z):
+        """
+        Convert all coordinates into at least 1d float64 arrays and
+        broadcast the shape of all three coordinates to the same shape.
+        The returned arrays are explicitly set to be writeable, to make sure
+        that the class does not become read-only.
+
+        Parameters
+        ----------
+        x : array like, number
+            First coordinate of the points in cartesian.
+        y : array like, number
+            Second coordinate of the points in cartesian.
+        z : array like, number
+            Third coordinate of the points in cartesian.
+
+        Returns
+        -------
+        x : np.ndarray[float64]
+            broadcasted first coordinate of the points in cartesian.
+        y : np.ndarray[float64]
+            broadcasted second coordinate of the points in cartesian.
+        z : np.ndarray[float64]
+            broadcasted third coordinate of the points in cartesian.
         """
         # cast to numpy array
         x = np.atleast_1d(np.asarray(x, dtype=np.float64))
@@ -1309,23 +1355,45 @@ class Coordinates():
         y.setflags(write=True)
         z.setflags(write=True)
 
-        # set values
-        self._x = x
-        self._y = y
-        self._z = z
+        return x, y, z
 
     def _set_weights(self, weights):
         """
-        Check and set sampling weights.
+        If not None convert to float64 numpy array and check for size.
+
+        Parameters
+        ----------
+        weights : array like, number
+            the weights for each point.
 
         Set self._weights, which is an atleast_1d numpy array of shape
         [L,M,...,N].
         """
+        # check weights and convert to numpy array if not None
+        weights = self._check_weights(weights)
 
-        # check input
+        # set class variable
+        self._weights = weights
+
+    def _check_weights(self, weights):
+        """
+        Convert weights into float64 numpy array and check versus the csize.
+        It will be reshaped to the cshape if the csize matches.
+
+        Parameters
+        ----------
+        weights : array like, number
+            the weights for each point, should be of size of self.csize.
+
+        Returns
+        -------
+        weights : np.ndarray[float64], None
+            The weights reshaped to the cshape of the coordinates if not None.
+            Otherwise None.
+        """
+        # if None no further checks are needed
         if weights is None:
-            self._weights = weights
-            return
+            return weights
 
         # cast to np.array
         weights = np.asarray(weights, dtype=np.float64)
@@ -1335,8 +1403,7 @@ class Coordinates():
             "weights must have same size as self.csize"
         weights = weights.reshape(self.cshape)
 
-        # set class variable
-        self._weights = weights
+        return weights
 
     def _make_kdtree(self):
         """Make a numpy KDTree for fast search of nearest points."""

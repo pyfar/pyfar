@@ -2,7 +2,8 @@
 Functions for testing of plots.
 
 Intended to reduce code redundancy and assure reproducibility on different
-operating systems
+operating systems. See the
+`contribution guidelines <https://pyfar-gallery.readthedocs.io/en/latest/contribute/contribution_guidelines.html#testing-plot-functions>`_.
 """
 
 import os
