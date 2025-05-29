@@ -678,10 +678,10 @@ def test_from_array_like(input, from_method):  # noqa: A002, ARG001
     assert hasattr(Coordinates, from_method), f"{from_method} does not exist"
 
     # Call the method with the first element of the coordinates
-    eval(f"Coordinates.{from_method}(input, 1, 1)")
+    getattr(Coordinates, from_method)(input, 1, 1)
 
     # Call the method with the second element of the coordinates
-    eval(f"Coordinates.{from_method}(1, input, 1)")
+    getattr(Coordinates, from_method)(1, input, 1)
 
     # Call the method with the third element of the coordinates
-    eval(f"Coordinates.{from_method}(1, 1, input)")
+    getattr(Coordinates, from_method)(1, 1, input)
