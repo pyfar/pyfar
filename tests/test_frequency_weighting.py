@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from numpy import testing as npt
 import pyfar
 import pyfar.dsp.filter as pffilt
@@ -27,7 +26,7 @@ def _test_frequency_weighting_constants_combination(
             frequency_weighting_band_corrections(weighting, bands, freq_range)
     calculated_weights = pyfar.constants. \
             frequency_weighting_curve(weighting, nominals)
-            
+
     # maybe there is a better way of testing. tolerance is 0.2, because
     # we need 0.1 for rounding the weight and then larger error
     # due to the difference in nominal vs exact frequency being evaluated
