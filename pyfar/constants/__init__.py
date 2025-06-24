@@ -17,6 +17,11 @@ from .constants import (
     air_attenuation,
 )
 
+from .frequency_weighting import (
+    frequency_weighting_curve,
+    frequency_weighting_band_corrections,
+)
+
 __all__ = [
     'saturation_vapor_pressure_magnus',
     'density_of_air',
@@ -24,6 +29,8 @@ __all__ = [
     'speed_of_sound_cramer',
     'speed_of_sound_ideal_gas',
     'air_attenuation',
+    'frequency_weighting_curve',
+    'frequency_weighting_band_corrections',
 ]
 
 
