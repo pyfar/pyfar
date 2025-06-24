@@ -2,7 +2,7 @@
 Functions and helpers to create frequency weighting filters
 according to IEC 61672-1.
 """
-from typing import Callable, Literal
+from typing import Callable, Literal, Optional
 import numpy as np
 import pyfar as pf
 import pyfar.constants as pfc
@@ -21,9 +21,9 @@ def frequency_weighting_filter(
         signal,
         target_weighting: Literal["A", "C"]="A",
         n_frequencies=100,
-        error_weighting: Callable[[
-            np.ndarray], np.ndarray] = None,
-        sampling_rate: float | None = None,
+        error_weighting: Optional[Callable[[
+            np.ndarray], np.ndarray]] = None,
+        sampling_rate: Optional[float] = None,
         **kwargs,
         ):
     """
@@ -120,8 +120,8 @@ def frequency_weighting_filter(
 def _design_frequency_weighting_filter(sampling_rate: float,
                                       target_weighting: Literal["A", "C"]="A",
                                       n_frequencies=100,
-                                      error_weighting: Callable[[
-                                          np.ndarray], np.ndarray] = None,
+                                      error_weighting: Optional[Callable[[
+                                          np.ndarray], np.ndarray]] = None,
                                       **kwargs,
                                       ) -> np.ndarray:
     """

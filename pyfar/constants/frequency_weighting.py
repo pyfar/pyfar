@@ -1,5 +1,5 @@
 """File containing all frequency weighting functions."""
-from typing import Literal
+from typing import Literal, Union
 import numpy as np
 
 # constants for the weighting curve formulas
@@ -11,7 +11,8 @@ _A_1000 = -2
 _C_1000 = -0.062
 
 
-def _calculate_A_weighted_level(f: float | np.ndarray) -> float | np.ndarray:
+def _calculate_A_weighted_level(f: Union[float, np.ndarray],
+                                ) -> Union[float, np.ndarray]:
     """
     Calculates the level correction in dB of a frequency component
     when using the A weighting.
@@ -22,7 +23,8 @@ def _calculate_A_weighted_level(f: float | np.ndarray) -> float | np.ndarray:
     return 10 * np.log10(bracket_term**2) - _A_1000
 
 
-def _calculate_C_weighted_level(f: float | np.ndarray) -> float | np.ndarray:
+def _calculate_C_weighted_level(f: Union[float, np.ndarray],
+                                ) -> Union[float, np.ndarray]:
     """
     Calculates the level correction in dB of a frequency component
     when using the C weighting.
@@ -32,7 +34,7 @@ def _calculate_C_weighted_level(f: float | np.ndarray) -> float | np.ndarray:
 
 
 def frequency_weighting_curve(weighting: Literal["A", "C"],
-            frequency: float | np.ndarray) -> float | np.ndarray:
+            frequency: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     """
     Calculates the level correction in dB of a frequency component when using
     the A or C weighting defined in IEC 61672-1.
