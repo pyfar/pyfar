@@ -1,7 +1,7 @@
 [project]
 name = "pyfar"
 version = "0.7.3"
-description = "Project for data formats in acoustics."
+description = "Python package for acoustics research."
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.9"
