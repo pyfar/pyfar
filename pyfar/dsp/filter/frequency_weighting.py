@@ -27,15 +27,25 @@ def frequency_weighting_filter(
         **kwargs,
         ):
     """
-    Creates an efficient SOS filter approximating the A or C weighting defined
+    Create and apply an A or C weighting filter.
+    The created SOS filter approximates the A or C weighting defined
     in IEC/DIN-EN 61672-1.
-    When using default parameters, the returned filter is compliant with a
-    class 1 sound level meter as described in the norm for all tested
-    sampling rates (see Notes).
-    This function will run a least-squares algorithm to iteratively approach
-    the target weighting curve.
-    Therefore, it may be much faster to create the filter once and reuse that
-    filter when repeatedly weighting audio data of identical sampling rates.
+
+    .. note::
+        This function will run a least-squares algorithm to iteratively
+        approach the target weighting curve. Therefore, it may be much
+        faster to create the filter once and reuse that filter when
+        repeatedly weighting audio data of identical sampling rates.
+
+    .. note::
+        When using default parameters for `n_frequencies` and `error_weighting`
+        and no `kwargs`, the returned filter is compliant with a class 1 sound
+        level meter as described in the standard for the sampling rates
+        48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
+        2, 1/2, 4, 1/4, 8, and 1/8 each.
+        For other arguments or sampling rates, the returned filter may not
+        comply with class 1 requirements, in which case a warning will be
+        printed.
 
     Parameters
     ----------
@@ -52,6 +62,7 @@ def frequency_weighting_filter(
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
         logarithmically spaced between 10 Hz and the Nyquist frequency.
+        The default is 100.
 
     error_weighting: callable
         A function that can be used to emphasize the approximation errors in
@@ -66,10 +77,10 @@ def frequency_weighting_filter(
         this effect and get a filter potentially closer to the target curve.
         Example: `error_weighting=lambda nf: 100**nf`. This example often
         leads to better results for typical sampling rates, but much worse
-        for very high rates.
+        for very high rates. The default is `None`.
 
     sampling_rate: float, conditionally optional
-        The sampling rate of the returned filter.
+        The sampling rate of the returned filter. The default is `None`.
 
     **kwargs: dict
         Keyword args that are passed to the
@@ -77,21 +88,13 @@ def frequency_weighting_filter(
 
     Returns
     -------
+    signal : Signal
+        The filtered signal. Only returned if ``sampling_rate = None``.
     filter: FilterSOS
-        The frequency weighting filter in second order sections format.
+        The frequency weighting filter as SOS Filter object.
+        Only returned if ``signal = None``.
         If weighting is 'A' the filter order will be 6. 'C' weighting will
         return a filter of order 4.
-
-    Notes
-    -----
-    Since this function performs an iterative approximation, results may not
-    be perfect depending on the input parameters. With the default parameters,
-    the filter will be at least class 1 compliant for the sampling rates
-    48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
-    2, 4, 8, 0.5, 0.25 and 0.125 each.
-    With non-default parameters and/or other sampling rates, the returned
-    filter may not comply with class 1 requirements,
-    in which case a warning will be printed.
     """
     # check input
     if (signal is None and sampling_rate is None) \
@@ -102,8 +105,8 @@ def frequency_weighting_filter(
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
     sos = _design_frequency_weighting_filter(fs, target_weighting,
-                                            n_frequencies, error_weighting,
-                                            **kwargs)
+                                             n_frequencies, error_weighting,
+                                             **kwargs)
     filt = pf.FilterSOS([sos], sampling_rate)
     filt.comment = (f"Frequency weighting SOS filter of order {filt.order} "
                     f"to approximate {target_weighting} weighting according "
@@ -118,15 +121,31 @@ def frequency_weighting_filter(
 
 
 def _design_frequency_weighting_filter(sampling_rate: float,
-                                      target_weighting: Literal["A", "C"]="A",
-                                      n_frequencies=100,
-                                      error_weighting: Optional[Callable[[
-                                          np.ndarray], np.ndarray]] = None,
-                                      **kwargs,
-                                      ) -> np.ndarray:
+                                       target_weighting: Literal["A", "C"]="A",
+                                       n_frequencies=100,
+                                       error_weighting: Optional[Callable[[
+                                           np.ndarray], np.ndarray]] = None,
+                                       **kwargs,
+                                       ) -> np.ndarray:
     """
     Designs SOS filter coefficients approximating the A or C weighting defined
     in IEC/DIN-EN 61672-1 for an arbitrary sampling rate.
+
+    .. note::
+        This function will run a least-squares algorithm to iteratively
+        approach the target weighting curve. Therefore, it may be much faster
+        to create the filter once and reuse that filter when repeatedly
+        weighting audio data of identical sampling rates.
+
+    .. note::
+        When using default parameters for `n_frequencies` and `error_weighting`
+        and no `kwargs`, the returned filter is compliant with a class 1 sound
+        level meter as described in the standard for the sampling rates
+        48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
+        2, 1/2, 4, 1/4, 8, and 1/8 each.
+        For other arguments or sampling rates, the returned filter may not
+        comply with class 1 requirements, in which case a warning will be
+        printed.
 
     Parameters
     ----------
@@ -142,6 +161,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
         logarithmically spaced between 10 Hz and the Nyquist frequency.
+        The default is 100.
 
     error_weighting: callable
         A function that can be used to emphasize the approximation errors in
@@ -156,7 +176,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
         this effect and get a filter potentially closer to the target curve.
         Example: `error_weighting=lambda nf: 100**nf`. This example often
         leads to better results for typical sampling rates, but much worse
-        for very high rates.
+        for very high rates. The default is `None`.
 
     **kwargs: dict
         Keyword args that are passed to the
@@ -166,17 +186,6 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     -------
     sos_coefficients: NDarray
         The coefficients of the designed filter in scipy's sos format.
-
-    Notes
-    -----
-    Since this function performs an iterative approximation, results may not
-    be perfect depending on the input parameters. With the default parameters,
-    the filter will be at least class 1 compliant for the sampling rates
-    48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
-    2, 4, 8, 0.5, 0.25 and 0.125 each.
-    With non-default parameters and/or other sampling rates, the returned
-    filter may not comply with class 1 requirements,
-    in which case a warning will be printed.
     """
 
     if target_weighting not in ["A", "C"]:
@@ -276,6 +285,7 @@ def _get_error_margins(f: np.ndarray):
     """
     Returns the upper and lower error margin in dB for every frequency in the
     input array for the A and C weighting according to IEC/DIN-EN 61672-1.
+    Margins are taken from table 3 in the standard.
     """
     upper = np.zeros_like(f)
     upper[f <= 10] = 3.0

@@ -2,7 +2,8 @@
 from typing import Literal, Union
 import numpy as np
 
-# constants for the weighting curve formulas
+# Constants for the weighting curve formulas.
+# See appendix E in IEC 61672-1.
 _F_1 = 20.598997057618316
 _F_2 = 107.65264864304629
 _F_3 = 737.8622307362901
@@ -15,8 +16,9 @@ def _calculate_A_weighted_level(f: Union[float, np.ndarray],
                                 ) -> Union[float, np.ndarray]:
     """
     Calculates the level correction in dB of a frequency component
-    when using the A weighting.
+    when using the A weighting according to IEC 61672-1.
     """
+    # formula (E.6) in the standard
     bracket_term = (_F_4**2 * f**4) / ((f**2 + _F_1**2) * (f**2 + _F_2**2)
                                       ** 0.5 * (f**2 + _F_3**2)**0.5
                                       * (f**2 + _F_4**2))
@@ -27,8 +29,9 @@ def _calculate_C_weighted_level(f: Union[float, np.ndarray],
                                 ) -> Union[float, np.ndarray]:
     """
     Calculates the level correction in dB of a frequency component
-    when using the C weighting.
+    when using the C weighting according to IEC 61672-1.
     """
+    # formula (E.1) in the standard
     bracket_term = (_F_4**2 * f**2) / ((f**2 + _F_1**2) * (f**2 + _F_4**2))
     return 10 * np.log10(bracket_term**2) - _C_1000
 
@@ -61,9 +64,10 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
         raise ValueError("Allowed literals for weighting are 'A' and 'C'")
 
 
-# constants for nominal band corrections.
-# This is somewhat redundant with dsp.filter.fractional_octaves -> move helper
-# functions to a new place where it can be accessed from everyhwere?
+# Constants for nominal band corrections, taken from table 3 in IEC 61672-1.
+# This is somewhat redundant with dsp.filter.fractional_octaves, but
+# implementing different standards. Here, IEC 61672-1 defines bands as low as
+# 10 Hz, which is not part of fractional_octaves.
 _NOMINAL_THIRDBAND_FREQUENCIES = np.array([
     10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
     400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
@@ -90,8 +94,7 @@ def frequency_weighting_band_corrections(
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Returns the A or C frequency weighting band corrections as specified in
-    IEC 62672-1 for the given frequency range. The lowest defined center
-    frequency is 10 Hz and the highest is 20 kHz.
+    IEC 62672-1 for the given frequency range.
 
     Parameters
     ----------
@@ -102,7 +105,8 @@ def frequency_weighting_band_corrections(
         Whether to use octave bands or third bands.
 
     frequency_range: (float, float)
-        A range of what nominal center frequencies to include.
+        A range of what nominal center frequencies to include. The lowest
+        defined center frequency is 10 Hz and the highest is 20 kHz.
 
     Returns
     -------
