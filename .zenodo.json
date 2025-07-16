@@ -21,6 +21,18 @@
       "name": "pyfar developers"
     }
   ],
+  "contributors": [
+    {
+        "name": "Developer, One",
+        "affiliation": "Institute of Advanced Procrastination",
+        "type": "Developer"
+    },
+    {
+        "name": "Developer, Two",
+        "affiliation": "Institute of Advanced Procrastination",
+        "type": "Developer"
+    }
+],
   "communities": [
     {
       "identifier": "pyfar"
