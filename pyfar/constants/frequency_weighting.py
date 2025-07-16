@@ -1,6 +1,7 @@
 """File containing all frequency weighting functions."""
 from typing import Literal, Union
 import numpy as np
+import pyfar
 
 # Constants for the weighting curve formulas.
 # See appendix E in IEC 61672-1.
@@ -37,7 +38,7 @@ def _calculate_C_weighted_level(f: Union[float, np.ndarray],
 
 
 def frequency_weighting_curve(weighting: Literal["A", "C"],
-            frequency: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+                              frequencies: list[float]):
     """
     Calculates the level correction in dB of a frequency component when using
     the A or C weighting defined in IEC 61672-1.
@@ -47,21 +48,24 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     weighting: str ('A' or 'C')
         Which frequency weighting to use.
 
-    frequency: float or array-like
-        The frequency or frequencies at which to evaluate the weighting curve.
-        The return value matches the shape of this argument.
+    frequencies: array-like
+        The frequencies at which to evaluate the weighting curve.
 
     Returns
     -------
-    weights: float or array-like
-        The weights in dB in the same shape as the frequency arguments.
+    weights: FrequencyData
+        The weights in dB and their frequencies as a Frequency Data object.
     """
     if weighting == "A":
-        return _calculate_A_weighted_level(frequency)
+        weights = _calculate_A_weighted_level(np.array(frequencies))
     elif weighting == "C":
-        return _calculate_C_weighted_level(frequency)
+        weights = _calculate_C_weighted_level(np.array(frequencies))
     else:
         raise ValueError("Allowed literals for weighting are 'A' and 'C'")
+
+    comment = f"Level corrections for {weighting} weighting according to" \
+               "IEC 61672-1"
+    return pyfar.FrequencyData(weights, frequencies, comment)
 
 
 # Constants for nominal band corrections, taken from table 3 in IEC 61672-1.

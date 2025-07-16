@@ -17,7 +17,7 @@ def test_frequency_weighting_constants(weighting, bands, freq_range):
     # maybe there is a better way of testing. tolerance is 0.2, because
     # we need 0.1 for rounding the weight and then larger error
     # due to the difference in nominal vs exact frequency being evaluated
-    npt.assert_allclose(calculated_weights, iec_weights, atol=0.3)
+    npt.assert_allclose(calculated_weights.freq[0], iec_weights, atol=0.3)
 
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
