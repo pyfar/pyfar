@@ -1,4 +1,3 @@
-import numpy as np
 from numpy import testing as npt
 import pyfar
 import pyfar.dsp.filter as pffilt
