@@ -101,10 +101,11 @@ def frequency_weighting_filter(
             or (signal is not None and sampling_rate is not None):
         raise ValueError('Either signal or sampling_rate must be none.')
 
-    # sampling frequency in Hz
-    fs = signal.sampling_rate if sampling_rate is None else sampling_rate
+    # obtain sampling rate from signal if not given
+    if sampling_rate is None:
+        sampling_rate: float = signal.sampling_rate
 
-    sos = _design_frequency_weighting_filter(fs, target_weighting,
+    sos = _design_frequency_weighting_filter(sampling_rate, target_weighting,
                                              n_frequencies, error_weighting,
                                              **kwargs)
     filt = pf.FilterSOS([sos], sampling_rate)
