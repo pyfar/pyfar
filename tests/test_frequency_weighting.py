@@ -9,15 +9,17 @@ import pytest
 @pytest.mark.parametrize("freq_range", [(20, 20000), (0, 100),
                                         (4000, 100_000)])
 def test_frequency_weighting_constants(weighting, bands, freq_range):
-    (nominals, iec_weights) = pyfar.constants. \
+    iec_weights = pyfar.constants. \
             frequency_weighting_band_corrections(weighting, bands, freq_range)
     calculated_weights = pyfar.constants. \
-            frequency_weighting_curve(weighting, nominals)
+            frequency_weighting_curve(weighting, iec_weights.frequencies)
 
     # maybe there is a better way of testing. tolerance is 0.2, because
     # we need 0.1 for rounding the weight and then larger error
     # due to the difference in nominal vs exact frequency being evaluated
-    npt.assert_allclose(calculated_weights.freq[0], iec_weights, atol=0.3)
+    npt.assert_allclose(calculated_weights.freq, iec_weights.freq, atol=0.3)
+    npt.assert_allclose(calculated_weights.frequencies,
+                        iec_weights.frequencies)
 
 
 @pytest.mark.parametrize("weighting", ["A", "C"])

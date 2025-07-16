@@ -95,7 +95,7 @@ def frequency_weighting_band_corrections(
     weighting: Literal["A", "C"],
     bands: Literal["third", "octave"],
     frequency_range: tuple[float, float],
-) -> tuple[np.ndarray, np.ndarray]:
+):
     """
     Returns the A or C frequency weighting band corrections as specified in
     IEC 62672-1 for the given frequency range.
@@ -114,11 +114,9 @@ def frequency_weighting_band_corrections(
 
     Returns
     -------
-    nominal_frequencies: NDArray
-        The nominal center frequencies included in the given range.
-
-    weights: NDArray
-        The correction values in dB for the specific frequency weighting.
+    weights_with_nominals: NDArray
+        The correction values in dB for the specific frequency weighting
+        over their nominal frequencies as a Frequency Data object.
     """
     if weighting == "A":
         all_weights = _THIRDBAND_WEIGHTINGS_A
@@ -144,4 +142,6 @@ def frequency_weighting_band_corrections(
         raise ValueError("Frequency range must include at least one value"
                          + "between 10 and 20000")
 
-    return (nominals_in_range, weights_in_range)
+    comment = f"Level corrections for the {weighting} weighting in {bands}" \
+               "bands in dB and the bands' nominal center frequencies"
+    return pyfar.FrequencyData(weights_in_range, nominals_in_range, comment)
