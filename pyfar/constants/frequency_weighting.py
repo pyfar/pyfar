@@ -139,8 +139,8 @@ def frequency_weighting_band_corrections(
     weights_in_range = band_weights[mask]
 
     if len(nominals_in_range) == 0:
-        raise ValueError("Frequency range must include at least one value"
-                         + "between 10 and 20000")
+        raise ValueError("Frequency range must include at least one value " \
+                         "between 10 and 20000")
 
     comment = f"Level corrections for the {weighting} weighting in {bands}" \
                "bands in dB and the bands' nominal center frequencies"
