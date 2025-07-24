@@ -656,3 +656,33 @@ def test_angle_conversion_deg2rad():
     rad = deg2rad(deg)
     # check output values
     npt.assert_allclose(rad, np.atleast_2d([np.pi, 2*np.pi, 1]))
+
+
+@pytest.mark.parametrize("input_coord", [
+    [1, 1],
+    [[1, 1], [1, 1]],
+    np.array([1, 1]),
+    np.array([[1, 1], [2, 2]]),
+    1,
+])
+@pytest.mark.parametrize("from_method", [
+    "from_cartesian",
+    "from_spherical_elevation",
+    "from_spherical_colatitude",
+    "from_spherical_side",
+    "from_spherical_front",
+    "from_cylindrical",
+])
+def test_from_array_like(input_coord, from_method):
+    """Test that Coordinates.from_* methods can handle array-like inputs."""
+    # Ensure the method exists
+    assert hasattr(Coordinates, from_method), f"{from_method} does not exist"
+
+    # Call the method with the first element of the coordinates
+    getattr(Coordinates, from_method)(input_coord, 1, 1)
+
+    # Call the method with the second element of the coordinates
+    getattr(Coordinates, from_method)(1, input_coord, 1)
+
+    # Call the method with the third element of the coordinates
+    getattr(Coordinates, from_method)(1, 1, input_coord)
