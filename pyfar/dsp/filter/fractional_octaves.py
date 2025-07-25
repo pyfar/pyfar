@@ -8,7 +8,7 @@ from pyfar._utils import rename_arg
 
 def fractional_octave_frequencies(
         num_fractions=1, frequency_range=(20, 20e3), return_cutoff=False):
-    """Return the octave center frequencies according to the IEC 61260:1:2014
+    """Return the octave center frequencies according to the IEC 61260-1:2014
     standard.
 
     For numbers of fractions other than ``1`` and ``3``, only the
@@ -171,6 +171,9 @@ def fractional_octave_bands(
         order=14):
     """Create and/or apply an energy preserving fractional octave filter bank.
 
+    The filters are in accordance with IEC 61260-1:2014 [#]_ for octave and
+    third band widths and the default filter order of 14 (see examples below).
+
     The filters are designed using second order sections of Butterworth
     band-pass filters. Note that if the upper cut-off frequency of a band lies
     above the Nyquist frequency, a high-pass filter is applied instead. Due to
@@ -218,6 +221,11 @@ def fractional_octave_bands(
     filter : FilterSOS
         Filter object. Only returned if ``signal = None``.
 
+    References
+    ----------
+    .. [#] IEC 61260-1 (2014). Octave-band and fractional-octave-band filters.
+           Part 1: Specifications.
+
     Examples
     --------
     Filter an impulse into octave bands. The summed energy of all bands equals
@@ -240,6 +248,41 @@ def fractional_octave_bands(
         >>> ax.set_title(
         ...     "Filter bands and the sum of their squared magnitudes")
 
+    Show that the filters meet class I tolerance according to IEC 61260-1
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> # get octave filter
+        >>> center_frequency = 1000
+        >>> octave_filter = pf.dsp.filter.fractional_octave_bands(
+        >>>     pf.signals.impulse(2**12), 1, None,
+        ...     (center_frequency, center_frequency))
+        >>>
+        >>>
+        >>> # Class 1 tolerance after DIN EN 61260-1:2014, Table 1.
+        >>> G = 10**(3/10)
+        >>> eps = 1e-10
+        >>> frequencies = center_frequency * G**np.array([
+        >>>     -4, -3, -2, -1, -0.5-eps, -0.5+eps, -3/8, -1/4, -1/8, 0,
+        >>>     1/8, 1/4, 3/8, 0.5-eps, 0.5+eps, 1, 2, 3, 4])
+        >>> upper = [-70, -60, -40.5, -16.6, -1.2, 0.4, 0.4, 0.4, 0.4,
+        ...     0.4, 0.4, 0.4, 0.4, 0.4, -1.2, -16.6, -40.5, -60, -70]
+        >>> lower = [-300, -300, -300, -300, -300, -5.3, -1.4, -0.7, -0.5,
+        ...     -0.4, -0.5, -0.7, -1.4, -5.3, -300, -300, -300, -300, -300]
+        >>>
+        >>> # plot filter and tolerance
+        >>> ax = pf.plot.freq(octave_filter, color='k', label='Octave filter')
+        >>> plt.fill_between(
+        ...     frequencies, lower, upper, facecolor=pf.plot.color('g'),
+        >>>     alpha=.25, label='Class 1 Tolerance region')
+        >>>
+        >>> ax.set_ylim(-40, 5)
+        >>> ax.set_xlim(.5*center_frequency, 2*center_frequency)
+        >>> ax.legend()
     """
 
     # check input
