@@ -162,7 +162,8 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=freq_scale, side=side)
+        log_reference=log_reference, xscale=freq_scale, side=side,
+        mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -420,7 +421,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         'time_freq', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
         log_reference=log_reference, xscale=freq_scale, unit_time=unit,
-        mode_time=mode_time, side=side)
+        mode_time=mode_time, side=side, mode_freq=mode_freq)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -506,7 +507,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     plot_parameter = ia.PlotParameter(
         'freq_phase', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, deg=deg,
-        unwrap=unwrap, side=side)
+        unwrap=unwrap, side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -600,7 +601,7 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     plot_parameter = ia.PlotParameter(
         'freq_group_delay', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, unit_gd=unit, xscale=freq_scale,
-        side=side)
+        side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction

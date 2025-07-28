@@ -512,6 +512,8 @@ def _assert_and_match_freq_data_to_mode(
         signal, mode, dB, log_prefix, log_reference):
     """Prepare data for frequency plots depending on the mode and dB Flag."""
 
+    signal = signal.copy()
+
     # get absolute, real, or immaginary part of the spectrum
     if mode == 'abs':
         signal.freq = np.abs(signal.freq)

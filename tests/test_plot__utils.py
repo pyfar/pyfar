@@ -223,9 +223,8 @@ def test_assert_and_match_time_data_to_mode(mode, ylabel):
         signal.fft_norm = 'none'
         signal.complex = True
 
-    data, _ylabel = plot._utils._assert_and_match_time_data_to_mode(signal.time,
-                                                               signal,
-                                                               mode)
+    data, _ylabel = plot._utils._assert_and_match_time_data_to_mode(
+        signal.time, signal, mode)
 
     if mode == 'real':
         npt.assert_allclose(data,

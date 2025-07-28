@@ -25,7 +25,7 @@ changes:
 1. Make sure that the `PlotParameter` object created in that plot function is
    up to date.
 2. Make sure that the call of that plot function in `Interaction.toggle_plot()`
-   is up to data.
+   is up to date.
 
 How to debug interaction
 ------------------------
@@ -146,7 +146,8 @@ class PlotParameter(object):
                  colorbar=True,
                  orientation='vertical', indices=None,     # 2D plots
                  method='pcolormesh',
-                 mode_time='real', side='right'):          # complex audio data
+                 mode_time='real',                         # complex audio data
+                 side='right', mode_freq='abs'):
 
         # set plot type
         self._plot_type = ['line', '2d']
@@ -174,6 +175,7 @@ class PlotParameter(object):
         self.method = method
         self.mode_time = mode_time
         self.side = side
+        self.mode_freq = mode_freq
 
         # set axis types based on `plot`
         self.update(plot)
@@ -245,6 +247,8 @@ class PlotParameter(object):
                 getattr(self, self._mode_time_param))
             # side
             self._side_param = None
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = 'line'
 
@@ -271,6 +275,8 @@ class PlotParameter(object):
                 getattr(self, self._mode_time_param))
             # side
             self._side_param = None
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = None
 
@@ -295,6 +301,11 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = 'mode_freq'
+            self._mode_freq_values = ['real', 'imag', 'abs']
+            self._mode_freq_id = self._mode_freq_values.index(
+                getattr(self, self._mode_freq_param))
             # cycler type
             self._cycler_type = 'line'
 
@@ -321,6 +332,11 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = 'mode_freq'
+            self._mode_freq_values = ['real', 'imag', 'abs']
+            self._mode_freq_id = self._mode_freq_values.index(
+                getattr(self, self._mode_freq_param))
             # cycler type
             self._cycler_type = None
 
@@ -346,6 +362,8 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = 'line'
 
@@ -373,6 +391,8 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = None
 
@@ -397,6 +417,8 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = 'line'
 
@@ -423,6 +445,8 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = None
 
@@ -447,6 +471,8 @@ class PlotParameter(object):
             self._side_values = ['left', 'right']
             self._side_id = self._side_values.index(
                 getattr(self, self._side_param))
+            # mode freq
+            self._mode_freq_param = None
             # cycler type
             self._cycler_type = 'signal'
 
@@ -561,6 +587,18 @@ class PlotParameter(object):
                 (self._mode_time_id + 1) % len(self._mode_time_values)
             setattr(self, self._mode_time_param,
                     self._mode_time_values[self._mode_time_id])
+            changed = True
+
+        return changed
+
+    def toggle_mode_freq(self):
+        """Toggle mode of freq plots: show real, imag or abs frequency data."""
+        changed = False
+        if self._mode_freq_param is not None:
+            self._mode_freq_id = \
+                (self._mode_freq_id + 1) % len(self._mode_freq_values)
+            setattr(self, self._mode_freq_param,
+                    self._mode_freq_values[self._mode_freq_id])
             changed = True
 
         return changed
@@ -754,8 +792,8 @@ class Interaction(object):
             if changed:
                 self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
-        # toggle display of complex audio data
-        elif event.key in ctr["toggle_mode"]:
+        # toggle side of double-sided spectrum
+        elif event.key in ctr["toggle_side"]:
 
             # return if all frequencies are >= 0
             if (type(self.signal) is pf.FrequencyData and
@@ -766,15 +804,22 @@ class Interaction(object):
                     not self.signal.complex:
                 return
 
-            # perform action for time plots
-            if self.params.plot.startswith('time'):
-                self.params.toggle_mode_time()
-                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
-
             # perform action for frequency plots
             if self.params.plot.startswith(
                     ('freq', 'phase', 'group', 'spectrogram')):
                 self.params.toggle_side()
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
+
+        # toggle display of complex audio data
+        elif event.key in ctr["toggle_mode"]:
+
+            # perform action for time plots
+            if self.params.plot.startswith('time'):
+                self.params.toggle_mode_time()
+                self.toggle_plot(EventEmu(self.plot[self.params._plot]))
+            # perform action for frequency plots
+            elif self.params.plot.startswith('freq'):
+                self.params.toggle_mode_freq()
                 self.toggle_plot(EventEmu(self.plot[self.params._plot]))
 
         # color map toggle
@@ -849,14 +894,15 @@ class Interaction(object):
                     self.all_axes = self.ax = _line._freq(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, self.ax, side=prm.side,
-                        **self.kwargs_line)
+                        mode=prm.mode_freq, **self.kwargs_line)
                 elif self.params.plot_type == "2d":
                     self.params.update('freq_2d')
                     self.all_axes, _, self.all_bars = _two_d._freq_2d(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.indices,
                         prm.orientation, prm.method, prm.colorbar,
-                        self.ax, side=prm.side, **self.kwargs_2d)
+                        self.ax, side=prm.side, mode=prm.mode_freq,
+                        **self.kwargs_2d)
                     self.ax = self.all_axes
 
             elif event.key in plot['phase']:
@@ -905,7 +951,7 @@ class Interaction(object):
                         prm.log_prefix_time, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.unit_time, self.ax,
                         mode_time=prm.mode_time, side=prm.side,
-                        **self.kwargs_line)
+                        mode_freq=prm.mode_freq, **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 elif self.params.plot_type == "2d":
                     self.params.update('time_freq_2d')
@@ -915,7 +961,8 @@ class Interaction(object):
                         prm.log_reference, prm.xscale, prm.unit_time,
                         prm.indices, prm.orientation, prm.method,
                         prm.colorbar, self.ax, mode_time=prm.mode_time,
-                        side=prm.side, **self.kwargs_2d)
+                        side=prm.side, mode_freq=prm.mode_freq,
+                        **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_phase']:
@@ -924,7 +971,8 @@ class Interaction(object):
                     self.all_axes = _line._freq_phase(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
-                        self.ax, side=prm.side, **self.kwargs_line)
+                        self.ax, side=prm.side, mode=prm.mode_freq,
+                        **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 elif self.params.plot_type == "2d":
                     self.params.update('freq_phase_2d')
@@ -932,7 +980,8 @@ class Interaction(object):
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.xscale, prm.deg, prm.unwrap,
                         prm.indices, prm.orientation, prm.method,
-                        prm.colorbar, self.ax, side=prm.side, **self.kwargs_2d)
+                        prm.colorbar, self.ax, side=prm.side,
+                        mode=prm.mode_freq, **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             elif event.key in plot['freq_group_delay']:
@@ -941,7 +990,8 @@ class Interaction(object):
                     self.all_axes = _line._freq_group_delay(
                         self.signal, prm.dB_freq, prm.log_prefix_freq,
                         prm.log_reference, prm.unit_gd, prm.xscale,
-                        self.ax, side=prm.side, **self.kwargs_line)
+                        self.ax, side=prm.side, mode=prm.mode_freq,
+                        **self.kwargs_line)
                     self.ax = self.all_axes[0]
                 if self.params.plot_type == "2d":
                     self.params.update('freq_group_delay_2d')
@@ -951,7 +1001,7 @@ class Interaction(object):
                             prm.log_reference, prm.unit_gd, prm.xscale,
                             prm.indices, prm.orientation, prm.method,
                             prm.colorbar, self.ax, side=prm.side,
-                            **self.kwargs_2d)
+                            mode=prm.mode_freq, **self.kwargs_2d)
                     self.ax = self.all_axes[0]
 
             # update figure

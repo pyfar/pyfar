@@ -294,7 +294,8 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     plot_parameter = ia.PlotParameter(
         'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, indices=indices,
-        orientation=orientation, method=method, colorbar=colorbar, side=side)
+        orientation=orientation, method=method, colorbar=colorbar, side=side,
+        mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -748,7 +749,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
         log_reference=log_reference, xscale=freq_scale, unit_time=unit,
         indices=indices, orientation=orientation, method=method,
-        colorbar=colorbar, mode_time=mode_time, side=side)
+        colorbar=colorbar, mode_time=mode_time, side=side, mode_freq=mode_freq)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -897,7 +898,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, deg=deg, unwrap=unwrap,
         indices=indices, orientation=orientation, method=method,
-        colorbar=colorbar, side=side)
+        colorbar=colorbar, side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -1054,7 +1055,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, unit_gd=unit,
         indices=indices, orientation=orientation, method=method,
-        colorbar=colorbar, side=side)
+        colorbar=colorbar, side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction

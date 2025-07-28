@@ -29,7 +29,8 @@ def _time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     else:
         data = signal.time.T
     # get data defined in 'mode'
-    data, y_label = _utils._assert_and_match_time_data_to_mode(data, signal, mode)
+    data, y_label = _utils._assert_and_match_time_data_to_mode(
+        data, signal, mode)
 
     # auto detect the time unit
     if unit in [None, "auto"]:
