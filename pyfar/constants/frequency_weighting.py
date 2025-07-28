@@ -114,7 +114,7 @@ def frequency_weighting_band_corrections(
 
     Returns
     -------
-    weights_with_nominals: NDArray
+    weights_with_nominals: FrequencyData
         The correction values in dB for the specific frequency weighting
         over their nominal frequencies as a Frequency Data object.
     """
