@@ -2,6 +2,7 @@ from numpy import testing as npt
 import pyfar
 import pyfar.dsp.filter as pffilt
 import pytest
+import re
 
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
@@ -89,3 +90,22 @@ def test_frequency_weighting_filter_on_signal():
     filtered2 = filt.process(signal)
     assert isinstance(filtered2, pyfar.Signal)
     npt.assert_allclose(filtered1.time, filtered2.time)
+
+
+def test_frequency_weighting_filter_errors():
+    signal = pyfar.signals.impulse(100)
+
+    match = "Allowed literals for weighting are 'A' and 'C'"
+    with pytest.raises(ValueError, match=match):
+        pffilt.frequency_weighting_filter(signal, "B")
+
+    match = "Either signal or sampling_rate must be none."
+    with pytest.raises(ValueError, match=match):
+        pffilt.frequency_weighting_filter(signal, "A", sampling_rate=48e3)
+    with pytest.raises(ValueError, match=match):
+        pffilt.frequency_weighting_filter(None, "A")
+
+    regex = r"The generated A weighting filter is not class 1 compliant.*"
+    with pytest.warns(UserWarning, match=re.compile(regex)):
+        pffilt.frequency_weighting_filter(signal, "A",
+                                          error_weighting=lambda _: 0)

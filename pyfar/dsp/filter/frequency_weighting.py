@@ -2,6 +2,7 @@
 Functions and helpers to create frequency weighting filters
 according to IEC 61672-1.
 """
+import warnings
 from typing import Callable, Literal, Optional
 import numpy as np
 import pyfar as pf
@@ -190,8 +191,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     """
 
     if target_weighting not in ["A", "C"]:
-        raise ValueError(f"Unrecognized weighting: '{target_weighting}'.",
-                         " Only 'A' and 'C' are implemented")
+        raise ValueError("Allowed literals for weighting are 'A' and 'C'")
 
     # Build the initial guess x0 (the variables to optimize) from
     # zeros, poles and gain. Use the poles from the bilinear filter,
@@ -243,9 +243,10 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     is_class_1, max_err, mean_err = _check_filter(
         sampling_rate, sos, target_weighting)
     if not is_class_1:
-        print(f"Warning: The generated {target_weighting} weighting filter is"
-              + "not class 1 compliant; "
-              + f"Max error: {max_err:.2} dB, mean error: {mean_err:.2} dB.")
+        warnings.warn(f"The generated {target_weighting} weighting filter "
+                      "is not class 1 compliant; Max error: "
+                      f"{max_err:.2} dB, mean error: {mean_err:.2} dB.",
+                      stacklevel=2)
     return sos
 
 
