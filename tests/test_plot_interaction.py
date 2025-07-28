@@ -166,7 +166,7 @@ plots = {
 
 # define non-plot functions in the module. They are skipped by tests using
 # `ismember` to get all functions from the plot module
-non_plot_functions = ['context', 'custom_subplots']
+non_plot_functions = ['context', 'custom_subplots', 'rename_arg']
 
 
 def test_event_emu():
@@ -477,7 +477,7 @@ def test_toggle_orientation_2d_plots():
 
     for function in getmembers(pf.plot.two_d, isfunction):
         # exclude functions that do not support interaction
-        if function[0] in ["context", "spectrogram"]:
+        if function[0] in non_plot_functions + ["spectrogram"]:
             continue
 
         # plot
