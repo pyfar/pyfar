@@ -10,7 +10,7 @@ import pyfar.constants as pfc
 import scipy.signal as sps
 import scipy.optimize as spo
 from pyfar.constants.frequency_weighting import _F_1, _F_2, _F_3, _F_4
-
+from functools import cache
 
 _A_WEIGHTING_ZEROS = [0, 0, 0, 0]
 _A_WEIGHTING_POLES = [_F_1, _F_1, _F_4, _F_4, _F_2, _F_3]
@@ -20,23 +20,17 @@ _C_WEIGHTING_POLES = [_F_1, _F_1, _F_4, _F_4]
 
 def frequency_weighting_filter(
         signal,
-        target_weighting: Literal["A", "C"]="A",
+        target_weighting: Literal["A", "C"] = "A",
         n_frequencies=100,
         error_weighting: Optional[Callable[[
             np.ndarray], np.ndarray]] = None,
         sampling_rate: Optional[float] = None,
         **kwargs,
-        ):
+):
     """
     Create and apply an A or C weighting filter.
     The created SOS filter approximates the A or C weighting defined
     in IEC/DIN-EN 61672-1.
-
-    .. note::
-        This function will run a least-squares algorithm to iteratively
-        approach the target weighting curve. Therefore, it may be much
-        faster to create the filter once and reuse that filter when
-        repeatedly weighting audio data of identical sampling rates.
 
     .. note::
         When using default parameters for `n_frequencies` and `error_weighting`
@@ -128,9 +122,13 @@ def frequency_weighting_filter(
     if sampling_rate is None:
         sampling_rate: float = signal.sampling_rate
 
-    sos = _design_frequency_weighting_filter(sampling_rate, target_weighting,
-                                             n_frequencies, error_weighting,
-                                             **kwargs)
+    if error_weighting is None and not kwargs:
+        sos = _design_frequency_weighting_filter_cachable(
+            sampling_rate, target_weighting, n_frequencies)
+    else:
+        sos = _design_frequency_weighting_filter(
+            sampling_rate, target_weighting, n_frequencies,
+            error_weighting, **kwargs)
     filt = pf.FilterSOS([sos], sampling_rate)
     filt.comment = (f"Frequency weighting SOS filter of order {filt.order} "
                     f"to approximate {target_weighting} weighting according "
@@ -144,8 +142,19 @@ def frequency_weighting_filter(
         return signal_filt
 
 
+@cache
+def _design_frequency_weighting_filter_cachable(sampling_rate: float,
+                                                target_weighting: Literal["A",
+                                                                          "C"],
+                                                n_frequencies: int,
+                                                ) -> np.ndarray:
+    return _design_frequency_weighting_filter(sampling_rate, target_weighting,
+                                              n_frequencies)
+
+
 def _design_frequency_weighting_filter(sampling_rate: float,
-                                       target_weighting: Literal["A", "C"]="A",
+                                       target_weighting: Literal["A",
+                                                                 "C"] = "A",
                                        n_frequencies=100,
                                        error_weighting: Optional[Callable[[
                                            np.ndarray], np.ndarray]] = None,
@@ -154,12 +163,6 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     """
     Designs SOS filter coefficients approximating the A or C weighting defined
     in IEC/DIN-EN 61672-1 for an arbitrary sampling rate.
-
-    .. note::
-        This function will run a least-squares algorithm to iteratively
-        approach the target weighting curve. Therefore, it may be much faster
-        to create the filter once and reuse that filter when repeatedly
-        weighting audio data of identical sampling rates.
 
     .. note::
         When using default parameters for `n_frequencies` and `error_weighting`
@@ -272,7 +275,6 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     return sos
 
 
-
 def _zpk_from_analog(weighting: str, fs: float,
                      ) -> tuple[np.ndarray, np.ndarray, float]:
     """
@@ -302,7 +304,6 @@ def _x2zpk(x: np.ndarray,
     fixed_zeros = [1, 1, 1, 1] if target_weighting == "A" else [1, 1]
     zeros = np.concat([fixed_zeros, x[0:2]])
     return (zeros, x[2:-1], x[-1])
-
 
 
 def _get_error_margins(f: np.ndarray):
@@ -367,5 +368,3 @@ def _check_filter(sampling_rate: float,
     max_diff = np.max(np.abs(mag_diffs))
     mean_diff = np.mean(np.abs(mag_diffs))
     return is_class_1, max_diff, mean_diff
-
-
