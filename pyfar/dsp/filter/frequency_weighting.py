@@ -96,6 +96,28 @@ def frequency_weighting_filter(
         Only returned if ``signal = None``.
         If weighting is 'A' the filter order will be 6. 'C' weighting will
         return a filter of order 4.
+
+    Examples
+    --------
+    Create and apply an A weighting filter to white noise.
+
+    .. plot::
+
+        import pyfar as pf
+        import matplotlib.pyplot as plt
+
+        noise = pf.dsp.normalize(pf.signals.noise(10000), domain="freq")
+        weighting_filter = pf.dsp.filter.frequency_weighting_filter(
+            None, "A", sampling_rate=noise.sampling_rate)
+        weighted_noise = weighting_filter.process(noise)
+
+        pf.plot.freq(noise, label="unweighted noise")
+        pf.plot.freq(weighting_filter.impulse_response(10000),
+                    label="weighting filter")
+        pf.plot.freq(weighted_noise, label="A weighted noise")
+        plt.ylim(-45, 5)
+        plt.legend()
+        plt.show()
     """
     # check input
     if (signal is None and sampling_rate is None) \
