@@ -61,6 +61,7 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     Plot the weighting curves.
 
     .. plot::
+
         import pyfar as pf
         import matplotlib.pyplot as plt
         import numpy as np
