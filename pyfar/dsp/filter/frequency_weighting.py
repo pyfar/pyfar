@@ -117,7 +117,6 @@ def frequency_weighting_filter(
         pf.plot.freq(weighted_noise, label="A weighted noise")
         plt.ylim(-45, 5)
         plt.legend()
-        plt.show()
     """
     # check input
     if (signal is None and sampling_rate is None) \

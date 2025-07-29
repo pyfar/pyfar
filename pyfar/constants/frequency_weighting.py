@@ -80,7 +80,6 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
         plt.xticks(ticks, ticks)
         plt.grid()
         plt.legend()
-        plt.show()
     """
     if weighting == "A":
         weights = _calculate_A_weighted_level(np.array(frequencies))
@@ -173,7 +172,6 @@ def frequency_weighting_band_corrections(
         plt.semilogx()
         plt.xticks(ticks, ticks)
         plt.grid()
-        plt.show()
     """
     if weighting == "A":
         all_weights = _THIRDBAND_WEIGHTINGS_A
