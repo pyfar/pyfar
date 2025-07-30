@@ -870,6 +870,8 @@ class TransmissionMatrix(FrequencyData):
 
         Example
         -------
+        Arbitrarily sized lossless conical horn section.
+        
         .. plot::
 
             >>> import pyfar as pf
@@ -884,9 +886,10 @@ class TransmissionMatrix(FrequencyData):
             >>> Z0 = pf.constants.reference_air_impedance
             >>> direction = 'forwards'
             >>> # Create the transmission matrix
-            >>> T = conical_horn_section(a, b, Omega, k, Z0, direction)
+            >>> T = pf.TransmissionMatrix.create_conical_horn_section(a, b, Omega, k, Z0, direction)
             >>> # Plot the transmission matrix
             >>> pf.plot.freq(T.input_impedance(np.inf))
+            
         """
         if not isinstance(a, Number):
             raise TypeError("The input a must be a number.")
