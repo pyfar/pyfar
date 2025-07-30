@@ -826,7 +826,7 @@ class TransmissionMatrix(FrequencyData):
             A, B, C, D, kl.frequencies)
 
     @staticmethod
-    def create_conical_horn_section(a: Number,
+    def create_conical_horn(a: Number,
             b: Number,
             Omega: Number,
             k: FrequencyData,
