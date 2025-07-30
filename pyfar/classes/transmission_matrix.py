@@ -876,15 +876,14 @@ class TransmissionMatrix(FrequencyData):
             >>> import numpy as np
             >>> # Horn parameters
             >>> a = 0.1
-            >>> b = 0.2
-            >>> Omega = 0.4
+            >>> b = 1.7
+            >>> Omega = 2.4
             >>> frequencies = np.linspace(20, 20e3, 1000)
             >>> omega = 2 * np.pi * frequencies
             >>> k = pf.FrequencyData(omega / pf.constants.reference_speed_of_sound, frequencies)
             >>> Z0 = pf.constants.reference_air_impedance
-            >>> direction = 'forwards'
             >>> # Create the transmission matrix
-            >>> T = pf.TransmissionMatrix.create_conical_horn_section(a, b, Omega, k, Z0, direction)
+            >>> T = pf.TransmissionMatrix.create_conical_horn(a, b, Omega, k, Z0)
             >>> # Plot the transmission matrix
             >>> pf.plot.freq(T.input_impedance(np.inf))
             
