@@ -825,6 +825,110 @@ class TransmissionMatrix(FrequencyData):
         return TransmissionMatrix.from_abcd(
             A, B, C, D, kl.frequencies)
 
+    @staticmethod
+    def conical_horn_section(a: Number, b: Number, Omega: Number,
+                         k: FrequencyData,
+                         medium_impedance: Number | FrequencyData,
+                         direction: str = 'backwards'
+                         ) -> TransmissionMatrix:
+        r"""Create a transmission matrix representing a conical horn.
+
+        The transmission matrix is calculated based on the starting point :math:`a`, 
+        end point :math:`b`, area constant :math:`\Omega`,  wave number :math:`k`, and
+        characteristic impedance :math:`Z_0` following Equation (5-18) of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                \frac{b}{a}cos(kl)-\frac{1}{ka}sin(kl) & \frac{jZ_0}{ab\Omega} \sin{kl} \\
+                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} - kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
+                \end{bmatrix}
+
+        Parameters
+        ----------
+        a : float
+            Distance from the horn's start to the virtual apex of the underlying cone.
+            This is not the physical length of the horn but the extrapolated length to the point
+            where the conical walls would converge.
+        b : float
+            Distance from the horn's end to the same virtual apex of the cone.
+            The difference (b - a) gives the actual physical length of the horn segment.
+        Omega : float
+            Area constant, such that the horn's cross-sectional area at any length
+            :math:`a\leq l \leq b` is given by :math:`S(l) = \Omega l^2`.
+        k : np.ndarray
+            Wave number.
+        medium_impedance : float | FrequencyData
+            The impedance of the medium filling the horn.
+        direction : str, optional
+            Direction of propagation. Must be either 'backwards' (from b to a)
+            or 'forwards' (from a to b). Default is 'backwards'.
+
+        Returns
+        -------
+        pf.TransmissionMatrix
+            Transmission matrix for the conical horn section.
+
+        Example
+        -------
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>> # Horn parameters
+            >>> a = 0.1
+            >>> b = 0.2
+            >>> Omega = 0.4
+            >>> frequencies = np.linspace(20, 20e3, 1000)
+            >>> omega = 2 * np.pi * frequencies
+            >>> k = pf.FrequencyData(omega / pf.constants.reference_speed_of_sound, frequencies)
+            >>> Z0 = pf.constants.reference_air_impedance
+            >>> direction = 'forwards'
+            >>> # Create the transmission matrix
+            >>> T = conical_horn_section(a, b, Omega, k, Z0, direction)
+            >>> # Plot the transmission matrix
+            >>> pf.plot.freq(T.input_impedance(np.inf))
+        """
+        if not isinstance(a, Number):
+            raise TypeError("Parameter 'a' must be a number.")
+        elif a <= 0:
+            raise ValueError("Parameter 'a' must be strictly greater than 0.")
+        if not isinstance(b, Number):
+            raise TypeError("Parameter 'b' must be a number.")
+        elif b <= 0:
+            raise ValueError("Parameter 'b' must be strictly greater than 0.")
+        if not isinstance(Omega, Number):
+            raise TypeError("Parameter 'Omega' must be a number.")
+        elif Omega <= 0:
+            raise ValueError("Parameter 'Omega' must be strictly greater than 0.")
+        if not isinstance(k, FrequencyData):
+            raise TypeError("The wavenumber 'k' must be a FrequencyData object.")
+        else:
+            frequencies = k.frequencies
+            k = k.freq
+        if isinstance(medium_impedance, FrequencyData):
+            if not np.allclose(medium_impedance.frequencies, k.frequencies, atol=1e-15):
+                raise ValueError("The frequencies of 'characteristic_impedance' must match those of 'k'.")
+            else:
+                medium_impedance = medium_impedance.freq
+        elif not isinstance(medium_impedance, Number):
+            raise TypeError("Parameter 'characteristic_impedance' must be a number or a FrequencyData object.")
+        if not isinstance(direction, str):
+            raise TypeError("Parameter 'direction' must be a string.")
+        if direction not in ['backwards', 'forwards']:
+            raise ValueError("Parameter 'direction' must be either 'backwards' or 'forwards'.")
+
+        L = b - a
+
+        A = b/a * np.cos(k*L) - 1/(k*a) * np.sin(k*L)
+        B = 1j * medium_impedance / (a*b*Omega) * np.sin(k*L)
+        C = 1j * Omega / (k*k*medium_impedance) * ((1 + k*k*a*b) * np.sin(k*L) - k*L*np.cos(k*L))
+        D =  a/b * np.cos(k*L) + 1/(k*b) * np.sin(k*L)
+
+        if direction == 'backwards':
+            return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+        elif direction == 'forwards':
+            prefix = 1 / (A*D - B*C)
+            return TransmissionMatrix.from_abcd(prefix * D, -1*prefix*B, -1*prefix*C, prefix * A, frequencies)
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
