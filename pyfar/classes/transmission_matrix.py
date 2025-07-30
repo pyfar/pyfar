@@ -831,7 +831,6 @@ class TransmissionMatrix(FrequencyData):
             Omega: Number,
             k: FrequencyData,
             medium_impedance: Number | FrequencyData,
-            direction: str = 'backwards'
             ) -> TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
 
@@ -861,9 +860,6 @@ class TransmissionMatrix(FrequencyData):
             Wave number.
         medium_impedance : float | FrequencyData
             The impedance of the medium filling the horn.
-        direction : str, optional
-            Direction of propagation. Must be either 'backwards' (from b to a)
-            or 'forwards' (from a to b). Default is 'backwards'.
 
         Returns
         -------
@@ -892,6 +888,18 @@ class TransmissionMatrix(FrequencyData):
             >>> # Plot the transmission matrix
             >>> pf.plot.freq(T.input_impedance(np.inf))
             
+        Note
+        ----
+        The returned transmission matrix relates the sound pressure and volume velocity at the horn's narrow end (a)
+        to the sound pressure and volume velocity at the horn's wide end (b).
+        
+        .. math::
+            \begin{bmatrix} p_a \\ q_a \end{bmatrix} = \begin{bmatrix}
+                \frac{b}{a}cos(kl)-\frac{1}{ka}sin(kl) & \frac{jZ_0}{ab\Omega} \sin{kl} \\
+                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} - kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
+                \end{bmatrix}\begin{bmatrix} p_b \\ q_b \end{bmatrix}
+
+        If one instead wants to express :math:`p_b` and :math:`q_b` in terms of :math:`p_a` and :math:`q_a`, then the position of `a` and `b` in the function signature must be swapped.
         """
         if not isinstance(a, Number):
             raise TypeError("The input a must be a number.")
@@ -917,10 +925,6 @@ class TransmissionMatrix(FrequencyData):
                 medium_impedance = medium_impedance.freq
         elif not isinstance(medium_impedance, Number):
             raise TypeError("The input medium_impedance must be a number or a FrequencyData object.")
-        if not isinstance(direction, str):
-            raise TypeError("The input direction must be a string.")
-        if direction not in ['backwards', 'forwards']:
-            raise ValueError("The input direction must be either 'backwards' or 'forwards'.")
 
         L = b - a
 
@@ -929,11 +933,8 @@ class TransmissionMatrix(FrequencyData):
         C = 1j * Omega / (k*k*medium_impedance) * ((1 + k*k*a*b) * np.sin(k*L) - k*L*np.cos(k*L))
         D =  a/b * np.cos(k*L) + 1/(k*b) * np.sin(k*L)
 
-        if direction == 'backwards':
-            return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-        elif direction == 'forwards':
-            prefix = 1 / (A*D - B*C)
-            return TransmissionMatrix.from_abcd(prefix * D, -1*prefix*B, -1*prefix*C, prefix * A, frequencies)
+        return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
