@@ -826,11 +826,13 @@ class TransmissionMatrix(FrequencyData):
             A, B, C, D, kl.frequencies)
 
     @staticmethod
-    def create_conical_horn_section(a: Number, b: Number, Omega: Number,
-                         k: FrequencyData,
-                         medium_impedance: Number | FrequencyData,
-                         direction: str = 'backwards'
-                         ) -> TransmissionMatrix:
+    def create_conical_horn_section(a: Number,
+            b: Number,
+            Omega: Number,
+            k: FrequencyData,
+            medium_impedance: Number | FrequencyData,
+            direction: str = 'backwards'
+            ) -> TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
 
         The transmission matrix is calculated based on the starting point :math:`a`, 
