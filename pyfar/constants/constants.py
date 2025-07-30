@@ -1,6 +1,7 @@
 """Constant calculation."""
 import numpy as np
 import pyfar as pf
+from typing import Literal
 
 
 def air_attenuation(
@@ -433,3 +434,116 @@ def density_of_air(
 
     # Equation 6.71
     return P / (R_a * (temperature + 273.15)) * (1+C)/(1+alpha*C)
+
+
+def octave_band_tolerance(
+        exact_center_frequency: float,
+        bands: Literal["octave", "third"],
+        tolerance_class : Literal[1, 2]):
+    r"""
+    Calculate the tolerance limits for fractional octave band filters.
+
+    Calculation is in accordance with IEC 61260-1:2014 [#]_ (Section 5.10 and
+    Table 1).
+
+    .. note ::
+        The standard defines some lower tolerance limits to :math:`-\infty`,
+        which is inconvenient for plotting. The returned tolerance is -60000 dB
+        in these cases, which is below the smallest possible value approx.
+        -6000 dB (``20*np.log10(np.finfo(float).tiny)``).
+
+    Parameters
+    ----------
+    exact_center_frequency : float
+        The exact center frequency of the band filter in Hz (see
+        :py:func:`~pyfar.dsp.filter.fractional_octave_frequencies`).
+    bands : Literal["octave", "third"]
+        The type of fractional octave band. Must be either 'octave' or 'third'.
+    tolerance_class : Literal[1, 2]
+        The tolerance class as defined in the standard. Must be 1 or 2.
+
+    Returns
+    -------
+    tolerance : FrequencyData
+        Tolerance limits in dB. The lower tolerance is given in the first
+        channel (``tolerance.freq[0]``) and the upper tolerance in the second
+        (``tolerance.freq[1]``).
+
+    References
+    ----------
+    .. [#] IEC61260-1:2014 Octave-band and fractional-octave-band filters.
+           Part 1: Specifications.
+
+    Examples
+    --------
+    Class 1 tolerance region and filter for the 1000 Hz octave band.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> tolerances = pf.constants.octave_band_tolerance(
+        ...     exact_center_frequency=1000, bands='octave', tolerance_class=1)
+        >>>
+        >>> octave_filter = pf.dsp.filter.fractional_octave_bands(
+        ...     pf.signals.impulse(2**12), num_fractions=1,
+        ...     frequency_range=(1000, 1000))
+        >>>
+        >>> ax = pf.plot.freq(octave_filter, color='k', label='Octave filter')
+        >>> plt.fill_between(
+        ...     tolerances.frequencies, tolerances.freq[0], tolerances.freq[1],
+        ...     facecolor='g', alpha=.25, label='Class 1 Tolerance')
+        >>> ax.set_ylim(-70, 5)
+        >>> ax.set_xlim(63, 15_850)
+        >>> ax.legend()
+    """
+
+    if not isinstance(exact_center_frequency, (int, float)):
+        raise ValueError('The exact center frequency must be a float '
+                         'or integer number')
+    if bands not in ['octave', 'third']:
+        raise ValueError(f"bands is '{bands}' but must be 'octave' or 'third'")
+    if tolerance_class not in [1, 2]:
+        raise ValueError(
+            f"tolerance_class is {tolerance_class} but must be 1 or 2")
+
+    # constants from DIN EN 61260-1:2014-10, Sec. 5.10 and Tab. 1
+    # (define only first half due to symmetry)
+    G = 10**(3/10)  # octave ratio according to Eq. (1)
+    eps = 1e-6      # small offset to model discontinuities in tolerance curve
+    inf = 60e3      # dB value for infinity (number required for plots)
+    relative_frequencies = [
+        -4, -3, -2, -1, -0.5-eps, -0.5+eps, -3/8, -1/4, -1/8, 0]
+    if tolerance_class == 1:
+        upper_tolerance = [
+            -70, -60, -40.5, -16.6, -1.2, 0.4, 0.4, 0.4, 0.4, 0.4]
+        lower_tolerance = [
+            -inf, -inf, -inf, -inf, -inf, -5.3, -1.4, -0.7, -0.5, -0.4]
+    else:
+        upper_tolerance = [
+            -60, -54, -39.5, -15.6, -0.8, 0.6, 0.6, 0.6, 0.6, 0.6]
+        lower_tolerance = [
+            -inf, -inf, -inf, -inf, -inf, -5.8, -1.7, -0.9, -0.7, -0.6]
+
+    relative_frequencies = np.hstack((
+        relative_frequencies, -np.flip(relative_frequencies[:-1])))
+    upper_tolerance = np.hstack((
+        upper_tolerance, np.flip(upper_tolerance[:-1])))
+    lower_tolerance = np.hstack((
+        lower_tolerance, np.flip(lower_tolerance[:-1])))
+
+    # scale frequencies to bandwidth
+    num_fractions = 1 if bands == 'octave' else 3
+    relative_frequencies /= num_fractions
+
+    # save to list of FrequencyData objects
+    bands_verbose = 'octave' if bands == 'octave' else 'third octave'
+    tolerance = pf.FrequencyData(
+        np.vstack((lower_tolerance, upper_tolerance)),
+        exact_center_frequency * G**relative_frequencies,
+        (f'Class {tolerance_class} tolerance in dB for {bands_verbose} '
+         f'band filter at {exact_center_frequency:.1f} Hz center frequency'
+         'according to DIN EN 61260-1:2014'))
+
+    return tolerance
