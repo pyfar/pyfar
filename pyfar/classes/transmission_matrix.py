@@ -826,7 +826,7 @@ class TransmissionMatrix(FrequencyData):
             A, B, C, D, kl.frequencies)
 
     @staticmethod
-    def conical_horn_section(a: Number, b: Number, Omega: Number,
+    def create_conical_horn_section(a: Number, b: Number, Omega: Number,
                          k: FrequencyData,
                          medium_impedance: Number | FrequencyData,
                          direction: str = 'backwards'
@@ -835,7 +835,7 @@ class TransmissionMatrix(FrequencyData):
 
         The transmission matrix is calculated based on the starting point :math:`a`, 
         end point :math:`b`, area constant :math:`\Omega`,  wave number :math:`k`, and
-        characteristic impedance :math:`Z_0` following Equation (5-18) of Reference [1]_:
+        medium impedance :math:`Z_0` following Equation (5-18) of Reference [1]_:
 
         .. math::
             T = \begin{bmatrix}
@@ -889,33 +889,33 @@ class TransmissionMatrix(FrequencyData):
             >>> pf.plot.freq(T.input_impedance(np.inf))
         """
         if not isinstance(a, Number):
-            raise TypeError("Parameter 'a' must be a number.")
-        elif a <= 0:
-            raise ValueError("Parameter 'a' must be strictly greater than 0.")
+            raise TypeError("The input a must be a number.")
+        elif isinstance(a, complex) or a <= 0:
+            raise ValueError("The input a must be real and strictly greater than 0.")
         if not isinstance(b, Number):
-            raise TypeError("Parameter 'b' must be a number.")
-        elif b <= 0:
-            raise ValueError("Parameter 'b' must be strictly greater than 0.")
+            raise TypeError("The input b must be a number.")
+        elif isinstance(b, complex) or b <= 0:
+            raise ValueError("The input b must be real and strictly greater than 0.")
         if not isinstance(Omega, Number):
-            raise TypeError("Parameter 'Omega' must be a number.")
-        elif Omega <= 0:
-            raise ValueError("Parameter 'Omega' must be strictly greater than 0.")
+            raise TypeError("The input Omega must be a number.")
+        elif isinstance(Omega, complex) or Omega <= 0:
+            raise ValueError("The input Omega must be real and strictly greater than 0.")
         if not isinstance(k, FrequencyData):
-            raise TypeError("The wavenumber 'k' must be a FrequencyData object.")
+            raise TypeError("The wave number k must be a FrequencyData object.")
         else:
             frequencies = k.frequencies
             k = k.freq
         if isinstance(medium_impedance, FrequencyData):
-            if not np.allclose(medium_impedance.frequencies, k.frequencies, atol=1e-15):
-                raise ValueError("The frequencies of 'characteristic_impedance' must match those of 'k'.")
+            if not np.allclose(medium_impedance.frequencies, frequencies, atol=1e-15):
+                raise ValueError("The frequencies of characteristic_impedance must match those of k.")
             else:
                 medium_impedance = medium_impedance.freq
         elif not isinstance(medium_impedance, Number):
-            raise TypeError("Parameter 'characteristic_impedance' must be a number or a FrequencyData object.")
+            raise TypeError("The input medium_impedance must be a number or a FrequencyData object.")
         if not isinstance(direction, str):
-            raise TypeError("Parameter 'direction' must be a string.")
+            raise TypeError("The input direction must be a string.")
         if direction not in ['backwards', 'forwards']:
-            raise ValueError("Parameter 'direction' must be either 'backwards' or 'forwards'.")
+            raise ValueError("The input direction must be either 'backwards' or 'forwards'.")
 
         L = b - a
 
