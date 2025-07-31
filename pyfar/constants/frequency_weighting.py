@@ -146,7 +146,7 @@ def frequency_weighting_band_corrections(
 
     Examples
     --------
-    Plot the band correction weights.
+    Plot the band correction levels.
 
     .. plot::
 
