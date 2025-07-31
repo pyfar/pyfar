@@ -1,4 +1,5 @@
 from numpy import testing as npt
+import numpy as np
 import pyfar
 import pyfar.dsp.filter as pffilt
 import pytest
@@ -68,15 +69,45 @@ def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
 @pytest.mark.parametrize("fs", [48000, 44100])
-@pytest.mark.parametrize("error_weighting", [lambda _: 1,
-                                             lambda nf: 100**nf])
-def test_frequency_weighting_filter_weighted(weighting, fs,
-                                    error_weighting):
-    filt = pffilt.frequency_weighting_filter(None, weighting, sampling_rate=fs,
-                                             error_weighting=error_weighting)
-    is_class_1, _, _ = pffilt.frequency_weighting. \
-        _check_filter(filt.sampling_rate, filt.coefficients[0], weighting)
-    assert is_class_1
+@pytest.mark.parametrize("errwgt", [lambda nf: 100**nf, lambda nf: 1 + nf])
+def test_frequency_weighting_filter_errwgt(weighting, fs, errwgt):
+    without = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs)
+    with_errwgt = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs, error_weighting=errwgt)
+    # they should produce different results with different weightings
+    assert not np.allclose(without.coefficients, with_errwgt.coefficients)
+
+
+@pytest.mark.parametrize("weighting", ["A", "C"])
+@pytest.mark.parametrize("fs", [48000, 44100, 16000])
+def test_frequency_weighting_filter_errwgt_passthrough(weighting, fs):
+    with_none = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs)
+    # weights every frequency with 1, so same as without any error weighting
+    with_passthrough = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs, error_weighting=lambda _: 1)
+    npt.assert_allclose(with_none.coefficients, with_passthrough.coefficients)
+
+
+@pytest.mark.parametrize("weighting", ["A", "C"])
+@pytest.mark.parametrize("fs", [48000, 44100])
+def test_frequency_weighting_filter_errwgt_recommended(weighting, fs):
+    # the function comment mentions lambda nf: 100**nf to produce better
+    # results for common sample rates, so make sure that is true
+    without = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs)
+    with_errwgt = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs, error_weighting=lambda nf: 100**nf)
+    stats_without = pffilt.frequency_weighting._check_filter(
+        fs, without.coefficients[0], weighting)
+    stats_with = pffilt.frequency_weighting._check_filter(
+        fs, with_errwgt.coefficients[0], weighting)
+    # assert both are class 1
+    assert stats_without[0]
+    assert stats_with[0]
+    # assert better maximum different
+    assert stats_with[1] < stats_without[1]
 
 
 def test_frequency_weighting_filter_on_signal():
