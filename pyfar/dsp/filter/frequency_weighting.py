@@ -56,14 +56,14 @@ def frequency_weighting_filter(
 
     target_weighting: str, optional
         Specifies which frequency weighting curve to approximate.
-        Must be either "A" or "C". The default is "A".
+        Must be either ``"A"`` or ``"C"``. The default is ``"A"``.
 
     n_frequencies: int, optional
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
         logarithmically spaced between 10 Hz and the Nyquist frequency.
-        The default is 100.
+        The default is ``100``.
 
     error_weighting: callable
         A function that can be used to emphasize the approximation errors in
@@ -76,12 +76,12 @@ def frequency_weighting_filter(
         usually leads to larger errors for higher frequencies. By passing
         a function that emphasizes high frequencies, it is possible to reduce
         this effect and get a filter potentially closer to the target curve.
-        Example: `error_weighting=lambda nf: 100**nf`. This example often
+        Example: ``error_weighting=lambda nf: 100**nf``. This example often
         leads to better results for typical sampling rates, but much worse
-        for very high rates. The default is `None`.
+        for very high rates. The default is ``None``.
 
     sampling_rate: float, conditionally optional
-        The sampling rate of the returned filter. The default is `None`.
+        The sampling rate of the returned filter. The default is ``None``.
 
     **kwargs: dict
         Keyword args that are passed to the
