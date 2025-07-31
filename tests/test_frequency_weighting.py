@@ -110,6 +110,14 @@ def test_frequency_weighting_filter_errwgt_recommended(weighting, fs):
     assert stats_with[1] < stats_without[1]
 
 
+def test_frequency_weighting_filter_kwargs():
+    without = pffilt.frequency_weighting_filter(None, "A", sampling_rate=44100)
+    # jac= is a parameter for scipy's least_squares method
+    with_kwarg = pffilt.frequency_weighting_filter(
+        None, "A", sampling_rate=44100, jac="3-point")
+    assert not np.allclose(without.coefficients, with_kwarg.coefficients)
+
+
 def test_frequency_weighting_filter_on_signal():
     signal = pyfar.signals.impulse(1000)
     filtered1 = pffilt.frequency_weighting_filter(signal)
