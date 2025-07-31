@@ -169,9 +169,11 @@ def frequency_weighting_band_corrections(
         plt.plot(weights_C.frequencies, weights_C.freq[0], "go",
                 label="C weighting in octave bands")
         plt.legend()
-        ticks = [10, 30, 100, 300, 1000, 3000, 10000]
+        ticks = weights_C.frequencies[::2].astype(int)
         plt.semilogx()
         plt.xticks(ticks, ticks)
+        plt.xlabel("f in Hz")
+        plt.ylabel("Corrections in dB")
         plt.grid()
     """
     if weighting == "A":
