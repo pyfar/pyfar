@@ -847,11 +847,11 @@ class TransmissionMatrix(FrequencyData):
         Parameters
         ----------
         a : float
-            Distance from the horn's start to the virtual apex of the underlying cone.
+            Distance from the horn's narrow end to the virtual apex of the underlying cone.
             This is not the physical length of the horn but the extrapolated length to the point
             where the conical walls would converge.
         b : float
-            Distance from the horn's end to the same virtual apex of the cone.
+            Distance from the horn's wide end to the same virtual apex of the cone.
             The difference (b - a) gives the actual physical length of the horn segment.
         Omega : float
             Area constant, such that the horn's cross-sectional area at any length
@@ -889,8 +889,8 @@ class TransmissionMatrix(FrequencyData):
             
         Note
         ----
-        The returned transmission matrix relates the sound pressure and volume velocity at the horn's narrow end (a)
-        to the sound pressure and volume velocity at the horn's wide end (b).
+        By default, the calculated transmission matrix relates the sound pressure and volume velocity at the horn's narrow end (a)
+        to the sound pressure and volume velocity at the horn's wide end (b):
         
         .. math::
             \begin{bmatrix} p_a \\ q_a \end{bmatrix} = \begin{bmatrix}
@@ -898,7 +898,9 @@ class TransmissionMatrix(FrequencyData):
                 \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} - kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
                 \end{bmatrix}\begin{bmatrix} p_b \\ q_b \end{bmatrix}
 
-        If one instead wants to express :math:`p_b` and :math:`q_b` in terms of :math:`p_a` and :math:`q_a`, then the position of `a` and `b` in the function signature must be swapped.
+        If one instead wants to express :math:`p_b` and :math:`q_b` in terms of :math:`p_a` and :math:`q_a`,
+        i.e. model wave propagation from the narrow towards the wide end,
+        then the position of `a` and `b` in the function signature must be swapped.
         """
         if not isinstance(a, Number):
             raise TypeError("The input a must be a number.")
