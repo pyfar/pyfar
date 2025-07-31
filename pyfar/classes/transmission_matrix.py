@@ -825,6 +825,117 @@ class TransmissionMatrix(FrequencyData):
         return TransmissionMatrix.from_abcd(
             A, B, C, D, kl.frequencies)
 
+    @staticmethod
+    def create_conical_horn(a: Number,
+            b: Number,
+            Omega: Number,
+            k: FrequencyData,
+            medium_impedance: Number | FrequencyData,
+            ) -> TransmissionMatrix:
+        r"""Create a transmission matrix representing a conical horn.
+
+        The transmission matrix is calculated based on the starting point :math:`a`, 
+        end point :math:`b`, area constant :math:`\Omega`,  wave number :math:`k`, and
+        medium impedance :math:`Z_0` following Equation (5-18) of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                \frac{b}{a}cos(kl)-\frac{1}{ka}sin(kl) & \frac{jZ_0}{ab\Omega} \sin{kl} \\
+                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} - kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
+                \end{bmatrix}
+
+        Parameters
+        ----------
+        a : float
+            Distance from the horn's narrow end to the virtual apex of the underlying cone.
+            This is not the physical length of the horn but the extrapolated length to the point
+            where the conical walls would converge.
+        b : float
+            Distance from the horn's wide end to the same virtual apex of the cone.
+            The difference (b - a) gives the actual physical length of the horn segment.
+        Omega : float
+            Area constant, such that the horn's cross-sectional area at any length
+            :math:`a\leq l \leq b` is given by :math:`S(l) = \Omega l^2`.
+        k : np.ndarray
+            Wave number.
+        medium_impedance : float | FrequencyData
+            The impedance of the medium filling the horn.
+
+        Returns
+        -------
+        pf.TransmissionMatrix
+            Transmission matrix for the conical horn section.
+
+        Example
+        -------
+        Arbitrarily sized lossless conical horn section.
+        
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>> # Horn parameters
+            >>> a = 0.1
+            >>> b = 1.7
+            >>> Omega = 2.4
+            >>> frequencies = np.linspace(20, 20e3, 1000)
+            >>> omega = 2 * np.pi * frequencies
+            >>> k = pf.FrequencyData(omega / pf.constants.reference_speed_of_sound, frequencies)
+            >>> Z0 = pf.constants.reference_air_impedance
+            >>> # Create the transmission matrix
+            >>> T = pf.TransmissionMatrix.create_conical_horn(a, b, Omega, k, Z0)
+            >>> # Plot the transmission matrix
+            >>> pf.plot.freq(T.input_impedance(np.inf))
+            
+        Note
+        ----
+        By default, the calculated transmission matrix relates the sound pressure and volume velocity at the horn's narrow end (a)
+        to the sound pressure and volume velocity at the horn's wide end (b):
+        
+        .. math::
+            \begin{bmatrix} p_a \\ q_a \end{bmatrix} = \begin{bmatrix}
+                \frac{b}{a}cos(kl)-\frac{1}{ka}sin(kl) & \frac{jZ_0}{ab\Omega} \sin{kl} \\
+                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} - kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
+                \end{bmatrix}\begin{bmatrix} p_b \\ q_b \end{bmatrix}
+
+        If one instead wants to express :math:`p_b` and :math:`q_b` in terms of :math:`p_a` and :math:`q_a`,
+        i.e. model wave propagation from the narrow towards the wide end,
+        then the position of `a` and `b` in the function signature must be swapped.
+        """
+        if not isinstance(a, Number):
+            raise TypeError("The input a must be a number.")
+        elif isinstance(a, complex) or a <= 0:
+            raise ValueError("The input a must be real and strictly greater than 0.")
+        if not isinstance(b, Number):
+            raise TypeError("The input b must be a number.")
+        elif isinstance(b, complex) or b <= 0:
+            raise ValueError("The input b must be real and strictly greater than 0.")
+        if not isinstance(Omega, Number):
+            raise TypeError("The input Omega must be a number.")
+        elif isinstance(Omega, complex) or Omega <= 0:
+            raise ValueError("The input Omega must be real and strictly greater than 0.")
+        if not isinstance(k, FrequencyData):
+            raise TypeError("The wave number k must be a FrequencyData object.")
+        else:
+            frequencies = k.frequencies
+            k = k.freq
+        if isinstance(medium_impedance, FrequencyData):
+            if not np.allclose(medium_impedance.frequencies, frequencies, atol=1e-15):
+                raise ValueError("The frequencies of characteristic_impedance must match those of k.")
+            else:
+                medium_impedance = medium_impedance.freq
+        elif not isinstance(medium_impedance, Number):
+            raise TypeError("The input medium_impedance must be a number or a FrequencyData object.")
+
+        L = b - a
+
+        A = b/a * np.cos(k*L) - 1/(k*a) * np.sin(k*L)
+        B = 1j * medium_impedance / (a*b*Omega) * np.sin(k*L)
+        C = 1j * Omega / (k*k*medium_impedance) * ((1 + k*k*a*b) * np.sin(k*L) - k*L*np.cos(k*L))
+        D =  a/b * np.cos(k*L) + 1/(k*b) * np.sin(k*L)
+
+        return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
