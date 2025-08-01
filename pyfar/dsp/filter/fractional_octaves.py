@@ -250,9 +250,7 @@ def fractional_octave_bands(
         >>> # get octave filter
         >>> center_frequency = 1000
         >>> octave_filter = pf.dsp.filter.fractional_octave_bands(
-        >>>     pf.signals.impulse(2**12), 1, None,
-        ...     (center_frequency, center_frequency))
-        >>>
+        ...     None, 1, 44100, (center_frequency, center_frequency))
         >>>
         >>> # Class 1 tolerance after DIN EN 61260-1:2014, Table 1.
         >>> G = 10**(3/10)
@@ -266,7 +264,8 @@ def fractional_octave_bands(
         ...     -0.4, -0.5, -0.7, -1.4, -5.3, -300, -300, -300, -300, -300]
         >>>
         >>> # plot filter and tolerance
-        >>> ax = pf.plot.freq(octave_filter, color='k', label='Octave filter')
+        >>> ax = pf.plot.freq(octave_filter.impulse_response(2**14),
+        ...                   color='k', label='Octave filter')
         >>> plt.fill_between(
         ...     frequencies, lower, upper, facecolor=pf.plot.color('g'),
         >>>     alpha=.25, label='Class 1 Tolerance region')
