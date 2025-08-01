@@ -241,14 +241,8 @@ class PlotParameter(object):
             self._cm_type = None
             self._cm_id = None
             # mode time
-            self._mode_time_param = 'mode_time'
             self._mode_time_values = ['real', 'imag', 'abs']
-            self._mode_time_id = self._mode_time_values.index(
-                getattr(self, self._mode_time_param))
-            # side
-            self._side_param = None
-            # mode freq
-            self._mode_freq_param = None
+            self._mode_time_id = self._mode_time_values.index(self.mode_time)
             # cycler type
             self._cycler_type = 'line'
 
@@ -269,14 +263,8 @@ class PlotParameter(object):
             self._cm_values = [False, True]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
             # mode time
-            self._mode_time_param = 'mode_time'
             self._mode_time_values = ['real', 'imag', 'abs']
-            self._mode_time_id = self._mode_time_values.index(
-                getattr(self, self._mode_time_param))
-            # side
-            self._side_param = None
-            # mode freq
-            self._mode_freq_param = None
+            self._mode_time_id = self._mode_time_values.index(self.mode_time)
             # cycler type
             self._cycler_type = None
 
@@ -294,18 +282,11 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
-            # mode time
-            self._mode_param = None
-            # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
+            self._side_id = self._side_values.index(self.side)
             # mode freq
-            self._mode_freq_param = 'mode_freq'
             self._mode_freq_values = ['real', 'imag', 'abs']
-            self._mode_freq_id = self._mode_freq_values.index(
-                getattr(self, self._mode_freq_param))
+            self._mode_freq_id = self._mode_freq_values.index(self.mode_freq)
             # cycler type
             self._cycler_type = 'line'
 
@@ -325,18 +306,12 @@ class PlotParameter(object):
             self._cm_param = 'dB_freq'
             self._cm_values = [False, True]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
-            # mode time
-            self._mode_time_param = None
             # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
+            self._side_id = self._side_values.index(self.side)
             # mode freq
-            self._mode_freq_param = 'mode_freq'
             self._mode_freq_values = ['real', 'imag', 'abs']
-            self._mode_freq_id = self._mode_freq_values.index(
-                getattr(self, self._mode_freq_param))
+            self._mode_freq_id = self._mode_freq_values.index(self.mode_freq)
             # cycler type
             self._cycler_type = None
 
@@ -355,15 +330,9 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
-            # mode time
-            self._mode_time_param = None
             # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
-            # mode freq
-            self._mode_freq_param = None
+            self._side_id = self._side_values.index(self.side)
             # cycler type
             self._cycler_type = 'line'
 
@@ -384,15 +353,9 @@ class PlotParameter(object):
             self._cm_param = 'unwrap'
             self._cm_values = [True, False, "360"]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
-            # mode time
-            self._mode_time_param = None
             # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
-            # mode freq
-            self._mode_freq_param = None
+            self._side_id = self._side_values.index(self.side)
             # cycler type
             self._cycler_type = None
 
@@ -410,15 +373,9 @@ class PlotParameter(object):
             # color map
             self._cm_type = None
             self._cm_id = None
-            # mode time
-            self._mode_time_param = None
             # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
-            # mode freq
-            self._mode_freq_param = None
+            self._side_id = self._side_values.index(self.side)
             # cycler type
             self._cycler_type = 'line'
 
@@ -438,15 +395,9 @@ class PlotParameter(object):
             self._cm_param = 'unit_gd'
             self._cm_values = ['s', 'ms', 'mus', 'samples', 'auto']
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
-            # mode time
-            self._mode_time_param = None
             # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
-            # mode freq
-            self._mode_freq_param = None
+            self._side_id = self._side_values.index(self.side)
             # cycler type
             self._cycler_type = None
 
@@ -464,15 +415,9 @@ class PlotParameter(object):
             self._cm_param = 'dB_freq'
             self._cm_values = [True, False]
             self._cm_id = self._cm_values.index(getattr(self, self._cm_param))
-            # mode time
-            self._mode_time_param = None
             # side
-            self._side_param = 'side'
             self._side_values = ['left', 'right']
-            self._side_id = self._side_values.index(
-                getattr(self, self._side_param))
-            # mode freq
-            self._mode_freq_param = None
+            self._side_id = self._side_values.index(self.side)
             # cycler type
             self._cycler_type = 'signal'
 
@@ -581,37 +526,20 @@ class PlotParameter(object):
 
     def toggle_mode_time(self):
         """Toggle mode of time plots: show real, imag or abs time data."""
-        changed = False
-        if self._mode_time_param is not None:
-            self._mode_time_id = \
-                (self._mode_time_id + 1) % len(self._mode_time_values)
-            setattr(self, self._mode_time_param,
-                    self._mode_time_values[self._mode_time_id])
-            changed = True
-
-        return changed
+        self._mode_time_id = \
+            (self._mode_time_id + 1) % len(self._mode_time_values)
+        self.mode_time = self._mode_time_values[self._mode_time_id]
 
     def toggle_mode_freq(self):
         """Toggle mode of freq plots: show real, imag or abs frequency data."""
-        changed = False
-        if self._mode_freq_param is not None:
-            self._mode_freq_id = \
-                (self._mode_freq_id + 1) % len(self._mode_freq_values)
-            setattr(self, self._mode_freq_param,
-                    self._mode_freq_values[self._mode_freq_id])
-            changed = True
-
-        return changed
+        self._mode_freq_id = \
+            (self._mode_freq_id + 1) % len(self._mode_freq_values)
+        self.mode_freq = self._mode_freq_values[self._mode_freq_id]
 
     def toggle_side(self):
         """Toggle side of two-sided spectra: show left or right side."""
-        changed = False
-        if self._side_param is not None:
-            self._side_id = (self._side_id + 1) % len(self._side_values)
-            setattr(self, self._side_param, self._side_values[self._side_id])
-            changed = True
-
-        return changed
+        self._side_id = (self._side_id + 1) % len(self._side_values)
+        self.side = self._side_values[self._side_id]
 
     @property
     def plot_type(self):
