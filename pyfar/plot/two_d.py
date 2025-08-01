@@ -4,6 +4,7 @@ from pyfar.plot.utils import context
 from pyfar import Signal
 from . import _two_d
 from . import _interaction as ia
+from pyfar._utils import rename_arg
 
 
 def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
@@ -146,7 +147,8 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
     plot_parameter = ia.PlotParameter(
         'time_2d', dB_time=dB, log_prefix_time=log_prefix,
         log_reference=log_reference, unit_time=unit, indices=indices,
-        orientation=orientation, method=method, colorbar=colorbar, mode=mode)
+        orientation=orientation, method=method, colorbar=colorbar,
+        mode_time=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -160,7 +162,7 @@ def time_2d(signal, dB=False, log_prefix=None, log_reference=1, unit="s",
 def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
             freq_scale='log', indices=None, orientation="vertical",
             method='pcolormesh', colorbar=True, ax=None, style='light',
-            side='right', **kwargs):
+            side='right', mode='abs', **kwargs):
     """
     2D color coded plot of magnitude spectra.
 
@@ -242,6 +244,10 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -282,13 +288,14 @@ def freq_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_2d(
             signal, dB, log_prefix, log_reference, freq_scale, indices,
-            orientation, method, colorbar, ax, side, **kwargs)
+            orientation, method, colorbar, ax, side, mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, indices=indices,
-        orientation=orientation, method=method, colorbar=colorbar, side=side)
+        orientation=orientation, method=method, colorbar=colorbar, side=side,
+        mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -578,11 +585,13 @@ def group_delay_2d(signal, unit="s", freq_scale='log', indices=None,
     return ax, qm, cb
 
 
+@rename_arg({"mode": "mode_time"}, "mode will be deprecated in"
+            " pyfar v0.11.0 in favor of mode_time")
 def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
                  log_prefix_freq=None, log_reference=1, freq_scale='log',
                  unit='s', indices=None, orientation="vertical",
                  method='pcolormesh', colorbar=True, ax=None, style='light',
-                 mode='real', side='right', **kwargs):
+                 mode_time='real', side='right', mode_freq='abs', **kwargs):
     """
     2D color coded plot of time signals and magnitude spectra (2 by 1 subplot).
 
@@ -676,6 +685,9 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ``style = {}`` to use the currently active plotstyle. The default is
         ``light``.
     mode : str
+        This parameter will be deprecated in pyfar v0.11.0 in favor of
+        `mode_time` (see below).
+    mode_time : str
         ``real``, ``imag``, or ``abs`` to specify if the real part, imaginary
         part or absolute value of a complex-valued time domain signal is
         plotted. The default is ``real``.
@@ -684,6 +696,10 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode_freq : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -725,7 +741,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ax, qm, cb = _two_d._time_freq_2d(
             signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
             log_reference, freq_scale, unit, indices, orientation, method,
-            colorbar, ax, mode, side, **kwargs)
+            colorbar, ax, mode_time, side, mode_freq, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
@@ -733,7 +749,7 @@ def time_freq_2d(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
         log_reference=log_reference, xscale=freq_scale, unit_time=unit,
         indices=indices, orientation=orientation, method=method,
-        colorbar=colorbar, mode=mode, side=side)
+        colorbar=colorbar, mode_time=mode_time, side=side, mode_freq=mode_freq)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -748,7 +764,7 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
                   freq_scale='log', deg=False, unwrap=False, indices=None,
                   orientation="vertical", method='pcolormesh',
                   colorbar=True, ax=None, style='light', side='right',
-                  **kwargs):
+                  mode='abs', **kwargs):
     """
     2D color coded plot of magnitude and phase spectra (2 by 1 subplot).
 
@@ -830,6 +846,10 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -871,14 +891,14 @@ def freq_phase_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_phase_2d(
             signal, dB, log_prefix, log_reference, freq_scale, deg, unwrap,
-            indices, orientation, method, colorbar, ax, side, **kwargs)
+            indices, orientation, method, colorbar, ax, side, mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, deg=deg, unwrap=unwrap,
         indices=indices, orientation=orientation, method=method,
-        colorbar=colorbar, side=side)
+        colorbar=colorbar, side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -893,7 +913,7 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
                         unit="s", freq_scale='log', indices=None,
                         orientation="vertical", method='pcolormesh',
                         colorbar=True, ax=None, style='light', side='right',
-                        **kwargs):
+                        mode='abs', **kwargs):
     """
     2D color coded plot of magnitude spectra and group delay (2 by 1 subplot).
 
@@ -984,6 +1004,10 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to
         :py:func:`matplotlib.pyplot.pcolormesh` or
@@ -1024,14 +1048,14 @@ def freq_group_delay_2d(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax, qm, cb = _two_d._freq_group_delay_2d(
             signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
-            orientation, method, colorbar, ax, side, **kwargs)
+            orientation, method, colorbar, ax, side, mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay_2d', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, unit_gd=unit,
         indices=indices, orientation=orientation, method=method,
-        colorbar=colorbar, side=side)
+        colorbar=colorbar, side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, cb, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction

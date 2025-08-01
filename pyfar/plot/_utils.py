@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pyfar import (Signal, FrequencyData)
+import pyfar as pf
 
 
 def _prepare_plot(ax=None, subplots=None):
@@ -490,7 +491,7 @@ def _assert_and_match_spectrogram_to_side(spectrogram, frequencies, signal,
     return spectrogram, frequencies, xlabel
 
 
-def _assert_and_match_data_to_mode(data, signal, mode):
+def _assert_and_match_time_data_to_mode(data, signal, mode):
     """Adjust data and y-label for plotting according to specified mode."""
 
     if mode == 'real':
@@ -505,3 +506,42 @@ def _assert_and_match_data_to_mode(data, signal, mode):
     else:
         raise ValueError('`mode` has to be `real`, `imag`, or '
                          f'`abs`, but is {mode}.')
+
+
+def _assert_and_match_freq_data_to_mode(
+        signal, mode, dB, log_prefix, log_reference):
+    """Prepare data for frequency plots depending on the mode and dB Flag."""
+
+    signal = signal.copy()
+
+    # get absolute, real, or immaginary part of the spectrum
+    if mode == 'abs':
+        signal.freq = np.abs(signal.freq)
+        ylabel = '(absolute)'
+    elif mode == 'real':
+        signal.freq = np.real(signal.freq)
+        ylabel = '(real)'
+    elif mode == 'imag':
+        signal.freq = np.imag(signal.freq)
+        ylabel = '(imaginary)'
+    else:
+        raise ValueError("the frequency mode must be 'abs', 'real' or 'imag'"
+                         f"but is '{mode}'")
+
+    # convert to decibels
+    if dB:
+        data = pf.dsp.decibel(signal, 'freq', log_prefix, log_reference)
+        ymax = np.nanmax(data)
+        ymin = ymax - 90
+        ymax = ymax + 10
+        if mode == 'abs':
+            ylabel = 'Magnitude in dB'
+        else:
+            ylabel = f'Spectrum {ylabel} in dB'
+    else:
+        data = signal.freq.real
+        ymin = None
+        ymax = None
+        ylabel = 'Magnitude' if mode == 'abs' else 'Spectrum ' + ylabel
+
+    return data, ymin, ymax, ylabel
