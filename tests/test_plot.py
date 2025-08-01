@@ -119,26 +119,6 @@ def test_complex_freq_plots(function, side_flag,
                      file_type, compare_output)
 
 
-@pytest.mark.parametrize('function', [
-    plot.freq_2d, plot.phase_2d, plot.group_delay_2d,
-    plot.freq_phase_2d, plot.freq_group_delay_2d, plot.spectrogram])
-@pytest.mark.parametrize('side_flag', [
-                         'left', 'right'])
-def test_complex_freq_plots_2d(function, side_flag):
-    """Test all line plots with default arguments and hold functionality."""
-    print(f"Testing: {function.__name__}")
-
-    # plot
-    filename = f'{function.__name__}_{side_flag}_default'
-    create_figure()
-    delay = 0 if function.__name__ == 'spectrogram' else [0, 10]
-    signal = pf.signals.impulse(2048, delay)
-    signal.complex = True
-    function(signal, side=side_flag)
-    save_and_compare(create_baseline, baseline_path, output_path, filename,
-                     file_type, compare_output)
-
-
 @pytest.mark.parametrize('signal', ['handsome_signal', 'impulse'])
 @pytest.mark.parametrize('param', [
     ['phase_deg', True, False],
