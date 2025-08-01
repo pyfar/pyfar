@@ -24,6 +24,7 @@ from .dsp import (
     rms,
     normalize,
     average,
+    correlate,
 )
 
 from .interpolation import (
@@ -35,6 +36,8 @@ from .interpolation import (
 
 from . import filter
 from . import fft
+
+from .regularization import RegularizedSpectrumInversion
 
 
 __all__ = [
@@ -67,4 +70,6 @@ __all__ = [
     'average',
     'normalize',
     'fractional_time_shift',
+    'correlate',
+    'RegularizedSpectrumInversion',
 ]

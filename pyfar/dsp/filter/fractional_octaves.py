@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import scipy.signal as spsignal
 import pyfar as pf
-from pyfar._utils import rename_arg
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def fractional_octave_frequencies(
@@ -160,9 +160,6 @@ def _center_frequencies_fractional_octaves_iec(num_fractions):
     return nominal, exact
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def fractional_octave_bands(
         signal,
         num_fractions,
@@ -207,12 +204,6 @@ def fractional_octave_bands(
         ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
-    freq_range: array, tuple, optional
-        The lower and upper frequency limits. The default is
-        ``frequency_range=(20, 20e3)``.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-
 
     Returns
     -------
@@ -441,7 +432,9 @@ def reconstructing_fractional_octave_bands(
     filter : FilterFIR
         FIR Filter object. Only returned if ``signal = None``.
     frequencies : np.ndarray
-        Center frequencies of the filters.
+        Center frequencies of the filters. Return variable will be removed
+        in pyfar 0.9.0. To get the fractional octave center frequencies, use
+        :py:func:`~pyfar.dsp.filter.fractional_octave_frequencies` instead.
 
     References
     ----------
@@ -459,7 +452,10 @@ def reconstructing_fractional_octave_bands(
         >>> import matplotlib.pyplot as plt
         >>> # generate data
         >>> x = pf.signals.impulse(2**12)
-        >>> y, f = pf.dsp.filter.reconstructing_fractional_octave_bands(x)
+        >>> y = pf.dsp.filter.reconstructing_fractional_octave_bands(x)[0]
+        >>> # get center frequencies
+        >>> f = pf.dsp.filter.fractional_octave_frequencies(
+        ...    frequency_range=(60, 16000))[1]
         >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
         >>> # time domain plot
         >>> ax = pf.plot.time_freq(y_sum, color='k', unit='ms')
@@ -562,6 +558,11 @@ def reconstructing_fractional_octave_bands(
         "Reconstructing linear phase fractional octave filter bank."
         f"(num_fractions={num_fractions}, frequency_range={frequency_range}, "
         f"overlap={overlap}, slope={slope})")
+
+    warnings.warn(("Return parameter 'frequencies' will be removed in pyfar"
+                   " 0.9.0. To get the fractional octave center frequencies,"
+                   " use `pyfar.dsp.filter.fractional_octave_frequencies` "
+                   "instead."), PyfarDeprecationWarning, stacklevel=2)
 
     if signal is None:
         # return the filter object

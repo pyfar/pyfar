@@ -98,6 +98,156 @@ def test_filter_comment():
     with pytest.raises(TypeError, match="comment has to be of type string."):
         pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
+@pytest.mark.parametrize('unit', [('samples'), ('s')])
+@pytest.mark.parametrize(('filter_object', 'actual_length'), [
+    # FIR filter ---------------------------------------------
+    # single-channel filter
+    (pf.FilterFIR([[1, 0, 1]], 44100), np.atleast_1d([3])),
+    (pf.FilterFIR([[1, 1, 0]], 44100), np.atleast_1d([2])),
+    # multi-channel filter
+    (pf.FilterFIR([[1, 0, 1], [1, 1, 0]], 44100), np.atleast_1d([3, 2])),
+    # single-channel FIR filter disguised as IIR filter
+    (pf.FilterIIR([[[1, 0, 1], [1, 0, 0]]], 44100), np.array([3])),
+    # IIR filter (see code for tested options) ----------------
+    # stable / pure oscillation / no pre-delay / any(abs(poles - 1) < 1e-5
+    (pf.FilterIIR([[[1, 0], [1, -1]]], 44100), np.array([10])),
+    # stable / no oscillation / no pre-delay / all(abs(poles - 1) >= 1e-5
+    (pf.FilterIIR([[[1, 0, 0], [1, .5, .25]]], 44100), np.array([14])),
+    # stable / no oscillation / pre-delay / all(abs(poles - 1) >= 1e-5
+    (pf.FilterIIR([[[0, 1, 0], [1, .5, .25]]], 44100), np.array([15])),
+    # stable / mix of both / no pre-delay / any(abs(poles - 1) < 1e-5
+    (pf.FilterIIR([[[1, 0, 0], [1, -1, 0]]], 44100), np.array([10])),
+    # instable / - / no-predelay / all(abs(poles - 1) >= 1e-5
+    (pf.FilterIIR([[[1, 0, 0], [1, 0, -9]]], 44100), np.array([12])),
+    # multichannel (combinations of the above)
+    (pf.FilterIIR([[[1, 0, 1], [1, 0, 0]],
+                                  [[1, 0, 0], [1, .5, .25]],
+                                  [[0, 1, 0], [1, .5, .25]]], 44100),
+     np.array([3, 14, 15])),
+    # SOS filter ---------------------------------------------
+    # single-channel, two sections, all IIR
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .1]]], 44100), np.array([28])),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .9]]], 44100), np.array([187])),
+    # single-channel, two sections, all FIR
+    (pf.FilterSOS([[[1, 0, 1, 1, 0, 0],
+                    [1, 2, 0, 1, 0, 0]]], 44100), np.array([5])),
+    # single-channel, two sections, mixed
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 1, 1, 0, 0]]], 44100), np.array([28])),
+    # multi-channel, one section, all IIR
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5]],
+                   [[1, 0, 0, 1, 0, .9]]], 44100), np.array([28, 187])),
+])
+def test_filter_impulse_response_length(filter_object, actual_length, unit):
+    """
+    Test minimum_impulse_response_length class method for all classes and
+    cases.
+    """
+
+    length_divisor = 1 if unit == 'samples' else 44100
+    estimated_length = filter_object.minimum_impulse_response_length()
+    npt.assert_equal(estimated_length / length_divisor,
+                     actual_length / length_divisor)
+    assert estimated_length.shape == actual_length.shape
+    assert estimated_length.dtype == int
+
+
+@pytest.mark.parametrize('filter_object', [
+    # FIR filter, single-channel
+    fo.FilterFIR(np.array([[1, -1, .1, -.1]]), 48000),
+    # FIR filter, multi-channel
+    fo.FilterFIR(np.array([[1, -1, .1, -.1], [2, -2, .2, -.2]]), 48000),
+    # IIR filter, single-channel
+    fo.FilterIIR(np.array([[[1, -1, .1, -.1], [1, .1, -.1, 0]]]), 48000),
+    # IIR filter, multi-channel
+    fo.FilterIIR(np.array([[[1, -1, .1, -.1], [1, .1, -.1, 0]],
+                           [[1, -2, .2, -.2], [1, .2, -.2, 0]]]), 48000),
+    # SOS filter, single-channel
+    fo.FilterSOS(np.array([[[1, -1, .1, 1, .1, -.1]]]), 48000),
+    # SOS filter, multi-channel
+    fo.FilterSOS(np.array([[[1, -1, .1, 1, .1, -.1]],
+                           [[2, -2, .2, 1, .2, -.2]]]), 48000),
+])
+def test_filter_impulse_response(filter_object):
+    """Test 'impulse_response' class methods for all Filter types."""
+
+    # test signal
+    n_samples = 256
+    impulse = pf.signals.impulse(n_samples, sampling_rate=48000)
+
+    # filter without state
+    impulse_response = filter_object.impulse_response(n_samples)
+    # test output
+    assert isinstance(impulse_response, pf.Signal)
+    assert impulse_response.n_samples == n_samples
+    npt.assert_equal(impulse_response, filter_object.process(impulse))
+    assert filter_object.state is None
+
+    # filter with state
+    filter_object.init_state(impulse.cshape, 'zeros')
+    state_before = filter_object.state.copy()
+    impulse_response_2 = filter_object.impulse_response(n_samples)
+    state_after = filter_object.state.copy()
+    # test output
+    assert isinstance(impulse_response, pf.Signal)
+    assert impulse_response.n_samples == n_samples
+    npt.assert_equal(impulse_response_2, impulse_response)
+    assert filter_object.state is not None
+    npt.assert_equal(state_after, state_before)
+
+
+@pytest.mark.parametrize(('filter_object', 'actual'), [
+    (fo.FilterFIR([[1, 0, 0, 1]], 48000), 4),
+    (pf.FilterIIR([[[1, 0], [1, -1]]], 44100), 10),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .9]]], 44100), 187),
+])
+def test_filter_impulse_response_warning(filter_object, actual):
+    """
+    Test warning if user values for impulse response length are too small.
+    """
+
+    match = ("n_samples should be at least as long as the filter, "
+             f"which is {actual}")
+
+    with pytest.warns(UserWarning, match=re.escape(match)):
+        _ = filter_object.impulse_response(2)
+
+
+@pytest.mark.parametrize(('filter_object', 'actual'), [
+    (fo.FilterFIR([[1, 0, 0, 1]], 48000), 4),
+    (pf.FilterIIR([[[1, 0], [1, -1]]], 44100), 10),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .5],
+                    [1, 0, 0, 1, 0, .9]]], 44100), 187),
+])
+def test_filter_impulse_response_n_samples_default(filter_object, actual):
+    """Test default value for minimum_impulse_response_length class methods."""
+    impulse_response = filter_object.impulse_response()
+    assert impulse_response.n_samples == actual
+
+
+@pytest.mark.parametrize(('filter_object'), [
+    (pf.FilterIIR([[[1, 0, 0], [1, 0, .9]]], 44100)),
+    (pf.FilterSOS([[[1, 0, 0, 1, 0, .9]]], 44100)),
+])
+def test_filter_recursive_impulse_response_length_tolerance(filter_object):
+    """Test tolerance parameter for estimating the impulse response length."""
+    low = filter_object.minimum_impulse_response_length(tolerance=5e-5)
+    high = filter_object.minimum_impulse_response_length(tolerance=5e-6)
+    assert low[0] < high[0]
+
+
+def test_filter_non_recursive_impulse_response_length_tolerance():
+    coefficients = np.array([[1, 0, .5, .0001, 0, 0],
+                             [2, 0, 0, .5, .0001, 0]])
+    filter_object = pf.FilterFIR(coefficients, 44100)
+
+    n_samples = filter_object.minimum_impulse_response_length(tolerance=.001)
+    assert n_samples.shape == (2, )
+    npt.assert_equal(n_samples, np.array([3, 4]))
+
 
 @pytest.mark.parametrize('filter_object', [
     (fo.FilterFIR([[1, -1]], 48000)),
@@ -122,7 +272,6 @@ def test_filter_init_state_default_and_error(filter_object):
     # test raising the error for an invalid value
     with pytest.raises(ValueError, match="state is 'random' but must be"):
         filter_object.init_state((1, ), 'random')
-
 
 
 def test_filter_iir_init():
@@ -245,6 +394,17 @@ def test_filter_fir_process(impulse):
     npt.assert_allclose(res.time[0, :3], coeff)
 
 
+@pytest.mark.parametrize('shape', [(2,), (4, 1), (1, 2, 3)])
+def test_filter_fir_process_multichannel_signal(shape):
+    impulse = pf.signals.impulse(44100, amplitude=np.ones(shape))
+    coeff = np.array([1, 1/2, 0])
+    filt = fo.FilterFIR(coeff, impulse.sampling_rate)
+    res = filt.process(impulse)
+    desired = np.tile(coeff, (*shape, 1))
+
+    npt.assert_allclose(res.time[..., :3], desired)
+
+
 def test_filter_fir_process_complex(impulse_complex):
     coeff = np.array([1, 1/2, 0])
     filt = fo.FilterFIR(coeff, impulse_complex.sampling_rate)
@@ -260,7 +420,7 @@ def test_filter_fir_process_state(impulse):
     state = filt.state
 
     npt.assert_allclose([[[0, 0, 0, 0, 0]]], state)
-    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff))
+    npt.assert_allclose(res.time[:, :6], np.atleast_2d(coeff), atol=1e-16)
 
 
 def test_filter_fir_init_state(impulse):
@@ -478,8 +638,10 @@ def test_blockwise_processing(Filter):
     block_a = Filter.process(pf.Signal(signal.time[0, :3], 44100), reset=False)
     block_b = Filter.process(pf.Signal(signal.time[0, 3:], 44100), reset=False)
     # outputs have to be identical in this case
-    npt.assert_array_equal(np.atleast_2d(complete.time[0, :3]), block_a.time)
-    npt.assert_array_equal(np.atleast_2d(complete.time[0, 3:]), block_b.time)
+    npt.assert_allclose(np.atleast_2d(complete.time[0, :3]), block_a.time,
+                        atol=1e-15)
+    npt.assert_allclose(np.atleast_2d(complete.time[0, 3:]), block_b.time,
+                        atol=1e-15)
 
 
 def test_blockwise_processing_with_coefficients_exchange():

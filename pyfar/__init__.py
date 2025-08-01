@@ -17,11 +17,11 @@ from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 from .classes.transmission_matrix import TransmissionMatrix
 
 from . import plot
-from . import samplings
 from . import io
 from . import dsp
 from . import signals
 from . import utils
+from . import constants
 
 
 __all__ = [
@@ -43,11 +43,11 @@ __all__ = [
     'FilterSOS',
     'TransmissionMatrix',
     'plot',
-    'samplings',
     'io',
     'dsp',
     'signals',
     'utils',
+    'constants',
     'dot',
     'cross',
     ]

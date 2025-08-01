@@ -29,6 +29,7 @@ Modules
 .. toctree::
    :maxdepth: 1
 
+   modules/pyfar.constants
    modules/pyfar.dsp
    modules/pyfar.dsp.fft
    modules/pyfar.dsp.filter
@@ -36,7 +37,6 @@ Modules
    modules/pyfar.plot
    modules/pyfar.signals
    modules/pyfar.signals.files
-   modules/pyfar.samplings
    modules/pyfar.utils
 
 Testing

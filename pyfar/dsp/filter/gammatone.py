@@ -4,9 +4,6 @@ import scipy.signal as sgn
 from copy import deepcopy
 from deepdiff import DeepDiff
 import pyfar as pf
-import warnings
-from pyfar.classes.warnings import PyfarDeprecationWarning
-from pyfar._utils import rename_arg
 
 
 class GammatoneBands():
@@ -50,12 +47,6 @@ class GammatoneBands():
     sampling_rate : number
         The sampling rate of the filter bank in Hz. The default is ``44100``
         Hz.
-    freq_range: array_like
-        The upper and lower frequency in Hz between which the filter bank is
-        constructed. Values must be larger than 0 and not exceed half the
-        sampling rate.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
     Examples
     --------
@@ -123,9 +114,6 @@ class GammatoneBands():
     .. [#] https://amtoolbox.org/
     """
 
-    @rename_arg({"freq_range": "frequency_range"},
-                "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-                "favor of frequency_range")
     def __init__(self, frequency_range, resolution=1,
                  reference_frequency=1000, delay=0.004, sampling_rate=44100):
 
@@ -171,20 +159,6 @@ class GammatoneBands():
     def __eq__(self, other):
         """Check for equality of two objects."""
         return not DeepDiff(self.__dict__, other.__dict__)
-
-    @property
-    def freq_range(self):
-        """Get the frequency range of the filter bank in Hz.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
-        """
-
-        # Deprecation warning for freq_range parameter
-        warnings.warn((
-            'freq_range parameter will be deprecated in pyfar 0.8.0 in favor'
-            ' of frequency_range'),
-                PyfarDeprecationWarning, stacklevel=2)
-        return self._frequency_range
 
     @property
     def frequency_range(self):
@@ -529,9 +503,6 @@ class GammatoneBands():
         return obj
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
     """
     Get frequencies that are linearly spaced on the ERB frequency scale.
@@ -559,11 +530,6 @@ def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
     reference_frequency : number, optional
         The reference frequency in Hz relative to which the frequency vector
         is constructed. The default is ``1000``.
-    freq_range: array_like
-        The upper and lower frequency limits in Hz between which the frequency
-        vector is computed.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
     Returns
     -------
