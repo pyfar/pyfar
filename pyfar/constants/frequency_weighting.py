@@ -13,7 +13,8 @@ _A_1000 = -2
 _C_1000 = -0.062
 
 # Constants for nominal band corrections, taken from table 3 in IEC 61672-1.
-# Could be replaced/combined with a dedicated frequency_bands_nominal() function.
+# Could be replaced/combined with a dedicated frequency_bands_nominal()
+# function later.
 _NOMINAL_THIRDBAND_FREQUENCIES = np.array([
     10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
     400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
