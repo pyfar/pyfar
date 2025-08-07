@@ -511,20 +511,22 @@ def octave_band_tolerance(
     # constants from DIN EN 61260-1:2014-10, Sec. 5.10 and Tab. 1
     # (define only first half due to symmetry)
     G = 10**(3/10)  # octave ratio according to Eq. (1)
-    eps = 1e-6      # small offset to model discontinuities in tolerance curve
-    inf = 60e3      # dB value for infinity (number required for plots)
-    relative_frequencies = [
-        -4, -3, -2, -1, -0.5-eps, -0.5+eps, -3/8, -1/4, -1/8, 0]
+    freq_offset = 1e-6  # small frequency offset to model discontinuities in
+                        # tolerance curve
+    min_dB = -60e3      # dB value to be used instead of minus infinity
+                        # (number required for plots)
+    relative_frequencies = [-4, -3, -2, -1, -0.5-freq_offset, -0.5+freq_offset,
+                            -3/8, -1/4, -1/8, 0]
     if tolerance_class == 1:
         upper_tolerance = [
             -70, -60, -40.5, -16.6, -1.2, 0.4, 0.4, 0.4, 0.4, 0.4]
-        lower_tolerance = [
-            -inf, -inf, -inf, -inf, -inf, -5.3, -1.4, -0.7, -0.5, -0.4]
+        lower_tolerance = [min_dB, min_dB, min_dB, min_dB, min_dB, -5.3,
+                           -1.4, -0.7, -0.5, -0.4]
     else:
         upper_tolerance = [
             -60, -54, -39.5, -15.6, -0.8, 0.6, 0.6, 0.6, 0.6, 0.6]
-        lower_tolerance = [
-            -inf, -inf, -inf, -inf, -inf, -5.8, -1.7, -0.9, -0.7, -0.6]
+        lower_tolerance = [min_dB, min_dB, min_dB, min_dB, min_dB, -5.8,
+                           -1.7, -0.9, -0.7, -0.6]
 
     relative_frequencies = np.hstack((
         relative_frequencies, -np.flip(relative_frequencies[:-1])))
