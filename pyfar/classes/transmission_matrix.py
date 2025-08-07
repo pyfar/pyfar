@@ -28,7 +28,7 @@ consecutive T-matrices simply using the ``@`` operator:
 >>> tmat_out.freq == tmat.freq
 
 """
-from __future__ import annotations # required for Python <= 3.9
+from __future__ import annotations
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
@@ -139,16 +139,17 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        A : FrequencyData, array_like, double
+        A : FrequencyData, array_like, scalar
             Raw data for the matrix entries A. The data need to match the
-            B, C and D entry or be broadcastable into one ``shape``.
-        B : FrequencyData, array_like, double
+            B, C and D entry or be broadcastable into one ``shape``. Can be
+            a FrequencyData object, an array_like, or a real or complex number.
+        B : FrequencyData, array_like, scalar
             See A.
-        C : FrequencyData, array_like, double
+        C : FrequencyData, array_like, scalar
             See A.
-        D : FrequencyData, array_like, double
+        D : FrequencyData, array_like, scalar
             See A.
-        frequencies : array, double, None
+        frequencies : array_like, scalar, None
             Frequencies of the data in Hz. This is optional if using the
             FrequencyData type for A, B, C, D.
 
@@ -191,14 +192,18 @@ class TransmissionMatrix(FrequencyData):
             raise ValueError(
                         "If using FrequencyData objects, all matrix entries "
                         "A, B, C, D, must be FrequencyData objects.")
-
         if frequencies is None:
             raise ValueError("'frequencies' must be specified if not using "
                              "'FrequencyData' objects as input.")
+
+        # Convert all parameters of type Number to 1d np arrays
+        A, B, C, D = [np.atleast_1d(np.asarray(param))
+            for param in (A, B, C, D)]
+
         # broadcast shapes
         shape = np.broadcast_shapes(
-            np.array(A).shape, np.array(B).shape,
-            np.array(C).shape, np.array(D).shape)
+            A.shape, B.shape,
+            C.shape, D.shape)
         A = np.broadcast_to(A, shape)
         B = np.broadcast_to(B, shape)
         C = np.broadcast_to(C, shape)

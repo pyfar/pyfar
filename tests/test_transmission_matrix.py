@@ -10,6 +10,9 @@ from pyfar import FrequencyData
 def frequencies():
     return [100, 200, 300]
 @pytest.fixture(scope="module")
+def frequencies_number():
+    return 100
+@pytest.fixture(scope="module")
 def A_list():
     """Test data for a matrix-entry (e.g. A) using a list type."""
     return [1, 2, 3]
@@ -19,8 +22,17 @@ def A_np(A_list):
     return np.array(A_list)
 @pytest.fixture(scope="module")
 def A_FreqDat(A_np, frequencies):
-    """Test data for a matrix-entry (e.g. A) using a FrequencyData object."""
+    """Test data for a matrix-entry (e.g. A) using an np array."""
     return FrequencyData(A_np, frequencies)
+@pytest.fixture(scope="module")
+def A_number():
+    """Test data for a matrix-entry (e.g. A) using a float."""
+    return 100.7
+@pytest.fixture(scope="module")
+def A_complex():
+    """Test data for a matrix-entry (e.g. A) using a complex."""
+    return 3.25 + 2.33j
+
 
 def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
     error_msg = re.escape("'data' must have a shape like "
@@ -80,6 +92,36 @@ def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
                        "not using 'FrequencyData' objects as input"):
         TransmissionMatrix.from_abcd(A_list, A_list, A_list, A_list)
 
+def test_tmatrix_from_abcd_creation_from_frequency_data(A_FreqDat):
+    t = TransmissionMatrix.from_abcd(
+        A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
+
+    _compare_tmat_vs_abcd(t, A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
+
+def test_tmatrix_from_abcd_creation_from_np(A_np, frequencies):
+    t = TransmissionMatrix.from_abcd(
+        A_np, A_np, A_np, A_np, frequencies)
+
+    _compare_tmat_vs_abcd(t, A_np, A_np, A_np, A_np)
+
+def test_tmatrix_from_abcd_creation_from_list(A_list, frequencies):
+    t = TransmissionMatrix.from_abcd(
+        A_list, A_list, A_list, A_list, frequencies)
+
+    _compare_tmat_vs_abcd(t, A_list, A_list, A_list, A_list)
+
+def test_tmatrix_from_abcd_creation_from_number(A_number, frequencies_number):
+    t = TransmissionMatrix.from_abcd(
+        A_number, A_number, A_number, A_number, frequencies_number)
+
+    _compare_tmat_vs_abcd(t, A_number, A_number, A_number, A_number)
+
+def test_tmatrix_from_abcd_creation_from_complex(
+    A_complex, frequencies_number):
+    t = TransmissionMatrix.from_abcd(
+        A_complex, A_complex, A_complex, A_complex, frequencies_number)
+
+    _compare_tmat_vs_abcd(t, A_complex, A_complex, A_complex, A_complex)
 
 # -------------------------
 # TESTS FOR HIGHER DIM DATA
