@@ -12,6 +12,26 @@ _F_4 = 12194.217147998012
 _A_1000 = -2
 _C_1000 = -0.062
 
+# Constants for nominal band corrections, taken from table 3 in IEC 61672-1.
+# Could be replaced/combined with a dedicated frequency_bands_nominal() function.
+_NOMINAL_THIRDBAND_FREQUENCIES = np.array([
+    10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
+    400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
+    8000, 10000, 12500, 16000, 20000,
+])
+_THIRDBAND_WEIGHTINGS_A = np.array([
+    -70.4, -63.4, -56.7, -50.5, -44.7, -39.4, -34.6, -30.2, -26.2, -22.5,
+    -19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8, -3.2, -1.9, -0.8,
+    0.0, 0.6, 1.0, 1.2, 1.3, 1.2, 1.0, 0.5, -0.1, -1.1,
+    -2.5, -4.3, -6.6, -9.3,
+])
+_THIRDBAND_WEIGHTINGS_C = np.array([
+    -14.3, -11.2, -8.5, -6.2, -4.4, -3.0, -2.0, -1.3, -0.8, -0.5,
+    -0.3, -0.2, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, -0.1, -0.2, -0.3, -0.5, -0.8, -1.3, -2.0, -3.0, -4.4,
+    -6.2, -8.5, -11.2,
+])
+
 
 def _calculate_A_weighted_level(f: Union[float, np.ndarray],
                                 ) -> Union[float, np.ndarray]:
@@ -92,29 +112,6 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     comment = f"Level corrections for {weighting} weighting according to" \
                "IEC 61672-1"
     return pyfar.FrequencyData(weights, frequencies, comment)
-
-
-# Constants for nominal band corrections, taken from table 3 in IEC 61672-1.
-# This is somewhat redundant with dsp.filter.fractional_octaves, but
-# implementing different standards. Here, IEC 61672-1 defines bands as low as
-# 10 Hz, which is not part of fractional_octaves.
-_NOMINAL_THIRDBAND_FREQUENCIES = np.array([
-    10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
-    400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
-    8000, 10000, 12500, 16000, 20000,
-])
-_THIRDBAND_WEIGHTINGS_A = np.array([
-    -70.4, -63.4, -56.7, -50.5, -44.7, -39.4, -34.6, -30.2, -26.2, -22.5,
-    -19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8, -3.2, -1.9, -0.8,
-    0.0, 0.6, 1.0, 1.2, 1.3, 1.2, 1.0, 0.5, -0.1, -1.1,
-    -2.5, -4.3, -6.6, -9.3,
-])
-_THIRDBAND_WEIGHTINGS_C = np.array([
-    -14.3, -11.2, -8.5, -6.2, -4.4, -3.0, -2.0, -1.3, -0.8, -0.5,
-    -0.3, -0.2, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, -0.1, -0.2, -0.3, -0.5, -0.8, -1.3, -2.0, -3.0, -4.4,
-    -6.2, -8.5, -11.2,
-])
 
 
 def frequency_weighting_band_corrections(
