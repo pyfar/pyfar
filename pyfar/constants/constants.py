@@ -434,3 +434,112 @@ def density_of_air(
 
     # Equation 6.71
     return P / (R_a * (temperature + 273.15)) * (1+C)/(1+alpha*C)
+
+def fractional_octave_frequencies_nominal(num_fractions=1, frequency_range=(12, 20e3)):
+    """Return the nominal center frequencies for octave-band and one-third-octave-band 
+    filters according to the IEC 61260-1:2014 standard.
+
+    Note that they are only defined between 10 Hz and 20 kHz.
+
+    The octave frequency ratio, G, is given by the following
+    expression: G = 10**(3/10) ≈ 1.99526
+
+    Parameters
+    ----------
+    num_fractions : 1, 3
+        The number of octave fractions. 1 returns octave center frequencies,
+        3 returns third octave center frequencies.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``frequency_range=(20, 20e3)``.
+        ``frequency_range=(20, 20e3)`` would lead to IEC 61260-1
+        ``frequency_range=(10, 20e3)`` would lead to IEC 61672-1
+
+    Returns
+    -------
+    nominal : array, float
+        The nominal center frequencies.
+    """
+    G = 10**(3/10)
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "You need to specify a lower and upper limit frequency.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The second frequency needs to be higher than the first.")
+    
+    if num_fractions == 1:
+            if (f_lims[0] > 15.8*G**(-1/2)) and ( f_lims[1] < 15848.93192*G**(1/2)):
+                nominal = np.array([
+                    16, 31.5, 63, 125, 250, 500, 1e3,
+                    2e3, 4e3, 8e3, 16e3], dtype=float)
+            else:
+                raise ValueError(
+                "The nominal center frequencies are not defined for this range.")
+    elif num_fractions == 3:
+        if (f_lims[0] > 10*G**(-1/6)) and (f_lims[1] < 19952.62315*G**(1/6)):
+            nominal = np.array([
+                10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 
+                100, 125, 160, 200, 250, 315, 400, 500, 630, 
+                800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 
+                5000, 6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
+        else:
+            raise ValueError(
+                "The nominal center frequencies are not defined for this range.")
+
+    mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+    nominal = nominal[mask]
+    return nominal
+
+def fractional_octave_frequencies_exact(
+        num_fractions=1, frequency_range=(10, 20e3), return_cutoff=False):
+    """Return the exact center frequencies for fractional octave band filters 
+    according to the IEC 61260-1:2014 standard.
+
+    The octave frequency ratio, G, is given by the following
+    expression: G = 10**(3/10) ≈ 1.99526
+
+    The center frequencies f_m are calculated using formula (2) for odd values of b and 
+    formula (3) for even values of b.
+    f_m = f_r G^{x/b} (2)
+    f_m = f_r G^{(2x+1)/(2b)} (3)
+    where b is the number of octave fractions, f_r is the reference frequency
+    chosen as 1000Hz and x is the index of the frequency band.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. Eg., ``1`` refers to
+        octave bands and ``3`` to third octave bands. The default is ``1``.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``frequency_range=(20, 20e3)``.
+
+    Returns
+    -------
+    exact : array, float
+        The exact center frequencies in Hz, resulting in a uniform distribution
+        of frequency bands over the frequency range.
+    cutoff : tuple, array, float
+        The lower and upper critical frequencies in Hz of the bandpass filters
+        for each band as a tuple corresponding to ``(f_lower, f_upper)``.
+    """
+    G = 10**(3/10)
+    ref_freq = 1e3
+    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
+    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
+
+    indices = np.arange(-Nmin, Nmax+1)
+    if num_fractions % 2 != 0:
+        exact = ref_freq * (G)**(indices / num_fractions)
+    else:
+        exact = ref_freq * (G)**((2*indices + 1)/ (2*num_fractions))
+
+    if return_cutoff:
+        freqs_upper = exact * G**(1/2/num_fractions)
+        freqs_lower = exact * G**(-1/2/num_fractions)
+        f_crit = (freqs_lower, freqs_upper)
+        return exact, f_crit
+    else:
+        return exact
