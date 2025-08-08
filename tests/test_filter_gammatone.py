@@ -206,3 +206,43 @@ def test_erb_frequencies_assertions():
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
         pf.dsp.filter.erb_frequencies([0, 1], 0)
+
+
+def test_impulse_response():
+    """Test the impulse response of GammatoneBands."""
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+    irs = GFB.impulse_response()
+    ir_real, ir_imag = irs
+
+    assert isinstance(irs, tuple)
+    assert len(irs) == 2
+    assert isinstance(ir_real, pf.Signal)
+    assert isinstance(ir_imag, pf.Signal)
+    assert ir_real.cshape == (GFB.n_bands, 1)
+
+
+def test_impulse_response_warning():
+    """Test that a warning is raised if n_samples is too small."""
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+    with pytest.warns(
+            UserWarning,
+            match="n_samples should be at least as long as the filter"):
+        GFB.impulse_response(n_samples=100)
+
+
+def test_impulse_response_length():
+    """Test the minimum impulse response length."""
+    GFB = pf.dsp.filter.GammatoneBands((100, 200))
+    coefficients = GFB.coefficients
+    sos_coeffs = np.tile([[1, 0, 0, 1, -coefficients[0], 0]], (4, 1))
+    sos_coeffs[3, 0] = GFB.normalizations[0]
+    SOS = pf.FilterSOS(sos_coeffs, GFB.sampling_rate)
+
+    min_length = np.max(GFB.minimum_impulse_response_length())
+
+    # test the minimum impulse response length
+    npt.assert_equal(SOS.minimum_impulse_response_length(), min_length)
+    # test the default impulse response length
+    npt.assert_equal(GFB.impulse_response()[0].n_samples, min_length)
+    # test the impulse response length with specified length
+    npt.assert_equal(GFB.impulse_response(2000)[0].n_samples, 2000)
