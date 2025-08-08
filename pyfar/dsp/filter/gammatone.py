@@ -4,6 +4,7 @@ import scipy.signal as sgn
 from copy import deepcopy
 from deepdiff import DeepDiff
 import pyfar as pf
+import warnings
 
 
 class GammatoneBands():
@@ -501,6 +502,84 @@ class GammatoneBands():
         obj.__dict__.update(obj_dict)
 
         return obj
+
+    def impulse_response(self, n_samples=None):
+        """
+        Compute the impulse response of the gammatone filterbank.
+
+        Parameters
+        ----------
+        n_samples : int, optional
+            Length in samples for which the impulse response is computed. The
+            default is ``None`` in which case ``n_samples`` is computed as the
+            maximum value across filter channels returned by
+            :py:func:`~GammatoneBands.minimum_impulse_response_length`.
+            A warning is returned if ``n_samples`` is shorter than the maximum
+            value returned by
+            :py:func:`~GammatoneBands.minimum_impulse_response_length`.
+
+        Returns
+        -------
+        impulse_response_real : Signal
+            The impulse response of the real part of the filterbank of
+            ``cshape = (:py:func:`~n_bands`, )``.
+        impulse_response_imag : Signal
+            The impulse response of the imaginary part of the filterbank of
+            ``cshape = (:py:func:`~n_bands`, )``.
+        """
+        # set or check minimum impulse_response length
+        minimum_impulse_response_length = \
+            int(np.max(self.minimum_impulse_response_length(unit='samples')))
+
+        if n_samples is None:
+            n_samples = minimum_impulse_response_length
+        elif n_samples < minimum_impulse_response_length:
+            warnings.warn(
+                ('n_samples should be at least as long as the filter, '
+                 f'which is {minimum_impulse_response_length}'), stacklevel=2)
+
+        return self.process(
+            pf.signals.impulse(n_samples, sampling_rate=self.sampling_rate))
+
+    def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
+        """
+        Estimate the minimum length of the filterbank's impulse response.
+
+        The length is estimated using
+        :py:meth:`FilterSOS.minimum_impulse_response_length <pyfar.classes.filter.FilterSOS.minimum_impulse_response_length>`.
+
+        Parameters
+        ----------
+        unit : string, optional
+            The unit in which the length is returned. Can be ``'samples'`` or
+            ``'s'`` (seconds). The default is ``'samples'``.
+        tolerance : float, optional
+            Tolerance for the accuracy. Smaller tolerances will result in
+            larger impulse response lengths. The default is ``5e-5``.
+
+        Returns
+        -------
+        minimum_impulse_response_length : array
+            An integer array of ``shape = (n_bands, )`` containing the length
+            in specified unit with the number of gammatone-bands
+            :py:func:`~n_bands`.
+        """  # noqa: E501
+        sos_sections = np.zeros((self.n_bands, 4, 6), dtype=complex)
+
+        # get SOS-sections for each band
+        for bb in range(self.n_bands):
+            sos_section = np.tile([1, 0, 0, 1, -self.coefficients[bb], 0],
+                                  (4, 1))
+            sos_section[3, 0] = self._normalizations[bb]
+            sos_sections[bb] = sos_section
+
+        # create a FilterSOS object
+        SOS_filt = pf.FilterSOS(sos_sections, self.sampling_rate)
+        # get the minimum impulse response length per band / filter-channel
+        estimated_length = \
+            SOS_filt.minimum_impulse_response_length(unit=unit,
+                                                     tolerance=tolerance)
+        return estimated_length
 
 
 def erb_frequencies(frequency_range, resolution=1, reference_frequency=1000):
