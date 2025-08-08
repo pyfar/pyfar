@@ -527,7 +527,7 @@ class GammatoneBands():
             The impulse response of the imaginary part of the filterbank of
             ``cshape = (:py:func:`~n_bands`, )``.
         """
-        # set or check impulse_response length
+        # set or check minimum impulse_response length
         minimum_impulse_response_length = \
             int(np.max(self.minimum_impulse_response_length(unit='samples')))
 
@@ -575,7 +575,7 @@ class GammatoneBands():
 
         # create a FilterSOS object
         SOS_filt = pf.FilterSOS(sos_sections, self.sampling_rate)
-        # get the minimum impulse response length
+        # get the minimum impulse response length per band / filter-channel
         estimated_length = \
             SOS_filt.minimum_impulse_response_length(unit=unit,
                                                      tolerance=tolerance)
