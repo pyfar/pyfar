@@ -40,6 +40,9 @@ from .gammatone import (
     erb_frequencies,
 )
 
+from .frequency_weighting import (
+    frequency_weighting_filter,
+)
 
 __all__ = [
     'allpass',
@@ -64,4 +67,5 @@ __all__ = [
     'fractional_octave_frequencies',
     'GammatoneBands',
     'erb_frequencies',
+    'frequency_weighting_filter',
 ]
