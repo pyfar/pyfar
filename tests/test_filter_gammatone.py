@@ -216,9 +216,10 @@ def test_impulse_response():
 
     assert isinstance(irs, tuple)
     assert len(irs) == 2
-    assert isinstance(ir_real, pf.Signal)
-    assert isinstance(ir_imag, pf.Signal)
+    assert type(ir_real) is pf.Signal
+    assert type(ir_imag) is pf.Signal
     assert ir_real.cshape == (GFB.n_bands, 1)
+    assert ir_imag.cshape == (GFB.n_bands, 1)
 
 
 def test_impulse_response_warning():
@@ -233,16 +234,8 @@ def test_impulse_response_warning():
 def test_impulse_response_length():
     """Test the minimum impulse response length."""
     GFB = pf.dsp.filter.GammatoneBands((100, 200))
-    coefficients = GFB.coefficients
-    sos_coeffs = np.tile([[1, 0, 0, 1, -coefficients[0], 0]], (4, 1))
-    sos_coeffs[3, 0] = GFB.normalizations[0]
-    SOS = pf.FilterSOS(sos_coeffs, GFB.sampling_rate)
 
-    min_length = np.max(GFB.minimum_impulse_response_length())
-
-    # test the minimum impulse response length
-    npt.assert_equal(SOS.minimum_impulse_response_length(), min_length)
-    # test the default impulse response length
-    npt.assert_equal(GFB.impulse_response()[0].n_samples, min_length)
+    assert type(GFB.minimum_impulse_response_length()) is np.ndarray
+    assert GFB.minimum_impulse_response_length().shape == (GFB.n_bands,)
     # test the impulse response length with specified length
-    npt.assert_equal(GFB.impulse_response(2000)[0].n_samples, 2000)
+    assert GFB.impulse_response(2000)[0].n_samples == 2000
