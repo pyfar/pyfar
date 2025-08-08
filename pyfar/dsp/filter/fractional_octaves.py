@@ -165,7 +165,8 @@ def fractional_octave_bands(
         num_fractions,
         sampling_rate=None,
         frequency_range=(20.0, 20e3),
-        order=14):
+        order=14,
+        tolerance_class=1):
     """Create and/or apply an energy preserving fractional octave filter bank.
 
     The filters are in accordance with IEC 61260-1:2014 [#]_ for octave and
@@ -291,6 +292,10 @@ def fractional_octave_bands(
         "Second order section 1/{num_fractions} fractional octave band"
         "filter of order {order}")
 
+    if num_fractions in [1, 3] and tolerance_class is not None:
+        _check_fractional_octave_bands_tolerance(
+            filt, num_fractions, frequency_range, tolerance_class)
+
     # return the filter object
     if signal is None:
         # return the filter object
@@ -369,6 +374,38 @@ def _coefficients_fractional_octave_bands(
                 order, Wn, btype=btype, output='sos')
         sos[idx, :, :] = sos_coeff
     return sos
+
+
+def _check_fractional_octave_bands_tolerance(
+            filt, num_fractions, frequency_range, tolerance_class):
+
+    nominal, exact = fractional_octave_frequencies(
+        num_fractions, frequency_range)
+
+    ir = filt.impulse_response()
+    tf = pf.dsp.decibel(ir).squeeze()
+    tolerance_not_met = []
+
+    for n, center_frequeny in enumerate(exact):
+
+        tolerance, frequencies = pf.constants.octave_band_tolerance(
+            center_frequeny, num_fractions, tolerance_class)
+
+        f_mask = np.logical_and(ir.frequencies >= frequencies[0],
+                                ir.frequencies <= frequencies[-1])
+
+        lower = np.interp(ir.frequencies[f_mask], frequencies, tolerance[0])
+        upper = np.interp(ir.frequencies[f_mask], frequencies, tolerance[1])
+
+        if np.any(tf[n, f_mask] < lower) or np.any(tf[n, f_mask] > upper):
+            tolerance_not_met.append(str(nominal[n]))
+
+    if tolerance_not_met:
+        message = (f'Class {tolerance_class} tolerance not met for filter '
+                   f'bands at {", ".join(tolerance_not_met)} Hz. Increase the '
+                   'filter order, decrease the tolerance class or disable the '
+                   'check to solve this issue.')
+        warnings.warn(message, UserWarning, stacklevel=2)
 
 
 def reconstructing_fractional_octave_bands(
