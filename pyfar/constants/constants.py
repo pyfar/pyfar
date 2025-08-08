@@ -438,7 +438,7 @@ def density_of_air(
 
 def octave_band_tolerance(
         exact_center_frequency: float,
-        bands: Literal["octave", "third"],
+        num_fractions: Literal[1, 3],
         tolerance_class : Literal[1, 2]):
     r"""
     Calculate the tolerance limits for fractional octave band filters.
@@ -457,8 +457,9 @@ def octave_band_tolerance(
     exact_center_frequency : float
         The exact center frequency of the band filter in Hz (see
         :py:func:`~pyfar.dsp.filter.fractional_octave_frequencies`).
-    bands : Literal["octave", "third"]
-        The type of fractional octave band. Must be either 'octave' or 'third'.
+    num_fractions : Literal[1, 3]
+        The number of bands an octave is divided into. ``1`` for octave bands
+        and ``3`` for third octave bands.
     tolerance_class : Literal[1, 2]
         The tolerance class as defined in the standard. Must be 1 or 2.
 
@@ -485,7 +486,8 @@ def octave_band_tolerance(
         >>> import matplotlib.pyplot as plt
         >>>
         >>> tolerances = pf.constants.octave_band_tolerance(
-        ...     exact_center_frequency=1000, bands='octave', tolerance_class=1)
+        ...     exact_center_frequency=1000, num_fractions=1,
+        ...     tolerance_class=1)
         >>>
         >>> octave_filter = pf.dsp.filter.fractional_octave_bands(
         ...     pf.signals.impulse(2**12), num_fractions=1,
@@ -503,8 +505,9 @@ def octave_band_tolerance(
     if not isinstance(exact_center_frequency, (int, float)):
         raise ValueError('The exact center frequency must be a float '
                          'or integer number')
-    if bands not in ['octave', 'third']:
-        raise ValueError(f"bands is '{bands}' but must be 'octave' or 'third'")
+    if num_fractions not in [1, 3]:
+        raise ValueError(
+            f"num_fractions is {num_fractions} but must be 1 or 3")
     if tolerance_class not in [1, 2]:
         raise ValueError(
             f"tolerance_class is {tolerance_class} but must be 1 or 2")
@@ -537,7 +540,6 @@ def octave_band_tolerance(
         lower_tolerance, np.flip(lower_tolerance[:-1])))
 
     # scale frequencies to bandwidth
-    num_fractions = 1 if bands == 'octave' else 3
     relative_frequencies /= num_fractions
 
     tolerance = np.vstack((lower_tolerance, upper_tolerance))
