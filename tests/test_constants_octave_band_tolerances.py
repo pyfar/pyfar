@@ -17,17 +17,20 @@ def test_octave_band_tolerance(
         "tests/references/octave_band_tolerance_"
         f"{int(exact_center_frequency)}Hz_{bands}_class{tolerance_class}.csv"))
     data = np.loadtxt(filename, delimiter=',')
-    frequencies = data[0]
-    freq = data[1:]
+    frequencies_ref = data[0]
+    tolerance_ref = data[1:]
 
     # generate tolerance using pyfar
-    tolerance = pf.constants.octave_band_tolerance(
+    tolerance, frequencies = pf.constants.octave_band_tolerance(
                 exact_center_frequency, bands, tolerance_class)
 
     # actual tests (data written and tested with 2 decimals of precision)
-    assert type(tolerance) == pf.FrequencyData
-    npt.assert_almost_equal(tolerance.frequencies, frequencies, 2)
-    npt.assert_almost_equal(tolerance.freq, freq, 2)
+    assert type(tolerance) == np.ndarray
+    assert type(frequencies) == np.ndarray
+    assert tolerance.shape == (2, 19)
+    assert frequencies.shape == (19, )
+    npt.assert_almost_equal(frequencies, frequencies_ref, 2)
+    npt.assert_almost_equal(tolerance, tolerance_ref, 2)
 
 
 def test_octave_band_tolerance_errors():

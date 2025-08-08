@@ -464,10 +464,11 @@ def octave_band_tolerance(
 
     Returns
     -------
-    tolerance : FrequencyData
-        Tolerance limits in dB. The lower tolerance is given in the first
-        channel (``tolerance.freq[0]``) and the upper tolerance in the second
-        (``tolerance.freq[1]``).
+    tolerance : numpy array
+        Tolerance limits in dB. The lower tolerance is given in
+        ``tolerance[0]`` and the upper tolerance ``tolerance.freq[1]``.
+    frequencies : numpy array
+        The frequencies in Hz at which the tolerance is given.
 
     References
     ----------
@@ -539,13 +540,7 @@ def octave_band_tolerance(
     num_fractions = 1 if bands == 'octave' else 3
     relative_frequencies /= num_fractions
 
-    # save to list of FrequencyData objects
-    bands_verbose = 'octave' if bands == 'octave' else 'third octave'
-    tolerance = pf.FrequencyData(
-        np.vstack((lower_tolerance, upper_tolerance)),
-        exact_center_frequency * G**relative_frequencies,
-        (f'Class {tolerance_class} tolerance in dB for {bands_verbose} '
-         f'band filter at {exact_center_frequency:.1f} Hz center frequency'
-         'according to DIN EN 61260-1:2014'))
+    tolerance = np.vstack((lower_tolerance, upper_tolerance))
+    frequencies = exact_center_frequency * G**relative_frequencies
 
-    return tolerance
+    return tolerance, frequencies
