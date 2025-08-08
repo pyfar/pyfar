@@ -485,7 +485,7 @@ def octave_band_tolerance(
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>>
-        >>> tolerances = pf.constants.octave_band_tolerance(
+        >>> tolerance, frequencies = pf.constants.octave_band_tolerance(
         ...     exact_center_frequency=1000, num_fractions=1,
         ...     tolerance_class=1)
         >>>
@@ -495,7 +495,7 @@ def octave_band_tolerance(
         >>>
         >>> ax = pf.plot.freq(octave_filter, color='k', label='Octave filter')
         >>> plt.fill_between(
-        ...     tolerances.frequencies, tolerances.freq[0], tolerances.freq[1],
+        ...     frequencies, tolerance[0], tolerance[1],
         ...     facecolor='g', alpha=.25, label='Class 1 Tolerance')
         >>> ax.set_ylim(-70, 5)
         >>> ax.set_xlim(63, 15_850)
