@@ -1,7 +1,6 @@
 """File containing all frequency weighting functions."""
 from typing import Literal, Union
 import numpy as np
-import pyfar
 
 # Constants for the weighting curve formulas.
 # See appendix E in IEC 61672-1.
@@ -74,8 +73,8 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
 
     Returns
     -------
-    weights: FrequencyData
-        The weights in dB and their frequencies as a Frequency Data object.
+    weights: NDArray
+        The weights in dB in the same shape as `frequencies`.
 
     Examples
     --------
@@ -93,8 +92,8 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
         weights_C = pf.constants.frequency_weighting_curve(
             "C", plot_frequencies)
 
-        plt.plot(plot_frequencies, weights_A.freq[0], label="A weighting")
-        plt.plot(plot_frequencies, weights_C.freq[0], label="C weighting")
+        plt.plot(plot_frequencies, weights_A, label="A weighting")
+        plt.plot(plot_frequencies, weights_C, label="C weighting")
         plt.semilogx()
         plt.xlabel("f in Hz")
         plt.ylabel("Weights in dB")
@@ -110,9 +109,7 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     else:
         raise ValueError("Allowed literals for weighting are 'A' and 'C'")
 
-    comment = f"Level corrections for {weighting} weighting according to" \
-               "IEC 61672-1"
-    return pyfar.FrequencyData(weights, frequencies, comment)
+    return weights
 
 
 def frequency_weighting_band_corrections(
@@ -138,9 +135,11 @@ def frequency_weighting_band_corrections(
 
     Returns
     -------
-    weights_with_nominals: FrequencyData
-        The correction values in dB for the specific frequency weighting
-        over their nominal frequencies as a Frequency Data object.
+    nominal_frequencies: NDArray
+        The nominal center frequencies included in the given range.
+
+    weights: NDArray
+        The correction values in dB for the specific frequency weighting.
 
     Examples
     --------
@@ -151,23 +150,23 @@ def frequency_weighting_band_corrections(
         import pyfar as pf
         import matplotlib.pyplot as plt
 
-        frequency_range = (10, 20000)
-        weights_A = pf.constants.frequency_weighting_band_corrections(
-            "A", "third", frequency_range)
-        weights_C = pf.constants.frequency_weighting_band_corrections(
-            "C", "octave", frequency_range)
+        range = (10, 20000)
+        nominals_third, weights_A = pf.constants. \
+            frequency_weighting_band_corrections("A", "third", range)
+        nominals_octave, weights_C = pf.constants. \
+            frequency_weighting_band_corrections("C", "octave", range)
 
         # plotting
-        plt.plot(weights_A.frequencies, weights_A.freq[0], "--",
+        plt.plot(nominals_third, weights_A, "--",
                 c=(0.5, 0.5, 0.5, 0.5))
-        plt.plot(weights_A.frequencies, weights_A.freq[0], "bo",
+        plt.plot(nominals_third, weights_A, "bo",
                 label="A weighting in third bands")
-        plt.plot(weights_C.frequencies, weights_C.freq[0], "--",
+        plt.plot(nominals_octave, weights_C, "--",
                 c=(0.5, 0.5, 0.5, 0.5))
-        plt.plot(weights_C.frequencies, weights_C.freq[0], "go",
+        plt.plot(nominals_octave, weights_C, "go",
                 label="C weighting in octave bands")
         plt.legend()
-        ticks = weights_C.frequencies[::2].astype(int)
+        ticks = nominals_octave[::2].astype(int)
         plt.semilogx()
         plt.xticks(ticks, ticks)
         plt.xlabel("f in Hz")
@@ -198,6 +197,4 @@ def frequency_weighting_band_corrections(
         raise ValueError("Frequency range must include at least one value " \
                          "between 10 and 20000")
 
-    comment = f"Level corrections for the {weighting} weighting in {bands}" \
-               "bands in dB and the bands' nominal center frequencies"
-    return pyfar.FrequencyData(weights_in_range, nominals_in_range, comment)
+    return (nominals_in_range, weights_in_range)

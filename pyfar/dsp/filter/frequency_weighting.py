@@ -229,7 +229,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     # least_squares() is easier and cleaner)
     frequencies = np.logspace(1, np.log10(sampling_rate/2), n_frequencies)
     target_levels = pfc.frequency_weighting_curve(target_weighting,
-                                                  frequencies).freq[0]
+                                                  frequencies)
 
     def compute_residuals(x: np.ndarray) -> np.ndarray:
         """
@@ -358,7 +358,7 @@ def _check_filter(sampling_rate: float,
     _, freq_resp = sps.freqz_zpk(z, p, k, test_freqs, fs=sampling_rate)
     mags = np.abs(freq_resp)
     mags_dB = 10 * np.log10(mags**2)
-    mags_target = pfc.frequency_weighting_curve(weighting, test_freqs).freq[0]
+    mags_target = pfc.frequency_weighting_curve(weighting, test_freqs)
     mag_diffs = mags_dB - mags_target
 
     upper, lower = _get_error_margins(test_freqs)
