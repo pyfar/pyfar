@@ -522,12 +522,10 @@ class GammatoneBands():
         -------
         impulse_response_real : Signal
             The impulse response of the real part of the filterbank of
-            ``cshape = (n_channels, )`` with the channel shape equivalent to
-            :py:func:`~n_bands`.
+            ``cshape = (:py:func:`~n_bands`, )``.
         impulse_response_imag : Signal
             The impulse response of the imaginary part of the filterbank of
-            ``cshape = (n_channels, )`` with the channel shape equivalent to
-            :py:func:`~n_bands`.
+            ``cshape = (:py:func:`~n_bands`, )``.
         """
         # set or check impulse_response length
         minimum_impulse_response_length = \
@@ -562,8 +560,8 @@ class GammatoneBands():
         Returns
         -------
         minimum_impulse_response_length : array
-            An integer array of shape(n_bands, ) containing the length in
-            specified unit with the number of gammatone-bands
+            An integer array of ``shape = (n_bands, )`` containing the length
+            in specified unit with the number of gammatone-bands
             :py:func:`~n_bands`.
         """  # noqa: E501
         sos_sections = np.zeros((self.n_bands, 4, 6), dtype=complex)
