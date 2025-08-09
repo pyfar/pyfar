@@ -466,9 +466,10 @@ def octave_band_tolerance(
 
     Returns
     -------
-    tolerance : numpy array
-        Tolerance limits in dB. The lower tolerance is given in
-        ``tolerance[0]`` and the upper tolerance ``tolerance.freq[1]``.
+    lower_tolerance : numpy array
+        Lower tolerance limits in dB.
+    upper_tolerance : numpy array
+        Upper tolerance limits in dB.
     frequencies : numpy array
         The frequencies in Hz at which the tolerance is given.
 
@@ -543,7 +544,6 @@ def octave_band_tolerance(
     # scale frequencies to bandwidth
     relative_frequencies /= num_fractions
 
-    tolerance = np.vstack((lower_tolerance, upper_tolerance))
     frequencies = exact_center_frequency * G**relative_frequencies
 
-    return tolerance, frequencies
+    return lower_tolerance, upper_tolerance, frequencies
