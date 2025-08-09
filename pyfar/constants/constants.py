@@ -467,11 +467,11 @@ def octave_band_tolerance(
     Returns
     -------
     lower_tolerance : numpy array
-        Lower tolerance limits in dB.
+        Lower tolerance limits in dB of shape (19, ).
     upper_tolerance : numpy array
-        Upper tolerance limits in dB.
+        Upper tolerance limits in dB of shape (19, ).
     frequencies : numpy array
-        The frequencies in Hz at which the tolerance is given.
+        The frequencies in Hz at which the tolerance is given of shape (19, ).
 
     References
     ----------
@@ -487,7 +487,7 @@ def octave_band_tolerance(
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>>
-        >>> tolerance, frequencies = pf.constants.octave_band_tolerance(
+        >>> lower, upper, frequencies = pf.constants.octave_band_tolerance(
         ...     exact_center_frequency=1000, num_fractions=1,
         ...     tolerance_class=1)
         >>>
@@ -497,7 +497,7 @@ def octave_band_tolerance(
         >>>
         >>> ax = pf.plot.freq(octave_filter, color='k', label='Octave filter')
         >>> plt.fill_between(
-        ...     frequencies, tolerance[0], tolerance[1],
+        ...     frequencies, lower, upper,
         ...     facecolor='g', alpha=.25, label='Class 1 Tolerance')
         >>> ax.set_ylim(-70, 5)
         >>> ax.set_xlim(63, 15_850)
