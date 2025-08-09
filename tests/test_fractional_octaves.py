@@ -144,3 +144,19 @@ def test_sum_bands_din():
 
     assert not np.any(diff[:, mask] > 10**(1/10))
     assert not np.any(diff[:, mask] < 10**(-1/10))
+
+
+@pytest.mark.parametrize('num_fractions', [1, 3])
+@pytest.mark.parametrize('tolerance_class', [1, 2])
+def test_fractional_octave_bands_tolerance(num_fractions, tolerance_class):
+    """Test if checking the tolerance class raises the expected error."""
+
+    message = f'Class {tolerance_class} tolerance not met.'
+
+    with pytest.raises(ValueError, match=message):
+        # the default frequency range is tested, which raises a warning that
+        # is caught as well to have clean tests
+        with pytest.warns(UserWarning, match='The upper frequency limit'):
+            filter.fractional_octave_bands(
+                None, num_fractions, sampling_rate=44100, order=1,
+                check_tolerance_class=tolerance_class)
