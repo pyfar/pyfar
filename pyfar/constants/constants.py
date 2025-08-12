@@ -1,11 +1,18 @@
 """Constant calculation."""
 import numpy as np
 import pyfar as pf
+from typeguard import typechecked
+from typing import Union
 
+ArrayLike = Union[float, int, np.ndarray, list, tuple]
+ArrayLikeNone = Union[float, int, np.ndarray, list, tuple, None]
 
+@typechecked
 def air_attenuation(
-        temperature, frequencies, relative_humidity,
-        atmospheric_pressure=None):
+        temperature: ArrayLike,
+        frequencies: ArrayLike,
+        relative_humidity: ArrayLike,
+        atmospheric_pressure: ArrayLikeNone = None):
     r"""Calculate the pure tone attenuation of sound in air according to
     ISO 9613-1.
 
@@ -70,23 +77,8 @@ def air_attenuation(
     """
     if atmospheric_pressure is None:
         atmospheric_pressure = pf.constants.reference_atmospheric_pressure
-    # check inputs
-    if not isinstance(temperature, (int, float, np.ndarray, list, tuple)):
-        raise TypeError(
-            'temperature must be a number or array of numbers')
-    if not isinstance(frequencies, (int, float, np.ndarray, list, tuple)):
-        raise TypeError(
-            'frequencies must be a number or array of numbers')
-    if not isinstance(
-            relative_humidity, (int, float, np.ndarray, list, tuple)):
-        raise TypeError(
-            'relative_humidity must be a number or array of numbers')
     if np.array(frequencies).ndim > 1:
         raise ValueError('frequencies must be one dimensional.')
-    if not isinstance(
-            atmospheric_pressure, (int, float, np.ndarray, list, tuple)):
-        raise TypeError(
-            'atmospheric_pressure must be a number or array of numbers')
 
     # check if broadcastable
     try:
@@ -312,7 +304,8 @@ def _saturation_vapour_pressure_iso(temperature):
     return 10**C * p_r
 
 
-def saturation_vapor_pressure_magnus(temperature):
+@typechecked
+def saturation_vapor_pressure_magnus(temperature:ArrayLike) -> ArrayLike:
     r"""
     Calculate the saturation vapor pressure of water in Pascal using the
     Magnus formula.

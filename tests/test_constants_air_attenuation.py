@@ -3,6 +3,7 @@ import numpy as np
 import pyfar as pf
 import numpy.testing as npt
 import re
+from typeguard import TypeCheckError
 
 
 @pytest.mark.parametrize((
@@ -71,13 +72,13 @@ def test_air_attenuation_inputs():
     temperature = 10
     frequency = 1000
     relative_humidity = .1
-    with pytest.raises(TypeError, match='must be a number or'):
+    with pytest.raises(TypeCheckError, match='did not match any element'):
         pf.constants.air_attenuation(
             'test', frequency, relative_humidity)
-    with pytest.raises(TypeError, match='must be a number or'):
+    with pytest.raises(TypeCheckError, match='did not match any element'):
         pf.constants.air_attenuation(
             temperature, 'frequency', relative_humidity)
-    with pytest.raises(TypeError, match='must be a number or'):
+    with pytest.raises(TypeCheckError, match='did not match any element'):
         pf.constants.air_attenuation(
             temperature, frequency, 'relative_humidity')
     with pytest.raises(
@@ -85,8 +86,8 @@ def test_air_attenuation_inputs():
         pf.constants.air_attenuation(
             temperature, [[1, 1]], relative_humidity)
     with pytest.raises(
-            TypeError,
-            match='atmospheric_pressure must be a number or array of numbers'):
+            TypeCheckError,
+            match='did not match any element'):
         pf.constants.air_attenuation(
             temperature, frequency, relative_humidity, 'test')
 

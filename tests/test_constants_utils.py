@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import pyfar as pf
 import numpy.testing as npt
+from typeguard import TypeCheckError
 
 
 def test_saturation_vapor_pressure_scalar():
@@ -41,8 +42,8 @@ def test_saturation_vapor_pressure_out_of_range_high():
 
 def test_saturation_vapor_pressure_invalid_type():
     with pytest.raises(
-            TypeError,
-            match="temperature must be a number or array of numbers"):
+            TypeCheckError,
+            match='did not match any element in the'):
         pf.constants.saturation_vapor_pressure_magnus("invalid")
 
 

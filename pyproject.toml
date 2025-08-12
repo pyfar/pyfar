@@ -37,6 +37,7 @@ dependencies = [
     "urllib3",
     "deepdiff",
     "soundfile>=0.11.0",
+    "typeguard",
 ]
 
 [project.optional-dependencies]
