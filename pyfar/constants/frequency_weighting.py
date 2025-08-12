@@ -151,10 +151,8 @@ def frequency_weighting_band_corrections(
         import matplotlib.pyplot as plt
 
         range = (10, 20000)
-        nominals_third, weights_A = pf.constants. \
-            frequency_weighting_band_corrections("A", "third", range)
-        nominals_octave, weights_C = pf.constants. \
-            frequency_weighting_band_corrections("C", "octave", range)
+        nominals_third, weights_A = pf.constants.frequency_weighting_band_corrections("A", "third", range)
+        nominals_octave, weights_C = pf.constants.frequency_weighting_band_corrections("C", "octave", range)
 
         # plotting
         plt.plot(nominals_third, weights_A, "--",
@@ -172,7 +170,7 @@ def frequency_weighting_band_corrections(
         plt.xlabel("f in Hz")
         plt.ylabel("Corrections in dB")
         plt.grid()
-    """
+    """ # noqa: E501
     if weighting == "A":
         all_weights = _THIRDBAND_WEIGHTINGS_A
     elif weighting == "C":
