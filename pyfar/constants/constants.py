@@ -12,6 +12,7 @@ def air_attenuation(
     Calculation is in accordance with ISO 9613-1 [#]_. The shape of the
     outputs is broadcasted from the shapes of the ``temperature``,
     ``relative_humidity``, and ``atmospheric_pressure``.
+    The frequency bins represents the last dimension.
 
     Parameters
     ----------
@@ -30,7 +31,7 @@ def air_attenuation(
 
     Returns
     -------
-    alpha : :py:class:`~pyfar.FrequencyData`
+    alpha : np.ndarray[float]
         Pure tone air attenuation coefficient in decibels per meter for
         atmospheric absorption.
     m : :py:class:`~pyfar.FrequencyData`
@@ -143,19 +144,17 @@ def air_attenuation(
         -4.17*((T/T_0)**(-1/3)-1)))
 
     # air attenuation (Eq. 5)
-    air_attenuation = 8.686*f**2*((1.84e-11*p_r/p_a*(T/T_0)**(1/2)) + \
+    alpha = 8.686*f**2*((1.84e-11*p_r/p_a*(T/T_0)**(1/2)) + \
         (T/T_0)**(-5/2)*(0.01275*np.exp(-2239.1/T)*(f_rO + (f**2/f_rO))**(-1)
         +0.1068*np.exp(-3352/T) * (f_rN + (f**2/f_rN))**(-1)))
 
-    alpha = pf.FrequencyData(
-        air_attenuation, frequencies=frequencies)
-
     # Equation 3: ISO 17497-1:2004
-    m = alpha / (10*np.log10(np.exp(1)))
+    m = pf.FrequencyData(
+        alpha / (10*np.log10(np.exp(1))), frequencies=frequencies)
 
     # calculate accuracy
     accuracy = _air_attenuation_accuracy(
-        h, temperature, atmospheric_pressure, frequencies, alpha.freq.shape)
+        h, temperature, atmospheric_pressure, frequencies, m.freq.shape)
 
     return alpha, m, accuracy
 
