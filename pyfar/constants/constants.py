@@ -436,7 +436,7 @@ def density_of_air(
     return P / (R_a * (temperature + 273.15)) * (1+C)/(1+alpha*C)
 
 
-def octave_band_tolerance(
+def fractional_octave_filter_tolerance(
         exact_center_frequency: float,
         num_fractions: Literal[1, 3],
         tolerance_class : Literal[1, 2]):
@@ -487,9 +487,10 @@ def octave_band_tolerance(
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>>
-        >>> lower, upper, frequencies = pf.constants.octave_band_tolerance(
-        ...     exact_center_frequency=1000, num_fractions=1,
-        ...     tolerance_class=1)
+        >>> lower, upper, frequencies = \
+        ...     pf.constants.fractional_octave_filter_tolerance(
+        ...         exact_center_frequency=1000, num_fractions=1,
+        ...         tolerance_class=1)
         >>>
         >>> octave_filter = pf.dsp.filter.fractional_octave_bands(
         ...     pf.signals.impulse(2**12), num_fractions=1,
