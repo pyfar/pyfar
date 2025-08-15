@@ -66,9 +66,10 @@ def test_fractional_coeff_oct_filter_iec():
     order = 6
 
     with pytest.warns(UserWarning, match="Skipping bands"):
-        actual = filter.fractional_octaves. \
-                    _coefficients_fractional_octave_bands(
-                        sr, 1, frequency_range=(5e3, 20e3), order=order)
+        with pytest.warns(UserWarning, match="The upper frequency limit"):
+            actual = filter.fractional_octaves. \
+                        _coefficients_fractional_octave_bands(
+                            sr, 1, frequency_range=(5e3, 20e3), order=order)
 
     assert actual.shape == (1, order, 6)
 
@@ -89,16 +90,29 @@ def test_fract_oct_filter_iec():
     impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     f_obj = filter.fractional_octave_bands(
-        None, 3, sampling_rate=sr, order=order)
+        None, 3, sampling_rate=sr)
     assert isinstance(f_obj, FilterSOS)
 
-    sig = filter.fractional_octave_bands(impulse, 3, order=order)
+    sig = filter.fractional_octave_bands(impulse, 3)
     assert isinstance(sig, Signal)
 
     ir_actual = filter.fractional_octave_bands(
-        impulse, 1, frequency_range=(1e3, 4e3), order=order)
+        impulse, 1, frequency_range=(1e3, 4e3))
 
     assert ir_actual.time.shape[0] == 3
+
+
+def test_fractional_octave_bands_errors():
+    """Test if all errors are raised as expected"""
+
+    with pytest.raises(ValueError, match='must be 1, 2, or None'):
+        filter.fractional_octave_bands(
+            None, 1, 44100, (1e3, 8e3), check_tolerance_class='one')
+
+    message = 'Either signal or sampling_rate must be None.'
+    with pytest.raises(ValueError, match=message):
+        filter.fractional_octave_bands(
+            Signal(1, 1), 1, 44100, (1e3, 8e3))
 
 
 def test_fract_oct_bands_non_iec():
@@ -144,3 +158,19 @@ def test_sum_bands_din():
 
     assert not np.any(diff[:, mask] > 10**(1/10))
     assert not np.any(diff[:, mask] < 10**(-1/10))
+
+
+@pytest.mark.parametrize('num_fractions', [1, 3])
+@pytest.mark.parametrize('tolerance_class', [1, 2])
+def test_fractional_octave_bands_tolerance(num_fractions, tolerance_class):
+    """Test if checking the tolerance class raises the expected error."""
+
+    message = f'Class {tolerance_class} tolerance not met.'
+
+    with pytest.raises(ValueError, match=message):
+        # the default frequency range is tested, which raises a warning that
+        # is caught as well to have clean tests
+        with pytest.warns(UserWarning, match='The upper frequency limit'):
+            filter.fractional_octave_bands(
+                None, num_fractions, sampling_rate=44100, order=1,
+                check_tolerance_class=tolerance_class)
