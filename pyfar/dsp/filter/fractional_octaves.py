@@ -165,8 +165,13 @@ def fractional_octave_bands(
         num_fractions,
         sampling_rate=None,
         frequency_range=(20.0, 20e3),
-        order=14):
+        order=14,
+        check_tolerance_class=1):
     """Create and/or apply an energy preserving fractional octave filter bank.
+
+    The filters are in accordance with IEC 61260-1:2014 [#]_ for octave bands
+    and filter order of 2 or higher, and for third octave bands and filter
+    orders of 6 or higher (see examples below).
 
     The filters are designed using second order sections of Butterworth
     band-pass filters. Note that if the upper cut-off frequency of a band lies
@@ -201,6 +206,11 @@ def fractional_octave_bands(
         ``frequency_range=(20, 20e3)``.
     order : int, optional
         Order of the Butterworth filter. The default is ``14``.
+    check_tolerance_class : int, None, optional
+        If this is ``1`` or ``2``, it is explicitly checked if the filters
+        meet the corresponding tolerance class defined in
+        :py:func:`~pyfar.constants.octave_band_tolerance`. ``None`` bypasses
+        the check. The default is ``1``.
 
     Returns
     -------
@@ -208,6 +218,11 @@ def fractional_octave_bands(
         The filtered signal. Only returned if ``sampling_rate = None``.
     filter : FilterSOS
         Filter object. Only returned if ``signal = None``.
+
+    References
+    ----------
+    .. [#] IEC 61260-1 (2014). Octave-band and fractional-octave-band filters.
+           Part 1: Specifications.
 
     Examples
     --------
@@ -231,12 +246,42 @@ def fractional_octave_bands(
         >>> ax.set_title(
         ...     "Filter bands and the sum of their squared magnitudes")
 
+    Show that the filters meet class I tolerance according to IEC 61260-1
+
+    .. plot::
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> # get octave filter
+        >>> center_frequency = 1000
+        >>> octave_filter = pf.dsp.filter.fractional_octave_bands(
+        ...     None, 1, 44100, (center_frequency, center_frequency))
+        >>>
+        >>> # Class 1 tolerance after DIN EN 61260-1:2014, Table 1.
+        >>> lower, upper, frequencies = \
+        ...         pf.constants.fractional_octave_filter_tolerance(
+        ...             center_frequeny, num_fractions, tolerance_class)
+        >>>
+        >>> # plot filter and tolerance
+        >>> ax = pf.plot.freq(octave_filter.impulse_response(2**14),
+        ...                   color='k', label='Octave filter')
+        >>> plt.fill_between(
+        ...     frequencies, lower, upper, facecolor=pf.plot.color('g'),
+        >>>     alpha=.25, label='Class 1 Tolerance region')
+        >>>
+        >>> ax.set_ylim(-40, 5)
+        >>> ax.set_xlim(.5*center_frequency, 2*center_frequency)
+        >>> ax.legend()
     """
 
     # check input
     if (signal is None and sampling_rate is None) \
             or (signal is not None and sampling_rate is not None):
-        raise ValueError('Either signal or sampling_rate must be none.')
+        raise ValueError('Either signal or sampling_rate must be None.')
+
+    if check_tolerance_class not in [1, 2, None]:
+        raise ValueError('check_tolerance_class must be 1, 2, or None')
 
     fs = signal.sampling_rate if sampling_rate is None else sampling_rate
 
@@ -248,6 +293,10 @@ def fractional_octave_bands(
     filt.comment = (
         "Second order section 1/{num_fractions} fractional octave band"
         "filter of order {order}")
+
+    if num_fractions in [1, 3] and check_tolerance_class is not None:
+        _check_fractional_octave_filter_tolerance(
+            filt, num_fractions, frequency_range, check_tolerance_class)
 
     # return the filter object
     if signal is None:
@@ -327,6 +376,60 @@ def _coefficients_fractional_octave_bands(
                 order, Wn, btype=btype, output='sos')
         sos[idx, :, :] = sos_coeff
     return sos
+
+
+def _check_fractional_octave_filter_tolerance(
+            filt, num_fractions, frequency_range, tolerance_class):
+    """
+    Check if pyfar.dsp.filter.fractional_octave_bands meet the tolerance
+    for the magnitude response returned by
+    pyfar.dsp.constants.fractional_octave_filter_tolerance.
+
+    Raises a ValueError, of the tolerance is not met.
+
+    Parameters
+    ----------
+    filt : FilterSOS
+        The fractional octave band filters.
+    num_fractions : int
+        The number of bands an octave is divided into. Eg., ``1`` refers to
+        octave bands and ``3`` to third octave bands.
+    frequency_range : array, tuple
+        The lower and upper frequency limits. The default is
+        ``frequency_range=(20, 20e3)``.
+    tolerance_class : int
+        The tolerance class as defined in the standard. Must be 1 or 2.
+    """
+
+    exact_center_frequencies = fractional_octave_frequencies(
+        num_fractions, frequency_range)[1]
+
+    ir = filt.impulse_response()
+    tf = pf.dsp.decibel(ir).squeeze()
+
+    # check the tolerance band by band
+    for n, center_frequeny in enumerate(exact_center_frequencies):
+
+        lower, upper, frequencies = \
+            pf.constants.fractional_octave_filter_tolerance(
+                center_frequeny, num_fractions, tolerance_class)
+
+        # find frequencies within the range where the tolerance is specified
+        f_mask = np.logical_and(ir.frequencies >= frequencies[0],
+                                ir.frequencies <= frequencies[-1])
+
+        # linearly interpolate the tolerance to the frequencies where the
+        # filters are given. This is fine, because the tolerance is a
+        # piece-wise linear function.
+        lower = np.interp(ir.frequencies[f_mask], frequencies, lower)
+        upper = np.interp(ir.frequencies[f_mask], frequencies, upper)
+
+        # check the current band
+        if np.any(tf[n, f_mask] < lower) or np.any(tf[n, f_mask] > upper):
+            raise ValueError(
+                f'Class {tolerance_class} tolerance not met. Increase the '
+                'filter order, decrease the tolerance class or disable the '
+                'check to solve this issue.')
 
 
 def reconstructing_fractional_octave_bands(
