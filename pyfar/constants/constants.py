@@ -447,10 +447,11 @@ def octave_band_tolerance(
     Table 1).
 
     .. note ::
-        The standard defines some lower tolerance limits to :math:`-\infty`,
+        The standard defines some lower tolerance limits as :math:`-\infty`,
         which is inconvenient for plotting. The returned tolerance is -60000 dB
-        in these cases, which is below the smallest possible value approx.
-        -6000 dB (``20*np.log10(np.finfo(float).tiny)``).
+        in these cases, which is below the smallest possible value of
+        ``20*np.log10(np.finfo(float).tiny``
+        :math:`\approx`-6000 dB.
 
     Parameters
     ----------
@@ -461,7 +462,7 @@ def octave_band_tolerance(
         The number of bands an octave is divided into. ``1`` for octave bands
         and ``3`` for third octave bands.
     tolerance_class : Literal[1, 2]
-        The tolerance class as defined in the standard. Must be 1 or 2.
+        The tolerance class as defined in the standard. Must be ``1`` or ``2``.
 
     Returns
     -------
