@@ -2359,7 +2359,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
     # check if averaging over one dimensional caxis
     if 1 in signal.cshape:
-        for ax in caxis:
+        for ax in np.atleast_1d(caxis):
             if signal.cshape[ax] == 1:
                 warnings.warn(
                     f"Averaging one dimensional caxis={caxis}.", stacklevel=2)
