@@ -442,8 +442,7 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
 
     Nominal center frequencies, as specified in the IEC 61260-1:2014 standard
     [#]_, are standardized values that approximate the exact center
-    frequencies. In this function they are defined only for the range from
-    10 Hz to 20 kHz.
+    frequencies. They are defined from 10 Hz to 20 kHz.
 
     Parameters
     ----------
@@ -452,9 +451,8 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
         frequencies, ``3`` returns third octave center frequencies.
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
-        ``(20, 20e3)``.
-        ``(20, 20e3)`` is in accordance with IEC 61260-1
-        ``(10, 20e3)`` is in accordance with IEC 61672-1 [#]_
+        ``(20, 20e3)`` following IEC 61260-1 [#]_.
+        E.g. ``(10, 20e3)`` would follow IEC 61672-1.
 
     Returns
     -------
@@ -479,28 +477,28 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
     if f_lims[0] > f_lims[1]:
         raise ValueError(
             "The second frequency needs to be higher than the first.")
-    #
+
     if num_fractions == 1:
-            if (f_lims[0] > 15.8*G**(-1/2)) and ( f_lims[1] <
-                                                 15848.93192*G**(1/2)):
-                nominal = np.array([
-                    16, 31.5, 63, 125, 250, 500, 1e3,
-                    2e3, 4e3, 8e3, 16e3], dtype=float)
-            else:
-                warnings.warn(
-                "The nominal center frequencies for one-third-octave-band " \
-                "are defined only from 11.2 Hz to 22387.2 Hz.",  stacklevel=2)
+        if (f_lims[0] < 15.8*G**(-1/2)) or (f_lims[1] >
+                                             15848.93192*G**(1/2)):
+            warnings.warn(
+                "The nominal center frequencies for octave-band " \
+                "are defined only from 11.2 Hz to 22387.2 Hz.", UserWarning,
+                stacklevel=2)
+        nominal = np.array([
+                16, 31.5, 63, 125, 250, 500, 1e3,
+                2e3, 4e3, 8e3, 16e3], dtype=float)
     elif num_fractions == 3:
-        if (f_lims[0] > 10*G**(-1/6)) and (f_lims[1] < 19952.62315*G**(1/6)):
-            nominal = np.array([
+        if (f_lims[0] < 10*G**(-1/6)) or (f_lims[1] > 19952.62315*G**(1/6)):
+            warnings.warn(
+                "The nominal center frequencies for one-third-octave-band " \
+                "are defined only from 8.91 Hz to 22387.2 Hz.", UserWarning,
+                stacklevel=2)
+        nominal = np.array([
                 10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80,
                 100, 125, 160, 200, 250, 315, 400, 500, 630,
                 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000,
                 5000, 6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
-        else:
-            warnings.warn(
-                "The nominal center frequencies for octave-band filter are " \
-                "defined only from 8.91 Hz to 22387.2 Hz.",  stacklevel=2)
 
     mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
     nominal = nominal[mask]
@@ -508,7 +506,8 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
 
 def fractional_octave_frequencies_exact(
         num_fractions=1, frequency_range=(20, 20e3)):
-    r"""Return the exact center frequencies for fractional-octave-band filters.
+    r"""Return the exact center and cutoff frequencies for
+    fractional-octave-band filters.
 
     The frequencies are calculated in accordance with the IEC 61260-1:2014
     standard [#]_.
@@ -518,7 +517,7 @@ def fractional_octave_frequencies_exact(
 
     .. math::
 
-        G = 10^{3/10} \approx 1.99526
+        G = 10^{\tfrac{3}{10}}
 
     The center frequencies :math:`f_m` are calculated using formula
     :eq:`eq_center_odd` for odd values of :math:`b` and formula
@@ -527,12 +526,12 @@ def fractional_octave_frequencies_exact(
     .. math::
         :label: eq_center_odd
 
-        f_m = f_r \cdot G^{x/b}
+        f_m = f_r \cdot G^{ \tfrac{x}{b}}
 
     .. math::
         :label: eq_center_even
 
-        f_m = f_r \cdot G^{(2x+1)/(2b)}
+        f_m = f_r \cdot G^{ \tfrac{2x+1}{2b}}
 
     where:
 
@@ -552,12 +551,15 @@ def fractional_octave_frequencies_exact(
 
     Returns
     -------
-    exact : array, float
+    center_frequencies : array, float
         The exact center frequencies in Hz, resulting in a uniform distribution
         of frequency bands over the frequency range.
-    cutoff : tuple, array, float
-        The lower and upper cutoff frequencies in Hz of the bandpass filters
-        for each band as a tuple corresponding to ``(f_lower, f_upper)``.
+    lower_cutoff_frequencies : array, float
+        The lower cutoff frequencies in Hz of the bandpass filters
+        for each band.
+    upper_cutoff_frequencies : array, float
+        The upper cutoff frequencies in Hz of the bandpass filters
+        for each band
 
     References
     ----------
@@ -572,11 +574,11 @@ def fractional_octave_frequencies_exact(
 
     indices = np.arange(-Nmin, Nmax+1)
     if num_fractions % 2 != 0:
-        exact = ref_freq * (G)**(indices / num_fractions)
+        center_frequencies = ref_freq * (G)**(indices / num_fractions)
     else:
-        exact = ref_freq * (G)**((2*indices + 1)/ (2*num_fractions))
+        center_frequencies = ref_freq * (G)**((2*indices + 1)/
+                                              (2*num_fractions))
 
-    freqs_upper = exact * G**(1/2/num_fractions)
-    freqs_lower = exact * G**(-1/2/num_fractions)
-    f_cutoff = (freqs_lower, freqs_upper)
-    return exact, f_cutoff
+    upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
+    lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
+    return center_frequencies, lower_cutoff_frequencies, upper_cutoff_frequencies  # noqa: E501
