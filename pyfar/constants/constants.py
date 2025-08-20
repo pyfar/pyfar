@@ -564,6 +564,7 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
     num_fractions : 1, 3
         The number of octave fractions. ``1`` returns octave center
         frequencies, ``3`` returns third octave center frequencies.
+        The default is ``1``.
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
         ``(20, 20e3)`` following IEC 61260-1 [#]_.
@@ -614,6 +615,8 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
                 100, 125, 160, 200, 250, 315, 400, 500, 630,
                 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000,
                 5000, 6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
+    else:
+        raise ValueError('num_fractions must be 1 or 3')
 
     mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
     nominal = nominal[mask]
@@ -666,13 +669,13 @@ def fractional_octave_frequencies_exact(
 
     Returns
     -------
-    center_frequencies : array, float
+    center_frequencies : numpy.ndarray
         The exact center frequencies in Hz, resulting in a uniform distribution
         of frequency bands over the frequency range.
-    lower_cutoff_frequencies : array, float
+    lower_cutoff_frequencies : numpy.ndarray
         The lower cutoff frequencies in Hz of the bandpass filters
         for each band.
-    upper_cutoff_frequencies : array, float
+    upper_cutoff_frequencies : numpy.ndarray
         The upper cutoff frequencies in Hz of the bandpass filters
         for each band
 
@@ -696,4 +699,5 @@ def fractional_octave_frequencies_exact(
 
     upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
     lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
-    return center_frequencies, lower_cutoff_frequencies, upper_cutoff_frequencies  # noqa: E501
+    return (center_frequencies,
+            lower_cutoff_frequencies, upper_cutoff_frequencies)
