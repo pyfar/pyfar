@@ -12,6 +12,8 @@ import pyfar.signals
 
 from pyfar.testing import stub_utils
 
+from unittest.mock import patch
+
 collect_ignore_glob = [
     "private/*",
     "references/*",
@@ -771,6 +773,7 @@ def state():
 
 
 @pytest.fixture()
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def filterObject(coeffs, state):
     """Filter object.
     """
