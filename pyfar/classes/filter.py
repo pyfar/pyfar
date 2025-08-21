@@ -119,7 +119,7 @@ class LTISystem(ABC):
 
     @property
     def sampling_rate(self):
-        """Sampling rate of the filter in Hz.
+        """Sampling rate of the system in Hz.
 
         The sampling rate is set upon initialization and cannot be changed
         after the object has been created.
@@ -129,13 +129,13 @@ class LTISystem(ABC):
     @property
     def state(self):
         """
-        The current state of the filter as an array with dimensions
+        The current state of the system as an array with dimensions
         corresponding to the order of the filter and number of filter channels.
         """
         return self._state
 
     def reset(self):
-        """Reset the filter state by filling it with zeros."""
+        """Reset the system state by filling it with zeros."""
         if self._state is not None:
             self._state = np.zeros_like(self._state)
         else:
@@ -155,7 +155,7 @@ class LTISystem(ABC):
             self._comment = value
 
     def copy(self):
-        """Return a copy of the Filter object."""
+        """Return a copy of the LTISystem object."""
         return deepcopy(self)
 
     def _encode(self):
