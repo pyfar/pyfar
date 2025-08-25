@@ -556,14 +556,14 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
     one-third-octave-band filters.
 
     Nominal center frequencies, as specified in the IEC 61260-1:2014 standard
-    [#]_, are standardized values that approximate the exact center
-    frequencies. They are defined from 10 Hz to 20 kHz.
+    [#]_ (Section 5.5 and Annex E), are standardized values that approximate
+    the exact center frequencies. They are defined from 10 Hz to 20 kHz.
 
     Parameters
     ----------
-    num_fractions : 1, 3
+    num_fractions : int, optional
         The number of octave fractions. ``1`` returns octave center
-        frequencies, ``3`` returns third octave center frequencies.
+        frequencies, ``3`` returns third-octave center frequencies.
         The default is ``1``.
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
@@ -585,6 +585,7 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
         "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
         Specifications", IEC, 2013.
     """
+    # IEC 61260-1 Eq. (1)
     G = 10**(3/10)
     f_lims = np.asarray(frequency_range)
     if f_lims.size != 2:
@@ -628,7 +629,7 @@ def fractional_octave_frequencies_exact(
     fractional-octave-band filters.
 
     The frequencies are calculated in accordance with the IEC 61260-1:2014
-    standard [#]_.
+    standard [#]_ (Sections 5.2, 5.3, 5.4 and 5.6).
 
     The octave frequency ratio, :math:`G`, is given by the following
     expression.
@@ -660,7 +661,7 @@ def fractional_octave_frequencies_exact(
     Parameters
     ----------
     num_fractions : int, optional
-        The number of bands an octave is divided into. Eg., ``1`` refers to
+        The number of bands an octave is divided into. E.g., ``1`` refers to
         octave bands and ``3`` to third octave bands. The default is ``1``.
         All positive integers are allowed.
     frequency_range : array, tuple
@@ -677,7 +678,7 @@ def fractional_octave_frequencies_exact(
         for each band.
     upper_cutoff_frequencies : numpy.ndarray
         The upper cutoff frequencies in Hz of the bandpass filters
-        for each band
+        for each band.
 
     References
     ----------
@@ -685,19 +686,25 @@ def fractional_octave_frequencies_exact(
         Electroacoustics - Octave-band and fractional-octave-band filters -
         Part 1: Specifications", IEC, 2014.
     """
+    # IEC 61260-1 Eq. (1)
     G = 10**(3/10)
     ref_freq = 1e3
     Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
     Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
 
     indices = np.arange(-Nmin, Nmax+1)
+    print(indices)
     if num_fractions % 2 != 0:
+        # IEC 61260-1 Eq. (2)
         center_frequencies = ref_freq * (G)**(indices / num_fractions)
     else:
+        # IEC 61260-1 Eq. (3)
         center_frequencies = ref_freq * (G)**((2*indices + 1)/
                                               (2*num_fractions))
 
+    # IEC 61260-1 Eq. (5)
     upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
+    # IEC 61260-1 Eq. (4)
     lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
     return (center_frequencies,
             lower_cutoff_frequencies, upper_cutoff_frequencies)
