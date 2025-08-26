@@ -567,8 +567,8 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
         The default is ``1``.
     frequency_range : array, tuple
         The lower and upper frequency limits, the default is
-        ``(20, 20e3)`` following IEC 61260-1 [#]_.
-        E.g. ``(10, 20e3)`` would follow IEC 61672-1.
+        ``(20, 20e3)`` following IEC 61260-1.
+        E.g. ``(10, 20e3)`` would follow IEC 61672-1 [#]_.
 
     Returns
     -------
