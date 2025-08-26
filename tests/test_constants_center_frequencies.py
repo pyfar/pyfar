@@ -38,10 +38,10 @@ def test_nominal_iec_error():
 
     with pytest.warns(UserWarning, match="octave-band are defined only"):
         constants.fractional_octave_frequencies_nominal(num_fractions=1,
-                                                    frequency_range=(12, 25e3))
+                                                frequency_range=(12, 25e3))
 
-    with pytest.warns(UserWarning, match="one-third-octave-band " \
-                                            "are defined only"):
+    with pytest.warns(UserWarning,
+                      match="one-third-octave-band are defined only"):
         constants.fractional_octave_frequencies_nominal(num_fractions=3,
                                                 frequency_range=(7, 20e3))
 
@@ -60,20 +60,23 @@ def test_exact_octave():
 
 def test_exact_octave_subset():
     exact = constants.fractional_octave_frequencies_exact(
-                                                    1, (2e3, 20e3))[0]
+                                        1, (2e3, 20e3))[0]
     expected = np.array([1995.262315, 3981.071706, 7943.282347, 15848.93192])
     np.testing.assert_allclose(exact, expected)
 
 def test_exact_twelfth_octave_subset():
     exact = constants.fractional_octave_frequencies_exact(
-                                                    12, (2e3, 4e3))[0]
+                                        12, (2e3, 4e3))[0]
     expected = np.array([2053.525026, 2175.204034, 2304.092976, 2440.619068,
                 2585.23484, 2738.419634, 2900.681199, 3072.557365, 3254.617835,
                 3447.466066, 3651.741273, 3868.120546, 4097.321098])
     np.testing.assert_allclose(exact, expected)
 
-def test_exact_fifth_octave_cutoff():
-    frac = 5
+
+@pytest.mark.parametrize(
+    "frac",
+    [2, 5])
+def test_exact_octave_cutoff(frac):
     exact, lower, upper = constants.fractional_octave_frequencies_exact(
         frac, (2e3, 20e3))
 

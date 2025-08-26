@@ -550,8 +550,8 @@ def fractional_octave_filter_tolerance(
 
     return lower_tolerance, upper_tolerance, frequencies
 
-def fractional_octave_frequencies_nominal(num_fractions=1,
-                                          frequency_range=(20, 20e3)):
+def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
+                        frequency_range:tuple[float, float]=(20, 20e3)):
     """Return the nominal center frequencies for octave-band and
     one-third-octave-band filters.
 
@@ -561,7 +561,7 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
 
     Parameters
     ----------
-    num_fractions : int, optional
+    num_fractions : {1, 3}
         The number of octave fractions. ``1`` returns octave center
         frequencies, ``3`` returns third-octave center frequencies.
         The default is ``1``.
@@ -624,7 +624,7 @@ def fractional_octave_frequencies_nominal(num_fractions=1,
     return nominal
 
 def fractional_octave_frequencies_exact(
-        num_fractions=1, frequency_range=(20, 20e3)):
+        num_fractions:int=1, frequency_range: tuple[float, float]=(20, 20e3)):
     r"""Return the exact center and cutoff frequencies for
     fractional-octave-band filters.
 
@@ -671,14 +671,14 @@ def fractional_octave_frequencies_exact(
     Returns
     -------
     center_frequencies : numpy.ndarray
-        The exact center frequencies in Hz, resulting in a uniform distribution
-        of frequency bands over the frequency range.
+        The exact center frequencies in Hz of the bandpass filters
+        for each fractional octave band.
     lower_cutoff_frequencies : numpy.ndarray
         The lower cutoff frequencies in Hz of the bandpass filters
-        for each band.
+        for each fractional octave band.
     upper_cutoff_frequencies : numpy.ndarray
         The upper cutoff frequencies in Hz of the bandpass filters
-        for each band.
+        for each fractional octave band.
 
     References
     ----------
