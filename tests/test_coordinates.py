@@ -710,3 +710,31 @@ def test___eq___differInShComment_notEqual():
     coordinates = Coordinates(1, 2, 3, comment="Madre mia!")
     actual = Coordinates(1, 2, 3, comment="Oh my woooooosh!")
     assert not coordinates == actual
+
+
+@pytest.mark.parametrize("cshape", [
+    (1, 1, 1),
+    (1, 3, 2),
+])
+def test_change_cshape_with_weights(cshape):
+    """A change of cshape should also change the weights shape."""
+    coordinates = Coordinates(1, 2, 3, weights=0.5)
+    coordinates.x = np.broadcast_to(coordinates.x, cshape)
+    assert coordinates.cshape == cshape
+    assert coordinates.weights.shape == cshape
+
+
+def test_non_broadcastable_x():
+    coordinates = Coordinates([1, 1], 2, 3)
+
+    with pytest.raises(
+            ValueError, match="Coordinates are not broadcastable"):
+        coordinates.x = np.broadcast_to([1], (1, 3, 3))
+
+
+def test_non_broadcastable_weights():
+    coordinates = Coordinates([1, 1], 2, 3, weights=[0.5, 0.5])
+
+    with pytest.raises(
+            ValueError, match="Coordinates.weights are not broadcastable"):
+        coordinates.weights = np.broadcast_to([1], (1, 3, 3))

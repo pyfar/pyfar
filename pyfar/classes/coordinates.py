@@ -2719,6 +2719,11 @@ class Coordinates():
         self._y = y
         self._z = z
 
+        # apply broadcasting on weights, if shape has changed
+        if self.weights is not None:
+            if self.weights.shape != self.cshape:
+                self._set_weights(self.weights)
+
     def _check_points(self, x, y, z):
         """
         Convert all coordinates into at least 1d float64 arrays and
@@ -2750,7 +2755,10 @@ class Coordinates():
         z = np.atleast_1d(np.asarray(z, dtype=np.float64))
 
         # determine shape
-        shapes = np.broadcast_shapes(x.shape, y.shape, z.shape)
+        try:
+            shapes = np.broadcast_shapes(x.shape, y.shape, z.shape)
+        except ValueError as e:
+            raise ValueError("Coordinates are not broadcastable.") from e
 
         # broadcast to same shape
         x = np.broadcast_to(x, shapes)
@@ -2805,10 +2813,13 @@ class Coordinates():
         # cast to np.array
         weights = np.asarray(weights, dtype=np.float64)
 
-        # reshape according to self._points
-        assert weights.size == self.csize, \
-            "weights must have same size as self.csize"
-        weights = weights.reshape(self.cshape)
+        # broadcast to self.cshape
+        try:
+            weights = np.broadcast_to(weights, self.cshape)
+            weights.setflags(write=True)
+        except ValueError as e:
+            raise ValueError(
+                "Coordinates.weights are not broadcastable.") from e
 
         return weights
 
