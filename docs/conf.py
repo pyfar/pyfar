@@ -10,6 +10,7 @@ import os
 import sys
 import urllib3
 import shutil
+import numpy as np
 sys.path.insert(0, os.path.abspath('..'))
 
 import pyfar  # noqa
@@ -105,6 +106,7 @@ intersphinx_mapping = {
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
+html_js_files = ["custom.js"]
 html_logo = 'resources/logos/pyfar_logos_fixed_size_pyfar.png'
 html_title = "pyfar"
 html_favicon = '_static/favicon.ico'
@@ -119,7 +121,8 @@ html_theme_options = {
     "navbar_start": ["navbar-logo"],
     "navbar_end": ["navbar-icon-links", "theme-switcher"],
     "navbar_align": "content",
-    "header_links_before_dropdown": 8,
+    "header_links_before_dropdown": None,  # will be automatically set later based on headers.rst
+    "header_dropdown_text": "Packages",  # Change dropdown name from "More" to "Packages"
     "icon_links": [
         {
           "name": "GitHub",
@@ -133,7 +136,7 @@ html_theme_options = {
     "secondary_sidebar_items": ["page-toc"],  # Omit 'show source' link that that shows notebook in json format
     "navigation_with_keys": True,
     # Configure navigation depth for section navigation
-    "navigation_depth": 1,
+    "navigation_depth": 2,
 }
 
 html_context = {
@@ -152,21 +155,47 @@ folders_in = [
     '_static/css/custom.css',
     '_static/favicon.ico',
     '_static/header.rst',
-    'resources/logos/pyfar_logos_fixed_size_pyfar.png'
+    'resources/logos/pyfar_logos_fixed_size_pyfar.png',
     ]
-c = urllib3.PoolManager()
-for file in folders_in:
-    url = link + file
-    filename = file
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with c.request('GET', url, preload_content=False) as res, open(filename, 'wb') as out_file:
-        shutil.copyfileobj(res, out_file)
+
+def download_files_from_gallery(link, folders_in):
+    c = urllib3.PoolManager()
+    for file in folders_in:
+        url = link + file
+        filename = file
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with c.request('GET', url, preload_content=False) as res:
+            if res.status == 200:
+                with open(filename, 'wb') as out_file:
+                    shutil.copyfileobj(res, out_file)
+
+download_files_from_gallery(link, folders_in)
+# if logo does not exist, use pyfar logo
+if not os.path.exists(html_logo):
+    download_files_from_gallery(
+        link, ['resources/logos/pyfar_logos_fixed_size_pyfar.png'])
+    shutil.copyfile(
+        'resources/logos/pyfar_logos_fixed_size_pyfar.png', html_logo)
 
 # replace pyfar hard link to internal link
 with open("_static/header.rst", "rt") as fin:
     with open("header.rst", "wt") as fout:
-        for line in fin:
-            fout.write(line.replace(f'https://{project}.readthedocs.io', project))
+        lines = [line.replace(f'https://{project}.readthedocs.io', project) for line in fin]
+        contains_project = any(project in line for line in lines)
+
+        fout.writelines(lines)
+
+        # add project to the list of projects if not in header
+        if not contains_project:
+            fout.write(f'   {project} <{project}>\n')
+        
+        # count the number of gallery headings
+        count_gallery_headings = np.sum(
+            ['https://pyfar-gallery.readthedocs.io' in line for line in lines])
+
+
+# set dropdown header after gallery headings
+html_theme_options['header_links_before_dropdown'] = count_gallery_headings+1
 
 # -- pyfar specifics -----------------------------------------------------
 

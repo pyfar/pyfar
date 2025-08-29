@@ -4,8 +4,6 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
-from pyfar.classes.warnings import PyfarDeprecationWarning
-from pyfar._utils import rename_arg
 import warnings
 import scipy.fft as sfft
 
@@ -748,9 +746,6 @@ def _time_window_symmetric_interval_four(interval, window):
     return win, win_start, win_stop
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def regularized_spectrum_inversion(
         signal, frequency_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
@@ -797,11 +792,6 @@ def regularized_spectrum_inversion(
     normalized : bool
         Flag to indicate if the normalized spectrum (according to
         `signal.fft_norm`) should be inverted. The default is ``True``.
-    freq_range: tuple, array_like, double
-        The upper and lower frequency limits outside of which the
-        regularization factor is to be applied.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
 
     Returns
@@ -1043,13 +1033,6 @@ def pad_zeros(signal, pad_width, mode='end'):
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
 
-    if mode in ['before', 'after']:
-        warnings.warn(('Mode "before" and "after" will be renamed into '
-                       '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=2)
-
-        mode = 'beginning' if mode == 'before' else 'end'
-
     padded_signal = signal.flatten()
 
     if mode in ['end', 'center']:
@@ -1089,14 +1072,14 @@ def time_shift(
     ----------
     signal : Signal
         The signal to be shifted
-    shift : int, float
+    shift : int, float, array_like
         The time-shift value. A positive value will result in right shift on
         the time axis (delaying of the signal), whereas a negative value
         yields a left shift on the time axis (non-causal shift to a earlier
         time). If a single value is given, the same time shift will be applied
         to each channel of the signal. Individual time shifts for each channel
-        can be performed by passing an array matching the signals channel
-        dimensions :py:func:`~pyfar.Signal.cshape`.
+        can be performed by passing an array broadcastable to the signals
+        channel dimensions :py:func:`~pyfar.Signal.cshape`.
     mode : str, optional
         The shifting mode
 
@@ -1292,7 +1275,8 @@ def find_impulse_response_delay(impulse_response, N=1):
             ir = impulse_response.time[ch]
             ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
-            if np.max(ir) > 1e-16:
+            #Check absolute amximum, because peaks can be positive or negative.
+            if np.max(np.abs(ir)) > 1e-16:
                 # minimum phase warns if the input signal is not symmetric,
                 # which is not critical for this application
                 with warnings.catch_warnings():
@@ -1317,6 +1301,16 @@ def find_impulse_response_delay(impulse_response, N=1):
                 search_region_range = np.arange(argmax-n, argmax+n)
                 search_region = np.imag(
                     correlation_analytic[search_region_range])
+
+                # If this is true, it indicates that `correlation_analytic` has
+                # a negative peak, which can happen if the absolute maximum of
+                # `impulse_response` is negative. Changing the sign of the
+                # search region makes sure that the `mask` generated below
+                # works as intended. Fixing it this way is safer because it is
+                # theoretically possible that the absolute maximum of
+                # `impulse_response` is negative but
+                # `correlation_analytic[argmax].real` is positive.
+                search_region *= np.sign(correlation_analytic[argmax].real)
 
                 # mask values with a negative gradient
                 mask = np.gradient(search_region, search_region_range) > 0
@@ -1433,7 +1427,7 @@ def find_impulse_response_start(
 
     """
     modes = ['real', 'complex'] if impulse_response.complex else ['real']
-    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape))
+    ir_start = np.zeros(((len(modes), ) + impulse_response.cshape), dtype=int)
     for idx, mode in enumerate(modes):
         ir = impulse_response.time
         ir_squared = np.real(ir)**2 if mode == 'real' else np.imag(ir)**2
@@ -1483,9 +1477,6 @@ def find_impulse_response_start(
     return ir_start
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def deconvolve(system_output, system_input, fft_length=None,
                frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
@@ -1535,14 +1526,6 @@ def deconvolve(system_output, system_input, fft_length=None,
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\omega)` are
         passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
-    freq_range: tuple, array_like, double
-        The upper and lower frequency limits outside of which the
-        regularization factor is to be applied. The default ``None``
-        bypasses the regularization, which might cause numerical
-        instabilities in case of band-limited `system_input`. Also see
-        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
 
     Returns
@@ -2442,8 +2425,16 @@ def normalize(signal, reference_method='max', domain='auto',
             Compute the mean absolute values per channel.
         ``'energy'``
             Compute the energy per channel using :py:func:`~pyfar.dsp.energy`.
+            Note that the square root of the energy is used as `reference`,
+            after handling multi-channel signals (see *channel_handling*
+            below). This is required for the energy of the normalized signal to
+            match the `target`.
         ``'power'``
             Compute the power per channel using :py:func:`~pyfar.dsp.power`.
+            Note that the square root of the power is used as `reference`,
+            after handling multi-channel signals (see *channel_handling*
+            below). This is required for the power of the normalized signal to
+            match the `target`.
         ``'rms'``
             Compute the RMS per channel using :py:func:`~pyfar.dsp.rms`.
 
@@ -2661,6 +2652,13 @@ def normalize(signal, reference_method='max', domain='auto',
     else:
         raise ValueError(("channel_handling must be 'individual', 'max', "
                           "'min' or 'mean'."))
+
+    # scale normalization and target to achieve target energy and power. This
+    # must be done because they are energetic properties
+    if reference_method in ['energy', 'power']:
+        reference_norm = np.sqrt(reference_norm)
+        target = np.sqrt(target)
+
     # apply normalization
     normalized_signal = signal.copy() * target / reference_norm
     if return_reference:

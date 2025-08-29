@@ -15,7 +15,6 @@ import re
 from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
-from pyfar.samplings import SphericalVoronoi
 import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData, TransmissionMatrix
 
@@ -274,17 +273,6 @@ def test_write_read_transmissionmatrix(tmpdir):
     assert actual == tmatrix
 
 
-def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
-    """SphericalVoronoi
-    Make sure `read` understands the bits written by `write`.
-    """
-    filename = os.path.join(tmpdir, 'sphericalvoronoi.far')
-    io.write(filename, sphericalvoronoi=sphericalvoronoi)
-    actual = io.read(filename)['sphericalvoronoi']
-    assert isinstance(actual, SphericalVoronoi)
-    assert actual == sphericalvoronoi
-
-
 def test_write_read_filter(filterObject, tmpdir):
     """Filter
     Make sure `read` understands the bits written by `write`.
@@ -412,7 +400,6 @@ def test_write_read_multiplePyfarObjects(
         filterSOS,
         coordinates,
         orientations,
-        sphericalvoronoi,
         time_data,
         frequency_data,
         sine,
@@ -431,7 +418,6 @@ def test_write_read_multiplePyfarObjects(
         filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
-        sphericalvoronoi=sphericalvoronoi,
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
@@ -450,8 +436,6 @@ def test_write_read_multiplePyfarObjects(
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
     assert actual['orientations'] == orientations
-    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
-    assert actual['sphericalvoronoi'] == sphericalvoronoi
     assert isinstance(actual['timedata'], TimeData)
     assert actual['timedata'] == time_data
     assert isinstance(actual['frequencydata'], FrequencyData)
@@ -480,7 +464,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filterSOS,
         coordinates,
         orientations,
-        sphericalvoronoi,
         time_data,
         frequency_data,
         sine,
@@ -500,7 +483,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
-        sphericalvoronoi=sphericalvoronoi,
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
@@ -519,8 +501,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
     assert actual['orientations'] == orientations
-    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
-    assert actual['sphericalvoronoi'] == sphericalvoronoi
     assert isinstance(actual['timedata'], TimeData)
     assert actual['timedata'] == time_data
     assert isinstance(actual['frequencydata'], FrequencyData)
@@ -757,3 +737,11 @@ def test_read_ita(filename, data_type):
             read_ita(filepath)
     else:
         read_ita(filepath)
+
+        
+def test__sofa_pos_error():
+    """Test error message for wrong position type."""
+    error_message = re.escape(
+        "Position: Type 'bla' is not supported")
+    with pytest.raises(ValueError, match=error_message):
+        io.io._sofa_pos('bla', np.array([1, 2, 3]))

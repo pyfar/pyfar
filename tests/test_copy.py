@@ -2,7 +2,7 @@ import pyfar
 
 
 def test_copy(
-        sphericalvoronoi, time_data, frequency_data,
+        time_data, frequency_data,
         filterFIR, filterIIR, filterSOS):
     """Test copy method used by several classes."""
     obj_list = [pyfar.Signal(1000, 44100),
@@ -11,7 +11,6 @@ def test_copy(
                 filterFIR,
                 filterIIR,
                 filterSOS,
-                sphericalvoronoi,
                 time_data,
                 frequency_data]
 

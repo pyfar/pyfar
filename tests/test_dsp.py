@@ -764,7 +764,8 @@ def test_impulse_response_delay(is_complex):
     npt.assert_allclose(start_sample_est, start_sample, atol=1e-2)
 
 
-def test_impulse_response_delay_sinc():
+@pytest.mark.parametrize('sign', [1, -1])
+def test_impulse_response_delay_sinc(sign):
     """Test delay of a band-limited sinc function shifted by 1/2 samples."""
     sr = 44100
     n_samples = 128
@@ -773,6 +774,10 @@ def test_impulse_response_delay_sinc():
 
     sinc = np.sinc(samples - delay_samples)
     win = sgn.get_window('hann', n_samples, fftbins=False)
+
+    # Impulse responses with large negative peaks require special handling in
+    # `find_impulse_response_delay`. This makes tests the special case.
+    sinc *= sign
 
     ir = pf.Signal(sinc*win, sr)
     start_samples = pf.dsp.find_impulse_response_delay(ir)
@@ -834,6 +839,7 @@ def test_impulse_response_start():
     ir = pf.Signal(ir, 44100)
 
     start_sample_est = dsp.find_impulse_response_start(ir)
+    assert start_sample_est.dtype == int
     assert start_sample_est == start_sample - 1
 
     ir_awgn = ir + noise

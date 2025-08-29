@@ -350,11 +350,14 @@ def head_related_impulse_responses(
             degrees.
         ``'median'``
             Return median plane HRIRs with an angular resolution of 2 degrees.
-        List of coordinates
-            Return HRIRs at specific positions defined by a list of azimuth
-            and elevation values in degrees. For example
+        Array like
+            Return HRIRs at azimuth and elevation in degrees. For example
             ``[[30, 0], [330, 0]]`` returns HRIRs on the horizontal plane
             (0 degree elevation) for azimuth angles of 30 and 330 degrees.
+        :py:class:`~pyfar.Coordinates`
+            Return HRIRs at positions defined by a pyfar Coordinates object.
+            Note that the HRIRs were measured at a fixed radius of 1.7 m.
+            Hence, the radius in `position` will be ignored.
 
         The default is ``[[0, 0]]``, which returns the HRIR for frontal sound
         incidence. A ValueError is raised if the requested position is not
@@ -392,32 +395,42 @@ def head_related_impulse_responses(
     tolerance_rad = 0.1 / 180 * np.pi
 
     # get indices of source positions
-    if position == "horizontal":
+    if isinstance(position, str) and position == "horizontal":
         idx = sources.elevation == 0
-    elif position == "median":
+    elif isinstance(position, str) and position == "median":
         idx = sources.lateral == 0
         idx = np.where(idx)[0]
         # sort positions according to polar angle
         polar = sources.polar[idx].flatten()
         idx = (idx[np.argsort(polar)], )
     else:
-        idx = []
-        for pos in position:
-            find = pf.Coordinates.from_spherical_elevation(
-                pos[0] / 180 * np.pi, pos[1] / 180 * np.pi, 1.7)
-            idx_current, distance = sources.find_nearest(
-                find, distance_measure='spherical_radians')
-            if distance < tolerance_rad:
-                idx.append(idx_current[0])
-            else:
-                raise ValueError((
-                    f"HRIR for azimuth={pos[0]} and elevation={pos[1]} degrees"
-                    " is not available. See documentation for more "
-                    "information."))
+
+        if isinstance(position, pf.Coordinates):
+            # force radius to be equal to those of HRIRs
+            position.radius = 1.7
+        else:
+            # convert to pyfar coordinates for convenience
+            position = np.atleast_2d(position) / 180 * np.pi
+            position = pf.Coordinates.from_spherical_elevation(
+                position[..., 0], position[..., 1], 1.7)
+
+        # find requested HRIRs
+        idx, distance = sources.find_nearest(
+            position, distance_measure='spherical_radians')
+
+        if np.any(distance > tolerance_rad):
+            raise ValueError((
+                "HRIRs for one or more requested source positions are not "
+                "available. See documentation for available positions."))
 
     # select data for desired source positions
     hrirs.time = hrirs.time[idx]
     sources = sources[idx]
+
+    # force cdim to be independent of number of requested source positions
+    # must be done due to indexing and numpy broadcasting above
+    if hrirs.cdim == 1:
+        hrirs.time = hrirs.time[None, ...]
 
     # diffuse field compensation
     if diffuse_field_compensation:
@@ -535,7 +548,8 @@ def _load_files(data):
     print(f"Loading {data} data. This is only done once.")
 
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
-    url = 'https://pyfar.org/wp-content/uploads/pyfar_files/'
+    url = ('https://github.com/pyfar/files/raw/refs/heads/main/'
+           'pyfar.signals.files/')
 
     for file in files:
 

@@ -131,7 +131,7 @@ def test_gammatone_bands_reset_state():
 def test_gammatone_bands_assertions():
     """Test all assertions."""
 
-    # wrong values in freq_range
+    # wrong values in frequency_range
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
         pf.dsp.filter.GammatoneBands([-1, 22050])
     with pytest.raises(ValueError, match="Values in frequency_range must be"):
@@ -195,14 +195,47 @@ def test_erb_frequencies():
 def test_erb_frequencies_assertions():
     """Test assertions for erb_frequencies."""
 
-    # freq_range must be an array of length 2
+    # frequency_range must be an array of length 2
     with pytest.raises(ValueError, match="frequency_range must be an array"):
         pf.dsp.filter.erb_frequencies(1)
     with pytest.raises(ValueError, match="frequency_range must be an array"):
         pf.dsp.filter.erb_frequencies([1])
-    # values freq_range must be increasing
+    # values frequency_range must be increasing
     with pytest.raises(ValueError, match="The first value of frequency_range"):
         pf.dsp.filter.erb_frequencies([1, 0])
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
         pf.dsp.filter.erb_frequencies([0, 1], 0)
+
+
+def test_impulse_response():
+    """Test the impulse response of GammatoneBands."""
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+    irs = GFB.impulse_response()
+    ir_real, ir_imag = irs
+
+    assert isinstance(irs, tuple)
+    assert len(irs) == 2
+    assert type(ir_real) is pf.Signal
+    assert type(ir_imag) is pf.Signal
+    assert ir_real.cshape == (GFB.n_bands, 1)
+    assert ir_imag.cshape == (GFB.n_bands, 1)
+
+
+def test_impulse_response_warning():
+    """Test that a warning is raised if n_samples is too small."""
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+    with pytest.warns(
+            UserWarning,
+            match="n_samples should be at least as long as the filter"):
+        GFB.impulse_response(n_samples=100)
+
+
+def test_impulse_response_length():
+    """Test the minimum impulse response length."""
+    GFB = pf.dsp.filter.GammatoneBands((100, 200))
+
+    assert type(GFB.minimum_impulse_response_length()) is np.ndarray
+    assert GFB.minimum_impulse_response_length().shape == (GFB.n_bands,)
+    # test the impulse response length with specified length
+    assert GFB.impulse_response(2000)[0].n_samples == 2000

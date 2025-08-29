@@ -2,6 +2,35 @@
 History
 =======
 
+0.7.3 (2025-06-23)
+------------------
+* Enhancement: Separate checking and setting coordinate points and weights in `pyfar.Coordinates` (PR #804 & #805)
+* Docs: Improve TOC depths (PR #795)
+* Docs: Improve docstring formatting (PR #800)
+* Docs: Use dropdown menu in the header of the documentation (PR #789)
+
+0.7.2 (2025-03-07)
+------------------
+* Fix: `pyfar.dsp.find_impulse_response_delay` crashed when the input impulse response had a large negative peak. This is now fixed (PR #776)
+* Fix: Add missing setter for the state, which accepts array likes, in all filter classes (PR #757)
+* Fix: `pyfar.dsp.find_impulse_response_start` now returns an array of integers as described in the documentation. Before, an array of floats was returned (PR #764)
+* Fix: Disable the possibility to set x, y, and z coordinates using `coordinates.x[0] = 1`.  This is now consistent with all other coordinates (PR #778)
+* Fix: `pyfar.Coordinates.find_within` now correctly works for multi-dimensional Coordinates objects. This was fixed by flattening the radii before checking if all radii are the same (PR #742)
+* Fix: The error message thrown by `pyfar.io.convert_sofa` in case of incompatible source positions was improved to be more verbose (PR #752)
+* Fix: Added missing default value in `pyfar.FilterIIR.init_state`. The new default is `state='zeros'` to be consistent with the other filter classes (PR #756)
+
+0.7.1 (2024-12-20)
+------------------
+* Fix: `pyfar.dsp.normalize` now correctly normalizes to the desired energy and power (PR #722)
+* Enhance: `pyfar.signals.files.head_related_impulse_responses` now works with arrays and `pyfar.Coordinates` objects as input (PR #728)
+* Enhance the documentation (PR #727)
+* Fix: Make sure that exact center frequencies are always returned by `pyfar.dsp.filter.fractional_octave_frequencies` (PR #736)
+* Fix: bug in interactive plotting due to a change in matplotlib 3.10.0 API (PR #737)
+* Testing: Move from setup.py to pyproject.toml (PR #710)
+* Testing: move from flake8 to ruff and add more linting rules (PR #612, #685, #692, #698)
+* Testing: Allow Sphinx 8 and Python 3.13 (PR #715, #717)
+
+
 0.7.0 (2024-09-20)
 ------------------
 * Features

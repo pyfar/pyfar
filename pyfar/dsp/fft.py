@@ -248,31 +248,32 @@ def normalization(spec, n_samples, sampling_rate, fft_norm='none',
         ``'amplitude'``
             Scale spectrum by ``1/n_samples`` as in [1]_ Eq. (4)
             to obtain the amplitude spectrum.
-        'rms'
+        ``'rms'``
             Scale spectrum by :math:`1/\sqrt{2}` as in [1]_
             Eq.(10) to obtain the RMS spectrum.
-        'power'
+        ``'power'``
             Power spectrum, which equals the squared RMS spectrum
             (except for the retained phase).
-        'psd'
+        ``'psd'``
             The power spectrum is scaled by ``n_samples/sampling_rate`` as in
             [1]_ Eq. (6)
 
-        Note that the `unitary` normalization is also applied for `amplitude`,
-        `rms`, `power`, and `psd` if the input spectrum is single sided (see
+        Note that the ``'unitary'`` normalization is also applied for
+        ``'amplitude'``, ``'rms'``, ``'power'``, and ``'psd'``
+        if the input spectrum is single sided (see
         `single_sided`).
     inverse : bool, optional
         apply the inverse normalization. The default is ``False``.
     single_sided : bool, optional
         denotes if `spec` is a single sided spectrum up to half the sampling
         rate or a both sided (full) spectrum. If ``single_sided=True`` the
-        `unitary` normalization according to [1]_ Eq. (8) is applied unless
+        ``'unitary'`` normalization according to [1]_ Eq. (8) is applied unless
         ``fft_norm='none'``.
         The default is ``True``.
     window : None, array like
         window that was applied to the time signal before performing the FFT.
         Affects the normalization as in [1]_ Eqs. (11-13). The window must be
-        an array-like with `n_samples` length and. The default is ``None``,
+        an array-like with `n_samples` length. The default is ``None``,
         which denotes that no window was applied.
 
     Returns

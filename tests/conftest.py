@@ -4,7 +4,6 @@ import os.path
 import sofar as sf
 import pyfar as pf
 
-from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
 from pyfar import Coordinates
 from pyfar import FrequencyData, TimeData
@@ -13,6 +12,11 @@ import pyfar.signals
 
 from pyfar.testing import stub_utils
 
+collect_ignore_glob = [
+    "private/*",
+    "references/*",
+    "test_plot_data/*",
+    "test_io_data/*"]
 
 @pytest.fixture()
 def sine_stub():
@@ -797,16 +801,6 @@ def filterSOS():
     """
     sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture()
-def sphericalvoronoi():
-    """SphericalVoronoi object.
-    """
-    points = np.array(
-        [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
-    sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
-    return SphericalVoronoi(sampling)
 
 
 @pytest.fixture()

@@ -8,7 +8,7 @@ fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission
 lines.
 
 System properties like input impedance or transfer functions can directly be
-derived from a T-matrix. Furthermore, systems can be cascaded my multiplying
+derived from a T-matrix. Furthermore, systems can be cascaded by multiplying
 consecutive T-matrices simply using the ``@`` operator:
 
 >>> import numpy as np
@@ -32,6 +32,7 @@ from __future__ import annotations # required for Python <= 3.9
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
+from numbers import Number
 
 
 class TransmissionMatrix(FrequencyData):
@@ -738,6 +739,92 @@ class TransmissionMatrix(FrequencyData):
         C = (1/transducer_constant).freq
         frequencies = transducer_constant.frequencies
         return TransmissionMatrix.from_abcd(0, B, C, 0, frequencies)
+
+    @staticmethod
+    def create_transmission_line(
+            kl: FrequencyData,
+            characteristic_impedance: Number | FrequencyData,
+            ) -> TransmissionMatrix:
+        r"""Create a transmission matrix representing a transmission line.
+
+        The transmission matrix is calculated from the product :math:`kl` of
+        the wavenumber :math:`k` and length :math:`l`,
+        and characteristic impedance :math:`Z_0` following
+        Equation (5-10) of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                \cos{kl} & j Z_0 \sin{kl} \\
+                j/Z_0 \sin{kl} & \cos{kl}
+                \end{bmatrix}
+
+        The inputs need to be broadcastable into one `cshape`.
+
+        Parameters
+        ----------
+        kl : FrequencyData
+            The product of wavenumber and length,
+            used as argument in the cosine and sine functions to calculate the
+            entries of the matrix.
+            If all imaginary parts of ``kl.freq`` are zero, the transmission
+            matrix represents a lossless transmission line.
+        characteristic_impedance : Number | FrequencyData
+            The characteristic impedance of the transmission line.
+
+        Returns
+        -------
+        tmat : TransmissionMatrix
+            A transmission matrix representing a transmission line.
+
+
+        Example
+        -------
+        Lossless acoustic duct with approximate ear canal dimensions.
+        Plot its input impedance with rigid termination.
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>> # Transmission line parameters
+            >>> frequencies = np.linspace(20, 20e3, 1000)
+            >>> omega = 2*np.pi*frequencies
+            >>> wavenumber = omega/pf.constants.reference_speed_of_sound
+            >>> length = 30e-3
+            >>> kl = pf.FrequencyData(wavenumber*length, frequencies)
+            >>> cross_section = np.pi*(3.5e-3)**2
+            >>> Z0 = pf.constants.reference_air_impedance/cross_section
+            >>> # Create transmission matrix
+            >>> T = pf.TransmissionMatrix.create_transmission_line(kl, Z0)
+            >>> # Plot input impedance with rigid termination
+            >>> ax = pf.plot.freq(T.input_impedance(np.inf))
+            >>> ax.set_ylim(100, 200)
+
+        """
+        if not isinstance(kl, FrequencyData):
+            raise ValueError("The input kl must be a FrequencyData object.")
+        if isinstance(characteristic_impedance, FrequencyData):
+            if not np.allclose(
+                    kl.frequencies,
+                    characteristic_impedance.frequencies, atol=1e-15):
+                raise ValueError(
+                    "The frequencies do not match.")
+            else:
+                characteristic_impedance = characteristic_impedance.freq
+        elif not isinstance(characteristic_impedance, Number):
+            raise ValueError(
+                "characteristic impedance must be a Number or " \
+                "FrequencyData object.")
+        # broadcastable shapes are checked by from_abcd
+
+        A = np.cos(kl.freq)
+        B = 1j*characteristic_impedance*np.sin(kl.freq)
+        C = 1j/characteristic_impedance*np.sin(kl.freq)
+        D = A.copy()
+
+        return TransmissionMatrix.from_abcd(
+            A, B, C, D, kl.frequencies)
+
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
