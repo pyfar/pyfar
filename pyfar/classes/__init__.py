@@ -5,7 +5,7 @@ from . import orientations
 from . import filter
 from . import transmission_matrix
 from . import warnings
-from . import pyfar_base
+from . import numpy_like
 
 __all__ = [
     'audio',
@@ -14,6 +14,6 @@ __all__ = [
     'filter',
     'transmission_matrix',
     'warnings',
-    'pyfar_base',
+    'numpy_like',
 
 ]
