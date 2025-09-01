@@ -6,6 +6,7 @@ from . import filter
 from . import rotation
 from . import transmission_matrix
 from . import warnings
+from . import numpy_like
 
 __all__ = [
     'audio',
@@ -15,4 +16,6 @@ __all__ = [
     'transmission_matrix',
     'warnings',
     'rotation',
+    'numpy_like',
+
 ]
