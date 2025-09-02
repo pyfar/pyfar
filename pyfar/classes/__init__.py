@@ -6,7 +6,7 @@ from . import filter
 from . import rotation
 from . import transmission_matrix
 from . import warnings
-from . import numpy_like
+from . import _pyfar_multichannel
 
 __all__ = [
     'audio',
@@ -16,6 +16,6 @@ __all__ = [
     'transmission_matrix',
     'warnings',
     'rotation',
-    'numpy_like',
+    '_pyfar_multichannel',
 
 ]
