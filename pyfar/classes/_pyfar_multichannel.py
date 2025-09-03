@@ -1,22 +1,19 @@
 """
-The following documents the NumPy-like abstract class for multichannel
-pyfar classes.
+The following documents the abstract class for multichannel pyfar classes,
+which implements functionality similar to NumPy arrays.
 """
 
 from abc import ABC, abstractmethod
+import numpy as np
 
 class _PyfarMultichannel(ABC):
     """
-    Internal abstract base class providing NumPy-like functionality for
-    multichannel pyfar classes.
+    Internal abstract base class for multichannel pyfar classes.
 
-    This class defines properties and methods inspired by NumPy's interface.
-    Subclasses are expected to implement these methods to support array-like
-    operations on custom pyfar classes.
+    This class defines properties and methods inspired by NumPy arrays.
+    Subclasses are expected to implement these methods on custom
+    pyfar classes.
     """
-
-    def __init__(self, comment=""):
-            self._comment = comment
 
     @property
     @abstractmethod
@@ -39,14 +36,16 @@ class _PyfarMultichannel(ABC):
 
     @property
     @abstractmethod
-    def csize(self):
+    def n_channels(self):
         """
-        Return channel size.
+        Return the total number of channels.
+        """
+        return np.prod(self.cshape)
 
-        The channel size is the total number of channels
-        (e.g. ``self.cshape = (2, 3)``; ``self.csize = 6``)
-        """
-        pass
+    @property
+    def T(self):
+        """Shorthand for `self.transpose()`."""
+        return self.transpose()
 
     @abstractmethod
     def reshape(self, newshape):
@@ -61,18 +60,18 @@ class _PyfarMultichannel(ABC):
         Returns
         -------
         reshaped : _PyfarMultichannel
-            reshaped copy of the audio object.
+            Reshaped copy of the object.
         """
 
         pass
 
-    @abstractmethod
     def flatten(self):
         """Return a copy of the object collapsed into one channel dimension."""
 
-        pass
+        return self.reshape(self.n_channels)
+
     @abstractmethod
-    def transpose(self):
+    def transpose(self, caxes=None):
         """Returns a copy of the object with channel axes transposed."""
 
         pass
@@ -89,17 +88,16 @@ class _PyfarMultichannel(ABC):
 
         Returns
         -------
-        object : _NumpyLike
+        object : _PyfarMultichannel
             Broadcasted copy of the object.
         """
 
         pass
 
-    @abstractmethod
     def broadcast_cdim(self, cdim):
         """
-        Broadcast an copy of the object wth a certain channel dimension
-        (`cdim`).
+        Broadcast a copy of the object with a certain channel dimension
+        (`cdim`) by prepending dimensions to the channel shape (`cshape`).
 
         Parameters
         ----------
@@ -111,5 +109,24 @@ class _PyfarMultichannel(ABC):
         object : _PyfarMultichannel
             Broadcasted copy of the object.
         """
+        if len(self.cshape) > cdim:
+            raise ValueError(
+            "Can not broadcast: Current channel dimensions exceeds `cdim`.")
+        newshape = tuple(np.ones(cdim-self.n_channels, dtype=int))+self.cshape
 
+        return self.copy().reshape(newshape)
+
+    @abstractmethod
+    def __getitem__(self, index):
+        """
+        Get a value of the object at the specified index.
+        """
         pass
+
+    @abstractmethod
+    def __setitem__(self, index, value):
+        """
+        Set the value of the object at the specified index.
+        """
+        pass
+
