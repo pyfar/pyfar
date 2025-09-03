@@ -19,7 +19,6 @@ class _PyfarBase(ABC):
     @property
     def comment(self):
         """Get comment."""
-
         return self._comment
 
     @comment.setter
@@ -32,13 +31,11 @@ class _PyfarBase(ABC):
 
     def copy(self):
         """Return a deep copy of the object."""
-
         return deepcopy(self)
 
-    @abstractmethod
     def _encode(self):
         """Return a dictionary for the encoding."""
-        pass
+        return self.copy().__dict__
 
     @abstractmethod
     def _decode(self):
