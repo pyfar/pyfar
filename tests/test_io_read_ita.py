@@ -32,7 +32,8 @@ def test_read_ita_domain(filename, domain):
     assert metadata["domain"] == domain
 
 @pytest.mark.parametrize(('filename', 'channelCoordinates'), [
-    ('freq_itaResult_mult.ita', np.array([[1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3]])),
+    ('freq_itaResult_mult.ita', np.array([[1, 2, 3], [1, 2, 3],
+                                        [1, 2, 3], [1, 2, 3]])),
     ('dirac_itaAudio.ita', np.array([[1, 2, 3]]))])
 
 def test_read_ita_channel_coordinates(filename, channelCoordinates):
@@ -45,5 +46,41 @@ def test_read_ita_channel_coordinates(filename, channelCoordinates):
     _, _, channel_coords, metadata = pf.io.read_ita(filepath)
     metadata_channel_coords_reshaped = \
         metadata["channelCoordinates"]["cart"].reshape(channel_coords.cartesian.shape)
-    assert np.array_equal(metadata_channel_coords_reshaped, channel_coords.cartesian) and \
+    assert np.array_equal(metadata_channel_coords_reshaped,
+                            channel_coords.cartesian) and \
         np.array_equal(channel_coords.cartesian, channelCoordinates)
+
+@pytest.mark.parametrize(('filename', 'data_to_test', 'expected_data'), [
+    ('freq_itaResult.ita', 'n_bins', 31),
+    ('time_itaResult_mult.ita', 'n_samples', 44100),
+    ('dirac_itaAudio.ita', 'n_bins', 22051),
+    ('dirac_itaAudio.ita', 'n_samples', 44100)])
+
+def test_read_ita_data_samples_bins(filename, data_to_test, expected_data):
+    """
+    Test the correct reading of the number of samples for time domain data
+    and the number of bins for frequency domain data.
+    """
+
+    filepath = os.path.join('tests', 'test_io_data', filename)
+    data, _, _, _ = pf.io.read_ita(filepath)
+    if data_to_test == "n_bins":
+        assert data.n_bins == expected_data
+    elif data_to_test == "n_samples":
+         assert data.n_samples == expected_data
+
+@pytest.mark.parametrize(('filename', 'dimension'), [
+    ('dirac_itaAudio.ita', (1,)),
+    ('dirac_itaAudio_old.ita', (1,)),
+    ('freq_itaResult.ita', (1,)),
+    ('time_itaResult.ita',(1,)),
+    ('dirac_itaAudio_mult.ita', (4,)),
+    ('freq_itaResult_mult.ita',(4,)),
+    ('time_itaResult_mult.ita', (4,))])
+
+def test_read_ita_data_dimension(filename, dimension):
+    """Test the correct reading of the number of dimensions from the data."""
+
+    filepath = os.path.join('tests', 'test_io_data', filename)
+    data, _, _, _ = pf.io.read_ita(filepath)
+    assert data.cshape == dimension
