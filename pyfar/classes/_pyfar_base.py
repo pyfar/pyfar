@@ -38,7 +38,7 @@ class _PyfarBase(ABC):
 
     def _encode(self):
         """Return a dictionary for the encoding."""
-        return self.copy().__dict__
+        return self.__dict__
 
     def __eq__(self, other):
         """Check for equality of two objects."""
