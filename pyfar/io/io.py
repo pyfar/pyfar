@@ -995,8 +995,10 @@ def read_ita(filename):
     domain = matlab_data.domain
 
     # convert coordinates
-    channel_coordinates = _to_coordinates(matlab_data.channelCoordinates)
-    object_coordinates = _to_coordinates(matlab_data.objectCoordinates)
+    if hasattr(matlab_data, "channelCoordinates"):
+        channel_coordinates = _to_coordinates(matlab_data.channelCoordinates)
+    if hasattr(matlab_data, "objectCoordinates"):
+        object_coordinates = _to_coordinates(matlab_data.objectCoordinates)
 
     data_in = np.ascontiguousarray((matlab_data.data.T).astype(float))
 
@@ -1023,8 +1025,11 @@ def read_ita(filename):
 
 
 def _to_coordinates(ita_coordinates):
-    ita_contains_weights = ita_coordinates.weights.size > 0
-    weights = ita_coordinates.weights if ita_contains_weights else None
+    if hasattr(ita_coordinates, 'weights'):
+        ita_contains_weights = ita_coordinates.weights.size > 0
+        weights = ita_coordinates.weights if ita_contains_weights else None
+    else:
+        weights = None
 
     # import as cartesian coordinates: x, y, z
     if hasattr(ita_coordinates, 'cart'):
