@@ -136,6 +136,18 @@ def test_tmatrix_from_abcd_single_frequency():
     TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
 
 
+def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list):
+    """Test from_abcd throws error if frequencies length does not match data."""
+    frequencies = [100, 200]
+    with pytest.raises(
+        ValueError,
+        match="Number of frequency values does not match the number of frequencies",
+    ):
+        TransmissionMatrix.from_abcd(
+            A_list, A_list, A_list, A_list, frequencies
+        )
+
+
 def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
     """Test from_abcd throws error if handing in arrays but no frequencies."""
     TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
