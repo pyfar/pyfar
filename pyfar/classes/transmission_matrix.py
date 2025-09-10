@@ -336,7 +336,7 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        Zl : scalar | FrequencyData
+        Zl : scalar, FrequencyData
             The load impedance data as scalar or FrequencyData. In latter case,
             the shape must match the entries of the T-matrix, i.e.
             shape(tmat.A.freq) == shape(Zl.freq), or must be broadcastable.
@@ -402,7 +402,7 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        Zl : scalar | FrequencyData
+        Zl : scalar, FrequencyData
             The load impedance data as scalar or FrequencyData. In latter case,
             the shape must match the entries of the T-matrix, i.e.
             shape(tmat.A.freq) == shape(Zl.freq), or must be broadcastable.
@@ -467,7 +467,7 @@ class TransmissionMatrix(FrequencyData):
             indices of the utilized quantity at the output (first integer)
             and input (second integer). For example, (1,0) refers to the
             transfer function :math:`Q_{2,\mathrm{out}} / Q_{1,\mathrm{in}}`.
-        Zl : scalar | FrequencyData
+        Zl : scalar, FrequencyData
             The load impedance data as scalar or FrequencyData. In latter case,
             the shape must match the entries of the T-matrix, i.e.
             shape(tmat.A.freq) == shape(Zl.freq), or must be broadcastable.
@@ -591,14 +591,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        frequencies : None | array_like, optional
+        frequencies : None, array_like, optional
             The frequency sampling points in Hz. The default is `None` which
             will result in this function to return an np.ndarray instead of an
             TransmissionMatrix object.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             If frequencies are specified, a TransmissionMatrix object that
             contains one 2x2 identity matrix per bin is returned. Otherwise,
             this returns a 2x2 np.ndarray.
@@ -628,12 +628,12 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        impedance : scalar | FrequencyData
+        impedance : scalar, FrequencyData
             The impedance data of the series impedance.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing the series connection
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -671,12 +671,12 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        admittance : scalar | FrequencyData
+        admittance : scalar, FrequencyData
             The admittance data of the element connected in parallel.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing a parallel connection
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -711,7 +711,7 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar | FrequencyData
+        transducer_constant : scalar, FrequencyData
             The transmission ratio with respect to voltage-like quantity,
             i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
@@ -719,7 +719,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing the transformer
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -765,14 +765,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar | FrequencyData
+        transducer_constant : scalar, FrequencyData
             The transducer constant :math:`M`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
             return value will be a 2x2 np.ndarray instead.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A the transmission matrix representing the gyrator and can be
             cascaded with TransmissionMatrix objects. If a scalar was used as
             input a frequency-independent matrix is returned, namely an
