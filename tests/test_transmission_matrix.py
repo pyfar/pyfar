@@ -147,6 +147,24 @@ def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list):
             A_list, A_list, A_list, A_list, frequencies
         )
 
+    frequencies = [100]
+    with pytest.raises(
+        ValueError,
+        match="Number of frequency values does not match the number of frequencies",
+    ):
+        TransmissionMatrix.from_abcd(
+            A_list, A_list, A_list, A_list, frequencies
+        )
+
+    frequencies = 100
+    with pytest.raises(
+        ValueError,
+        match="Number of frequency values does not match the number of frequencies",
+    ):
+        TransmissionMatrix.from_abcd(
+            A_list, A_list, A_list, A_list, frequencies
+        )
+
 
 def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
     """Test from_abcd throws error if handing in arrays but no frequencies."""
