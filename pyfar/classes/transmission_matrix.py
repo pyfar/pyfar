@@ -211,23 +211,26 @@ class TransmissionMatrix(FrequencyData):
                 "If using FrequencyData objects, all matrix entries "
                 "A, B, C, D, must be FrequencyData objects."
             )
+
+        if frequencies is None:
+            raise ValueError(
+                "'frequencies' must be specified if not using "
+                "'FrequencyData' objects as input."
+            )
+
         (A, B, C, D) = (
             np.atleast_1d(np.asanyarray(A, dtype=np.float64)),
             np.atleast_1d(np.asanyarray(B, dtype=np.float64)),
             np.atleast_1d(np.asanyarray(C, dtype=np.float64)),
             np.atleast_1d(np.asanyarray(D, dtype=np.float64)),
         )
-        if frequencies is None:
-            raise ValueError(
-                "'frequencies' must be specified if not using "
-                "'FrequencyData' objects as input."
-            )
+
         # broadcast shapes
         shape = np.broadcast_shapes(
-            np.array(A).shape,
-            np.array(B).shape,
-            np.array(C).shape,
-            np.array(D).shape,
+            A.shape,
+            B.shape,
+            C.shape,
+            D.shape,
         )
         A = np.broadcast_to(A, shape)
         B = np.broadcast_to(B, shape)
