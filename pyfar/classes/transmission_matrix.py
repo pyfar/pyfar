@@ -209,7 +209,12 @@ class TransmissionMatrix(FrequencyData):
                 "If using FrequencyData objects, all matrix entries "
                 "A, B, C, D, must be FrequencyData objects."
             )
-
+        (A, B, C, D) = (
+            np.atleast_1d(np.asanyarray(A, dtype=np.float64)),
+            np.atleast_1d(np.asanyarray(B, dtype=np.float64)),
+            np.atleast_1d(np.asanyarray(C, dtype=np.float64)),
+            np.atleast_1d(np.asanyarray(D, dtype=np.float64)),
+        )
         if frequencies is None:
             raise ValueError(
                 "'frequencies' must be specified if not using "
