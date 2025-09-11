@@ -314,12 +314,12 @@ def shortcuts(show=True, report=False, layout="console"):
             x_toggle = [f":py:func:`~pyfar.plot.{x}`" for x in x_toggle]
             y_toggle = [f":py:func:`~pyfar.plot.{y}`" for y in y_toggle]
             spectrogram = ":py:func:`~pyfar.plot.spectrogram`"
-            time = ':py:func:`~pyfar.plot.time`'
-            freq = ':py:func:`~pyfar.plot.freq`'
+            time = ":py:func:`~pyfar.plot.time`"
+            freq = ":py:func:`~pyfar.plot.freq`"
         else:
             spectrogram = "spectrogram"
-            time = 'pyfar.plot.time'
-            freq = 'pyfar.plot.freq'
+            time = "pyfar.plot.time"
+            freq = "pyfar.plot.freq"
 
         sc_str += ("- Moving and zooming the x and y axes is supported by all "
                    "plots.\n"
