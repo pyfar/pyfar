@@ -85,7 +85,6 @@ def test_fract_oct_filter_iec():
     # Test only Filter object related stuff here, testing of coefficients is
     # done in separate test.
     sr = 48e3
-    order = 2
     n_samples = 2**10
     impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
@@ -103,7 +102,7 @@ def test_fract_oct_filter_iec():
 
 
 def test_fractional_octave_bands_errors():
-    """Test if all errors are raised as expected"""
+    """Test if all errors are raised as expected."""
 
     with pytest.raises(ValueError, match='must be 1, 2, or None'):
         filter.fractional_octave_bands(
