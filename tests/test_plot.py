@@ -82,13 +82,13 @@ def test_complex_plots_mode(function, mode,
     # initial plot
     filename = f'{function.__name__}_{mode}_default'
     create_figure()
-    plot.time(handsome_complex_signal, mode=mode)
+    function(handsome_complex_signal, mode=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
     # test hold functionality
     filename = f'{function.__name__}_{mode}_hold'
-    plot.time(handsome_complex_signal_v2,
+    function(handsome_complex_signal_v2,
               mode=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
