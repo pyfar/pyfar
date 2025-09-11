@@ -126,7 +126,10 @@ def test_complex_freq_plots(function, side_flag,
 def test_complex_freq_plots_2d(function, side_flag,
                                handsome_complex_signal,
                                handsome_complex_signal_v2):
-    """Test all line plots with default arguments and hold functionality."""
+    """
+    Test ``side`` parameter for all 2D plots with default arguments and hold
+    functionality.
+    """
 
     print(f"Testing: {function.__name__}")
 
