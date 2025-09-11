@@ -34,7 +34,7 @@ def A_FreqDat(A_np, frequencies):
 def _expect_data_with_wrong_abcd_dims(data: np.ndarray, frequencies):
     error_msg = re.escape(
         "'data' must have a shape like "
-        "(..., 2, 2, n_bins), e.g. (2, 2, 100)."
+        "(..., 2, 2, n_bins), e.g. (2, 2, 100).",
     )
     with pytest.raises(ValueError, match=error_msg):
         TransmissionMatrix(data, frequencies)
@@ -58,10 +58,12 @@ def test_tmatrix_init(frequencies):
     _expect_data_with_wrong_abcd_dims(np.ones([3, 2, num_bins]), frequencies)
     _expect_data_with_wrong_abcd_dims(np.ones([2, 5, num_bins]), frequencies)
     _expect_data_with_wrong_abcd_dims(
-        np.ones([7, 4, 2, num_bins]), frequencies
+        np.ones([7, 4, 2, num_bins]),
+        frequencies,
     )
     _expect_data_with_wrong_abcd_dims(
-        np.ones([7, 8, 4, 2, num_bins]), frequencies
+        np.ones([7, 8, 4, 2, num_bins]),
+        frequencies,
     )
 
 
@@ -137,32 +139,44 @@ def test_tmatrix_from_abcd_single_frequency():
 
 
 def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list):
-    """Test from_abcd throws error if frequencies length does not match data."""
+    """Test from_abcd throws error if frequencies length does not match."""
     frequencies = [100, 200]
     with pytest.raises(
         ValueError,
-        match="Number of frequency values does not match the number of frequencies",
+        match="Number of frequency values does not match the number",
     ):
         TransmissionMatrix.from_abcd(
-            A_list, A_list, A_list, A_list, frequencies
+            A_list,
+            A_list,
+            A_list,
+            A_list,
+            frequencies,
         )
 
     frequencies = [100]
     with pytest.raises(
         ValueError,
-        match="Number of frequency values does not match the number of frequencies",
+        match="Number of frequency values does not match the number",
     ):
         TransmissionMatrix.from_abcd(
-            A_list, A_list, A_list, A_list, frequencies
+            A_list,
+            A_list,
+            A_list,
+            A_list,
+            frequencies,
         )
 
     frequencies = 100
     with pytest.raises(
         ValueError,
-        match="Number of frequency values does not match the number of frequencies",
+        match="Number of frequency values does not match the number",
     ):
         TransmissionMatrix.from_abcd(
-            A_list, A_list, A_list, A_list, frequencies
+            A_list,
+            A_list,
+            A_list,
+            A_list,
+            frequencies,
         )
 
 
@@ -348,7 +362,8 @@ def test_tmatrix_create_shunt_admittance_scalar_input():
 
 
 @pytest.mark.parametrize(
-    "transducer_constant", [2.5, FrequencyData([2.5, 5, 10], [1, 2, 3])]
+    "transducer_constant",
+    [2.5, FrequencyData([2.5, 5, 10], [1, 2, 3])],
 )
 def test_tmatrix_create_transformer(transducer_constant, frequencies):
     """Test `create_transformer` for FrequencyData and scalar input."""
@@ -369,7 +384,8 @@ def test_tmatrix_create_transformer(transducer_constant, frequencies):
 
 
 @pytest.mark.parametrize(
-    "transducer_constant", [2.5, FrequencyData([2.5, 5, 10], [1, 2, 3])]
+    "transducer_constant",
+    [2.5, FrequencyData([2.5, 5, 10], [1, 2, 3])],
 )
 def test_tmatrix_create_gyrator(transducer_constant, frequencies):
     """Test `create_gyrator` for FrequencyData and scalar input."""
