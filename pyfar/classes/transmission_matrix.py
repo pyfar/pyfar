@@ -93,7 +93,7 @@ class TransmissionMatrix(FrequencyData):
         if n_dim < 3 or shape[-3] != 2 or shape[-2] != 2:
             raise ValueError(
                 "'data' must have a shape like "
-                "(..., 2, 2, n_bins), e.g. (2, 2, 100)."
+                "(..., 2, 2, n_bins), e.g. (2, 2, 100).",
             )
 
         super().__init__(data, frequencies, comment)
@@ -145,7 +145,7 @@ class TransmissionMatrix(FrequencyData):
             and (isinstance(D, Number) or isinstance(D, complex))
         ):
             raise TypeError(
-                "A, B, C, and D must be scalars (real or complex)."
+                "A, B, C, and D must be scalars (real or complex).",
             )
         return np.array([[A, B], [C, D]])
 
@@ -207,13 +207,13 @@ class TransmissionMatrix(FrequencyData):
         elif num_freqdata != 0:
             raise ValueError(
                 "If using FrequencyData objects, all matrix entries "
-                "A, B, C, D, must be FrequencyData objects."
+                "A, B, C, D, must be FrequencyData objects.",
             )
 
         if frequencies is None:
             raise ValueError(
                 "'frequencies' must be specified if not using "
-                "'FrequencyData' objects as input."
+                "'FrequencyData' objects as input.",
             )
 
         (A, B, C, D) = (
@@ -270,28 +270,36 @@ class TransmissionMatrix(FrequencyData):
     def A(self) -> FrequencyData:
         """A entry of the transmission matrix."""
         return FrequencyData(
-            self.freq[..., 0, 0, :], self.frequencies, self.comment
+            self.freq[..., 0, 0, :],
+            self.frequencies,
+            self.comment,
         )
 
     @property
     def B(self) -> FrequencyData:
         """B entry of the transmission matrix."""
         return FrequencyData(
-            self.freq[..., 0, 1, :], self.frequencies, self.comment
+            self.freq[..., 0, 1, :],
+            self.frequencies,
+            self.comment,
         )
 
     @property
     def C(self) -> FrequencyData:
         """C entry of the transmission matrix."""
         return FrequencyData(
-            self.freq[..., 1, 0, :], self.frequencies, self.comment
+            self.freq[..., 1, 0, :],
+            self.frequencies,
+            self.comment,
         )
 
     @property
     def D(self) -> FrequencyData:
         """D entry of the transmission matrix."""
         return FrequencyData(
-            self.freq[..., 1, 1, :], self.frequencies, self.comment
+            self.freq[..., 1, 1, :],
+            self.frequencies,
+            self.comment,
         )
 
     def _check_for_inf(self, Zl: complex | FrequencyData):
@@ -432,7 +440,9 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     def transfer_function(
-        self, quantity_indices, Zl: complex | FrequencyData
+        self,
+        quantity_indices,
+        Zl: complex | FrequencyData,
     ) -> FrequencyData:
         r"""Returns the transfer function (output/input) for specified
         quantities and a given load impedance.
@@ -489,14 +499,14 @@ class TransmissionMatrix(FrequencyData):
         if is_scalar or not is_numeric or not len(quantity_indices) == 2:
             raise ValueError(
                 "'quantity_indices' must be an array-like type "
-                "with two numeric elements."
+                "with two numeric elements.",
             )
         if not all(
-            np.logical_or(quantity_indices == 0, quantity_indices == 1)
+            np.logical_or(quantity_indices == 0, quantity_indices == 1),
         ):
             raise ValueError(
                 "'quantity_indices' must contain two integers "
-                "between 0 and 1."
+                "between 0 and 1.",
             )
 
         if quantity_indices[0] == 0 and quantity_indices[1] == 0:
@@ -509,13 +519,15 @@ class TransmissionMatrix(FrequencyData):
             return self._transfer_function_q1q2(Zl)
 
     def _transfer_function_q1q1(
-        self, Zl: complex | FrequencyData
+        self,
+        Zl: complex | FrequencyData,
     ) -> FrequencyData:
         """Returns the first quantity's transfer function (Q1_out/Q1_in)."""
         idx_inf, __, __ = self._check_for_inf(Zl)
         denominator = self.A * Zl + self.B
         nominator = Zl * FrequencyData(
-            np.ones_like(denominator.freq), self.frequencies
+            np.ones_like(denominator.freq),
+            self.frequencies,
         )
 
         # Admittance form for Zl = inf
@@ -528,12 +540,14 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     def _transfer_function_q2q1(
-        self, Zl: complex | FrequencyData
+        self,
+        Zl: complex | FrequencyData,
     ) -> FrequencyData:
         """Returns the transfer function Q2_out / Q1_in."""
         denominator = self.A * Zl + self.B
         nominator = FrequencyData(
-            np.ones_like(denominator.freq), self.frequencies
+            np.ones_like(denominator.freq),
+            self.frequencies,
         )
 
         # In cases where the denominator is zero, e.g. Zl = 0 & B = 0,
@@ -542,12 +556,14 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     def _transfer_function_q2q2(
-        self, Zl: complex | FrequencyData
+        self,
+        Zl: complex | FrequencyData,
     ) -> FrequencyData:
         """Returns the second quantity's transfer function (Q2_out/Q2_in)."""
         denominator = self.C * Zl + self.D
         nominator = FrequencyData(
-            np.ones_like(denominator.freq), self.frequencies
+            np.ones_like(denominator.freq),
+            self.frequencies,
         )
 
         # Admittance form for Zl = inf
@@ -561,12 +577,14 @@ class TransmissionMatrix(FrequencyData):
         return nominator / denominator
 
     def _transfer_function_q1q2(
-        self, Zl: complex | FrequencyData
+        self,
+        Zl: complex | FrequencyData,
     ) -> FrequencyData:
         """Returns the transfer function Q1_out / Q2_in."""
         denominator = self.C * Zl + self.D
         nominator = Zl * FrequencyData(
-            np.ones_like(denominator.freq), self.frequencies
+            np.ones_like(denominator.freq),
+            self.frequencies,
         )
 
         # Admittance form for Zl = inf
@@ -611,7 +629,11 @@ class TransmissionMatrix(FrequencyData):
             return np.eye(2)
 
         return TransmissionMatrix.from_abcd(
-            np.ones_like(frequencies), 0, 0, 1, frequencies
+            np.ones_like(frequencies),
+            0,
+            0,
+            1,
+            frequencies,
         )
 
     @staticmethod
@@ -649,10 +671,14 @@ class TransmissionMatrix(FrequencyData):
         if not isinstance(impedance, FrequencyData):
             raise ValueError(
                 "'impedance' must be a "
-                "numerical scalar or FrequencyData object."
+                "numerical scalar or FrequencyData object.",
             )
         return TransmissionMatrix.from_abcd(
-            1, impedance.freq, 0, 1, impedance.frequencies
+            1,
+            impedance.freq,
+            0,
+            1,
+            impedance.frequencies,
         )
 
     @staticmethod
@@ -692,10 +718,14 @@ class TransmissionMatrix(FrequencyData):
         if not isinstance(admittance, FrequencyData):
             raise ValueError(
                 "'admittance' must be a "
-                "numerical scalar or FrequencyData object."
+                "numerical scalar or FrequencyData object.",
             )
         return TransmissionMatrix.from_abcd(
-            1, 0, admittance.freq, 1, admittance.frequencies
+            1,
+            0,
+            admittance.freq,
+            1,
+            admittance.frequencies,
         )
 
     @staticmethod
@@ -730,16 +760,20 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(transducer_constant) and not isinstance(
-            transducer_constant, str
+            transducer_constant,
+            str,
         ):
             return TransmissionMatrix._tmat_from_abcd(
-                transducer_constant, 0, 0, 1 / transducer_constant
+                transducer_constant,
+                0,
+                0,
+                1 / transducer_constant,
             )
 
         if not isinstance(transducer_constant, FrequencyData):
             raise ValueError(
                 "'transducer_constant' must be a "
-                "numerical scalar or FrequencyData object."
+                "numerical scalar or FrequencyData object.",
             )
         A = transducer_constant.freq
         D = (1 / transducer_constant).freq
@@ -783,16 +817,20 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(transducer_constant) and not isinstance(
-            transducer_constant, str
+            transducer_constant,
+            str,
         ):
             return TransmissionMatrix._tmat_from_abcd(
-                0, transducer_constant, 1 / transducer_constant, 0
+                0,
+                transducer_constant,
+                1 / transducer_constant,
+                0,
             )
 
         if not isinstance(transducer_constant, FrequencyData):
             raise ValueError(
                 "'transducer_constant' must be a "
-                "numerical scalar or FrequencyData object."
+                "numerical scalar or FrequencyData object.",
             )
         B = transducer_constant.freq
         C = (1 / transducer_constant).freq
@@ -814,7 +852,9 @@ class TransmissionMatrix(FrequencyData):
     def _decode(cls, obj_dict):
         """Decode object based on its respective `_encode` counterpart."""
         obj = cls(
-            obj_dict["_data"], obj_dict["_frequencies"], obj_dict["_comment"]
+            obj_dict["_data"],
+            obj_dict["_frequencies"],
+            obj_dict["_comment"],
         )
         obj.__dict__.update(obj_dict)
         return obj
@@ -834,7 +874,7 @@ class TransmissionMatrix(FrequencyData):
         if not self.is_indexable():
             raise IndexError(
                 "Object is not indexable, since ABCD-entries "
-                "only have a single channel"
+                "only have a single channel",
             )
 
         # Add three empty slices at the end to always get all data contained
@@ -852,11 +892,13 @@ class TransmissionMatrix(FrequencyData):
                         f"Indexed dimensions must not exceed the ABCD "
                         f"channel dimension (abcd_cdim), which is "
                         f"{len(self.abcd_cshape)}"
-                    )
+                    ),
                 ) from error
             else:
                 raise error
 
         return TransmissionMatrix.from_tmatrix(
-            data, frequencies=self.frequencies, comment=self.comment
+            data,
+            frequencies=self.frequencies,
+            comment=self.comment,
         )
