@@ -131,8 +131,6 @@ def test_complex_freq_plots_2d(function, side_flag,
     functionality.
     """
 
-    print(f"Testing: {function.__name__}")
-
     signal = pf.utils.concatenate_channels((
         handsome_complex_signal, handsome_complex_signal_v2))
 
