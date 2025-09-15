@@ -381,9 +381,9 @@ def reconstructing_fractional_octave_bands(
         Band overlap of the filter slopes between 0 and 1. Smaller values yield
         wider pass-bands and steeper filter slopes. The default is ``1``.
     slope : int, optional
-        Number > 0 that defines the width and steepness of the filter slopes.
-        Larger values yield wider pass-bands and steeper filter slopes. The
-        default is ``0``.
+        Non-negative integer that defines the width and steepness of the filter
+        slopes. Larger values yield wider pass-bands and steeper filter slopes.
+        The default is ``0``.
     n_samples : int, optional
         Length of the filter in samples. Longer filters yield more exact
         filters. The default is ``2**12``.
@@ -439,7 +439,7 @@ def reconstructing_fractional_octave_bands(
         raise ValueError("overlap must be between 0 and 1")
 
     if not isinstance(slope, int) or slope < 0:
-        raise ValueError("slope must be a positive integer.")
+        raise ValueError("slope must be a non-negative integer.")
 
     # sampling frequency in Hz
     sampling_rate = \
