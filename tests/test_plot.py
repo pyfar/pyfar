@@ -94,8 +94,8 @@ def test_complex_time_plots(mode,
 
 
 @pytest.mark.parametrize('function', [
-    (plot.freq), (plot.phase), (plot.group_delay),
-    (plot.freq_phase), (plot.freq_group_delay)])
+    plot.freq, plot.phase, plot.group_delay,
+    plot.freq_phase, plot.freq_group_delay])
 @pytest.mark.parametrize('side_flag', [
                          'left', 'right'])
 def test_complex_freq_plots(function, side_flag,
@@ -105,15 +105,39 @@ def test_complex_freq_plots(function, side_flag,
     print(f"Testing: {function.__name__}")
 
     # initial plot
-    filename = f'{function.__name__}_{side_flag}_default'
+    filename = f'{function.__name__}_side_{side_flag}'
     create_figure()
     function(handsome_complex_signal, side=side_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
     # test hold functionality
-    filename = f'{function.__name__}_{side_flag}_hold'
+    filename = f'{function.__name__}_side_{side_flag}_hold'
     function(handsome_complex_signal_v2, side=side_flag)
+    save_and_compare(create_baseline, baseline_path, output_path, filename,
+                     file_type, compare_output)
+
+
+@pytest.mark.parametrize('function', [
+    plot.freq_2d, plot.phase_2d, plot.group_delay_2d,
+    plot.freq_phase_2d, plot.freq_group_delay_2d, plot.spectrogram])
+@pytest.mark.parametrize('side_flag', [
+                         'left', 'right'])
+def test_complex_freq_plots_2d(function, side_flag,
+                               handsome_complex_signal,
+                               handsome_complex_signal_v2):
+    """
+    Test ``side`` parameter for all 2D plots with default arguments and hold
+    functionality.
+    """
+
+    signal = pf.utils.concatenate_channels((
+        handsome_complex_signal, handsome_complex_signal_v2))
+
+    # plot
+    filename = f'{function.__name__}_side_{side_flag}'
+    create_figure()
+    function(signal, side=side_flag)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
