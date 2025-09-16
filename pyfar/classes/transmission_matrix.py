@@ -149,7 +149,7 @@ class TransmissionMatrix(FrequencyData):
         return np.array([[A, B], [C, D]])
 
     @classmethod
-    def from_abcd(cls, A, B, C, D, frequencies=None):
+    def from_abcd(cls, A, B, C, D, frequencies = None):
         """Create a TransmissionMatrix object from A-, B-, C-, D-data, and
         frequencies.
 
@@ -194,26 +194,23 @@ class TransmissionMatrix(FrequencyData):
 
         """
         num_freqdata = 0
-        for obj in (A, B, C, D):
+        for obj in (A,B,C,D):
             if isinstance(obj, FrequencyData):
                 num_freqdata = num_freqdata + 1
 
         if num_freqdata == 4:
             frequencies = A.frequencies
-            for obj in (B, C, D):  # Frequency bins must match
+            for obj in (B,C,D):  # Frequency bins must match
                 npt.assert_allclose(frequencies, obj.frequencies, atol=1e-15)
-            (A, B, C, D) = (A.freq, B.freq, C.freq, D.freq)
+            (A,B,C,D) = (A.freq, B.freq, C.freq, D.freq)
         elif num_freqdata != 0:
             raise ValueError(
-                "If using FrequencyData objects, all matrix entries "
-                "A, B, C, D, must be FrequencyData objects.",
-            )
+                        "If using FrequencyData objects, all matrix entries "
+                        "A, B, C, D, must be FrequencyData objects.")
 
         if frequencies is None:
-            raise ValueError(
-                "'frequencies' must be specified if not using "
-                "'FrequencyData' objects as input.",
-            )
+            raise ValueError("'frequencies' must be specified if not using "
+                             "'FrequencyData' objects as input.")
 
         (A, B, C, D) = (
             np.atleast_1d(np.asanyarray(A, dtype=np.float64)),
@@ -237,9 +234,9 @@ class TransmissionMatrix(FrequencyData):
         data = np.array([[A, B], [C, D]])
         # Switch dimension order so that T matrices refer to
         # third and second last dimension (axes -3 and -2)
-        order = np.array(range(data.ndim - 1))
+        order = np.array(range(data.ndim-1))
         order = np.roll(order, -2)
-        order = np.append(order, data.ndim - 1)
+        order = np.append(order, data.ndim-1)
         data = np.transpose(data, order)
 
         return cls(data, frequencies)
@@ -594,9 +591,8 @@ class TransmissionMatrix(FrequencyData):
                                             0, 0, 1, frequencies)
 
     @staticmethod
-    def create_series_impedance(
-        impedance: complex | FrequencyData,
-    ) -> np.ndarray | TransmissionMatrix:
+    def create_series_impedance(impedance: complex | FrequencyData,
+                                ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a series impedance.
 
         This means the impedance is connected in series with a potential load
@@ -632,9 +628,8 @@ class TransmissionMatrix(FrequencyData):
             1, impedance.freq, 0, 1, impedance.frequencies)
 
     @staticmethod
-    def create_shunt_admittance(
-        admittance: complex | FrequencyData,
-    ) -> np.ndarray | TransmissionMatrix:
+    def create_shunt_admittance(admittance: complex | FrequencyData,
+                                ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a shunt admittance
         (parallel connection).
 
@@ -673,8 +668,8 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def create_transformer(
-        transducer_constant: float | int | FrequencyData,
-    ) -> np.ndarray | TransmissionMatrix:
+            transducer_constant: float | int | FrequencyData,
+            ) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a transformer.
 
         See Equation (2-12) in Table I of Reference [1]_:
@@ -722,9 +717,8 @@ class TransmissionMatrix(FrequencyData):
         return TransmissionMatrix.from_abcd(A, 0, 0, D, frequencies)
 
     @staticmethod
-    def create_gyrator(
-        transducer_constant: complex | FrequencyData,
-    ) -> np.ndarray | TransmissionMatrix:
+    def create_gyrator(transducer_constant :
+                complex | FrequencyData) -> np.ndarray | TransmissionMatrix:
         r"""Creates a transmission matrix representing a gyrator.
 
         The T-matrix is defined by a transducer constant (:math:`M`),
