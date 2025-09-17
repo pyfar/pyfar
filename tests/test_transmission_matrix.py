@@ -5,6 +5,7 @@ import re
 import pyfar as pf
 from pyfar import TransmissionMatrix
 from pyfar import FrequencyData
+from pyfar.constants import reference_air_impedance
 
 @pytest.fixture(scope="module")
 def frequencies():
@@ -139,10 +140,10 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
         assert tmat.C == C
         assert tmat.D == D
     else:
-        assert np.all(tmat.A.freq == A)
-        assert np.all(tmat.B.freq == B)
-        assert np.all(tmat.C.freq == C)
-        assert np.all(tmat.D.freq == D)
+        assert np.allclose(tmat.A.freq, A, atol=1e-15)
+        assert np.allclose(tmat.B.freq, B, atol=1e-15)
+        assert np.allclose(tmat.C.freq, C, atol=1e-15)
+        assert np.allclose(tmat.D.freq, D, atol=1e-15)
 
 def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
     """Test whether ABCD entries of T-Matrix match ABCD data used for
@@ -327,6 +328,527 @@ def test_create_transmission_line_frequency_matching():
     with pytest.raises(
         ValueError, match="The frequencies do not match"):
         TransmissionMatrix.create_transmission_line(kl, Z)
+
+@pytest.mark.parametrize(
+    "S0",
+    [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
+)
+def test_calculate_horn_geometry_parameters_S0_value_error(S0):
+    S1 = 0.2
+    L = 0.35
+
+    with pytest.raises(ValueError, match="The input S0"):
+        TransmissionMatrix._calculate_horn_geometry_parameters(S0, S1, L)
+
+
+@pytest.mark.parametrize(
+    "S1",
+    [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
+)
+def test_calculate_horn_geometry_parameters_S1_value_error(S1):
+    S0 = 0.2
+    L = 0.35
+
+    with pytest.raises(ValueError, match="The input S1"):
+        TransmissionMatrix._calculate_horn_geometry_parameters(S0, S1, L)
+
+
+@pytest.mark.parametrize(
+    "L",
+    [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
+)
+def test_calculate_horn_geometry_parameters_L_value_error(L):
+    S0 = 0.2
+    S1 = 0.3
+
+    with pytest.raises(ValueError, match="The input L"):
+        TransmissionMatrix._calculate_horn_geometry_parameters(S0, S1, L)
+
+
+def test_calculate_horn_geometry_parameters_S0_larger_S1_value_error():
+    S0 = 0.35
+    S1 = 0.3
+    L = 0.35
+
+    with pytest.raises(
+        ValueError,
+        match="S0 must be strictly smaller than S1.",
+    ):
+        TransmissionMatrix._calculate_horn_geometry_parameters(S0, S1, L)
+
+
+def test_calculate_horn_geometry_parameters_S0_equal_S1_value_error():
+    S0 = 0.35
+    S1 = 0.35
+    L = 0.2
+
+    with pytest.raises(ValueError, match="For a conical horn S0 must be"):
+        TransmissionMatrix._calculate_horn_geometry_parameters(S0, S1, L)
+
+
+def test_calculate_horn_geometry_calculations():
+    a = 0.3
+    b = 0.7
+    Omega = 1.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    Omega_ret, a_ret, b_ret = (
+        TransmissionMatrix._calculate_horn_geometry_parameters(S0, S1, L)
+    )
+
+    assert np.isclose(Omega, Omega_ret, atol=1e-15)
+    assert np.isclose(a, a_ret, atol=1e-15)
+    assert np.isclose(b, b_ret, atol=1e-15)
+
+
+def test_create_conical_horn_imp_number():
+    """Test `create_conical_horn` with impedance as number."""
+    k = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = 4 + 0.1j
+
+    a = 0.3
+    b = 0.5
+    Omega = 0.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    tmat_backwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "backwards",
+    )
+    tmat_forwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "forwards",
+    )
+
+    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
+        k.freq * (b - a),
+    )
+    B = 1j * Z / (a * b * Omega) * np.sin(k.freq * (b - a))
+    C = (
+        1j
+        * Omega
+        / (k.freq * k.freq * Z)
+        * (
+            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
+            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+        )
+    )
+    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
+        k.freq * (b - a),
+    )
+
+    inv_prefix = 1 / (A * D - B * C)
+
+    assert isinstance(tmat_backwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(tmat_backwards, A, B, C, D)
+
+    assert isinstance(tmat_forwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat_forwards,
+        inv_prefix * D,
+        -1 * inv_prefix * B,
+        -1 * inv_prefix * C,
+        inv_prefix * A,
+    )
+
+
+def test_create_conical_horn_imp_frequency_data():
+    """Test `create_conical_horn` with impedance as FrequencyData."""
+    k = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = FrequencyData([1 + 1j, 2 + 2j, 3 + 1j], [1, 2, 3])
+
+    a = 0.3
+    b = 0.5
+    Omega = 0.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    tmat_backwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "backwards",
+    )
+    tmat_forwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "forwards",
+    )
+
+    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
+        k.freq * (b - a),
+    )
+    B = 1j * Z.freq / (a * b * Omega) * np.sin(k.freq * (b - a))
+    C = (
+        1j
+        * Omega
+        / (k.freq * k.freq * Z.freq)
+        * (
+            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
+            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+        )
+    )
+    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
+        k.freq * (b - a),
+    )
+
+    inv_prefix = 1 / (A * D - B * C)
+
+    assert isinstance(tmat_backwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(tmat_backwards, A, B, C, D)
+
+    assert isinstance(tmat_forwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat_forwards,
+        inv_prefix * D,
+        -1 * inv_prefix * B,
+        -1 * inv_prefix * C,
+        inv_prefix * A,
+    )
+
+
+def test_create_conical_horn_k_number():
+    """Test `create_conical_horn` with impedance as number."""
+    k = 21
+    Z = 4 + 0.1j
+
+    a = 0.3
+    b = 0.5
+    Omega = 0.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    tmat_backwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "backwards",
+    )
+    tmat_forwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "forwards",
+    )
+
+    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
+        k.freq * (b - a),
+    )
+    B = 1j * Z / (a * b * Omega) * np.sin(k.freq * (b - a))
+    C = (
+        1j
+        * Omega
+        / (k.freq * k.freq * Z)
+        * (
+            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
+            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+        )
+    )
+    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
+        k.freq * (b - a),
+    )
+    inv_prefix = 1 / (A * D - B * C)
+
+    assert isinstance(tmat_backwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(tmat_backwards, A, B, C, D)
+
+    assert isinstance(tmat_forwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat_forwards,
+        inv_prefix * D,
+        -1 * inv_prefix * B,
+        -1 * inv_prefix * C,
+        inv_prefix * A,
+    )
+
+
+def test_create_conical_horn_k_frequency_data():
+    """Test `create_conical_horn` with impedance as FrequencyData."""
+    k = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = FrequencyData([1 + 1j, 2 + 2j, 3 + 1j], [1, 2, 3])
+
+    a = 0.3
+    b = 0.5
+    Omega = 0.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    tmat_backwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "backwards",
+    )
+    tmat_forwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "forwards",
+    )
+
+    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
+        k.freq * (b - a),
+    )
+    B = 1j * Z.freq / (a * b * Omega) * np.sin(k.freq * (b - a))
+    C = (
+        1j
+        * Omega
+        / (k.freq * k.freq * Z.freq)
+        * (
+            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
+            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+        )
+    )
+    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
+        k.freq * (b - a),
+    )
+
+    inv_prefix = 1 / (A * D - B * C)
+
+    assert isinstance(tmat_backwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(tmat_backwards, A, B, C, D)
+
+    assert isinstance(tmat_forwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat_forwards,
+        inv_prefix * D,
+        -1 * inv_prefix * B,
+        -1 * inv_prefix * C,
+        inv_prefix * A,
+    )
+
+
+def test_create_conical_horn_broadcasting():
+    """Test `create_conical_horn` broadcasting."""
+    k = FrequencyData(np.array([[1j, 2, 3j], [4j, 5, 6j]]), [1, 2, 3])
+    Z = FrequencyData([1 + 1j, 2 + 2j, 3 + 1j], [1, 2, 3])
+
+    a = 0.3
+    b = 0.5
+    Omega = 0.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    tmat_backwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "backwards",
+    )
+    tmat_forwards = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+        Z,
+        "forwards",
+    )
+
+    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
+        k.freq * (b - a),
+    )
+    B = 1j * Z.freq / (a * b * Omega) * np.sin(k.freq * (b - a))
+    C = (
+        1j
+        * Omega
+        / (k.freq * k.freq * Z.freq)
+        * (
+            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
+            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+        )
+    )
+    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
+        k.freq * (b - a),
+    )
+
+    inv_prefix = 1 / (A * D - B * C)
+
+    assert isinstance(tmat_backwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(tmat_backwards, A, B, C, D)
+
+    assert isinstance(tmat_forwards, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat_forwards,
+        inv_prefix * D,
+        -1 * inv_prefix * B,
+        -1 * inv_prefix * C,
+        inv_prefix * A,
+    )
+
+
+def test_create_conical_horn_default_parameters():
+    """Test `create_conical_horn` default parameters."""
+    k = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = reference_air_impedance
+
+    a = 0.3
+    b = 0.5
+    Omega = 0.4
+
+    S0 = Omega * a**2
+    S1 = Omega * b**2
+    L = b - a
+
+    tmat = TransmissionMatrix.create_conical_horn(
+        S0,
+        S1,
+        L,
+        k,
+    )  # using default Z and default propagation_direction
+
+    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
+        k.freq * (b - a),
+    )
+    B = 1j * Z / (a * b * Omega) * np.sin(k.freq * (b - a))
+    C = (
+        1j
+        * Omega
+        / (k.freq * k.freq * Z)
+        * (
+            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
+            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+        )
+    )
+    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
+        k.freq * (b - a),
+    )
+
+    inv_prefix = 1 / (A * D - B * C)
+
+    assert isinstance(tmat, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat,
+        inv_prefix * D,
+        -1 * inv_prefix * B,
+        -1 * inv_prefix * C,
+        inv_prefix * A,
+    )
+
+
+@pytest.mark.parametrize("k", [{"a": 1, "b": 3j}, np.array([1, 2, 3]), "term"])
+def test_create_conical_horn_k_errors(k):
+    """Test `create_conical_horn` error for k input."""
+    Z = 4 + 0.1j
+    S0 = 0.03
+    S1 = 0.04
+    L = 0.25
+
+    with pytest.raises(TypeError, match="The wave number k"):
+        TransmissionMatrix.create_conical_horn(S0, S1, L, k, Z, "backwards")
+
+
+@pytest.mark.parametrize("Z", [np.array([1, 2, 3]), "imp"])
+def test_create_conical_horn_medium_impedance_errors(Z):
+    """Test `create_conical_horn` errors for impedance parameter."""
+    k = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    S0 = 0.03
+    S1 = 0.04
+    L = 0.25
+
+    with pytest.raises(TypeError, match="The input medium_impedance"):
+        TransmissionMatrix.create_conical_horn(S0, S1, L, k, Z, "backwards")
+
+
+@pytest.mark.parametrize(
+    "propagation_direction",
+    [np.array([1, 2, 3]), 2, -5, 8j],
+)
+def test_create_conical_horn_propagation_direction_type_errors(
+    propagation_direction,
+):
+    """Test `create_conical_horn` errors for propagation_direction."""
+    k = FrequencyData(np.array([[1j, 2, 3j], [4j, 5, 6j]]), [1, 2, 3])
+    Z = FrequencyData([1 + 1j, 2 + 2j, 3 + 1j], [1, 2, 3])
+
+    S0 = 0.03
+    S1 = 0.04
+    L = 0.25
+
+    with pytest.raises(TypeError, match="The input propagation_direction"):
+        TransmissionMatrix.create_conical_horn(
+            S0,
+            S1,
+            L,
+            k,
+            Z,
+            propagation_direction,
+        )
+
+
+@pytest.mark.parametrize("propagation_direction", ["test", "", "forward"])
+def test_create_conical_horn_propagation_direction_value_errors(
+    propagation_direction,
+):
+    """Test `create_conical_horn` errors for propagation_direction."""
+    k = FrequencyData(np.array([[1j, 2, 3j], [4j, 5, 6j]]), [1, 2, 3])
+    Z = FrequencyData([1 + 1j, 2 + 2j, 3 + 1j], [1, 2, 3])
+
+    S0 = 0.03
+    S1 = 0.04
+    L = 0.25
+
+    with pytest.raises(
+        ValueError,
+        match="The string propagation_direction must either",
+    ):
+        TransmissionMatrix.create_conical_horn(
+            S0,
+            S1,
+            L,
+            k,
+            Z,
+            propagation_direction,
+        )
+
+
+def test_create_conical_horn_frequency_matching():
+    """Test `create_conical_horn` frequency matching."""
+    k = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = FrequencyData([1 + 1j, 2 + 2j, 3 + 1j], [1, 2, 4])
+
+    S0 = 0.03
+    S1 = 0.04
+    L = 0.25
+
+    with pytest.raises(ValueError, match="The frequencies of"):
+        TransmissionMatrix.create_conical_horn(S0, S1, L, k, Z, "backwards")
 
 def test_tmatrix_slicing(frequencies):
     """Test whether slicing a T-Matrix object return T-Matrix or raises correct
