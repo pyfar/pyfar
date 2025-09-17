@@ -208,6 +208,18 @@ def abcd_data_3x3x1():
     D = A + 3
     tmat = TransmissionMatrix.from_abcd(A, B, C, D)
     return tmat, A, B, C, D
+@pytest.fixture(scope="module")
+def abcd_data_complex():
+    """ABCD matrices with 2 frequency bins and one additional
+    dimension of size 3.
+    """
+    frequencies = [100, 200]
+    A = FrequencyData([[1j, 1+1j]], frequencies)
+    B = FrequencyData([[2j, 2+1j]], frequencies)
+    C = FrequencyData([[3j, 3+1j]], frequencies)
+    D = FrequencyData([[4j, 4+1j]], frequencies)
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D)
+    return tmat, A, B, C, D
 
 def test_tmatrix_abcd_cshape(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
     """Test whether abcd_cshape matches cshape of A-property."""
@@ -231,10 +243,13 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
         assert np.all(tmat.C.freq == C)
         assert np.all(tmat.D.freq == D)
 
-def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
+def test_tmatrix_abcd_entries(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
     """Test whether ABCD entries of T-Matrix match ABCD data used for
     initialization.
     """
+    tmat, A, B, C, D = abcd_data_1x2
+    _compare_tmat_vs_abcd(tmat, A, B, C, D)
+
     tmat, A, B, C, D = abcd_data_3x2
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
