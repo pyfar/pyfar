@@ -951,7 +951,7 @@ class TransmissionMatrix(FrequencyData):
         k : FrequencyData, scalar
             Wave number.
         medium_impedance : FrequencyData, scalar
-            The impedance of the medium filling the horn. Defautl is
+            The impedance of the medium filling the horn. Default is
             ``pyfar.constants.reference_air_impedance``
         propagation_direction: str = {'forwards', 'backwards'}
             Defines the direction of sound propagation through the horn,
