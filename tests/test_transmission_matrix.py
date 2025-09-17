@@ -664,21 +664,21 @@ def test_create_conical_horn_k_number():
         "forwards",
     )
 
-    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
-        k.freq * (b - a),
+    A = b / a * np.cos(k * (b - a)) - 1 / (k * a) * np.sin(
+        k * (b - a),
     )
-    B = 1j * Z / (a * b * Omega) * np.sin(k.freq * (b - a))
+    B = 1j * Z / (a * b * Omega) * np.sin(k * (b - a))
     C = (
         1j
         * Omega
-        / (k.freq * k.freq * Z)
+        / (k * k * Z)
         * (
-            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
-            - k.freq * (b - a) * np.cos(k.freq * (b - a))
+            (1 + k * k * a * b) * np.sin(k * (b - a))
+            - k * (b - a) * np.cos(k * (b - a))
         )
     )
-    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
-        k.freq * (b - a),
+    D = a / b * np.cos(k * (b - a)) + 1 / (k * b) * np.sin(
+        k * (b - a),
     )
     inv_prefix = 1 / (A * D - B * C)
 
