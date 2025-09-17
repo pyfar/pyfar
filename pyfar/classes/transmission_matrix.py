@@ -34,7 +34,6 @@ import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
 from pyfar.constants import reference_air_impedance, reference_speed_of_sound
-from numbers import Number
 
 
 class TransmissionMatrix(FrequencyData):
