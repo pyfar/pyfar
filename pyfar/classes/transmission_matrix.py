@@ -211,10 +211,10 @@ class TransmissionMatrix(FrequencyData):
                              "'FrequencyData' objects as input.")
 
         (A, B, C, D) = (
-            np.atleast_1d(np.asanyarray(A, dtype=np.float64)),
-            np.atleast_1d(np.asanyarray(B, dtype=np.float64)),
-            np.atleast_1d(np.asanyarray(C, dtype=np.float64)),
-            np.atleast_1d(np.asanyarray(D, dtype=np.float64)),
+            np.atleast_1d(np.asarray(A, dtype=np.float64)),
+            np.atleast_1d(np.asarray(B, dtype=np.float64)),
+            np.atleast_1d(np.asarray(C, dtype=np.float64)),
+            np.atleast_1d(np.asarray(D, dtype=np.float64)),
         )
 
         # broadcast shapes

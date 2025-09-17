@@ -243,7 +243,7 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
         assert np.all(tmat.C.freq == C)
         assert np.all(tmat.D.freq == D)
 
-def test_tmatrix_abcd_entries(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
+def test_tmatrix_abcd_entries(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1, abcd_data_complex):
     """Test whether ABCD entries of T-Matrix match ABCD data used for
     initialization.
     """
@@ -254,6 +254,9 @@ def test_tmatrix_abcd_entries(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
     tmat, A, B, C, D = abcd_data_3x3x1
+    _compare_tmat_vs_abcd(tmat, A, B, C, D)
+    
+    tmat, A, B, C, D = abcd_data_complex
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
 
