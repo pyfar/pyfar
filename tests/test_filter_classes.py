@@ -717,11 +717,12 @@ def test_extend_sos_coefficients():
     npt.assert_allclose(imp_filt, imp)
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test___eq___equal(filterObject):
     actual = filterObject.copy()
     assert filterObject == actual
 
-
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test___eq___notEqual(filterObject, coeffs, state):
     actual = fo.Filter(coefficients=2 * coeffs, state=state)
     assert not filterObject == actual
