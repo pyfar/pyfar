@@ -162,14 +162,6 @@ class LTISystem(ABC):
         """Return dictionary for the encoding."""
         return self.copy().__dict__
 
-    @classmethod
-    def _decode(cls, obj_dict):
-        """Decode object based on its respective object dictionary."""
-        # initializing this way satisfies FIR, IIR and SOS initialization
-        obj = cls(np.zeros((1, 6)), None)
-        obj.__dict__.update(obj_dict)
-        return obj
-
     def __eq__(self, other):
         """Check for equality of two objects."""
         return not deepdiff.DeepDiff(self, other)
@@ -377,6 +369,14 @@ class Filter(LTISystem):
             self._state = state
 
         return impulse_response
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        # initializing this way satisfies FIR, IIR and SOS initialization
+        obj = cls(np.zeros((1, 6)), None, None, "")
+        obj.__dict__.update(obj_dict)
+        return obj
 
 
 class FilterFIR(Filter):
