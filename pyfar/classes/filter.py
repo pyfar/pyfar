@@ -44,10 +44,11 @@ def _atleast_4d_first_dim(arr):
 
 
 def _pop_state_from_kwargs(**kwargs):
-    kwargs.pop('zi', None)
+    kwargs.pop("zi", None)
     warnings.warn(
         "This filter function does not support saving the filter state",
-        stacklevel=2)
+        stacklevel=2,
+    )
     return kwargs
 
 
@@ -75,8 +76,8 @@ def _extend_sos_coefficients(sos, order):
         return sos
     pad_len = order - sos_order
     sos_ext = np.zeros((pad_len, 6))
-    sos_ext[:, 3] = 1.
-    sos_ext[:, 0] = 1.
+    sos_ext[:, 3] = 1.0
+    sos_ext[:, 0] = 1.0
 
     return np.vstack((sos, sos_ext))
 
@@ -84,27 +85,31 @@ def _extend_sos_coefficients(sos, order):
 def _repr_string(filter_type, order, n_channels, sampling_rate):
     """Generate repr string for filter objects."""
 
-    ch_str = 'channel' if n_channels == 1 else 'channels'
+    ch_str = "channel" if n_channels == 1 else "channels"
 
     if filter_type == "SOS":
-        sec_str = 'section' if order == 1 else 'sections'
-        representation = (f"SOS filter with {order} {sec_str} and "
-                          f"{n_channels} {ch_str} "
-                          f"@ {sampling_rate} Hz sampling rate")
+        sec_str = "section" if order == 1 else "sections"
+        representation = (
+            f"SOS filter with {order} {sec_str} and "
+            f"{n_channels} {ch_str} "
+            f"@ {sampling_rate} Hz sampling rate"
+        )
     else:
         if order % 10 == 1:
-            order_string = 'st'
+            order_string = "st"
         elif order % 10 == 2:
-            order_string = 'nd'
+            order_string = "nd"
         elif order % 10 == 3:
-            order_string = 'rd'
+            order_string = "rd"
         else:
-            order_string = 'th'
+            order_string = "th"
 
-        representation = (f"{order}{order_string} order "
-                          f"{filter_type} filter with "
-                            f"{n_channels} {ch_str} @ {sampling_rate} "
-                            "Hz sampling rate")
+        representation = (
+            f"{order}{order_string} order "
+            f"{filter_type} filter with "
+            f"{n_channels} {ch_str} @ {sampling_rate} "
+            "Hz sampling rate"
+        )
 
     return representation
 
@@ -179,11 +184,8 @@ class Filter(LTISystem):
     """Abstract base class for digital filters."""
 
     def __init__(
-            self,
-            coefficients=None,
-            sampling_rate=None,
-            state=None,
-            comment=""):
+        self, coefficients=None, sampling_rate=None, state=None, comment=""
+    ):
         """
         Initialize a general Filter object.
 
@@ -214,10 +216,12 @@ class Filter(LTISystem):
         if state is not None:
             if coefficients is None:
                 raise ValueError(
-                    "Cannot set a state without filter coefficients")
+                    "Cannot set a state without filter coefficients"
+                )
             state = _atleast_3d_first_dim(state)
-        super().__init__(sampling_rate=sampling_rate,
-                         state=state, comment=comment)
+        super().__init__(
+            sampling_rate=sampling_rate, state=state, comment=comment
+        )
 
     def init_state(self, state):
         """
@@ -233,9 +237,10 @@ class Filter(LTISystem):
         """
         Check the value of the state keyword for 'ini_state' class methods.
         """
-        if state not in ['zeros', 'step']:
+        if state not in ["zeros", "step"]:
             raise ValueError(
-                f"state is '{state}' but must be 'zeros' or 'step'")
+                f"state is '{state}' but must be 'zeros' or 'step'"
+            )
 
     @property
     def coefficients(self):
@@ -287,7 +292,8 @@ class Filter(LTISystem):
 
         if self.sampling_rate != signal.sampling_rate:
             raise ValueError(
-                "The sampling rates of filter and signal do not match")
+                "The sampling rates of filter and signal do not match"
+            )
 
         if reset is True:
             self.reset()
@@ -295,20 +301,23 @@ class Filter(LTISystem):
         # shape of the output signal. if n_channels is 1, it will be squeezed
         # below
         filtered_signal_data = np.zeros(
-            (self.n_channels, *signal.time.shape),
-            dtype=signal.time.dtype)
+            (self.n_channels, *signal.time.shape), dtype=signal.time.dtype
+        )
 
         if self.state is not None:
             new_state = np.zeros_like(self._state)
             for idx, (coeff, state) in enumerate(
-                    zip(self._coefficients, self._state)):
-                filtered_signal_data[idx, ...], new_state[idx, ...] = \
+                zip(self._coefficients, self._state)
+            ):
+                filtered_signal_data[idx, ...], new_state[idx, ...] = (
                     self._process(coeff, signal.time, state)
+                )
             self._state = new_state
         else:
             for idx, coeff in enumerate(self._coefficients):
                 filtered_signal_data[idx, ...] = self._process(
-                    coeff, signal.time, zi=None)
+                    coeff, signal.time, zi=None
+                )
 
         # prepare output signal
         filtered_signal = deepcopy(signal)
@@ -343,14 +352,19 @@ class Filter(LTISystem):
             :py:func:`~n_channels`.
         """
         # set or check the impulse response length
-        minimum_impulse_response_length = int(np.max(
-            self.minimum_impulse_response_length()))
+        minimum_impulse_response_length = int(
+            np.max(self.minimum_impulse_response_length())
+        )
         if n_samples is None:
             n_samples = minimum_impulse_response_length
         elif np.any(minimum_impulse_response_length > n_samples):
             warnings.warn(
-                ('n_samples should be at least as long as the filter, '
-                 f'which is {minimum_impulse_response_length}'), stacklevel=2)
+                (
+                    "n_samples should be at least as long as the filter, "
+                    f"which is {minimum_impulse_response_length}"
+                ),
+                stacklevel=2,
+            )
 
         # track the state (better than copying the entire filter)
         if self.state is not None:
@@ -361,8 +375,10 @@ class Filter(LTISystem):
             reset = False
 
         # get impulse response
-        impulse_response = self.process(pf.signals.impulse(
-            n_samples, sampling_rate=self.sampling_rate), reset=reset)
+        impulse_response = self.process(
+            pf.signals.impulse(n_samples, sampling_rate=self.sampling_rate),
+            reset=reset,
+        )
 
         # reset the state if required
         if reset:
@@ -406,13 +422,13 @@ class FilterFIR(Filter):
     """
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
-
         if state is not None and np.asarray(state).ndim < 3:
             state = _atleast_3d_first_dim(state)
             warnings.warn(
                 "The state should be of shape (n_channels, *cshape, order). "
                 f"The state has been reshaped to shape=({state.shape}",
-                stacklevel=2)
+                stacklevel=2,
+            )
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -479,17 +495,20 @@ class FilterFIR(Filter):
         """
         if state is not None:
             state = np.asarray(state)
-            if (state.shape[-1] != self.order
+            if (
+                state.shape[-1] != self.order
                 or state.ndim < 3
-                or state.shape[0] != self.n_channels):
+                or state.shape[0] != self.n_channels
+            ):
                 raise ValueError(
                     "The state does not match the filter structure. Required "
-                    "shape for FilterFIR is (n_channels, *cshape, order).")
+                    "shape for FilterFIR is (n_channels, *cshape, order)."
+                )
 
         # sets filter state in parent class
         Filter.state.fset(self, state)
 
-    def init_state(self, cshape, state='zeros'):
+    def init_state(self, cshape, state="zeros"):
         """Initialize the buffer elements to pre-defined initial conditions.
 
         Parameters
@@ -505,12 +524,12 @@ class FilterFIR(Filter):
         self._check_state_keyword(state)
 
         new_state = np.zeros((self.n_channels, *cshape, self.order))
-        if state == 'step':
+        if state == "step":
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         super().init_state(state=new_state)
 
-    def minimum_impulse_response_length(self, unit='samples', tolerance=None):
+    def minimum_impulse_response_length(self, unit="samples", tolerance=None):
         r"""
         Get the minimum length of the filter impulse response.
 
@@ -552,9 +571,9 @@ class FilterFIR(Filter):
         estimated_length = np.max(estimated_length, -1) + 1
 
         # convert to desired unit
-        if unit == 's':
+        if unit == "s":
             estimated_length /= self.sampling_rate
-        elif unit == 'samples':
+        elif unit == "samples":
             estimated_length = estimated_length.astype(int)
         else:
             raise ValueError(f"unit is '{unit}' but must be 'samples' or 's'")
@@ -612,25 +631,25 @@ class FilterFIR(Filter):
 
         b = coefficients[0]
         # broadcast b to match ndim of data for convolution
-        b = np.broadcast_to(b, (1, ) * (data.ndim - b.ndim) + b.shape)
+        b = np.broadcast_to(b, (1,) * (data.ndim - b.ndim) + b.shape)
 
-        out_full = spsignal.oaconvolve(data, b, mode='full')
+        out_full = spsignal.oaconvolve(data, b, mode="full")
 
         # Ensure that the output has the same shape as the input
-        out = out_full[..., 0:data.shape[-1]]
+        out = out_full[..., 0 : data.shape[-1]]
 
         if zi is not None:
-
             if zi.shape[0:-1] != data.shape[0:-1]:
                 raise ValueError(
                     "The initial state does not match the cshape of "
                     "the signal. Required shape for `state` in "
-                    "FilterFIR is (n_channels, *cshape, order).")
+                    "FilterFIR is (n_channels, *cshape, order)."
+                )
 
             # add initial filter state to the beginning of the output
-            out[..., 0:zi.shape[-1]] += zi
+            out[..., 0 : zi.shape[-1]] += zi
             # get new filter state
-            zf = out_full[..., data.shape[-1]:]
+            zf = out_full[..., data.shape[-1] :]
             return out, zf
         else:
             return out
@@ -638,7 +657,8 @@ class FilterFIR(Filter):
     def __repr__(self):
         """Representation of the filter object."""
         return _repr_string(
-            "FIR", self.order, self.n_channels, self.sampling_rate)
+            "FIR", self.order, self.n_channels, self.sampling_rate
+        )
 
 
 class FilterIIR(Filter):
@@ -672,13 +692,13 @@ class FilterIIR(Filter):
     """
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
-
         if state is not None and np.asarray(state).ndim < 3:
             state = _atleast_3d_first_dim(state)
             warnings.warn(
                 "The state should be of shape (n_channels, *cshape, order). "
                 f"The state has been reshaped to shape=({state.shape}",
-                stacklevel=2)
+                stacklevel=2,
+            )
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -719,17 +739,20 @@ class FilterIIR(Filter):
         """
         if state is not None:
             state = np.asarray(state)
-            if (state.shape[-1] != self.order
+            if (
+                state.shape[-1] != self.order
                 or state.ndim < 3
-                or state.shape[0] != self.n_channels):
+                or state.shape[0] != self.n_channels
+            ):
                 raise ValueError(
                     "The state does not match the filter structure. Required "
-                    "shape for FilterIIR is (n_channels, *cshape, order).")
+                    "shape for FilterIIR is (n_channels, *cshape, order)."
+                )
 
         # sets filter state in parent class
         Filter.state.fset(self, state)
 
-    def init_state(self, cshape, state='zeros'):
+    def init_state(self, cshape, state="zeros"):
         """Initialize the buffer elements to pre-defined initial conditions.
 
         Parameters
@@ -745,7 +768,7 @@ class FilterIIR(Filter):
         self._check_state_keyword(state)
 
         new_state = np.zeros((self.n_channels, *cshape, self.order))
-        if state == 'step':
+        if state == "step":
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.lfilter_zi(coeff[0], coeff[1])
         return super().init_state(state=new_state)
@@ -774,7 +797,7 @@ class FilterIIR(Filter):
         """
         return super().impulse_response(n_samples)
 
-    def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
+    def minimum_impulse_response_length(self, unit="samples", tolerance=5e-5):
         """
         Estimate the minimum length of the filter impulse response.
 
@@ -804,7 +827,6 @@ class FilterIIR(Filter):
         estimated_length = np.zeros(channels)
 
         for channel in range(channels):
-
             b = self.coefficients[channel, 0]
             a = self.coefficients[channel, 1]
 
@@ -822,8 +844,9 @@ class FilterIIR(Filter):
             if np.any(np.abs(poles) > 1.0001):
                 # This is an unstable filter. The closer the outmost pole is to
                 # the unit circle, the longer the impulse response.
-                estimated_length[channel] += \
-                    6 / np.log10(np.max(np.abs(poles[np.abs(poles) > 1])))
+                estimated_length[channel] += 6 / np.log10(
+                    np.max(np.abs(poles[np.abs(poles) > 1]))
+                )
             else:
                 # This is a stable filter. Minimum height is 1e-5 of original
                 # amplitude
@@ -831,45 +854,51 @@ class FilterIIR(Filter):
                 poles[idx] = -poles[idx]
 
                 # poles on and close to unit circle
-                idx_oscillation = np.argwhere(np.abs(np.abs(poles)-1) < 1e-5)
+                idx_oscillation = np.argwhere(np.abs(np.abs(poles) - 1) < 1e-5)
                 # poles further away from unit circle
-                idx_damped = np.argwhere(np.abs(np.abs(poles)-1) >= 1e-5)
+                idx_damped = np.argwhere(np.abs(np.abs(poles) - 1) >= 1e-5)
 
                 if len(idx_oscillation) == len(poles):
                     # pure oscillation
-                    estimated_length[channel] += \
-                        5 * np.max(2 * np.pi / np.abs(np.angle(poles)))
+                    estimated_length[channel] += 5 * np.max(
+                        2 * np.pi / np.abs(np.angle(poles))
+                    )
                 elif len(idx_damped) == len(poles):
                     # no oscillation
                     idx = np.argmax(np.abs(poles))
                     pole_multiplicity = self._pole_multiplicity(poles, idx)
-                    estimated_length[channel] += \
-                        pole_multiplicity * np.log10(tolerance) / \
-                        np.log10(np.abs(poles[idx]))
+                    estimated_length[channel] += (
+                        pole_multiplicity
+                        * np.log10(tolerance)
+                        / np.log10(np.abs(poles[idx]))
+                    )
                 else:
                     # mixture of both
-                    periods = 5 * np.max(2 * np.pi / \
-                        np.abs(np.angle(poles[idx_oscillation[0]])))
+                    periods = 5 * np.max(
+                        2 * np.pi / np.abs(np.angle(poles[idx_oscillation[0]]))
+                    )
                     poles_damped = poles[idx_damped[0]]
                     idx = np.argmax(np.abs(poles_damped))
                     multiplicity = self._pole_multiplicity(poles_damped, idx)
                     # catch runtime warning for poles in the origin
                     if np.abs(poles_damped[idx]) > 0:
-                        multiplicity_factor = np.log10(tolerance) / \
-                            np.log10(np.abs(poles_damped[idx]))
+                        multiplicity_factor = np.log10(tolerance) / np.log10(
+                            np.abs(poles_damped[idx])
+                        )
                     else:
                         multiplicity_factor = 0
 
                     estimated_length[channel] += np.maximum(
-                        periods,
-                        multiplicity * multiplicity_factor)
+                        periods, multiplicity * multiplicity_factor
+                    )
 
             estimated_length[channel] = np.maximum(
-                len(a) + len(b) - 1, estimated_length[channel])
+                len(a) + len(b) - 1, estimated_length[channel]
+            )
 
-        if unit == 's':
+        if unit == "s":
             estimated_length /= self.sampling_rate
-        elif unit == 'samples':
+        elif unit == "samples":
             estimated_length = estimated_length.astype(int)
         else:
             raise ValueError(f"unit is '{unit}' but must be 'samples' or 's'")
@@ -877,7 +906,7 @@ class FilterIIR(Filter):
         return estimated_length
 
     @staticmethod
-    def _pole_multiplicity(poles, index, tolerance=.001):
+    def _pole_multiplicity(poles, index, tolerance=0.001):
         """
         Find multiplicity of a pole.
 
@@ -896,15 +925,18 @@ class FilterIIR(Filter):
         function in the parent class.
         """
         if zi is not None and zi.shape[0:-1] != data.shape[0:-1]:
-            raise ValueError("The initial state does not match the cshape of "
-                             "the signal. Required shape for `state` in "
-                             "FilterIIR is (n_channels, *cshape, order).")
+            raise ValueError(
+                "The initial state does not match the cshape of "
+                "the signal. Required shape for `state` in "
+                "FilterIIR is (n_channels, *cshape, order)."
+            )
         return spsignal.lfilter(coefficients[0], coefficients[1], data, zi=zi)
 
     def __repr__(self):
         """Representation of the filter object."""
         return _repr_string(
-            "IIR", self.order, self.n_channels, self.sampling_rate)
+            "IIR", self.order, self.n_channels, self.sampling_rate
+        )
 
 
 class FilterSOS(Filter):
@@ -938,13 +970,13 @@ class FilterSOS(Filter):
     """
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
-
         if state is not None and np.asarray(state).ndim < 4:
             state = _atleast_4d_first_dim(state)
             warnings.warn(
                 "The state should be of shape (n_channels, *cshape, n_sections"
                 f", 2). The state has been reshaped to shape=({state.shape}",
-                stacklevel=2)
+                stacklevel=2,
+            )
 
         super().__init__(coefficients, sampling_rate, state, comment)
 
@@ -956,7 +988,8 @@ class FilterSOS(Filter):
         if coeff.shape[-1] != 6:
             raise ValueError(
                 "The coefficients are not in line with a second order",
-                "section filter structure.")
+                "section filter structure.",
+            )
 
         self._coefficients = coeff
 
@@ -965,7 +998,7 @@ class FilterSOS(Filter):
         """The order of the filter.
         This is always twice the number of sections.
         """
-        return 2*self.n_sections
+        return 2 * self.n_sections
 
     @property
     def n_sections(self):
@@ -1005,19 +1038,22 @@ class FilterSOS(Filter):
         """
         if state is not None:
             state = np.asarray(state)
-            if (state.shape[0] != self.n_channels
+            if (
+                state.shape[0] != self.n_channels
                 or state.shape[-1] != 2
                 or state.shape[-2] != self.n_sections
-                or state.ndim < 4):
+                or state.ndim < 4
+            ):
                 raise ValueError(
                     "The state does not match the filter structure. Required "
                     "shape for FilterSOS is (n_channels, *cshape, "
-                    "n_sections, 2).")
+                    "n_sections, 2)."
+                )
 
         # sets filter state in parent class
         Filter.state.fset(self, state)
 
-    def init_state(self, cshape, state='zeros'):
+    def init_state(self, cshape, state="zeros"):
         """Initialize the buffer elements to pre-defined initial conditions.
 
         Parameters
@@ -1033,7 +1069,7 @@ class FilterSOS(Filter):
         self._check_state_keyword(state)
 
         new_state = np.zeros((self.n_channels, *cshape, self.n_sections, 2))
-        if state == 'step':
+        if state == "step":
             for idx, coeff in enumerate(self._coefficients):
                 new_state[idx, ...] = spsignal.sosfilt_zi(coeff)
         return super().init_state(state=new_state)
@@ -1067,7 +1103,7 @@ class FilterSOS(Filter):
         """
         return super().impulse_response(n_samples)
 
-    def minimum_impulse_response_length(self, unit='samples', tolerance=5e-5):
+    def minimum_impulse_response_length(self, unit="samples", tolerance=5e-5):
         """
         Estimate the minimum length of the filter impulse response.
 
@@ -1098,7 +1134,6 @@ class FilterSOS(Filter):
         estimated_length = np.zeros(channels)
 
         for channel in range(channels):
-
             # initialize length for FIR and IIR sections
             # Note: Matlab uses 1 for initialization, which does not make sense
             #       for FIR sections. Using 0 should be better there and does
@@ -1107,7 +1142,6 @@ class FilterSOS(Filter):
             length_iir = 0
 
             for section in range(sections):
-
                 # estimate length of each section and channel
                 b = self.coefficients[channel, section, :3]
                 a = self.coefficients[channel, section, 3:]
@@ -1123,14 +1157,16 @@ class FilterSOS(Filter):
                     length_iir = np.maximum(
                         length_iir,
                         filter_iir.minimum_impulse_response_length(
-                            tolerance=tolerance)[0])
+                            tolerance=tolerance
+                        )[0],
+                    )
 
             # use maximum of FIR and IIR length for final estimate
             estimated_length[channel] = np.maximum(length_fir, length_iir)
 
-        if unit == 's':
+        if unit == "s":
             estimated_length /= self.sampling_rate
-        elif unit == 'samples':
+        elif unit == "samples":
             estimated_length = estimated_length.astype(int)
         else:
             raise ValueError(f"unit is '{unit}' but must be 'samples' or 's'")
@@ -1144,10 +1180,12 @@ class FilterSOS(Filter):
         function in the parent class.
         """
         if zi is not None and zi.shape[0:-2] != data.shape[0:-1]:
-            raise ValueError("The initial state does not match the cshape of "
-                             "the signal. Required shape for `state` in "
-                             "FilterSOS is (n_channels, *cshape, n_sections,"
-                             " 2).")
+            raise ValueError(
+                "The initial state does not match the cshape of "
+                "the signal. Required shape for `state` in "
+                "FilterSOS is (n_channels, *cshape, n_sections,"
+                " 2)."
+            )
         if zi is not None:
             zi = zi.transpose(1, 0, 2)
         res = spsignal.sosfilt(sos, data, zi=zi, axis=-1)
@@ -1160,4 +1198,150 @@ class FilterSOS(Filter):
     def __repr__(self):
         """Representation of the filter object."""
         return _repr_string(
-            "SOS", self.n_sections, self.n_channels, self.sampling_rate)
+            "SOS", self.n_sections, self.n_channels, self.sampling_rate
+        )
+
+
+class StateSpaceModel(LTISystem):
+    """
+    Class for discrete-time state-space models.
+
+    A state-space model is defined by the matrices :math:`A`, :math:`B`, :math:`C`, and :math:`D`.
+    Contrary to an impulse response or filter model, a state-space model can represent multi-input
+    multi-output (MIMO) linear time-invariant (LTI) systems in a numerically stable and efficient
+    way. The system is described by the following equations (discrete-time):
+
+    .. math:
+        x_{t+1} = A x_t + B u_t
+        y_t   = C x_t + D u_t,
+
+    where :math:`x_t` is the state, :math:`u` the input, and :math:`y` the output at time step :math:`t`.
+
+    The matrix :math:`A` is the state matrix, defining the internal dynamics of the system, i.e. how
+    the internal state evolves on its own; :math:`B` is the input matrix, defining the action of the
+    input :math: `u` on the state; :math:`C` is the output matrix, defining the action of the state
+    :math:`x` on the output :math:`y`; and :math:`D` is the feedthrough matrix, defining the direct
+    action of the input :math:`u` on the output :math:`y`.
+
+    Note that, unlike an impulse response or transfer function representation, the state-space
+    representation is not unique. Different state-space models can represent the same input-output
+    behaviour.
+
+    For a short introduction, see: https://ccrma.stanford.edu/~jos/StateSpace/
+
+    Parameters
+    ----------
+    A : array
+        The state matrix :math:`A` with dimensions ``(order, order)``.
+    B : array
+        The input matrix :math:`B` with dimensions ``(order, n_inputs)``.
+    C : array
+        The output matrix :math:`C` with dimensions ``(n_outputs, order)``.
+    D : array, optional
+        The feedthrough matrix :math:`D` with dimensions ``(n_outputs, n_inputs)``.
+        The default is ``None``, which initializes an all-zero matrix.
+    sampling_rate : number, optional
+        The sampling rate of the system in Hz. The default is ``None``.
+    state : array, double, optional
+        The initial state of the system.
+    comment : str, optional
+        A comment. The default is ``''``.
+    """
+
+    def __init__(
+        self, A, B, C, D=None, sampling_rate=None, state=None, comment=""
+    ):
+        D = np.zeros((C.shape[0], B.shape[1])) if D is None else D
+        assert all(
+            [isinstance(M, np.ndarray) and (M.ndim == 2) for M in (A, B, C, D)]
+        )
+        assert A.shape[1] == A.shape[0], "A needs to be square."
+        assert B.shape[0] == A.shape[0], (
+            f"B needs to be of shape ({A.shape[0]}, m)."
+        )
+        assert C.shape[1] == A.shape[0], (
+            f"C needs to be of shape (p, {A.shape[0]})."
+        )
+        assert D.shape == (C.shape[0], B.shape[1]), (
+            f"D needs to be of shape ({C.shape[0], B.shape[1]})."
+        )
+
+        super().__init__(
+            sampling_rate=sampling_rate, state=state, comment=comment
+        )
+        self._A, self._B, self._C, self._D = A, B, C, D
+
+    @property
+    def A(self):
+        return self._A
+
+    @property
+    def B(self):
+        return self._B
+
+    @property
+    def C(self):
+        return self._C
+
+    @property
+    def D(self):
+        return self._D
+
+    @property
+    def n_inputs(self):
+        return self.B.shape[1]
+
+    @property
+    def n_outputs(self):
+        return self.C.shape[0]
+
+    @property
+    def order(self):
+        """The order of the state-space system."""
+        return self.A.shape[0]
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        pass
+
+    def init_state(self):
+        self._state = np.zeros(self.order)
+
+    def process(self, signal, reset=False):
+        assert signal.sampling_rate == self.sampling_rate, (
+            "The sampling rates of the signal and the state-space model need to match."
+        )
+        u = signal.time.squeeze()
+        assert u.shape[:-1] == (self.n_inputs,), (
+            f"The input signal needs to be compatible with the number of inputs to the state-space system ({self.n_inputs})."
+        )
+        if self.state is None or reset:
+            self.init_state()
+        y = np.zeros((self.n_outputs, signal.n_samples + 1))
+        for i in range(signal.n_samples):
+            y[:, i] = self.C @ self.state + self.D @ u[:, i]
+            self._state = self.A @ self.state + self.B @ u[:, i]
+        return pf.Signal(y, self.sampling_rate)
+
+    def impulse_response(self, n_samples):
+        y = np.zeros((self.n_inputs, self.n_outputs, n_samples))
+        y[..., 0] = self.D.T
+        x = self.B
+        for i in range(1, n_samples):
+            y[..., i] = (self.C @ x).T
+            x = self.A @ x
+        return pf.Signal(y, self.sampling_rate)
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        obj = cls(*np.zeros((3, 1, 1)), None, None, "")
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __repr__(self):
+        return f"Order {self.order} state-space model with {self.n_inputs} inputs and {self.n_outputs} outputs @ {self.sampling_rate} Hz sampling rate."
