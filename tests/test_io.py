@@ -287,7 +287,7 @@ def test_write_filterFIR(filterFIR, tmpdir):
     """filterFIR
     Make sure `read` understands the bits written by `write`.
     """
-    filename = os.path.join(tmpdir, 'filterIIR.far')
+    filename = os.path.join(tmpdir, 'filterFIR.far')
     io.write(filename, filterFIR=filterFIR)
     actual = io.read(filename)['filterFIR']
     assert isinstance(actual, fo.Filter)
