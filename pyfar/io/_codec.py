@@ -195,19 +195,19 @@ def _inner_decode(obj, key, zipfile):
         PyfarType = _str_to_type(obj[key][0][1:])
         obj[key] = PyfarType._decode(obj[key][1])
         _decode(obj[key].__dict__, zipfile)
-    elif obj[key][0][1:] == 'dtype':
+    elif obj[key][0][1:] == "dtype":
         obj[key] = getattr(np, obj[key][1])
-    elif obj[key][0][1:] == 'ndarray':
+    elif obj[key][0][1:] == "ndarray":
         obj[key] = _decode_ndarray(obj[key][1], zipfile)
-    elif obj[key][0][1:] == 'complex':
+    elif obj[key][0][1:] == "complex":
         obj[key] = complex(obj[key][1][0], obj[key][1][1])
-    elif obj[key][0][1:] == 'tuple':
+    elif obj[key][0][1:] == "tuple":
         obj[key] = tuple(obj[key][1])
-    elif obj[key][0][1:] == 'set':
+    elif obj[key][0][1:] == "set":
         obj[key] = set(obj[key][1])
-    elif obj[key][0][1:] == 'frozenset':
+    elif obj[key][0][1:] == "frozenset":
         obj[key] = frozenset(tuple(obj[key][1]))
-    elif obj[key][0][1:] == 'bytes':
+    elif obj[key][0][1:] == "bytes":
         obj[key] = bytes.fromhex(obj[key][1])
     else:
         _decode_numpy_scalar(obj, key)
@@ -250,7 +250,7 @@ def _decode_object_json_aided(name, type_hint, zipfile):
     zipfile: zipfile
         The zipfile from where we'd like to read data.
     """
-    json_str = zipfile.read(f'{name}/{type_hint}').decode('UTF-8')
+    json_str = zipfile.read(f"{name}/{type_hint}").decode("UTF-8")
     obj_dict_encoded = json.loads(json_str)
     obj_dict = _decode(obj_dict_encoded, zipfile)
     ObjType = _str_to_type(type_hint[1:])
@@ -258,7 +258,8 @@ def _decode_object_json_aided(name, type_hint, zipfile):
         return ObjType._decode(obj_dict)
     except AttributeError as e:
         raise NotImplementedError(
-            f'You must implement `{ObjType.__name__}._decode` first.') from e
+            f"You must implement `{ObjType.__name__}._decode` first."
+        ) from e
 
 
 def _encode(obj, zip_path, zipfile):
@@ -290,10 +291,10 @@ def _encode(obj, zip_path, zipfile):
     """
     if isinstance(obj, dict):
         for key in obj.keys():
-            _inner_encode(obj, key, f'{zip_path}/{key}', zipfile)
+            _inner_encode(obj, key, f"{zip_path}/{key}", zipfile)
     elif isinstance(obj, (list, tuple, set, frozenset)):
         for i in range(0, len(obj)):
-            _inner_encode(obj, i, f'{zip_path}/{i}', zipfile)
+            _inner_encode(obj, i, f"{zip_path}/{i}", zipfile)
 
     return obj
 
@@ -322,21 +323,21 @@ def _inner_encode(obj, key, zip_path, zipfile):
         e.g. to encode ndarrays when they occur.
     """
     if _is_dtype(obj[key]):
-        obj[key] = ['$dtype', obj[key].__name__]
+        obj[key] = ["$dtype", obj[key].__name__]
     elif isinstance(obj[key], np.ndarray):
         zipfile.writestr(zip_path, _encode_ndarray(obj[key]))
-        obj[key] = ['$ndarray', zip_path]
+        obj[key] = ["$ndarray", zip_path]
     elif _is_pyfar_type(obj[key]):
-        obj[key] = [f'${type(obj[key]).__name__}', obj[key]._encode()]
+        obj[key] = [f"${type(obj[key]).__name__}", obj[key]._encode()]
         _encode(obj[key][1], zip_path, zipfile)
     elif _is_numpy_scalar(obj[key]):
-        obj[key] = [f'${type(obj[key]).__name__}', obj[key].item()]
+        obj[key] = [f"${type(obj[key]).__name__}", obj[key].item()]
     elif isinstance(obj[key], complex):
-        obj[key] = ['$complex', [obj[key].real, obj[key].imag]]
+        obj[key] = ["$complex", [obj[key].real, obj[key].imag]]
     elif isinstance(obj[key], (tuple, set, frozenset)):
-        obj[key] = [f'${type(obj[key]).__name__}', list(obj[key])]
+        obj[key] = [f"${type(obj[key]).__name__}", list(obj[key])]
     elif isinstance(obj[key], bytes):
-        obj[key] = [f'${type(obj[key]).__name__}', obj[key].hex()]
+        obj[key] = [f"${type(obj[key]).__name__}", obj[key].hex()]
     else:
         _encode(obj[key], zip_path, zipfile)
 
@@ -382,32 +383,32 @@ def _encode_object_json_aided(obj, name, zipfile):
     """
     try:
         obj_dict = _encode(obj._encode(), name, zipfile)
-        type_hint = f'${type(obj).__name__}'
-        zipfile.writestr(
-            f'{name}/{type_hint}',
-            json.dumps(obj_dict))
+        type_hint = f"${type(obj).__name__}"
+        zipfile.writestr(f"{name}/{type_hint}", json.dumps(obj_dict))
     except AttributeError as error:
         raise NotImplementedError(
-            f'You must implement `{type}._encode` first.') from error
+            f"You must implement `{type}._encode` first."
+        ) from error
 
 
 def _is_pyfar_type(obj):
-    """True if object is a Pyfar-type.
-    """
+    """True if object is a Pyfar-type."""
     type_str = obj if isinstance(obj, str) else type(obj).__name__
     return type_str in [
-        'Orientations',
-        'Coordinates',
-        'Signal',
-        'Filter',
-        'FilterFIR',
-        'FilterIIR',
-        'FilterSOS',
-        'GammatoneBands',
-        'TimeData',
-        'FrequencyData',
-        'TransmissionMatrix',
-        'BuiltinsWrapper']
+        "Orientations",
+        "Coordinates",
+        "Signal",
+        "Filter",
+        "FilterFIR",
+        "FilterIIR",
+        "FilterSOS",
+        "StateSpaceModel",
+        "GammatoneBands",
+        "TimeData",
+        "FrequencyData",
+        "TransmissionMatrix",
+        "BuiltinsWrapper",
+    ]
 
 
 def _supported_builtin_types():
@@ -425,40 +426,41 @@ def _supported_builtin_types():
         list,
         set,
         str,
-        tuple]
+        tuple,
+    ]
     return builtin_types
 
 
 def _is_numpy_type(obj):
-    """True if object is a Numpy-type.
-    """
+    """True if object is a Numpy-type."""
     return type(obj).__module__ == np.__name__
 
 
 def _is_dtype(obj):
-    """True if object is `numpy.dtype`.
-    """
+    """True if object is `numpy.dtype`."""
     return isinstance(obj, type) and (
-        obj.__module__ == 'numpy' or obj == complex)
+        obj.__module__ == "numpy" or obj == complex
+    )
 
 
 def _is_numpy_scalar(obj):
-    """True if object is any numpy.dtype scalar e.g. `numpy.int32`.
-    """
-    return type(obj).__module__ == 'numpy'
+    """True if object is any numpy.dtype scalar e.g. `numpy.int32`."""
+    return type(obj).__module__ == "numpy"
 
 
 def _is_type_hint(obj):
     """Check if object is stored along with its type in the typical format:
     [str, str] => [typehint, value] e.g. ['$complex', (3 + 4j)].
     """
-    return isinstance(obj, list) \
-        and len(obj) == 2 \
-        and isinstance(obj[0], str) \
-        and obj[0][0] == '$'
+    return (
+        isinstance(obj, list)
+        and len(obj) == 2
+        and isinstance(obj[0], str)
+        and obj[0][0] == "$"
+    )
 
 
-def _str_to_type(type_as_string, module='pyfar'):
+def _str_to_type(type_as_string, module="pyfar"):
     """
     Recursively find a PyfarType by passing in a valid type as a string.
 
@@ -479,13 +481,16 @@ def _str_to_type(type_as_string, module='pyfar'):
         return getattr(sys.modules[module], type_as_string)
     except AttributeError:
         submodules = [
-            attrib for attrib in dir(sys.modules[module])
-            if not attrib.startswith('__') and attrib.islower()]
+            attrib
+            for attrib in dir(sys.modules[module])
+            if not attrib.startswith("__") and attrib.islower()
+        ]
     except KeyError:
         return
     for submodule in submodules:
         PyfarType = _str_to_type(
-            type_as_string, module=f'{module}.{submodule}')
+            type_as_string, module=f"{module}.{submodule}"
+        )
         if PyfarType:
             return PyfarType
 
