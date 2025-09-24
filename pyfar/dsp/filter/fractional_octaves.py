@@ -260,8 +260,7 @@ def fractional_octave_bands(
         ...     (center_frequency, center_frequency), tolerance_class=1)
         >>>
         >>> # Class 1 tolerance after DIN EN 61260-1:2014, Table 1.
-        >>> lower, upper, frequencies = \
-                pf.constants.fractional_octave_filter_tolerance(
+        >>> lower, upper, frequencies = pf.constants.fractional_octave_filter_tolerance(
         ...         center_frequency, num_fractions, tolerance_class=1)
         >>>
         >>> # plot filter and tolerance
@@ -274,7 +273,7 @@ def fractional_octave_bands(
         >>> ax.set_ylim(-40, 5)
         >>> ax.set_xlim(.5*center_frequency, 2*center_frequency)
         >>> ax.legend()
-    """
+    """  # noqa : E501
 
     # check input
     if (signal is None and sampling_rate is None) \
