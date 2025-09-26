@@ -87,7 +87,11 @@
     "toggle_mode": {
         "key": ["M"],
         "key_verbose": ["shift+m"],
-        "info": "toggle display of complex audio data (real, imaginary, or absolute time data; left or right-sided spectrum)"},
+        "info": "toggle showing real, imaginary, or absolute data."},
+    "toggle_side": {
+        "key": ["O"],
+        "key_verbose": ["shift+o"],
+        "info": "toggle left or right-sided spectrum of complex signals"},
     "toggle_all": {
         "key": ["A"],
         "key_verbose": ["shift+a"],

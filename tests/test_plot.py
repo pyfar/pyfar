@@ -69,9 +69,10 @@ def test_line_plots(function, handsome_signal, handsome_signal_v2):
                      file_type, compare_output)
 
 
+@pytest.mark.parametrize('function', [plot.time, plot.freq])
 @pytest.mark.parametrize('mode', [
     'real', 'imag', 'abs'])
-def test_complex_time_plots(mode,
+def test_complex_plots_mode(function, mode,
                             handsome_complex_signal,
                             handsome_complex_signal_v2):
     """Test all line plots with default arguments and hold functionality."""
@@ -79,15 +80,15 @@ def test_complex_time_plots(mode,
           f"= {mode}")
 
     # initial plot
-    filename = f'{plot.time.__name__}_{mode}_default'
+    filename = f'{function.__name__}_{mode}_default'
     create_figure()
-    plot.time(handsome_complex_signal, mode=mode)
+    function(handsome_complex_signal, mode=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)
 
     # test hold functionality
-    filename = f'{plot.time.__name__}_{mode}_hold'
-    plot.time(handsome_complex_signal_v2,
+    filename = f'{function.__name__}_{mode}_hold'
+    function(handsome_complex_signal_v2,
               mode=mode)
     save_and_compare(create_baseline, baseline_path, output_path, filename,
                      file_type, compare_output)

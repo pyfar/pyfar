@@ -2,6 +2,7 @@
 from pyfar.plot.utils import context
 from . import _line
 from . import _interaction as ia
+from pyfar._utils import rename_arg
 
 
 def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
@@ -81,7 +82,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'time', dB_time=dB, log_prefix_time=log_prefix,
-        log_reference=log_reference, unit_time=unit, mode=mode)
+        log_reference=log_reference, unit_time=unit, mode_time=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -90,7 +91,7 @@ def time(signal, dB=False, log_prefix=20, log_reference=1, unit="s",
 
 
 def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
-         ax=None, style='light', side='right', **kwargs):
+         ax=None, style='light', side='right', mode='abs', **kwargs):
     """
     Plot the magnitude spectrum.
 
@@ -132,6 +133,10 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -152,12 +157,13 @@ def freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
     with context(style):
         ax = _line._freq(signal.flatten(), dB, log_prefix, log_reference,
-                         freq_scale, ax, side, **kwargs)
+                         freq_scale, ax, side, mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq', dB_freq=dB, log_prefix_freq=log_prefix,
-        log_reference=log_reference, xscale=freq_scale, side=side)
+        log_reference=log_reference, xscale=freq_scale, side=side,
+        mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax.interaction = interaction
@@ -309,11 +315,12 @@ def group_delay(signal, unit="s", freq_scale='log', ax=None, style='light',
 
     return ax
 
-
+@rename_arg({"mode": "mode_time"}, "mode will be deprecated in"
+            " pyfar v0.11.0 in favor of mode_time")
 def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
               log_prefix_freq=None, log_reference=1, freq_scale='log',
               unit="s", ax=None, style='light',
-              mode='real', side='right', **kwargs):
+              mode_time='real', side='right', mode_freq='abs', **kwargs):
     """
     Plot the time signal and magnitude spectrum (2 by 1 subplot).
 
@@ -369,6 +376,9 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         :py:data:`matplotlib.style.available`. Pass a dictionary to set
         specific plot parameters, for example
     mode : str
+        This parameter will be deprecated in pyfar v0.11.0 in favor of
+        `mode_time` (see below).
+    mode_time : str
         ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
         imaginary part or absolute value of the time data is plotted.
         ``'imag'`` and ``'abs'``` can only be used for complex Signals.
@@ -378,6 +388,10 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode_freq : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -399,15 +413,15 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
         ax = _line._time_freq(signal.flatten(), dB_time, dB_freq,
                               log_prefix_time, log_prefix_freq,
                               log_reference, freq_scale, unit, ax,
-                              mode=mode, side=side,
-                              **kwargs)
+                              mode_time=mode_time, side=side,
+                              mode_freq=mode_freq, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'time_freq', dB_time=dB_time, dB_freq=dB_freq,
         log_prefix_time=log_prefix_time, log_prefix_freq=log_prefix_freq,
         log_reference=log_reference, xscale=freq_scale, unit_time=unit,
-        mode=mode, side=side)
+        mode_time=mode_time, side=side, mode_freq=mode_freq)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -417,7 +431,7 @@ def time_freq(signal, dB_time=False, dB_freq=True, log_prefix_time=20,
 
 def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
                freq_scale='log', deg=False, unwrap=False, ax=None,
-               style='light', side='right', **kwargs):
+               style='light', side='right', mode='abs', **kwargs):
     """Plot the magnitude and phase spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``angle(signal.freq)`` and passes keyword
@@ -463,6 +477,10 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are forwarded to matplotlib.pyplot.plot
 
@@ -483,13 +501,13 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax = _line._freq_phase(signal.flatten(), dB, log_prefix, log_reference,
                                freq_scale, deg, unwrap, ax, side=side,
-                               **kwargs)
+                               mode=mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_phase', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, xscale=freq_scale, deg=deg,
-        unwrap=unwrap, side=side)
+        unwrap=unwrap, side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
@@ -499,7 +517,7 @@ def freq_phase(signal, dB=True, log_prefix=None, log_reference=1,
 
 def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
                      unit="s", freq_scale='log', ax=None, style='light',
-                     side='right', **kwargs):
+                     side='right', mode='abs', **kwargs):
     """Plot the magnitude and group delay spectrum (2 by 1 subplot).
 
     Plots ``abs(signal.freq)`` and ``pyfar.dsp.group_delay(signal.freq)`` and
@@ -553,6 +571,10 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
         frequencies, or ``'left'`` to plot the left-sided spectrum containing
         the negative frequencies (only possible for complex Signals). The
         default is ``'right'``.
+    mode : str, optional
+        ``'real'``, ``'imag'``, or ``'abs'`` to specify if the real part,
+        imaginary part or absolute value of the spectrum is plotted. The
+        default is ``real``.
     **kwargs
         Keyword arguments that are passed to :py:func:`matplotlib.pyplot.plot`.
 
@@ -573,13 +595,13 @@ def freq_group_delay(signal, dB=True, log_prefix=None, log_reference=1,
     with context(style):
         ax = _line._freq_group_delay(
             signal.flatten(), dB, log_prefix, log_reference,
-            unit, freq_scale, ax, side=side, **kwargs)
+            unit, freq_scale, ax, side=side, mode=mode, **kwargs)
 
     # manage interaction
     plot_parameter = ia.PlotParameter(
         'freq_group_delay', dB_freq=dB, log_prefix_freq=log_prefix,
         log_reference=log_reference, unit_gd=unit, xscale=freq_scale,
-        side=side)
+        side=side, mode_freq=mode)
     interaction = ia.Interaction(
         signal, ax, None, style, plot_parameter, **kwargs)
     ax[0].interaction = interaction
