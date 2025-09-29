@@ -1,4 +1,4 @@
-from pyfar.classes._pyfar_base import _PyfarBase
+from pyfar.classes._PyfarBase import _PyfarBase
 
 class Dummy(_PyfarBase):
     """
@@ -18,6 +18,7 @@ def test_comment_setter():
     """Test the comment.setter."""
 
     instance = Dummy()
+    assert instance.comment == ''
     instance.comment = "Dummy #2"
     assert instance.comment == "Dummy #2"
 
