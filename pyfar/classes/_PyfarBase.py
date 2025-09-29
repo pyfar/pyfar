@@ -16,7 +16,7 @@ class _PyfarBase(ABC):
     must follow.
     """
 
-    def __init__(self, comment=""):
+    def __init__(self, comment: str=""):
             self._comment = comment
 
     @property
@@ -25,7 +25,7 @@ class _PyfarBase(ABC):
         return self._comment
 
     @comment.setter
-    def comment(self, comment):
+    def comment(self, comment: str):
         """Set comment."""
         if not isinstance(comment, str):
             raise TypeError("Comment has to be of type string.")
