@@ -693,7 +693,6 @@ def fractional_octave_frequencies_exact(
     Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
 
     indices = np.arange(-Nmin, Nmax+1)
-    print(indices)
     if num_fractions % 2 != 0:
         # IEC 61260-1 Eq. (2)
         center_frequencies = ref_freq * (G)**(indices / num_fractions)
