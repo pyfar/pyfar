@@ -162,10 +162,7 @@ class Coordinates():
         ``""``, which initializes an empty string.
     """
 
-    _x: np.array = np.empty
-    _y: np.array = np.empty
-    _z: np.array = np.empty
-    _weights: np.array = None
+    _data: np.array = np.empty
     _comment: str = None
 
     def __init__(
@@ -178,11 +175,10 @@ class Coordinates():
         # init empty object
         super(Coordinates, self).__init__()
 
-        # init cartesian coordinates
-        self._set_points(x, y, z)
+        # init cartesian coordinates and weights
+        self._set_points_weights(x, y, z, weights)
 
         # save meta data
-        self._set_weights(weights)
         self._comment = comment
 
     @classmethod
@@ -427,12 +423,14 @@ class Coordinates():
     @property
     def weights(self):
         """Get sampling weights."""
-        return self._weights
+        if self._data.shape[-1] == 3:
+            return None
+        return self._data[..., 3].copy()
 
     @weights.setter
     def weights(self, value):
         """Set sampling weights."""
-        self._set_weights(value)
+        self._set_points_weights(self.x, self.y, self.z, value)
 
     @property
     def comment(self):
@@ -455,8 +453,8 @@ class Coordinates():
         The channel shape gives the shape of the coordinate points excluding
         the last dimension, which is always 3.
         """
-        if self._x.size:
-            return self._x.shape
+        if self.x.size:
+            return self.x.shape
         else:
             return (0,)
 
@@ -468,8 +466,8 @@ class Coordinates():
         The channel dimension gives the number of dimensions of the coordinate
         points excluding the last dimension.
         """
-        if self._x.size:
-            return self._x.ndim
+        if self.x.size:
+            return self.x.ndim
         else:
             return 0
 
@@ -481,7 +479,7 @@ class Coordinates():
         The channel size gives the number of points stored in the coordinates
         object.
         """
-        return self._x.size
+        return self.x.size
 
     @property
     def cartesian(self):
@@ -496,7 +494,8 @@ class Coordinates():
 
     @cartesian.setter
     def cartesian(self, value):
-        self._set_points(value[..., 0], value[..., 1], value[..., 2])
+        self._set_points_weights(
+            value[..., 0], value[..., 1], value[..., 2], self.weights)
 
     @property
     def spherical_elevation(self):
@@ -518,7 +517,7 @@ class Coordinates():
             value[..., 1], -np.pi/2, np.pi/2, 'elevation angle')
         x, y, z = sph2cart(
             value[..., 0], np.pi / 2 - value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._set_points_weights(x, y, z, self.weights)
 
     @property
     def spherical_colatitude(self):
@@ -539,7 +538,7 @@ class Coordinates():
         value[..., 1] = _check_array_limits(
             value[..., 1], 0, np.pi, 'colatitude angle')
         x, y, z = sph2cart(value[..., 0], value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._set_points_weights(x, y, z, self.weights)
 
     @property
     def spherical_side(self):
@@ -561,7 +560,7 @@ class Coordinates():
             value[..., 0], -np.pi/2, np.pi/2, 'polar angle')
         x, z, y = sph2cart(
             value[..., 1], np.pi / 2 - value[..., 0], value[..., 2])
-        self._set_points(x, y, z)
+        self._set_points_weights(x, y, z, self.weights)
 
     @property
     def spherical_front(self):
@@ -581,7 +580,7 @@ class Coordinates():
         value[..., 1] = _check_array_limits(
             value[..., 1], 0, np.pi, 'frontal angle')
         y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._set_points_weights(x, y, z, self.weights)
 
     @property
     def cylindrical(self):
@@ -598,7 +597,7 @@ class Coordinates():
     @cylindrical.setter
     def cylindrical(self, value):
         x, y, z = cyl2cart(value[..., 0], value[..., 1], value[..., 2])
-        self._set_points(x, y, z)
+        self._set_points_weights(x, y, z, self.weights)
 
     @property
     def x(self):
@@ -607,11 +606,11 @@ class Coordinates():
         (:math:`-\infty` < x < :math:`\infty`).
         """
         self._check_empty()
-        return self._x.copy()
+        return self._data[..., 0].copy()
 
     @x.setter
     def x(self, value):
-        self._set_points(value, self.y, self.z)
+        self._set_points_weights(value, self.y, self.z, self.weights)
 
     @property
     def y(self):
@@ -620,11 +619,11 @@ class Coordinates():
         (:math:`-\infty` < y < :math:`\infty`).
         """
         self._check_empty()
-        return self._y.copy()
+        return self._data[..., 1].copy()
 
     @y.setter
     def y(self, value):
-        self._set_points(self.x, value, self.z)
+        self._set_points_weights(self.x, value, self.z, self.weights)
 
     @property
     def z(self):
@@ -633,11 +632,11 @@ class Coordinates():
         (:math:`-\infty` < z < :math:`\infty`).
         """
         self._check_empty()
-        return self._z.copy()
+        return self._data[..., 2].copy()
 
     @z.setter
     def z(self, value):
-        self._set_points(self.x, self.y, value)
+        self._set_points_weights(self.x, self.y, value, self.weights)
 
     @property
     def rho(self):
@@ -1266,10 +1265,12 @@ class Coordinates():
         points = rot.apply(self.cartesian.reshape((self.csize, 3)), inverse)
 
         # set points
-        self._set_points(
+        self._set_points_weights(
             points[:, 0].reshape(shape),
             points[:, 1].reshape(shape),
-            points[:, 2].reshape(shape))
+            points[:, 2].reshape(shape),
+            self.weights,
+        )
 
     def copy(self):
         """Return a deep copy of the Coordinates object."""
@@ -1286,7 +1287,7 @@ class Coordinates():
         obj.__dict__.update(obj_dict)
         return obj
 
-    def _set_points(self, x, y, z):
+    def _set_points_weights(self, x, y, z, weights):
         """
         Convert all points into at least 1d numpy arrays and broadcast them
         to the same shape by calling ``_check_points``,
@@ -1306,11 +1307,18 @@ class Coordinates():
         """
         # check input
         x, y, z = self._check_points(x, y, z)
+        weights = self._check_weights(weights, x.shape)
 
         # set values
-        self._x = x
-        self._y = y
-        self._z = z
+        if weights is None:
+            self._data = np.stack(
+                [x, y, z],
+                axis=-1)
+        else:
+            self._data = np.stack(
+                [x, y, z, weights],
+                axis=-1)
+
 
     def _check_points(self, x, y, z):
         """
@@ -1357,25 +1365,7 @@ class Coordinates():
 
         return x, y, z
 
-    def _set_weights(self, weights):
-        """
-        If not None convert to float64 numpy array and check for size.
-
-        Parameters
-        ----------
-        weights : array like, number
-            the weights for each point.
-
-        Set self._weights, which is an atleast_1d numpy array of shape
-        [L,M,...,N].
-        """
-        # check weights and convert to numpy array if not None
-        weights = self._check_weights(weights)
-
-        # set class variable
-        self._weights = weights
-
-    def _check_weights(self, weights):
+    def _check_weights(self, weights, cshape=None):
         """
         Convert weights into float64 numpy array and check versus the csize.
         It will be reshaped to the cshape if the csize matches.
@@ -1384,6 +1374,9 @@ class Coordinates():
         ----------
         weights : array like, number
             the weights for each point, should be of size of self.csize.
+        cshape : tuple, None
+            The shape to which the weights should be reshaped. If None,
+            self.cshape is used.
 
         Returns
         -------
@@ -1398,10 +1391,13 @@ class Coordinates():
         # cast to np.array
         weights = np.asarray(weights, dtype=np.float64)
 
-        # reshape according to self._points
-        assert weights.size == self.csize, \
-            "weights must have same size as self.csize"
-        weights = weights.reshape(self.cshape)
+        # reshape to cshape
+        cshape = cshape if cshape is not None else self.cshape
+        try:
+            weights = weights.reshape(cshape)
+        except ValueError as e:
+            raise ValueError(
+                "weights cannot be reshaped to self.cshape") from e
 
         return weights
 
@@ -1417,13 +1413,10 @@ class Coordinates():
         """Return copied slice of Coordinates object at index."""
 
         new = self.copy()
-        # slice points
-        new._x = np.atleast_1d(new._x[index])
-        new._y = np.atleast_1d(new._y[index])
-        new._z = np.atleast_1d(new._z[index])
-        # slice weights
-        if new._weights is not None:
-            new._weights = new._weights[index]
+        # slice data
+        sliced_weights = None if self.weights is None else self.weights[index]
+        new._set_points_weights(
+            new.x[index], new.y[index], new.z[index], sliced_weights)
 
         return new
 
@@ -1445,7 +1438,7 @@ class Coordinates():
         _repr = obj + "\n"
 
         # check for sampling weights
-        if self._weights is None:
+        if self.weights is None:
             _repr += "\nDoes not contain sampling weights"
         else:
             _repr += "\nContains sampling weights"
@@ -1460,12 +1453,9 @@ class Coordinates():
         """Check for equality of two objects."""
         if self.cshape != other.cshape:
             return False
-        eq_x = self._x == other._x
-        eq_y = self._y == other._y
-        eq_z = self._z == other._z
-        eq_weights = self._weights == other._weights
+        eq_data = self._data == other._data
         eq_comment = self._comment == other._comment
-        return (eq_x & eq_y & eq_z).all() & eq_weights & eq_comment
+        return eq_data.all() & eq_comment
 
     def __add__(self, other):
         """Add two numbers/Coordinates objects."""
