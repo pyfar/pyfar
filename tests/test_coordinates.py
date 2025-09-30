@@ -70,7 +70,7 @@ def test_coordinates_init_val_and_weights():
     npt.assert_allclose(coords.weights, [.5, .5])
 
     # incorrect number of weights
-    with pytest.raises(ValueError, match="weights cannot be reshaped"):
+    with pytest.raises(ValueError, match="weights cannot be broadcasted"):
         Coordinates([1], 0, 0, weights=[.5, 0.5])
 
 
