@@ -453,8 +453,8 @@ class Coordinates():
         The channel shape gives the shape of the coordinate points excluding
         the last dimension, which is always 3.
         """
-        if self.x.size:
-            return self.x.shape
+        if self.csize:
+            return self._data[..., 0].shape
         else:
             return (0,)
 
@@ -466,8 +466,8 @@ class Coordinates():
         The channel dimension gives the number of dimensions of the coordinate
         points excluding the last dimension.
         """
-        if self.x.size:
-            return self.x.ndim
+        if self._data[..., 0].size:
+            return self._data[..., 0].ndim
         else:
             return 0
 
@@ -479,7 +479,7 @@ class Coordinates():
         The channel size gives the number of points stored in the coordinates
         object.
         """
-        return self.x.size
+        return self._data[..., 0].size
 
     @property
     def cartesian(self):
@@ -489,8 +489,7 @@ class Coordinates():
         see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
         """
-        return np.atleast_2d(np.moveaxis(
-            np.array([self.x, self.y, self.z]), 0, -1))
+        return self._data[..., :3].copy()
 
     @cartesian.setter
     def cartesian(self, value):
@@ -1290,8 +1289,9 @@ class Coordinates():
     def _set_points_weights(self, x, y, z, weights):
         """
         Convert all points into at least 1d numpy arrays and broadcast them
-        to the same shape by calling ``_check_points``,
-        then assign the points to self._x, self._y and self._z.
+        to the same shape by calling ``_check_points``, than check the weights
+        by calling ``_check_weights`` and reshape them to the cshape if needed.
+        Finally ``_data`` is set to ``y``, ``x``, ``z`` and ``weights``.
 
         Parameters
         ----------
@@ -1301,9 +1301,8 @@ class Coordinates():
             Second coordinate of the points in cartesian.
         z : array like, number
             Third coordinate of the points in cartesian.
-
-        Set self._x, self._y and self._z, which are at least 1d numpy arrays
-        of self.cshape.
+        weights : array like, number, None
+            the weights for each point, should be of broadcastable.
         """
         # check input
         x, y, z = self._check_points(x, y, z)
@@ -1392,12 +1391,13 @@ class Coordinates():
         weights = np.asarray(weights, dtype=np.float64)
 
         # reshape to cshape
-        cshape = cshape if cshape is not None else self.cshape
+        cshape = self.cshape if cshape is None else cshape
         try:
-            weights = weights.reshape(cshape)
+            weights = np.broadcast_to(weights, cshape)
+            weights.setflags(write=True)
         except ValueError as e:
             raise ValueError(
-                "weights cannot be reshaped to self.cshape") from e
+                "weights cannot be broadcasted to self.cshape") from e
 
         return weights
 
@@ -1414,9 +1414,7 @@ class Coordinates():
 
         new = self.copy()
         # slice data
-        sliced_weights = None if self.weights is None else self.weights[index]
-        new._set_points_weights(
-            new.x[index], new.y[index], new.z[index], sliced_weights)
+        new._data = np.atleast_2d(new._data[index])
 
         return new
 
