@@ -1291,7 +1291,7 @@ class Coordinates():
         Convert all points into at least 1d numpy arrays and broadcast them
         to the same shape by calling ``_check_points``, than check the weights
         by calling ``_check_weights`` and reshape them to the cshape if needed.
-        Finally ``_data`` is set to ``y``, ``x``, ``z`` and ``weights``.
+        Finally ``_data`` is set to ``x``, ``y``, ``z`` and ``weights``.
 
         Parameters
         ----------
