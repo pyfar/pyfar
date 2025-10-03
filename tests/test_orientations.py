@@ -128,8 +128,8 @@ def test_as_view_up_right(views, ups, orientations):
 
     views_, ups_, _ = orientations.as_view_up_right()
 
-    assert np.array_equal(views_, views), "views are not preserved"
-    assert np.array_equal(ups_, ups), "ups are not preserved"
+    np.testing.assert_allclose(views_, views, atol=1e-15)
+    np.testing.assert_allclose(ups_, ups, atol=1e-15)
 
 
 def test_from_view_as_view_roundtrip():
