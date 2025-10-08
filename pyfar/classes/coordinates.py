@@ -1394,8 +1394,7 @@ class Coordinates():
         # reshape to cshape
         cshape = self.cshape if cshape is None else cshape
         try:
-            weights = np.broadcast_to(weights, cshape)
-            weights.setflags(write=True)
+            weights = np.broadcast_to(weights, cshape).copy()
         except ValueError as e:
             raise ValueError(
                 f"weights cannot be broadcasted cshape {self.cshape}") from e
