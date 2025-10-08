@@ -1397,7 +1397,7 @@ class Coordinates():
             weights.setflags(write=True)
         except ValueError as e:
             raise ValueError(
-                "weights cannot be broadcasted to self.cshape") from e
+                f"weights cannot be broadcasted cshape {self.cshape}") from e
 
         return weights
 
