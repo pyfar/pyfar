@@ -1302,7 +1302,7 @@ class Coordinates():
         z : array like, number
             Third coordinate of the points in cartesian.
         weights : array like, number, None
-            the weights for each point, should be of broadcastable.
+            the weights for each point, should be broadcastable to ``x``, ``y``, ``z``.
         """
         # check input
         x, y, z = self._check_points(x, y, z)
