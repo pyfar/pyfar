@@ -560,6 +560,64 @@ def time_window(signal, interval, window='hann', shape='symmetric',
     else:
         return signal_win
 
+def time_crop(signal, interval, unit='samples'):
+    """This function can be used to crop a signal object.
+
+    Parameters
+    ----------
+    signal : pyfar.Signal
+        Signal object to be cropped.
+
+    interval : array_like
+        Must contain exactly two entries, these specify the beginning and
+        the end of the section to be cropped. The unit of `interval`
+        is specified by the parameter `unit`.
+        See below for more details.
+
+    unit : string, optional
+        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        Time values are rounded to the nearest sample. The default is
+        ``'samples'``.
+
+    Returns
+    -------
+    cropped_signal : pyfar.Signal
+        Cropped signal object.
+
+    """
+    #Check the input
+    if not isinstance(signal, pyfar.Signal):
+        raise TypeError("The parameter signal has to be of type " \
+        "pyfar.Signal.")
+
+    if not isinstance(interval, (list, tuple)):
+        raise TypeError(
+            "The parameter interval has to be of type list or tuple.")
+    if len(interval) != 2:
+        raise ValueError(
+            "The parameter interval must consist of 2 entries.")
+
+    # Convert to samples
+    interval = np.array(interval)
+    if unit == 's':
+        interval = np.round(interval*signal.sampling_rate).astype(int)
+    elif unit == 'samples':
+        interval = interval.astype(int)
+    else:
+        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+
+    #Check the start and the end points
+    start, end = interval
+    if start >= end:
+        raise ValueError("The start point in the parameter interval must" \
+        "be smaller than the end point.")
+
+    start_index = max(start, 0)
+    end_index = min(end, signal.n_samples)
+    time_data = signal.time[:, start_index:end_index]
+    cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
+
+    return cropped_signal
 
 def kaiser_window_beta(A):
     """Return a shape parameter beta to create kaiser window based on desired

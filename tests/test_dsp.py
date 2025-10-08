@@ -682,6 +682,50 @@ def test_time_window_return_window_error():
     with pytest.raises(TypeError, match="boolean"):
         dsp.time_window(sig, interval=(4, 8), return_window='a')
 
+def test_time_crop_signal_types():
+    """Raise TypeError if `signal` is not a pyfar.Signal instance."""
+    signal_1 = pyfar.Signal(np.ones(10), 2)
+    dsp.time_crop(signal_1, interval=(1, 2))
+    signal_2 = "signal"
+    with pytest.raises(TypeError, match='has to be of type'):
+        dsp.time_crop(signal_2, interval=(1, 2))
+
+def test_time_crop_interval_types():
+    """Accept list or tuple for `interval`, raise TypeError otherwise."""
+    signal = pyfar.Signal(np.ones(10), 2)
+    dsp.time_crop(signal, interval=(1, 2))
+    dsp.time_crop(signal, interval=[1, 2])
+    with pytest.raises(TypeError, match='has to be of type'):
+        dsp.time_crop(signal, interval=5)
+
+def test_time_crop_interval_order_error():
+    """Raise ValueError if `interval` start value >= end value."""
+    signal = pyfar.Signal(np.ones(10), 2)
+    with pytest.raises(ValueError, match='smaller than the end point'):
+        dsp.time_crop(signal, interval=[2, 1])
+
+def test_time_crop_interval_entries_error():
+    """Raise ValueError if `interval` does not contain exactly two entries."""
+    signal = pyfar.Signal(np.ones(10), 2)
+    with pytest.raises(ValueError, match='2 entries'):
+        dsp.time_crop(signal, interval=[1, 2, 3])
+
+def test_time_crop_interval_size():
+    """Allow `interval` boundaries outside signal range."""
+    signal = pyfar.Signal(np.ones(10), 2)
+    cropped_signal = dsp.time_crop(signal, interval=[0, 40])
+    cropped_signal = dsp.time_crop(signal, interval=[-1, 2])
+    #If both boundaries are exceeded, the input signal is returned unchanged.
+    cropped_signal = dsp.time_crop(signal, interval=[-1, 40])
+    assert signal == cropped_signal
+
+def test_time_crop_unit_error():
+    """Raise ValueError for invalid `unit` argument."""
+    signal = pyfar.Signal(np.ones(10), 2)
+    with pytest.raises(ValueError, match='but has to be'):
+        dsp.time_crop(signal, interval=[0, 6], unit='seconds')
+    with pytest.raises(ValueError, match='but has to be '):
+        dsp.time_crop(signal, interval=[0, 6], unit=2)
 
 def test_kaiser_window_beta():
     """Test function call."""
