@@ -103,20 +103,19 @@ def frequency_weighting_filter(
 
     .. plot::
 
-        import pyfar as pf
-        import matplotlib.pyplot as plt
-
-        noise = pf.dsp.normalize(pf.signals.noise(10000), domain="freq")
-        weighting_filter = pf.dsp.filter.frequency_weighting_filter(
-            None, "A", sampling_rate=noise.sampling_rate)
-        weighted_noise = weighting_filter.process(noise)
-
-        pf.plot.freq(noise, label="unweighted noise")
-        pf.plot.freq(weighting_filter.impulse_response(10000),
-                    label="weighting filter")
-        pf.plot.freq(weighted_noise, label="A weighted noise")
-        plt.ylim(-45, 5)
-        plt.legend()
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> noise = pf.dsp.normalize(pf.signals.noise(10000), domain="freq")
+        >>> weighting_filter = pf.dsp.filter.frequency_weighting_filter(
+        ...     None, "A", sampling_rate=noise.sampling_rate)
+        >>> weighted_noise = weighting_filter.process(noise)
+        >>> pf.plot.freq(noise, label="unweighted noise")
+        >>> pf.plot.freq(
+        ...     weighting_filter.impulse_response(10000),
+        ...     label="weighting filter")
+        >>> pf.plot.freq(weighted_noise, label="A weighted noise")
+        >>> plt.ylim(-45, 5)
+        >>> plt.legend()
     """
     # check input
     if (signal is None and sampling_rate is None) \

@@ -82,25 +82,23 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
 
     .. plot::
 
-        import pyfar as pf
-        import matplotlib.pyplot as plt
-        import numpy as np
-
-        plot_frequencies = np.logspace(1, 4.5, 100, base=10)
-        weights_A = pf.constants.frequency_weighting_curve(
-            "A", plot_frequencies)
-        weights_C = pf.constants.frequency_weighting_curve(
-            "C", plot_frequencies)
-
-        plt.plot(plot_frequencies, weights_A, label="A weighting")
-        plt.plot(plot_frequencies, weights_C, label="C weighting")
-        plt.semilogx()
-        plt.xlabel("f in Hz")
-        plt.ylabel("Weights in dB")
-        ticks = [10, 30, 100, 300, 1000, 3000, 10000, 30000]
-        plt.xticks(ticks, ticks)
-        plt.grid()
-        plt.legend()
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> plot_frequencies = np.logspace(1, 4.5, 100, base=10)
+        >>> weights_A = pf.constants.frequency_weighting_curve(
+        ...     "A", plot_frequencies)
+        >>> weights_C = pf.constants.frequency_weighting_curve(
+        ...     "C", plot_frequencies)
+        >>> plt.plot(plot_frequencies, weights_A, label="A weighting")
+        >>> plt.plot(plot_frequencies, weights_C, label="C weighting")
+        >>> plt.semilogx()
+        >>> plt.xlabel("f in Hz")
+        >>> plt.ylabel("Weights in dB")
+        >>> ticks = [10, 30, 100, 300, 1000, 3000, 10000, 30000]
+        >>> plt.xticks(ticks, ticks)
+        >>> plt.grid()
+        >>> plt.legend()
     """
     if weighting == "A":
         weights = _calculate_A_weighted_level(np.array(frequencies))
@@ -147,29 +145,25 @@ def frequency_weighting_band_corrections(
 
     .. plot::
 
-        import pyfar as pf
-        import matplotlib.pyplot as plt
-
-        range = (10, 20000)
-        nominals_third, weights_A = pf.constants.frequency_weighting_band_corrections("A", "third", range)
-        nominals_octave, weights_C = pf.constants.frequency_weighting_band_corrections("C", "octave", range)
-
-        # plotting
-        plt.plot(nominals_third, weights_A, "--",
-                c=(0.5, 0.5, 0.5, 0.5))
-        plt.plot(nominals_third, weights_A, "bo",
-                label="A weighting in third bands")
-        plt.plot(nominals_octave, weights_C, "--",
-                c=(0.5, 0.5, 0.5, 0.5))
-        plt.plot(nominals_octave, weights_C, "go",
-                label="C weighting in octave bands")
-        plt.legend()
-        ticks = nominals_octave[::2].astype(int)
-        plt.semilogx()
-        plt.xticks(ticks, ticks)
-        plt.xlabel("f in Hz")
-        plt.ylabel("Corrections in dB")
-        plt.grid()
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> f_range = (10, 20000)
+        >>> nominals_third, weights_A = pf.constants.frequency_weighting_band_corrections(
+        ...     "A", "third", f_range)
+        >>> nominals_octave, weights_C = pf.constants.frequency_weighting_band_corrections(
+        ...     "C", "octave", f_range)
+        >>> # plotting
+        >>> plt.plot(nominals_third, weights_A, "--", c=(0.5, 0.5, 0.5, 0.5))
+        >>> plt.plot(nominals_third, weights_A, "bo", label="A weighting in third bands")
+        >>> plt.plot(nominals_octave, weights_C, "--", c=(0.5, 0.5, 0.5, 0.5))
+        >>> plt.plot(nominals_octave, weights_C, "go", label="C weighting in octave bands")
+        >>> plt.legend()
+        >>> ticks = nominals_octave[::2].astype(int)
+        >>> plt.semilogx()
+        >>> plt.xticks(ticks, ticks)
+        >>> plt.xlabel("f in Hz")
+        >>> plt.ylabel("Corrections in dB")
+        >>> plt.grid()
     """ # noqa: E501
     if weighting == "A":
         all_weights = _THIRDBAND_WEIGHTINGS_A
