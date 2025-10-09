@@ -145,7 +145,7 @@ def frequency_weighting_filter(
 
 def _design_frequency_weighting_filter(sampling_rate: float,
                                        target_weighting: Literal["A", "C"]="A",
-                                       n_frequencies=100,
+                                       n_bins=100,
                                        error_weighting: Optional[Callable[[
                                            np.ndarray], np.ndarray]] = None,
                                        **kwargs,
@@ -227,7 +227,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
 
     # build the cost function (as a closure, so that passing it to
     # least_squares() is easier and cleaner)
-    frequencies = np.logspace(1, np.log10(sampling_rate/2), n_frequencies)
+    frequencies = np.logspace(1, np.log10(sampling_rate/2), n_bins)
     target_levels = pfc.frequency_weighting_curve(target_weighting,
                                                   frequencies)
 
