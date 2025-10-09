@@ -14,7 +14,7 @@ _C_1000 = -0.062
 # Constants for nominal band corrections, taken from table 3 in IEC 61672-1.
 # Could be replaced/combined with a dedicated frequency_bands_nominal()
 # function later.
-_NOMINAL_THIRDBAND_FREQUENCIES = np.array([
+_NOMINAL_THIRD_OCTAVE_BAND_FREQUENCIES = np.array([
     10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
     400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
     8000, 10000, 12500, 16000, 20000,
@@ -173,10 +173,10 @@ def frequency_weighting_band_corrections(
         raise ValueError("Allowed literals for weighting are 'A' and 'C'")
 
     if bands == "octave":
-        nominals = _NOMINAL_THIRDBAND_FREQUENCIES[2::3]
+        nominals = _NOMINAL_THIRD_OCTAVE_BAND_FREQUENCIES[2::3]
         band_weights = all_weights[2::3]
     elif bands == "third":
-        nominals =_NOMINAL_THIRDBAND_FREQUENCIES
+        nominals =_NOMINAL_THIRD_OCTAVE_BAND_FREQUENCIES
         band_weights = all_weights
     else:
         raise ValueError("Allowed literals for bands are 'octave' and 'third'")
