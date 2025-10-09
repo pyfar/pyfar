@@ -21,7 +21,7 @@ _C_WEIGHTING_POLES = [_F_1, _F_1, _F_4, _F_4]
 def frequency_weighting_filter(
         signal,
         target_weighting: Literal["A", "C"]="A",
-        n_frequencies=100,
+        n_bins=100,
         error_weighting: Optional[Callable[[
             np.ndarray], np.ndarray]] = None,
         sampling_rate: Optional[float] = None,
@@ -58,7 +58,7 @@ def frequency_weighting_filter(
         Specifies which frequency weighting curve to approximate.
         Must be either ``"A"`` or ``"C"``. The default is ``"A"``.
 
-    n_frequencies: int, optional
+    n_bins: int, optional
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
@@ -127,7 +127,7 @@ def frequency_weighting_filter(
         sampling_rate: float = signal.sampling_rate
 
     sos = _design_frequency_weighting_filter(sampling_rate, target_weighting,
-                                             n_frequencies, error_weighting,
+                                             n_bins, error_weighting,
                                              **kwargs)
     filt = pf.FilterSOS([sos], sampling_rate)
     filt.comment = (f"Frequency weighting SOS filter of order {filt.order} "
@@ -178,7 +178,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
         Specifies which frequency weighting curve to approximate.
         Must be either "A" or "C". The default is "A".
 
-    n_frequencies: int, optional
+    n_bins: int, optional
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
