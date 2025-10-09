@@ -73,7 +73,7 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
 
     Returns
     -------
-    weights: NDArray
+    weights: numpy.ndarray[float]
         The weights in dB in the same shape as `frequencies`.
 
     Examples
@@ -133,10 +133,10 @@ def frequency_weighting_band_corrections(
 
     Returns
     -------
-    nominal_frequencies: NDArray
+    nominal_frequencies: numpy.ndarray[float]
         The nominal center frequencies included in the given range.
 
-    weights: NDArray
+    weights: numpy.ndarray[float]
         The correction values in dB for the specific frequency weighting.
 
     Examples

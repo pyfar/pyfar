@@ -206,7 +206,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
 
     Returns
     -------
-    sos_coefficients: NDarray
+    sos_coefficients: numpy.ndarray[float]
         The coefficients of the designed filter in scipy's sos format.
     """
 
