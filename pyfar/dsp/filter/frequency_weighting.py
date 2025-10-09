@@ -29,6 +29,7 @@ def frequency_weighting_filter(
         ):
     """
     Create and apply an A or C weighting filter.
+    
     The created SOS filter approximates the A or C weighting defined
     in IEC/DIN-EN 61672-1.
 
