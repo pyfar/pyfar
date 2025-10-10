@@ -1397,7 +1397,7 @@ class Coordinates():
             weights = np.broadcast_to(weights, cshape).copy()
         except ValueError as e:
             raise ValueError(
-                f"weights cannot be broadcasted cshape {self.cshape}") from e
+                f"weights cannot be broadcasted cshape {cshape}") from e
 
         return weights
 
