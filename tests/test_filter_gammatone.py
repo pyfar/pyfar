@@ -206,3 +206,36 @@ def test_erb_frequencies_assertions():
     # resolution must be > 0
     with pytest.raises(ValueError, match="Resolution must be larger"):
         pf.dsp.filter.erb_frequencies([0, 1], 0)
+
+
+def test_impulse_response():
+    """Test the impulse response of GammatoneBands."""
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+    irs = GFB.impulse_response()
+    ir_real, ir_imag = irs
+
+    assert isinstance(irs, tuple)
+    assert len(irs) == 2
+    assert type(ir_real) is pf.Signal
+    assert type(ir_imag) is pf.Signal
+    assert ir_real.cshape == (GFB.n_bands, 1)
+    assert ir_imag.cshape == (GFB.n_bands, 1)
+
+
+def test_impulse_response_warning():
+    """Test that a warning is raised if n_samples is too small."""
+    GFB = pf.dsp.filter.GammatoneBands([0, 22050])
+    with pytest.warns(
+            UserWarning,
+            match="n_samples should be at least as long as the filter"):
+        GFB.impulse_response(n_samples=100)
+
+
+def test_impulse_response_length():
+    """Test the minimum impulse response length."""
+    GFB = pf.dsp.filter.GammatoneBands((100, 200))
+
+    assert type(GFB.minimum_impulse_response_length()) is np.ndarray
+    assert GFB.minimum_impulse_response_length().shape == (GFB.n_bands,)
+    # test the impulse response length with specified length
+    assert GFB.impulse_response(2000)[0].n_samples == 2000

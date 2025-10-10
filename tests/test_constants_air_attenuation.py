@@ -25,7 +25,7 @@ def test_air_attenuation_after_table_iso(
     """
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity)
-    npt.assert_allclose(alpha.freq, expected, atol=1e-3)
+    npt.assert_allclose(alpha, expected, atol=1e-3)
     npt.assert_allclose(accuracy.freq, expected_accuracy)
 
 
@@ -54,11 +54,10 @@ def test_air_attenuation_array(
     alpha, m, accuracy = pf.constants.air_attenuation(
         temperature, frequency, relative_humidity, atmospheric_pressure)
     # test air attenuation alpha
-    expected = 2.16e1*1e-3 + np.zeros_like(alpha.freq[..., 0])
-    npt.assert_allclose(alpha.freq[..., 0], expected, atol=1e-3)
-    npt.assert_allclose(alpha.frequencies, frequency, atol=1e-3)
+    expected = 2.16e1*1e-3 + np.zeros_like(alpha[..., 0])
+    npt.assert_allclose(alpha[..., 0], expected, atol=1e-3)
     # test air attenuation factor m
-    expected = 2.16e1*1e-3/4.34 + np.zeros_like(alpha.freq[..., 0])
+    expected = 2.16e1*1e-3/4.34 + np.zeros_like(alpha[..., 0])
     npt.assert_allclose(m.freq[..., 0], expected, atol=1e-3)
     npt.assert_allclose(m.frequencies, frequency, atol=1e-3)
     # test accuracy

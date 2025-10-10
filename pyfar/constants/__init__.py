@@ -5,6 +5,7 @@ from typing import Final
 from .constants import (
     saturation_vapor_pressure_magnus,
     density_of_air,
+    fractional_octave_filter_tolerance,
 )
 
 from .speed_of_sound import (
@@ -31,6 +32,7 @@ __all__ = [
     'air_attenuation',
     'frequency_weighting_curve',
     'frequency_weighting_band_corrections',
+    'fractional_octave_filter_tolerance',
 ]
 
 

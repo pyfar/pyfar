@@ -46,57 +46,49 @@ plots = {
         'shortcut': sc_plot["time"]["key"][0],
         'xlabel': ['Time in s'],
         'ylabel': ['Amplitude'],
-        'cblabel': [None],
-        'complex': 'time'},  # 'time' or 'freq' to indicate the effect
-                             # of the shortcut 'shift+m'
+        'cblabel': [None]},
     'freq': {
         'type': 'line',
         'n_plots': 1,
         'shortcut': sc_plot["freq"]["key"][0],
         'xlabel': ['Frequency in Hz'],
         'ylabel': ['Magnitude in dB'],
-        'cblabel': [None],
-        'complex': 'freq'},
+        'cblabel': [None]},
     'phase': {
         'type': 'line',
         'n_plots': 1,
         'shortcut': sc_plot["phase"]["key"][0],
         'xlabel': ['Frequency in Hz'],
         'ylabel': ['Phase in radians'],
-        'cblabel': [None],
-        'complex': 'freq'},
+        'cblabel': [None]},
     'group_delay': {
         'type': 'line',
         'n_plots': 1,
         'shortcut': sc_plot["group_delay"]["key"][0],
         'xlabel': ['Frequency in Hz'],
         'ylabel': ['Group delay in s'],
-        'cblabel': [None],
-        'complex': 'freq'},
+        'cblabel': [None]},
     'time_freq': {
         'type': 'line',
         'n_plots': 2,
         'shortcut': sc_plot["time_freq"]["key"][0],
         'xlabel': ['Time in s', 'Frequency in Hz'],
         'ylabel': ['Amplitude', 'Magnitude in dB'],
-        'cblabel': [None],
-        'complex': 'time'},
+        'cblabel': [None]},
     'freq_phase': {
         'type': 'line',
         'n_plots': 2,
         'shortcut': sc_plot["freq_phase"]["key"][0],
         'xlabel':  ['Frequency in Hz', 'Frequency in Hz'],
         'ylabel': ['Magnitude in dB', 'Phase in radians'],
-        'cblabel': [None],
-        'complex': 'freq'},
+        'cblabel': [None]},
     'freq_group_delay': {
         'type': 'line',
         'n_plots': 2,
         'shortcut': sc_plot["freq_group_delay"]["key"][0],
         'xlabel': ['Frequency in Hz', 'Frequency in Hz'],
         'ylabel': ['Magnitude in dB', 'Group delay in s'],
-        'cblabel': [None],
-        'complex': 'freq'},
+        'cblabel': [None]},
     # 2D plots
     'time_2d': {
         'type': '2d',
@@ -104,69 +96,61 @@ plots = {
         'shortcut': sc_plot["time"]["key"][0],
         'xlabel': ['Indices'],
         'ylabel': ['Time in s'],
-        'cblabel': ['Amplitude'],
-        'complex': 'time'},
+        'cblabel': ['Amplitude']},
     'freq_2d': {
         'type': '2d',
         'n_plots': 1,
         'shortcut': sc_plot["freq"]["key"][0],
         'xlabel': ['Indices'],
         'ylabel': ['Frequency in Hz'],
-        'cblabel': ['Magnitude in dB'],
-        'complex': 'freq'},
+        'cblabel': ['Magnitude in dB']},
     'phase_2d': {
         'type': '2d',
         'n_plots': 1,
         'shortcut': sc_plot["phase"]["key"][0],
         'xlabel': ['Indices'],
         'ylabel': ['Frequency in Hz'],
-        'cblabel': ['Phase in radians'],
-        'complex': 'freq'},
+        'cblabel': ['Phase in radians']},
     'group_delay_2d': {
         'type': '2d',
         'n_plots': 1,
         'shortcut': sc_plot["group_delay"]["key"][0],
         'xlabel': ['Indices'],
         'ylabel': ['Frequency in Hz'],
-        'cblabel': ['Group delay in s'],
-        'complex': 'freq'},
+        'cblabel': ['Group delay in s']},
     'spectrogram': {
         'type': '2d',
         'n_plots': 1,
         'shortcut': sc_plot["spectrogram"]["key"][0],
         'xlabel': ['Time in s'],
         'ylabel': ['Frequency in Hz'],
-        'cblabel': ['Magnitude in dB'],
-        'complex': 'freq'},
+        'cblabel': ['Magnitude in dB']},
     'time_freq_2d': {
         'type': '2d',
-        'n_plots': 1,
+        'n_plots': 2,
         'shortcut': sc_plot["time_freq"]["key"][0],
         'xlabel': ['Indices', 'Indices'],
         'ylabel': ['Time in s', 'Frequency in Hz'],
-        'cblabel': ['Amplitude', 'Magnitude in dB'],
-        'complex': 'time'},
+        'cblabel': ['Amplitude', 'Magnitude in dB']},
     'freq_phase_2d': {
         'type': '2d',
-        'n_plots': 1,
+        'n_plots': 2,
         'shortcut': sc_plot["freq_phase"]["key"][0],
         'xlabel': ['Indices', 'Indices'],
         'ylabel': ['Frequency in Hz', 'Frequency in Hz'],
-        'cblabel': ['Magnitude in dB', 'Phase in radians'],
-        'complex': 'freq'},
+        'cblabel': ['Magnitude in dB', 'Phase in radians']},
     'freq_group_delay_2d': {
         'type': '2d',
-        'n_plots': 1,
+        'n_plots': 2,
         'shortcut': sc_plot["freq_group_delay"]["key"][0],
         'xlabel': ['Indices', 'Indices'],
         'ylabel': ['Frequency in Hz', 'Frequency in Hz'],
-        'cblabel': ['Magnitude in dB', 'Group delay in s'],
-        'complex': 'freq'},
+        'cblabel': ['Magnitude in dB', 'Group delay in s']},
     }
 
 # define non-plot functions in the module. They are skipped by tests using
 # `ismember` to get all functions from the plot module
-non_plot_functions = ['context', 'custom_subplots']
+non_plot_functions = ['context', 'custom_subplots', 'rename_arg']
 
 
 def test_event_emu():
@@ -477,7 +461,7 @@ def test_toggle_orientation_2d_plots():
 
     for function in getmembers(pf.plot.two_d, isfunction):
         # exclude functions that do not support interaction
-        if function[0] in ["context", "spectrogram"]:
+        if function[0] in non_plot_functions + ["spectrogram"]:
             continue
 
         # plot
@@ -673,12 +657,77 @@ def test_cycle_plot_styles():
 @pytest.mark.parametrize("function",
                          getmembers(pf.plot.line, isfunction) +
                          getmembers(pf.plot.two_d, isfunction))
-def test_toggle_display_of_complex_signals(function):
+def test_toggle_side_of_complex_signals(function):
+    """Test toggling the right/left side of double sided spectra."""
 
     # dont run test for non-plot functions and functions that plot on more
     # than one axis
     if function[0] in non_plot_functions or \
-            not plots[function[0]]['complex'] or \
+            plots[function[0]]['n_plots'] != 1:
+        return
+
+    # test only on functions with a frequency axis
+    if function[0].endswith(('2d', 'spectrogram')):
+        label = plots[function[0]]['ylabel'][0]
+    else:
+        label = plots[function[0]]['xlabel'][0]
+
+    if label != 'Frequency in Hz':
+        return
+
+    # signal for plotting
+    delays = 2 if function[0] == 'spectrogram' else [0, 2]
+    signal = pf.signals.impulse(2048, delays)
+    signal.complex = True
+
+    # Use create figure to specify the plot backend
+    create_figure()
+
+    # plot
+    ax = function[1](signal)
+
+    # get label sufffix
+    suffixes = ['(right)', '(left)']
+
+    # test label after toggling the mode
+    key = sc_ctr["toggle_side"]["key"][0]
+    for tt in range(len(suffixes) + 1):
+
+        # Get interaction object:
+        # axis is first return parameter if function returns multiple
+        ax = ax[0] if isinstance(ax, (tuple)) else ax
+        # interaction axis is first axis if functions returns multiple
+        ax = ax[0] if isinstance(ax, (np.ndarray, list)) else ax
+        interaction = ax.interaction
+
+        # get label of interest
+        # (only compare label of first plot if there is more than one axis)
+        if function[0].endswith(('2d', 'spectrogram')):
+            axis = np.atleast_1d(interaction.all_axes)
+            label_test = axis[0].get_ylabel()
+        else:
+            axis = np.atleast_1d(interaction.all_axes)
+            label_test = axis[0].get_xlabel()
+
+        # test label
+        assert f'{label} {suffixes[tt % len(suffixes)]}' == label_test
+
+        # trigger interaction
+        interaction.select_action(ia.EventEmu(key))
+
+    plt.close("all")
+
+
+@pytest.mark.parametrize("function",
+                         getmembers(pf.plot.line, isfunction) +
+                         getmembers(pf.plot.two_d, isfunction))
+def test_toggle_mode_of_complex_signals(function):
+    """Test toggling the mode (abs, real, imag) of complex data."""
+
+    # Only run tests on function that support the functionality.
+    # Don't test functions combined functions with multiple plots.
+    if function[0] in non_plot_functions or \
+            not function[0].startswith(('time', 'freq')) or \
             plots[function[0]]['n_plots'] != 1:
         return
 
@@ -693,14 +742,18 @@ def test_toggle_display_of_complex_signals(function):
     ax = function[1](signal)
 
     # get post-fix
-    if plots[function[0]]['complex'] == 'time':
-        suffixes = ['(real)', '(imaginary)', '(absolute)']
-    elif plots[function[0]]['complex'] == 'freq':
-        suffixes = ['(right)', '(left)']
+    if function[0].startswith('time'):
+        labels_ref = ['Amplitude (real)',
+                      'Amplitude (imaginary)',
+                      'Amplitude (absolute)']
+    elif function[0].startswith('freq'):
+        labels_ref = ['Magnitude in dB',
+                      'Spectrum (real) in dB',
+                      'Spectrum (imaginary) in dB']
 
     # test label after toggling the mode
     key = sc_ctr["toggle_mode"]["key"][0]
-    for tt in range(len(suffixes) + 1):
+    for tt in range(len(labels_ref) + 1):
 
         # Get interaction object:
         # axis is first return parameter if function returns multiple
@@ -711,31 +764,15 @@ def test_toggle_display_of_complex_signals(function):
 
         # get label of interest
         # (only compare label of first plot if there is more than one axis)
-        if plots[function[0]]['type'] == '2d' and \
-                plots[function[0]]['complex'] == 'time':
-            label_ref = plots[function[0]]['cblabel'][0]
+        if function[0].endswith('2d'):
             axis = np.atleast_1d(interaction.all_bars)
             label_test = axis[0].ax.get_ylabel()
-        elif plots[function[0]]['type'] == '2d' and \
-                plots[function[0]]['complex'] == 'freq':
-            label_ref = plots[function[0]]['ylabel'][0]
-            axis = np.atleast_1d(interaction.all_axes)
-            label_test = axis[0].get_ylabel()
-        elif plots[function[0]]['type'] == 'line' and \
-                plots[function[0]]['complex'] == 'time':
-            label_ref = plots[function[0]]['ylabel'][0]
-            axis = np.atleast_1d(interaction.all_axes)
-            label_test = axis[0].get_ylabel()
-        elif plots[function[0]]['type'] == 'line' and \
-                plots[function[0]]['complex'] == 'freq':
-            label_ref = plots[function[0]]['xlabel'][0]
-            axis = np.atleast_1d(interaction.all_axes)
-            label_test = axis[0].get_xlabel()
         else:
-            raise ValueError(f'Missed to test function {function[0]}')
+            axis = np.atleast_1d(interaction.all_axes)
+            label_test = axis[0].get_ylabel()
 
         # test label
-        assert f'{label_ref} {suffixes[tt % len(suffixes)]}' == label_test
+        assert labels_ref[tt % len(labels_ref)] == label_test
 
         # trigger interaction
         interaction.select_action(ia.EventEmu(key))
