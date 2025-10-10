@@ -72,14 +72,12 @@ def frequency_weighting_filter(
         argument, specifying the normalized frequencies between 0 and 1
         (where 1 is the Nyquist frequency) to weight, and returns a float
         array as output containing the weights.
-        The default value is None, in which case the errors of all
+        By default the errors of all
         (logarithmically spaced) frequencies are equally weighted. This
         usually leads to larger errors for higher frequencies. By passing
         a function that emphasizes high frequencies, it is possible to reduce
-        this effect and get a filter potentially closer to the target curve.
-        Example: ``error_weighting=lambda nf: 100**nf``. This example often
-        leads to better results for typical sampling rates, but much worse
-        for very high rates. The default is ``None``.
+        this effect and get a filter potentially closer to the target curve
+        (see examples below). The default is ``None``.
 
     sampling_rate: float, conditionally optional
         The sampling rate of the returned filter. The default is ``None``.
@@ -117,6 +115,29 @@ def frequency_weighting_filter(
         >>> pf.plot.freq(weighted_noise, label="A weighted noise")
         >>> plt.ylim(-45, 5)
         >>> plt.legend()
+
+    Use the ``error_weighting`` parameter to improve filter accuracy
+    near the nyquist frequency. Doing so often leads to better results
+    for typical sampling rates, but much worse for very high rates.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> impulse = pf.signals.impulse(1000, sampling_rate=48000)
+        >>> no_weighting = pf.dsp.filter.frequency_weighting_filter(impulse)
+        >>> with_weighting = pf.dsp.filter.frequency_weighting_filter(
+        ...     impulse, error_weighting=lambda nf: 100**nf)
+        >>> pf.plot.freq(no_weighting, c="b", label="without weighting")
+        >>> pf.plot.freq(with_weighting, c="o", label="with weighting")
+        >>> f = np.logspace(1, 4.4, 100)
+        >>> ideal = pf.constants.frequency_weighting_curve("A", f)
+        >>> plt.plot(f, ideal, linestyle="--", c="black", label="ideal")
+        >>> plt.legend()
+        >>> plt.ylim(-13, 3)
+        >>> plt.xlim(4e3, 24e3)
+        >>> plt.show()
     """
     # check input
     if (signal is None and sampling_rate is None) \
