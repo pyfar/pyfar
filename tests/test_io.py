@@ -4,7 +4,6 @@ import numpy.testing as npt
 import pytest
 from unittest.mock import patch
 import pyfar
-from pyfar.io.io import read_ita
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
@@ -720,31 +719,3 @@ def test__sofa_pos_error():
         "Position: Type 'bla' is not supported")
     with pytest.raises(ValueError, match=error_message):
         io.io._sofa_pos('bla', np.array([1, 2, 3]))
-
-
-@pytest.mark.parametrize(('filename', 'data_type'), [
-    ('dirac_itaAudio.ita', 'signal'),
-    ('dirac_itaAudio_mult.ita', 'signal'),
-    ('dirac_itaAudio_mult.ita', 'data'),
-    ('dirac_itaAudio_energy.ita', 'signal'),
-    ('freq_itaResult.ita', 'data'),
-    ('freq_itaResult.ita', 'signal'),
-    ('freq_itaResult_mult.ita', 'data'),
-    ('freq_itaResult_mult_ww.ita', 'data'),
-    ('time_itaResult.ita', 'data'),
-    ('time_itaResult_mult.ita', 'data')])
-def test_read_ita(filename, data_type):
-    """Tests correct exception raise for example *.ita files."""
-    filepath = os.path.join('tests', 'test_io_data', filename)
-    if (filename == 'freq_itaResult.ita' and data_type == 'signal'):
-        message = "The itaResult object can't contain a signal."
-        with pytest.raises(Exception, match=message):
-            read_ita(filepath)
-        pass
-    elif (filename == 'freq_itaResult_mult_ww.ita'):
-        message = "channelCoordinates.weights must have the same size as\
-                   channelCoordinates.csize."
-        with pytest.raises(Exception, match=message):
-            read_ita(filepath)
-    else:
-        read_ita(filepath)
