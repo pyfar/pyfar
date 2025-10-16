@@ -966,23 +966,30 @@ def _read_comsol_get_headerline(filename):
 
 
 def read_ita(filename):
-    """Read a *.ita file from the ITA-toolbox.
+    """
+    Read an `*.ita` file created using the ITA-toolbox.
+
+    ITA-Tollbox is a MATLAB Toolbox for Acoustics [#]_.
 
     Parameters
     ----------
     filename : str
-        The filename. The file extension must be *.ita.
+        The filename. The file extension must be `*.ita`.
 
     Returns
     -------
     data : pyfar.Signal, pyfar.TimeData, pyfar.FrequencyData
-        The data contained in the *.ita file.
+        The audio data contained in the `*.ita` file.
     object_coordinates : pyfar.Coordinates
-        The object coordinates of the *.ita file.
+        The object coordinates of the `*.ita` file.
     channel_coordinates : pyfar.Coordinates
-        The channel coordinates of the *.ita file.
+        The channel coordinates of the `*.ita` file.
     metadata : dict
-        Additional metadata contained in the *.ita file.
+        Additional metadata contained in the `*.ita` file.
+
+    References
+    ----------
+    .. [#]  https://www.ita-toolbox.org/
     """
     matfile = spio.loadmat(
         os.path.join(filename),
@@ -996,9 +1003,11 @@ def read_ita(filename):
 
     # convert coordinates
     if hasattr(matlab_data, "channelCoordinates"):
-        channel_coordinates = _to_coordinates(matlab_data.channelCoordinates)
+        channel_coordinates = _ita_to_pyfar_coordinates(
+            matlab_data.channelCoordinates)
     if hasattr(matlab_data, "objectCoordinates"):
-        object_coordinates = _to_coordinates(matlab_data.objectCoordinates)
+        object_coordinates = _ita_to_pyfar_coordinates(
+            matlab_data.objectCoordinates)
 
     data_in = np.ascontiguousarray((matlab_data.data.T).astype(float))
 
@@ -1024,7 +1033,7 @@ def read_ita(filename):
     return data, object_coordinates, channel_coordinates, metadata
 
 
-def _to_coordinates(ita_coordinates):
+def _ita_to_pyfar_coordinates(ita_coordinates):
     if hasattr(ita_coordinates, 'weights'):
         ita_contains_weights = ita_coordinates.weights.size > 0
         weights = ita_coordinates.weights if ita_contains_weights else None
@@ -1059,7 +1068,7 @@ def _to_coordinates(ita_coordinates):
             ita_coordinates.sph[..., 0],
             weights=weights)
     else:
-        return pf.Coordinates()
+        return None
 
 
 def _matlab_to_dict(mat_obj):
