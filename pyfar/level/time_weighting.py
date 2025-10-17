@@ -19,8 +19,14 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     .. math:: p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{0}^{n} p^2(n)
         e^{-(t-n)/\tau_\text{F}} }
 
-    Parameters:
-    ---------
+    .. note:: While this function appears similar to functions in
+    pyfar.dsp.filter, it is not a linear system like actual filters, since
+    the time data is squared in this algorithm, removing the sign of each
+    sample. This function therefore exists mainly as a helper function for
+    other functions in pyfar.levels as well as for plotting purposes.
+
+    Parameters
+    ----------
     signal: Signal
         The signal object to apply the weighting to
 
@@ -39,6 +45,24 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     .. [#] International Electrotechnical Commission,
         "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
         Specifications", IEC, 2013.
+
+    Examples
+    --------
+    Plot the effect of time weighting on example audio.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> audio = pf.signals.files.drums()
+        >>> fast_weighted = pf.level.time_weighted_sound_pressure(audio, "F")
+        >>> slow_weighted = pf.level.time_weighted_sound_pressure(audio, "S")
+        >>> pf.plot.time(audio, dB=True, label="Audio content", alpha=0.7)
+        >>> pf.plot.time(fast_weighted, dB=True, label="Fast-weighted level")
+        >>> pf.plot.time(slow_weighted, dB=True, label="Slow-weighted level")
+        >>> plt.ylim(-45, 5)
+        >>> plt.legend()
+        >>> plt.show()
     """
     weighting = time_weighting.upper()
     if weighting in ["F", "FAST"]:
