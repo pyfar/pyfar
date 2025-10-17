@@ -19,7 +19,7 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     .. math:: p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{0}^{n} p^2(n)
         e^{-(t-n)/\tau_\text{F}} }
 
-    Paramters:
+    Parameters:
     ---------
     signal: Signal
         The signal object to apply the weighting to
