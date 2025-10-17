@@ -50,4 +50,5 @@ __all__ = [
     'constants',
     'dot',
     'cross',
+    'level',
     ]
