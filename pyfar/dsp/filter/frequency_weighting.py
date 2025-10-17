@@ -99,8 +99,8 @@ def frequency_weighting_filter(
     References
     ----------
     .. [#] International Electrotechnical Commission,
-        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
-        Specifications", IEC, 2013.
+           "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+           Specifications", IEC, 2013.
 
     Examples
     --------

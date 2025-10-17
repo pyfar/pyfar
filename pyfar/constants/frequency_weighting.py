@@ -79,8 +79,8 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     References
     ----------
     .. [#] International Electrotechnical Commission,
-        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
-        Specifications", IEC, 2013.
+           "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+           Specifications", IEC, 2013.
 
     Examples
     --------
@@ -148,8 +148,8 @@ def frequency_weighting_band_corrections(
     References
     ----------
     .. [#] International Electrotechnical Commission,
-        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
-        Specifications", IEC, 2013.
+           "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+           Specifications", IEC, 2013.
 
     Examples
     --------
