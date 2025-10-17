@@ -23,7 +23,7 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     pyfar.dsp.filter, it is not a linear system like actual filters, since
     the time data is squared in this algorithm, removing the sign of each
     sample. This function therefore exists mainly as a helper function for
-    other functions in pyfar.levels as well as for plotting purposes.
+    other functions in pyfar.level as well as for plotting purposes.
 
     Parameters
     ----------
