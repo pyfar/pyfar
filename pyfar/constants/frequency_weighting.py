@@ -76,6 +76,12 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     weights: numpy.ndarray[float]
         The weights in dB in the same shape as `frequencies`.
 
+    References
+    ----------
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+
     Examples
     --------
     Plot the weighting curves.
@@ -138,6 +144,12 @@ def frequency_weighting_band_corrections(
 
     weights: numpy.ndarray[float]
         The correction values in dB for the specific frequency weighting.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
 
     Examples
     --------

@@ -96,6 +96,12 @@ def frequency_weighting_filter(
         If weighting is 'A' the filter order will be 6. 'C' weighting will
         return a filter of order 4.
 
+    References
+    ----------
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+
     Examples
     --------
     Create and apply an A weighting filter to white noise.
