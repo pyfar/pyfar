@@ -80,33 +80,47 @@ def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     _expect_error_abcd_same_type(A_np, A_FreqDat, A_np, A_np)
     _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
 
-def test_tmatrix_from_abcd_broadcasting(frequencies):
-    A = [1, 2, 3]
-    B = [1]
-    C = [1]
-    D = [1]
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+@pytest.mark.parametrize("A,B,C,D", [
+    ([1., 2., 3.], [1.], [1.], [1.]),
+    ([1., 2., 3.], [1.], [1.], [[1.]]),
+    ([1., 2., 3.], [1.], [1.], [[1.], [2.]]),
+    ([1., 2., 3.], [1.], [1.], 1.),
+])
+def test_tmatrix_from_abcd_broadcasting_working(frequencies, A, B, C, D):
+    """Test from_abcd with valid broadcasting combinations."""
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+    broadcast_BCD = [1., 1., 1.]
+    
+    assert isinstance(tmat, TransmissionMatrix)
+    npt.assert_allclose(tmat.A.freq[0], A, atol=1e-15)
+    npt.assert_allclose(tmat.B.freq[0], broadcast_BCD, atol=1e-15)
+    npt.assert_allclose(tmat.C.freq[0], broadcast_BCD, atol=1e-15)
+    npt.assert_allclose(tmat.D.freq[0], broadcast_BCD, atol=1e-15)
 
-    D = [[1]]
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
-    D = [[1], [2]]
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-
-    D = 1
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-
-    D = [1, 2]
+@pytest.mark.parametrize("A,B,C,D", [
+    ([1, 2, 3], [1], [1], [1, 2]),
+    ([1, 2, 3], [1], [1], [1, 2, 3, 4]),
+])
+def test_tmatrix_from_abcd_broadcasting_expect_error(frequencies, A, B, C, D):
+    """Test from_abcd raises error for invalid broadcasting combinations."""
     _expect_error_abcd_broadcast(A, B, C, D, frequencies)
 
-    D = [1, 2, 3, 4]
-    _expect_error_abcd_broadcast(A, B, C, D, frequencies)
 
-def test_tmatrix_from_abcd_single_frequency():
-    A = [1]
-    B = [2]
-    C = [3]
-    D = [4]
+@pytest.mark.parametrize("A,B,C,D,frequency", [
+    ([1], [2], [3], [4], 1000),
+    ([1], [2], [3], [4], [1000]),
+    (1, 2, 3, 4, 1000),
+    (1, 2, 3, 4, [1000]),
+])
+def test_tmatrix_from_abcd_single_frequency(A, B, C, D, frequency):
+    """Test from_abcd with single frequency values."""
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D, frequency)
+    assert isinstance(tmat, TransmissionMatrix)
+    npt.assert_allclose(tmat.A.freq, A, atol=1e-15)
+    npt.assert_allclose(tmat.B.freq, B, atol=1e-15)
+    npt.assert_allclose(tmat.C.freq, C, atol=1e-15)
+    npt.assert_allclose(tmat.D.freq, D, atol=1e-15)
     frequency = 1000
     TransmissionMatrix.from_abcd(A, B, C, D, frequency)
     TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
