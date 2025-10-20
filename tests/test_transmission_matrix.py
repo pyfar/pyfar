@@ -60,13 +60,6 @@ def _expect_error_abcd_same_type(A, B, C, D):
                     "A, B, C, D, must be FrequencyData objects."):
         TransmissionMatrix.from_abcd(A, B, C, D, 1000)
 
-def _expect_error_abcd_broadcast(A, B, C, D, frequencies):
-    with pytest.raises(
-        ValueError,
-        match="shape mismatch: objects cannot be broadcast to a single shape",
-    ):
-        TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-
 def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     """Test 'from_abcd' with valid and invalid data types."""
     TransmissionMatrix.from_abcd(A_list, A_list,
@@ -104,7 +97,11 @@ def test_tmatrix_from_abcd_broadcasting_working(frequencies, A, B, C, D):
 ])
 def test_tmatrix_from_abcd_broadcasting_expect_error(frequencies, A, B, C, D):
     """Test from_abcd raises error for invalid broadcasting combinations."""
-    _expect_error_abcd_broadcast(A, B, C, D, frequencies)
+    with pytest.raises(
+        ValueError,
+        match="shape mismatch: objects cannot be broadcast to a single shape",
+    ):
+        TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
 
 @pytest.mark.parametrize("A,B,C,D,frequency", [
