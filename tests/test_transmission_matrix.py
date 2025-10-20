@@ -73,7 +73,7 @@ def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     _expect_error_abcd_same_type(A_np, A_FreqDat, A_np, A_np)
     _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
 
-@pytest.mark.parametrize("A,B,C,D", [
+@pytest.mark.parametrize(("A","B","C","D"), [
     ([1., 2., 3.], [1.], [1.], [1.]),
     ([1., 2., 3.], [1.], [1.], [[1.]]),
     ([1., 2., 3.], [1.], [1.], [[1.], [2.]]),
@@ -83,7 +83,7 @@ def test_tmatrix_from_abcd_broadcasting_working(frequencies, A, B, C, D):
     """Test from_abcd with valid broadcasting combinations."""
     tmat = TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
     broadcast_BCD = [1., 1., 1.]
-    
+
     assert isinstance(tmat, TransmissionMatrix)
     npt.assert_allclose(tmat.A.freq[0], A, atol=1e-15)
     npt.assert_allclose(tmat.B.freq[0], broadcast_BCD, atol=1e-15)
@@ -91,7 +91,7 @@ def test_tmatrix_from_abcd_broadcasting_working(frequencies, A, B, C, D):
     npt.assert_allclose(tmat.D.freq[0], broadcast_BCD, atol=1e-15)
 
 
-@pytest.mark.parametrize("A,B,C,D", [
+@pytest.mark.parametrize(("A","B","C","D"), [
     ([1, 2, 3], [1], [1], [1, 2]),
     ([1, 2, 3], [1], [1], [1, 2, 3, 4]),
 ])
@@ -104,7 +104,7 @@ def test_tmatrix_from_abcd_broadcasting_expect_error(frequencies, A, B, C, D):
         TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
 
-@pytest.mark.parametrize("A,B,C,D,frequency", [
+@pytest.mark.parametrize(("A","B","C","D","frequency"), [
     ([1], [2], [3], [4], 1000),
     ([1], [2], [3], [4], [1000]),
     (1, 2, 3, 4, 1000),
@@ -118,7 +118,7 @@ def test_tmatrix_from_abcd_single_frequency(A, B, C, D, frequency):
     npt.assert_allclose(tmat.B.freq[0], B, atol=1e-15)
     npt.assert_allclose(tmat.C.freq[0], C, atol=1e-15)
     npt.assert_allclose(tmat.D.freq[0], D, atol=1e-15)
-    
+
     # Check all frequency vectors
     npt.assert_allclose(tmat.A.frequencies, frequency, atol=1e-15)
     npt.assert_allclose(tmat.B.frequencies, frequency, atol=1e-15)
