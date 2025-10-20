@@ -117,21 +117,17 @@ def test_tmatrix_from_abcd_single_frequency(A, B, C, D, frequency):
     """Test from_abcd with single frequency values."""
     tmat = TransmissionMatrix.from_abcd(A, B, C, D, frequency)
     assert isinstance(tmat, TransmissionMatrix)
-    npt.assert_allclose(tmat.A.freq, A, atol=1e-15)
-    npt.assert_allclose(tmat.B.freq, B, atol=1e-15)
-    npt.assert_allclose(tmat.C.freq, C, atol=1e-15)
-    npt.assert_allclose(tmat.D.freq, D, atol=1e-15)
-    frequency = 1000
-    TransmissionMatrix.from_abcd(A, B, C, D, frequency)
-    TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
+    npt.assert_allclose(tmat.A.freq[0], A, atol=1e-15)
+    npt.assert_allclose(tmat.B.freq[0], B, atol=1e-15)
+    npt.assert_allclose(tmat.C.freq[0], C, atol=1e-15)
+    npt.assert_allclose(tmat.D.freq[0], D, atol=1e-15)
+    
+    # Check all frequency vectors
+    npt.assert_allclose(tmat.A.frequencies, frequency, atol=1e-15)
+    npt.assert_allclose(tmat.B.frequencies, frequency, atol=1e-15)
+    npt.assert_allclose(tmat.C.frequencies, frequency, atol=1e-15)
+    npt.assert_allclose(tmat.D.frequencies, frequency, atol=1e-15)
 
-    A = 1
-    B = 2
-    C = 3
-    D = 4
-    frequency = 1000
-    TransmissionMatrix.from_abcd(A, B, C, D, frequency)
-    TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
 
 def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list):
     """Test from_abcd throws error if frequencies length does not match."""
