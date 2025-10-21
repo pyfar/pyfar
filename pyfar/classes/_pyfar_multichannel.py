@@ -5,6 +5,7 @@ which implements functionality similar to NumPy arrays.
 
 from abc import ABC, abstractmethod
 import numpy as np
+from copy import deepcopy
 
 class _PyfarMultichannel(ABC):
     """
@@ -16,15 +17,13 @@ class _PyfarMultichannel(ABC):
     """
 
     @property
-    @abstractmethod
     def cshape(self):
         """
         Return channel shape.
         """
-        pass
+        return self._data.shape[:-1]
 
     @property
-    @abstractmethod
     def cdim(self):
         """
         Return channel dimension.
@@ -35,10 +34,9 @@ class _PyfarMultichannel(ABC):
         return len(self.cshape)
 
     @property
-    @abstractmethod
-    def n_channels(self):
+    def csize(self):
         """
-        Return the total number of channels.
+        Return the channel size, i.e., total number of channels.
         """
         return np.prod(self.cshape)
 
@@ -47,7 +45,6 @@ class _PyfarMultichannel(ABC):
         """Shorthand for `self.transpose()`."""
         return self.transpose()
 
-    @abstractmethod
     def reshape(self, newshape):
         """
         Return reshaped copy of the object.
@@ -63,7 +60,26 @@ class _PyfarMultichannel(ABC):
             Reshaped copy of the object.
         """
 
-        pass
+        # Check input
+        if not isinstance(newshape, int) and not isinstance(newshape, tuple):
+            raise ValueError("newshape must be an integer or tuple")
+
+        if isinstance(newshape, int):
+            newshape = (newshape, )
+
+        # reshape
+        reshaped = deepcopy(self)
+        length_last_dimension = reshaped._data.shape[-1]
+        try:
+            reshaped._data = reshaped._data.reshape(
+                newshape + (length_last_dimension, ))
+        except ValueError as e:
+            if np.prod(newshape) != np.prod(self.cshape):
+                raise ValueError(
+                    (f"Cannot reshape an object of cshape "
+                     f"{self.cshape} to {newshape}")) from e
+
+        return reshaped
 
     def flatten(self):
         """Return a copy of the object collapsed into one channel dimension."""
@@ -76,7 +92,6 @@ class _PyfarMultichannel(ABC):
 
         pass
 
-    @abstractmethod
     def broadcast_cshape(self, cshape):
         """
         Broadcast the object to a certain channel shape (`cshape`).
@@ -92,7 +107,10 @@ class _PyfarMultichannel(ABC):
             Broadcasted copy of the object.
         """
 
-        pass
+        signal = self.copy()
+        signal._data = np.broadcast_to(
+            signal._data, cshape + (signal._data.shape[-1], ))
+        return signal
 
     def broadcast_cdim(self, cdim):
         """
@@ -109,12 +127,13 @@ class _PyfarMultichannel(ABC):
         object : _PyfarMultichannel
             Broadcasted copy of the object.
         """
-        if len(self.cshape) > cdim:
+        if self.cdim > cdim:
             raise ValueError(
             "Can not broadcast: Current channel dimensions exceeds `cdim`.")
-        newshape = tuple(np.ones(cdim-self.n_channels, dtype=int))+self.cshape
-
-        return self.copy().reshape(newshape)
+        signal = self.copy()
+        while signal.cdim < cdim:
+            signal._data = signal._data[None, ...]
+        return signal
 
     @abstractmethod
     def __getitem__(self, index):
