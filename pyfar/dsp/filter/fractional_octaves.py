@@ -372,14 +372,21 @@ def _coefficients_fractional_octave_bands(
 
 
 def check_fractional_octave_band_filter_tolerance(
-            fractional_octave_band_filter, num_fractions, frequency_range,
-            tolerance_class):
+    fractional_octave_band_filter, num_fractions, frequency_range,
+    tolerance_class, n_samples=None):
     """
     Check magnitude tolerance of fractional octave band filters.
 
     The tolerance is defined in [#]_ and returned by
     :py:func:`~pyfar.constants.fractional_octave_filter_tolerance`.
     See :py:func:`~pyfar.dsp.filter.fractional_octave_bands` for an example.
+
+    .. note ::
+
+        The parameters `num_fractions` and `frequency_range` are used to
+        determine the center frequencies of the filters. Their values must be
+        the same values that were used to generate the fractional octave
+        band filters.
 
     Parameters
     ----------
@@ -389,9 +396,14 @@ def check_fractional_octave_band_filter_tolerance(
         The number of bands an octave is divided into. Must be ``1`` (octave
         bands) or ``3`` (one-third octave bands).
     frequency_range : array, tuple
-        The lower and upper frequency limits.
+        The lower and upper frequency limits of the filter bank.
     tolerance_class : int
         The tolerance class as defined in the standard. Must be ``1`` or ``2``.
+    n_samples : int, optional
+        The length of the filter impulse responses in samples for which the
+        tolerance is checked. The default ``None`` estimates the length using
+        :py:class:`~pyfar.classes.filter.FilterSOS.
+        minimum_impulse_response_length`.
 
     Returns
     -------
@@ -417,12 +429,12 @@ def check_fractional_octave_band_filter_tolerance(
     exact_center_frequencies = fractional_octave_frequencies(
         num_fractions, frequency_range)[1]
 
-    ir = fractional_octave_band_filter.impulse_response()
+    ir = fractional_octave_band_filter.impulse_response(n_samples)
     log_magnitude = pf.dsp.decibel(ir).squeeze()
 
     if exact_center_frequencies.size != ir.cshape[0]:
-        raise ValueError('The frequency_range does not match the number of'
-                         'filters in factional_octave_bands')
+        raise ValueError('num_fractions and frequency_range do not match the '
+                         'number of filters in factional_octave_bands')
 
     # make it work for a single band by prepending an axis
     if exact_center_frequencies.size == 1:
