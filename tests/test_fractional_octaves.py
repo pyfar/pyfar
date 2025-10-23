@@ -181,6 +181,22 @@ def test_check_fractional_octave_band_filter_tolerance(
         frequency_range, tolerance_class) == tolerance_met
 
 
+def test_check_fractional_octance_band_filter_tolerance_n_samples():
+    """Test the n_samples parameter with non-default value."""
+
+    sampling_rate = 44100
+    num_fractions = 1
+    frequency_range = (20, 20000)
+
+    with pytest.warns(UserWarning, match='The upper frequency limit'):
+        fractional_octave_bands = filter.fractional_octave_bands(
+            None, num_fractions, sampling_rate, frequency_range, order=6)
+
+    assert filter.check_fractional_octave_band_filter_tolerance(
+        fractional_octave_bands, num_fractions,
+        frequency_range, tolerance_class=1, n_samples=36_000)
+
+
 def test_errors_check_fractional_octave_band_filter_tolerance():
     """Check if errors are raised as expected."""
 
@@ -203,6 +219,6 @@ def test_errors_check_fractional_octave_band_filter_tolerance():
             fractional_octave_band_filter, 1, (100, 1000), 3)
 
     # frequency range not matching filters
-    with pytest.raises(ValueError, match='frequency_range does not match'):
+    with pytest.raises(ValueError, match='num_fractions and frequency_range'):
         filter.check_fractional_octave_band_filter_tolerance(
             fractional_octave_band_filter, 1, (100, 4000), 2)
