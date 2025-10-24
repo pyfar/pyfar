@@ -2,6 +2,7 @@
 import numpy as np
 import pyfar as pf
 from typing import Literal
+import warnings
 
 
 def air_attenuation(
@@ -548,3 +549,161 @@ def fractional_octave_filter_tolerance(
     frequencies = exact_center_frequency * G**relative_frequencies
 
     return lower_tolerance, upper_tolerance, frequencies
+
+def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
+                        frequency_range:tuple[float, float]=(20, 20e3)):
+    """Return the nominal center frequencies for octave-band and
+    one-third-octave-band filters.
+
+    Nominal center frequencies, as specified in the IEC 61260-1:2014 standard
+    [#]_ (Section 5.5 and Annex E), are standardized values that approximate
+    the exact center frequencies. They are defined from 10 Hz to 20 kHz.
+
+    Parameters
+    ----------
+    num_fractions : {1, 3}
+        The number of octave fractions. ``1`` returns octave center
+        frequencies, ``3`` returns third-octave center frequencies.
+        The default is ``1``.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``(20, 20e3)`` following IEC 61260-1.
+        E.g. ``(10, 20e3)`` would follow IEC 61672-1 [#]_.
+
+    Returns
+    -------
+    nominal : numpy.ndarray of float
+        The nominal center frequencies.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
+        Electroacoustics - Octave-band and fractional-octave-band filters -
+        Part 1: Specifications", IEC, 2014.
+
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+    """
+    # IEC 61260-1 Eq. (1)
+    G = 10**(3/10)
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "You need to specify a lower and upper limit frequency.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The second frequency needs to be higher than the first.")
+
+    if num_fractions == 1:
+        if (f_lims[0] < 15.8*G**(-1/2)) or (f_lims[1] >
+                                             15848.93192*G**(1/2)):
+            warnings.warn(
+                "The nominal center frequencies for octave-band " \
+                "are defined only from 11.2 Hz to 22387.2 Hz.", UserWarning,
+                stacklevel=2)
+        nominal = np.array([
+                16, 31.5, 63, 125, 250, 500, 1e3,
+                2e3, 4e3, 8e3, 16e3], dtype=float)
+    elif num_fractions == 3:
+        if (f_lims[0] < 10*G**(-1/6)) or (f_lims[1] > 19952.62315*G**(1/6)):
+            warnings.warn(
+                "The nominal center frequencies for one-third-octave-band " \
+                "are defined only from 8.91 Hz to 22387.2 Hz.", UserWarning,
+                stacklevel=2)
+        nominal = np.array([
+                10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80,
+                100, 125, 160, 200, 250, 315, 400, 500, 630,
+                800, 1000, 1250, 1600, 2000, 2500, 3150, 4000,
+                5000, 6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
+    else:
+        raise ValueError('num_fractions must be 1 or 3')
+
+    mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+    nominal = nominal[mask]
+    return nominal
+
+def fractional_octave_frequencies_exact(
+        num_fractions:int=1, frequency_range: tuple[float, float]=(20, 20e3)):
+    r"""Return the exact center and cutoff frequencies for
+    fractional-octave-band filters.
+
+    The frequencies are calculated in accordance with the IEC 61260-1:2014
+    standard [#]_ (Sections 5.2, 5.3, 5.4 and 5.6).
+
+    The octave frequency ratio, :math:`G`, is given by the following
+    expression.
+
+    .. math::
+
+        G = 10^{\tfrac{3}{10}}
+
+    The center frequencies :math:`f_m` are calculated using formula
+    :eq:`eq_center_odd` for odd values of :math:`b` and formula
+    :eq:`eq_center_even` for even values of :math:`b`.
+
+    .. math::
+        :label: eq_center_odd
+
+        f_m = f_r \cdot G^{ \tfrac{x}{b}}
+
+    .. math::
+        :label: eq_center_even
+
+        f_m = f_r \cdot G^{ \tfrac{2x+1}{2b}}
+
+    where:
+
+    - :math:`b` is the number of octave fractions.
+    - :math:`f_r` is the reference frequency, set to 1000 Hz.
+    - :math:`x` is the index of the frequency band.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. E.g., ``1`` refers to
+        octave bands and ``3`` to third octave bands. The default is ``1``.
+        All positive integers are allowed.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``(20, 20e3)``.
+
+    Returns
+    -------
+    center_frequencies : numpy.ndarray
+        The exact center frequencies in Hz of the bandpass filters
+        for each fractional octave band.
+    lower_cutoff_frequencies : numpy.ndarray
+        The lower cutoff frequencies in Hz of the bandpass filters
+        for each fractional octave band.
+    upper_cutoff_frequencies : numpy.ndarray
+        The upper cutoff frequencies in Hz of the bandpass filters
+        for each fractional octave band.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
+        Electroacoustics - Octave-band and fractional-octave-band filters -
+        Part 1: Specifications", IEC, 2014.
+    """
+    # IEC 61260-1 Eq. (1)
+    G = 10**(3/10)
+    ref_freq = 1e3
+    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
+    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
+
+    indices = np.arange(-Nmin, Nmax+1)
+    if num_fractions % 2 != 0:
+        # IEC 61260-1 Eq. (2)
+        center_frequencies = ref_freq * (G)**(indices / num_fractions)
+    else:
+        # IEC 61260-1 Eq. (3)
+        center_frequencies = ref_freq * (G)**((2*indices + 1)/
+                                              (2*num_fractions))
+
+    # IEC 61260-1 Eq. (5)
+    upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
+    # IEC 61260-1 Eq. (4)
+    lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
+    return (center_frequencies,
+            lower_cutoff_frequencies, upper_cutoff_frequencies)
