@@ -58,8 +58,8 @@ def _calculate_C_weighted_level(f: Union[float, np.ndarray],
 def frequency_weighting_curve(weighting: Literal["A", "C"],
                               frequencies: list[float]):
     """
-    Calculates the level correction in dB of a frequency component when using
-    the A or C weighting defined in IEC 61672-1 [#]_.
+    Calculates the level correction in dB of each frequency component when
+    using the A or C frequency weighting.
 
     Parameters
     ----------
@@ -73,6 +73,7 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
     -------
     weights: numpy.ndarray[float]
         The weights in dB in the same shape as `frequencies`.
+        These weights are in accordance with IEC 61672-1 [#]_.
 
     References
     ----------
@@ -120,8 +121,11 @@ def frequency_weighting_band_corrections(
     frequency_range: tuple[float, float],
 ):
     """
-    Returns the A or C frequency weighting band corrections as specified in
-    IEC 62672-1 [#]_ for the given frequency range.
+    Returns the A or C frequency weighting correction values for
+    octave or third-octave bands in a given frequency range.
+
+    This function uses the nominal frequencies and their respective
+    weights as given in the IEC 62672-1 standard [#]_.
 
     Parameters
     ----------
