@@ -59,7 +59,7 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
                               frequencies: list[float]):
     """
     Calculates the level correction in dB of a frequency component when using
-    the A or C weighting defined in IEC 61672-1.
+    the A or C weighting defined in IEC 61672-1 [#]_.
 
     Parameters
     ----------
@@ -121,7 +121,7 @@ def frequency_weighting_band_corrections(
 ):
     """
     Returns the A or C frequency weighting band corrections as specified in
-    IEC 62672-1 for the given frequency range.
+    IEC 62672-1 [#]_ for the given frequency range.
 
     Parameters
     ----------
