@@ -12,7 +12,9 @@ import re
                                         (4000, 100_000)])
 def test_frequency_weighting_constants(weighting, num_fractions, freq_range):
     nominals, iec_weights = pyfar.constants. \
-            frequency_weighting_band_corrections(weighting, num_fractions, freq_range)
+            frequency_weighting_band_corrections(weighting, 
+                                                 num_fractions, 
+                                                 freq_range)
     calculated_weights = pyfar.constants. \
             frequency_weighting_curve(weighting, nominals)
 
