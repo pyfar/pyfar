@@ -7,12 +7,12 @@ import re
 
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
-@pytest.mark.parametrize("bands", ["octave", "third"])
+@pytest.mark.parametrize("num_fractions", [1, 3])
 @pytest.mark.parametrize("freq_range", [(20, 20000), (0, 100),
                                         (4000, 100_000)])
-def test_frequency_weighting_constants(weighting, bands, freq_range):
+def test_frequency_weighting_constants(weighting, num_fractions, freq_range):
     nominals, iec_weights = pyfar.constants. \
-            frequency_weighting_band_corrections(weighting, bands, freq_range)
+            frequency_weighting_band_corrections(weighting, num_fractions, freq_range)
     calculated_weights = pyfar.constants. \
             frequency_weighting_curve(weighting, nominals)
 
@@ -29,21 +29,14 @@ def test_frequency_weighting_band_corrections_errors():
     # invalid weighting
     match = "Allowed literals for weighting are 'A' and 'C'"
     with pytest.raises(ValueError, match=match):
-        pyfar.constants.frequency_weighting_band_corrections("B", "octave",
+        pyfar.constants.frequency_weighting_band_corrections("B", 1,
                                                              (100, 1000))
 
     # invalid bands
-    match = "Allowed literals for bands are 'octave' and 'third'"
-    with pytest.raises(ValueError, match=match):
-        pyfar.constants.frequency_weighting_band_corrections("A", "oct",
-                                                             (100, 1000))
-
-    # empty frequency range
-    match = "Frequency range must include at least one value " \
-            "between 10 and 20000"
+    match = "num_fractions must be 1 or 3"
     with pytest.raises(ValueError, match=match):
         pyfar.constants.frequency_weighting_band_corrections("A", "octave",
-                                                             (1000, 100))
+                                                             (100, 1000))
 
 
 def test_frequeny_weighting_curve_errors():

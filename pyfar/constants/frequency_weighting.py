@@ -1,6 +1,7 @@
 """File containing all frequency weighting functions."""
 from typing import Literal, Union
 import numpy as np
+import pyfar as pf
 
 # Constants for the weighting curve formulas.
 # See appendix E in IEC 61672-1.
@@ -12,25 +13,22 @@ _A_1000 = -2
 _C_1000 = -0.062
 
 # Constants for nominal band corrections, taken from table 3 in IEC 61672-1.
-# Could be replaced/combined with a dedicated frequency_bands_nominal()
-# function later.
-_NOMINAL_THIRD_OCTAVE_BAND_FREQUENCIES = np.array([
-    10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
-    400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
-    8000, 10000, 12500, 16000, 20000,
-])
-_THIRDBAND_WEIGHTINGS_A = np.array([
-    -70.4, -63.4, -56.7, -50.5, -44.7, -39.4, -34.6, -30.2, -26.2, -22.5,
-    -19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8, -3.2, -1.9, -0.8,
-    0.0, 0.6, 1.0, 1.2, 1.3, 1.2, 1.0, 0.5, -0.1, -1.1,
-    -2.5, -4.3, -6.6, -9.3,
-])
-_THIRDBAND_WEIGHTINGS_C = np.array([
-    -14.3, -11.2, -8.5, -6.2, -4.4, -3.0, -2.0, -1.3, -0.8, -0.5,
-    -0.3, -0.2, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, -0.1, -0.2, -0.3, -0.5, -0.8, -1.3, -2.0, -3.0, -4.4,
-    -6.2, -8.5, -11.2,
-])
+_NOMINAL_A_WEIGHTING_CORRECTIONS = {
+    10: -70.4, 12.5: -63.4, 16: -56.7, 20: -50.5, 25: -44.7, 31.5: -39.4,
+    40: -34.6, 50: -30.2, 63: -26.2, 80: -22.5, 100: -19.1, 125: -16.1,
+    160: -13.4, 200: -10.9, 250: -8.6, 315: -6.6, 400: -4.8, 500: -3.2,
+    630: -1.9, 800: -0.8, 1000: 0.0, 1250: 0.6, 1600: 1.0, 2000: 1.2,
+    2500: 1.3, 3150: 1.2, 4000: 1.0, 5000: 0.5, 6300: -0.1, 8000: -1.1,
+    10000: -2.5, 12500: -4.3, 16000: -6.6, 20000: -9.3,
+}
+_NOMINAL_C_WEIGHTING_CORRECTIONS = {
+    10: -14.3, 12.5: -11.2, 16: -8.5, 20: -6.2, 25: -4.4, 31.5: -3.0,
+    40: -2.0, 50: -1.3, 63: -0.8, 80: -0.5, 100: -0.3, 125: -0.2,
+    160: -0.1, 200: 0.0, 250: 0.0, 315: 0.0, 400: 0.0, 500: 0.0,
+    630: 0.0, 800: 0.0, 1000: 0.0, 1250: 0.0, 1600: -0.1, 2000: -0.2,
+    2500: -0.3, 3150: -0.5, 4000: -0.8, 5000: -1.3, 6300: -2.0, 8000: -3.0,
+    10000: -4.4, 12500: -6.2, 16000: -8.5, 20000: -11.2,
+}
 
 
 def _calculate_A_weighted_level(f: Union[float, np.ndarray],
@@ -118,7 +116,7 @@ def frequency_weighting_curve(weighting: Literal["A", "C"],
 
 def frequency_weighting_band_corrections(
     weighting: Literal["A", "C"],
-    bands: Literal["third", "octave"],
+    num_fractions: Literal[1, 3],
     frequency_range: tuple[float, float],
 ):
     """
@@ -130,8 +128,9 @@ def frequency_weighting_band_corrections(
     weighting: str ('A' or 'C')
         Which frequency weighting type to use.
 
-    bands: str ('octave' or 'third')
-        Whether to use octave bands or third bands.
+    num_fractions: {1, 3}
+        The number of octave fractions. ``1`` returns octave band
+        corrections, ``3`` returns third-octave band corrections.
 
     frequency_range: (float, float)
         A range of what nominal center frequencies to include. The lowest
@@ -161,9 +160,9 @@ def frequency_weighting_band_corrections(
         >>> import matplotlib.pyplot as plt
         >>> f_range = (10, 20000)
         >>> nominals_third, weights_A = pf.constants.frequency_weighting_band_corrections(
-        ...     "A", "third", f_range)
+        ...     "A", 3, f_range)
         >>> nominals_octave, weights_C = pf.constants.frequency_weighting_band_corrections(
-        ...     "C", "octave", f_range)
+        ...     "C", 1, f_range)
         >>> # plotting
         >>> plt.plot(nominals_third, weights_A, "--", c=(0.5, 0.5, 0.5, 0.5))
         >>> plt.plot(nominals_third, weights_A, "bo", label="A weighting in third bands")
@@ -178,27 +177,13 @@ def frequency_weighting_band_corrections(
         >>> plt.grid()
     """ # noqa: E501
     if weighting == "A":
-        all_weights = _THIRDBAND_WEIGHTINGS_A
+        all_weights = _NOMINAL_A_WEIGHTING_CORRECTIONS
     elif weighting == "C":
-        all_weights = _THIRDBAND_WEIGHTINGS_C
+        all_weights = _NOMINAL_C_WEIGHTING_CORRECTIONS
     else:
         raise ValueError("Allowed literals for weighting are 'A' and 'C'")
 
-    if bands == "octave":
-        nominals = _NOMINAL_THIRD_OCTAVE_BAND_FREQUENCIES[2::3]
-        band_weights = all_weights[2::3]
-    elif bands == "third":
-        nominals =_NOMINAL_THIRD_OCTAVE_BAND_FREQUENCIES
-        band_weights = all_weights
-    else:
-        raise ValueError("Allowed literals for bands are 'octave' and 'third'")
-
-    mask = (nominals >= frequency_range[0]) & (nominals <= frequency_range[1])
-    nominals_in_range = nominals[mask]
-    weights_in_range = band_weights[mask]
-
-    if len(nominals_in_range) == 0:
-        raise ValueError("Frequency range must include at least one value " \
-                         "between 10 and 20000")
-
+    nominals_in_range = pf.constants.fractional_octave_frequencies_nominal(
+        num_fractions, frequency_range)
+    weights_in_range = np.array([all_weights[n] for n in nominals_in_range])
     return (nominals_in_range, weights_in_range)
