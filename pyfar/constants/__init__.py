@@ -6,6 +6,8 @@ from .constants import (
     saturation_vapor_pressure_magnus,
     density_of_air,
     fractional_octave_filter_tolerance,
+    fractional_octave_frequencies_nominal,
+    fractional_octave_frequencies_exact,
 )
 
 from .speed_of_sound import (
@@ -33,6 +35,8 @@ __all__ = [
     'frequency_weighting_curve',
     'frequency_weighting_band_corrections',
     'fractional_octave_filter_tolerance',
+    'fractional_octave_frequencies_nominal',
+    'fractional_octave_frequencies_exact',
 ]
 
 
