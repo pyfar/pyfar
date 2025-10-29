@@ -193,31 +193,16 @@ def _design_frequency_weighting_filter_cached(
 
 
 def _design_frequency_weighting_filter(sampling_rate: float,
-                                       target_weighting: Literal["A", "C"]="A",
-                                       n_bins=100,
+                                       target_weighting: Literal["A", "C"],
+                                       n_bins,
                                        error_weighting: Optional[Callable[[
                                            np.ndarray], np.ndarray]] = None,
                                        **kwargs,
                                        ) -> np.ndarray:
     """
     Designs SOS filter coefficients approximating the A or C weighting defined
-    in IEC/DIN-EN 61672-1 for an arbitrary sampling rate.
-
-    .. note::
-        This function will run a least-squares algorithm to iteratively
-        approach the target weighting curve. Therefore, it may be much faster
-        to create the filter once and reuse that filter when repeatedly
-        weighting audio data of identical sampling rates.
-
-    .. note::
-        When using default parameters for `n_frequencies` and `error_weighting`
-        and no `kwargs`, the returned filter is compliant with a class 1 sound
-        level meter as described in the standard for the sampling rates
-        48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
-        2, 1/2, 4, 1/4, 8, and 1/8 each.
-        For other arguments or sampling rates, the returned filter may not
-        comply with class 1 requirements, in which case a warning will be
-        printed.
+    in IEC/DIN-EN 61672-1 for an arbitrary sampling rate using an iterative
+    least-squares algorithm.
 
     Parameters
     ----------
@@ -226,14 +211,13 @@ def _design_frequency_weighting_filter(sampling_rate: float,
 
     target_weighting: str, optional
         Specifies which frequency weighting curve to approximate.
-        Must be either "A" or "C". The default is "A".
+        Must be either "A" or "C".
 
     n_bins: int, optional
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
         logarithmically spaced between 10 Hz and the Nyquist frequency.
-        The default is 100.
 
     error_weighting: callable
         A function that can be used to emphasize the approximation errors in
@@ -241,14 +225,8 @@ def _design_frequency_weighting_filter(sampling_rate: float,
         argument, specifying the normalized frequencies between 0 and 1
         (where 1 is the Nyquist frequency) to weight, and returns a float
         array as output containing the weights.
-        The default value is None, in which case the errors of all
-        (logarithmically spaced) frequencies are equally weighted. This
-        usually leads to larger errors for higher frequencies. By passing
-        a function that emphasizes high frequencies, it is possible to reduce
-        this effect and get a filter potentially closer to the target curve.
-        Example: `error_weighting=lambda nf: 100**nf`. This example often
-        leads to better results for typical sampling rates, but much worse
-        for very high rates. The default is `None`.
+        The default value is ``None``, in which case the errors of all
+        (logarithmically spaced) frequencies are equally weighted.
 
     **kwargs: dict
         Keyword args that are passed to the
