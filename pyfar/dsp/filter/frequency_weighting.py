@@ -10,6 +10,7 @@ import pyfar.constants as pfc
 import scipy.signal as sps
 import scipy.optimize as spo
 from pyfar.constants.frequency_weighting import _F_1, _F_2, _F_3, _F_4
+from functools import lru_cache
 
 
 _A_WEIGHTING_ZEROS = [0, 0, 0, 0]
@@ -35,9 +36,12 @@ def frequency_weighting_filter(
 
     .. note::
         This function will run a least-squares algorithm to iteratively
-        approach the target weighting curve. Therefore, it may be much
-        faster to create the filter once and reuse that filter when
-        repeatedly weighting audio data of identical sampling rates.
+        approach the filter coefficients for the target weighting curve.
+        The coefficients are cached, but only when the ``error_weighting``
+        and ``kwargs`` arguments are unused, which are unhashable.
+        Therefore, it may be much faster to create the filter once and
+        reuse that filter when calling this function repeatedly
+        with an ``error_weighting`` or ``kwargs``.
 
     .. note::
         When using default parameters for `n_frequencies` and `error_weighting`
@@ -154,9 +158,14 @@ def frequency_weighting_filter(
     if sampling_rate is None:
         sampling_rate: float = signal.sampling_rate
 
-    sos = _design_frequency_weighting_filter(sampling_rate, target_weighting,
-                                             n_bins, error_weighting,
-                                             **kwargs)
+    # cache when possible (does not work on functions and dicts)
+    if error_weighting is None and not kwargs:
+        sos = _design_frequency_weighting_filter_cached(
+            sampling_rate, target_weighting, n_bins)
+    else:
+        sos = _design_frequency_weighting_filter(
+            sampling_rate, target_weighting, n_bins, error_weighting, **kwargs)
+
     filt = pf.FilterSOS([sos], sampling_rate)
     filt.comment = (f"Frequency weighting SOS filter of order {filt.order} "
                     f"to approximate {target_weighting} weighting according "
@@ -168,6 +177,19 @@ def frequency_weighting_filter(
     else:
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+@lru_cache
+def _design_frequency_weighting_filter_cached(
+        sampling_rate: float,
+        target_weighting: Literal["A", "C"],
+        n_bins: int) -> np.ndarray:
+    """
+    Forwards to the filter design method but with a caching decorator and
+    without the unhashable parameters that would prevent caching.
+    """
+    return _design_frequency_weighting_filter(sampling_rate, target_weighting,
+                                              n_bins)
 
 
 def _design_frequency_weighting_filter(sampling_rate: float,
