@@ -44,7 +44,7 @@ def frequency_weighting_filter(
         with an ``error_weighting`` or ``kwargs``.
 
     .. note::
-        When using default parameters for `n_frequencies` and `error_weighting`
+        When using default parameters for `n_bins` and `error_weighting`
         and no `kwargs`, the returned filter is compliant with a class 1 sound
         level meter as described in the standard for the sampling rates
         48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
