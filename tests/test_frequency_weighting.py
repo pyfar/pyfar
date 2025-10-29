@@ -149,7 +149,7 @@ def test_frequency_weighting_filter_caching():
     # from the same cached coefficients
     a = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
     b = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
-    assert np.all(a == b)
+    assert np.all(a.coefficients == b.coefficients)
     # if both share a reference to the same coefficients object,
     # this would mutate both
     a.coefficients[0][0][1] = 10
