@@ -157,8 +157,10 @@ def test_frequency_weighting_filter_caching():
 
     # just to be safe, the private (internal) function should also not expose
     # references to cached arrays, which must not be mutated
-    a = pffilt.frequency_weighting._design_frequency_weighting_filter_cached(fs, "A", 100)
-    b = pffilt.frequency_weighting._design_frequency_weighting_filter_cached(fs, "A", 100)
+    a = pffilt.frequency_weighting. \
+        _design_frequency_weighting_filter_cached(fs, "A", 100)
+    b = pffilt.frequency_weighting. \
+        _design_frequency_weighting_filter_cached(fs, "A", 100)
     assert np.all(a == b)
     a[0][0] = 10
     assert not np.all(a == b)
