@@ -141,3 +141,24 @@ def test_frequency_weighting_filter_errors():
     with pytest.warns(UserWarning, match=re.compile(regex)):
         pffilt.frequency_weighting_filter(signal, "A",
                                           error_weighting=lambda _: 0)
+
+
+def test_frequency_weighting_filter_caching():
+    fs = 48000
+    # mutating coefficients of one filter should not affect other filters built
+    # from the same cached coefficients
+    a = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
+    b = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
+    assert np.all(a == b)
+    # if both share a reference to the same coefficients object,
+    # this would mutate both
+    a.coefficients[0][0][1] = 10
+    assert a.coefficients[0][0][1] != b.coefficients[0][0][1]
+
+    # just to be safe, the private (internal) function should also not expose
+    # references to cached arrays, which must not be mutated
+    a = pffilt.frequency_weighting._design_frequency_weighting_filter_cached(fs, "A", 100)
+    b = pffilt.frequency_weighting._design_frequency_weighting_filter_cached(fs, "A", 100)
+    assert np.all(a == b)
+    a[0][0] = 10
+    assert not np.all(a == b)

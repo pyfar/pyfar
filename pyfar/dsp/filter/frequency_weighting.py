@@ -10,7 +10,7 @@ import pyfar.constants as pfc
 import scipy.signal as sps
 import scipy.optimize as spo
 from pyfar.constants.frequency_weighting import _F_1, _F_2, _F_3, _F_4
-from functools import lru_cache
+from functools import lru_cache, wraps
 
 
 _A_WEIGHTING_ZEROS = [0, 0, 0, 0]
@@ -179,7 +179,26 @@ def frequency_weighting_filter(
         return signal_filt
 
 
-@lru_cache
+def _cache_and_copy(function):
+    """
+    Helper decorator for functions that return a np.ndarray, which...
+    1) applies the @lru_cache decorator to enable caching
+    2) copies the results into a new array to avoid mutating cached arrays
+    3) applies the @wraps decorator to keep the original function
+    comment and type hints.
+    """
+    @lru_cache()
+    def cached_function(*args):
+        return function(*args)
+
+    @wraps(function)
+    def copying_cached_function(*args):
+        return np.copy(cached_function(*args))
+
+    return copying_cached_function
+
+
+@_cache_and_copy
 def _design_frequency_weighting_filter_cached(
         sampling_rate: float,
         target_weighting: Literal["A", "C"],
