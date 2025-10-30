@@ -7,6 +7,7 @@ from pyfar.dsp import fft
 import warnings
 import scipy.fft as sfft
 from typing import Literal
+from typing import Union
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -562,7 +563,8 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         return signal_win
 
 
-def time_crop(signal, interval: list[float] | tuple[float, float] | np.ndarray,
+def time_crop(signal, interval: Union[list[float], tuple[float, float],
+                                       np.ndarray],
               unit: Literal["samples", "s"]='samples'):
     """This function can be used to crop a pf.Signal or pf.TimeData object.
 
