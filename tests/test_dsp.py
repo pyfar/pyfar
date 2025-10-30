@@ -683,49 +683,82 @@ def test_time_window_return_window_error():
         dsp.time_window(sig, interval=(4, 8), return_window='a')
 
 def test_time_crop_signal_types():
-    """Raise TypeError if `signal` is not a pyfar.Signal instance."""
+    """
+    Raise TypeError if `signal` is not a pyfar.Signal or pyfar.TimeData
+    instance.
+    """
     signal_1 = pyfar.Signal(np.ones(10), 2)
-    dsp.time_crop(signal_1, interval=(1, 2))
-    signal_2 = "signal"
+    dsp.time_crop(signal_1, interval = (1, 2))
+    signal_2 = pf.TimeData([1, 2], [1, 2])
+    dsp.time_crop(signal_2, interval = (1, 2))
+    signal_3 = "signal"
     with pytest.raises(TypeError, match='has to be of type'):
-        dsp.time_crop(signal_2, interval=(1, 2))
+        dsp.time_crop(signal_3, interval=(1, 2))
 
-def test_time_crop_interval_types():
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+@pytest.mark.parametrize("interval", [(1, 2), [1, 2], np.array([1, 2])])
+
+def test_time_crop_interval_types(signal, interval):
     """Accept list or tuple for `interval`, raise TypeError otherwise."""
-    signal = pyfar.Signal(np.ones(10), 2)
-    dsp.time_crop(signal, interval=(1, 2))
-    dsp.time_crop(signal, interval=[1, 2])
+    dsp.time_crop(signal, interval)
+    dsp.time_crop(signal, interval)
+    dsp.time_crop(signal, interval)
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_type_error(signal):
+    """Raise ValueError if the `interval` is of the wrong data type."""
     with pytest.raises(TypeError, match='has to be of type'):
         dsp.time_crop(signal, interval=5)
 
-def test_time_crop_interval_order_error():
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_order_error(signal):
     """Raise ValueError if `interval` start value >= end value."""
-    signal = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='smaller than the end point'):
         dsp.time_crop(signal, interval=[2, 1])
 
-def test_time_crop_interval_entries_error():
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_entries_error(signal):
     """Raise ValueError if `interval` does not contain exactly two entries."""
-    signal = pyfar.Signal(np.ones(10), 2)
-    with pytest.raises(ValueError, match='2 entries'):
+    with pytest.raises(ValueError, match = '2 entries'):
         dsp.time_crop(signal, interval=[1, 2, 3])
 
-def test_time_crop_interval_size():
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_size(signal):
     """Allow `interval` boundaries outside signal range."""
-    signal = pyfar.Signal(np.ones(10), 2)
     cropped_signal = dsp.time_crop(signal, interval=[0, 40])
     cropped_signal = dsp.time_crop(signal, interval=[-1, 2])
-    #If both boundaries are exceeded, the input signal is returned unchanged.
+    # If both boundaries are exceeded, the input signal is returned unchanged.
     cropped_signal = dsp.time_crop(signal, interval=[-1, 40])
     assert signal == cropped_signal
 
-def test_time_crop_unit_error():
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_unit_error(signal):
     """Raise ValueError for invalid `unit` argument."""
-    signal = pyfar.Signal(np.ones(10), 2)
     with pytest.raises(ValueError, match='but has to be'):
-        dsp.time_crop(signal, interval=[0, 6], unit='seconds')
+        dsp.time_crop(signal, interval = [0, 6], unit='seconds')
     with pytest.raises(ValueError, match='but has to be '):
-        dsp.time_crop(signal, interval=[0, 6], unit=2)
+        dsp.time_crop(signal, interval = [0, 6], unit=2)
+
+def test_time_crop_unit_seconds_time_data():
+    """Test the function with the unit 's'."""
+    signal = pf.TimeData([10, 20, 30, 40], [1.5, 2.1, 3.2, 3.7])
+    cropped = dsp.time_crop(signal, interval=[1.7, 3.8], unit='s')
+    assert (cropped.time == np.array((10, 20, 30))).all()
+    assert (cropped.times == np.array((1.5, 2.1, 3.2))).all()
+
+def test_time_crop_unit_samples_time_data():
+    """Test the function with the unit 'samples'."""
+    signal = pf.TimeData([10, 20, 30, 40], [1, 2, 3, 4])
+    cropped = dsp.time_crop(signal, interval=[1, 3])
+    assert (cropped.time == np.array((20, 30))).all()
+    assert (cropped.times == np.array((2, 3))).all()
 
 def test_kaiser_window_beta():
     """Test function call."""
