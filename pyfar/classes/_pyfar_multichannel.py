@@ -6,8 +6,10 @@ which implements functionality similar to NumPy arrays.
 from abc import ABC, abstractmethod
 import numpy as np
 from copy import deepcopy
+from math import prod
+from pyfar.classes._pyfar_base import _PyfarBase
 
-class _PyfarMultichannel(ABC):
+class _PyfarMultichannel(_PyfarBase, ABC):
     """
     Internal abstract base class for multichannel pyfar classes.
 
@@ -38,7 +40,7 @@ class _PyfarMultichannel(ABC):
         """
         Return the channel size, i.e., total number of channels.
         """
-        return np.prod(self.cshape)
+        return prod(self.cshape)
 
     @property
     def T(self):
@@ -83,8 +85,7 @@ class _PyfarMultichannel(ABC):
 
     def flatten(self):
         """Return a copy of the object collapsed into one channel dimension."""
-
-        return self.reshape(self.n_channels)
+        return self.reshape(self.csize)
 
     @abstractmethod
     def transpose(self, caxes=None):
