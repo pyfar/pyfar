@@ -227,33 +227,42 @@ def test_deprecation_shelve_functions():
 
 
 def test_deprecations_shelf_function_results():
-    np.testing.assert_allclose(
-        pfilt.high_shelve(None, 10e3, 1.5, 1, "I",
-                          sampling_rate=44100).coefficients,
-        pfilt.high_shelf(None, 10e3, 1.5, 1, "I",
-                         sampling_rate=44100).coefficients,
-        rtol=0)
+    with pytest.warns(PyfarDeprecationWarning,
+                      match="'high_shelve' will be deprecated in pyfar 0.9.0"):
+        np.testing.assert_allclose(
+            pfilt.high_shelve(None, 10e3, 1.5, 1, "I",
+                            sampling_rate=44100).coefficients,
+            pfilt.high_shelf(None, 10e3, 1.5, 1, "I",
+                            sampling_rate=44100).coefficients,
+            rtol=0)
 
-    np.testing.assert_allclose(
-        pfilt.low_shelve(None, 10e3, 1.5, 1, "I",
-                         sampling_rate=44100).coefficients,
-        pfilt.low_shelf(None, 10e3, 1.5, 1, "I",
-                        sampling_rate=44100).coefficients,
-        rtol=0)
+    with pytest.warns(PyfarDeprecationWarning,
+                      match="'low_shelve' will be deprecated in pyfar 0.9.0"):
+        np.testing.assert_allclose(
+            pfilt.low_shelve(None, 10e3, 1.5, 1, "I",
+                            sampling_rate=44100).coefficients,
+            pfilt.low_shelf(None, 10e3, 1.5, 1, "I",
+                            sampling_rate=44100).coefficients,
+            rtol=0)
+    with pytest.warns(PyfarDeprecationWarning,
+                      match=("'high_shelve_cascade' will be deprecated "
+                             "in pyfar 0.9.0")):
+        np.testing.assert_allclose(
+            pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                    sampling_rate=44100)[0].coefficients,
+            pfilt.high_shelf_cascade(None, 250, "lower", -60, None, 4,
+                                    sampling_rate=44100)[0].coefficients,
+            rtol=0)
 
-    np.testing.assert_allclose(
-        pfilt.high_shelve_cascade(None, 250, "lower", -60, None, 4,
-                                  sampling_rate=44100)[0].coefficients,
-        pfilt.high_shelf_cascade(None, 250, "lower", -60, None, 4,
-                                 sampling_rate=44100)[0].coefficients,
-        rtol=0)
-
-    np.testing.assert_allclose(
-        pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
-                                 sampling_rate=44100)[0].coefficients,
-        pfilt.low_shelf_cascade(None, 250, "lower", -60, None, 4,
-                                sampling_rate=44100)[0].coefficients,
-        rtol=0)
+    with pytest.warns(PyfarDeprecationWarning,
+                      match=("'low_shelve_cascade' will be deprecated "
+                             "in pyfar 0.9.0")):
+        np.testing.assert_allclose(
+            pfilt.low_shelve_cascade(None, 250, "lower", -60, None, 4,
+                                    sampling_rate=44100)[0].coefficients,
+            pfilt.low_shelf_cascade(None, 250, "lower", -60, None, 4,
+                                    sampling_rate=44100)[0].coefficients,
+            rtol=0)
 
 
 def test_deprecations_audio_io():
