@@ -40,6 +40,12 @@ def fractional_octave_frequencies(
         The lower and upper critical frequencies in Hz of the bandpass filters
         for each band as a tuple corresponding to ``(f_lower, f_upper)``.
     """
+    warnings.warn((
+        "pyfar.dsp.filter.fractional_octave_frequencies will removed in pyfar "
+        "0.10.0. Use pyfar.constants.fractional_octave_frequencies_nominal or "
+        "pyfar.constants.fractional_octave_frequencies_nominal instead."),
+        PyfarDeprecationWarning, stacklevel=1)
+
     nominal = None
 
     f_lims = np.asarray(frequency_range)
