@@ -458,7 +458,7 @@ def fractional_octave_filter_tolerance(
     ----------
     exact_center_frequency : float
         The exact center frequency of the band filter in Hz (see
-        :py:func:`~pyfar.dsp.filter.fractional_octave_frequencies`).
+        :py:func:`~pyfar.constants.fractional_octave_frequencies_exact`).
     num_fractions : Literal[1, 3]
         The number of bands an octave is divided into. ``1`` for octave bands
         and ``3`` for third octave bands.

@@ -338,11 +338,9 @@ def _coefficients_fractional_octave_bands(
     increased numeric accuracy and stability.
     """
 
-    f_crit = fractional_octave_frequencies(
-        num_fractions, frequency_range, return_cutoff=True)[2]
-
-    freqs_upper = f_crit[1]
-    freqs_lower = f_crit[0]
+    _, freqs_lower, freqs_upper = \
+        pf.constants.fractional_octave_frequencies_exact(
+            num_fractions, frequency_range)
 
     # normalize interval such that the Nyquist frequency is 1
     Wns = np.vstack((freqs_lower, freqs_upper)).T / sampling_rate * 2
@@ -432,8 +430,9 @@ def check_fractional_octave_band_filter_tolerance(
     if tolerance_class not in [1, 2]:
         raise ValueError('tolerance_class must be 1 or 2')
 
-    exact_center_frequencies = fractional_octave_frequencies(
-        num_fractions, frequency_range)[1]
+    exact_center_frequencies, *_ = \
+        pf.constants.fractional_octave_frequencies_exact(
+            num_fractions, frequency_range)
 
     ir = fractional_octave_band_filter.impulse_response(n_samples)
     log_magnitude = pf.dsp.decibel(ir).squeeze()
@@ -535,7 +534,8 @@ def reconstructing_fractional_octave_bands(
     frequencies : np.ndarray
         Center frequencies of the filters. Return variable will be removed
         in pyfar 0.9.0. To get the fractional octave center frequencies, use
-        :py:func:`~pyfar.dsp.filter.fractional_octave_frequencies` instead.
+        :py:func:`~pyfar.constants.fractional_octave_frequencies_exact`
+        instead.
 
     References
     ----------
@@ -555,8 +555,8 @@ def reconstructing_fractional_octave_bands(
         >>> x = pf.signals.impulse(2**12)
         >>> y = pf.dsp.filter.reconstructing_fractional_octave_bands(x)[0]
         >>> # get center frequencies
-        >>> f = pf.dsp.filter.fractional_octave_frequencies(
-        ...    frequency_range=(60, 16000))[1]
+        >>> f = pf.constants.fractional_octave_frequencies_exact(
+        ...    num_fractions=1, frequency_range=(60, 16000))[0]
         >>> y_sum = pf.Signal(np.sum(y.time, 0), y.sampling_rate)
         >>> # time domain plot
         >>> ax = pf.plot.time_freq(y_sum, color='k', unit='ms')
@@ -589,8 +589,9 @@ def reconstructing_fractional_octave_bands(
     n_bins = int(n_samples // 2 + 1)
 
     # fractional octave frequencies
-    _, f_m, f_cut_off = pf.dsp.filter.fractional_octave_frequencies(
-        num_fractions, frequency_range, return_cutoff=True)
+    f_m, f_lower, f_upper = \
+        pf.constants.fractional_octave_frequencies_exact(
+            num_fractions, frequency_range)
 
     # discard fractional octaves, if the center frequency exceeds
     # half the sampling rate
@@ -601,9 +602,9 @@ def reconstructing_fractional_octave_bands(
 
     # DFT lines of the lower cut-off and center frequency as in
     # Antoni, Eq. (14)
-    k_1 = np.round(n_samples * f_cut_off[0][f_id] / sampling_rate).astype(int)
+    k_1 = np.round(n_samples * f_lower[f_id] / sampling_rate).astype(int)
     k_m = np.round(n_samples * f_m[f_id] / sampling_rate).astype(int)
-    k_2 = np.round(n_samples * f_cut_off[1][f_id] / sampling_rate).astype(int)
+    k_2 = np.round(n_samples * f_upper[f_id] / sampling_rate).astype(int)
 
     # overlap in samples (symmetrical around the cut-off frequencies)
     P = np.round(overlap / 2 * (k_2 - k_m)).astype(int)
@@ -662,8 +663,8 @@ def reconstructing_fractional_octave_bands(
 
     warnings.warn(("Return parameter 'frequencies' will be removed in pyfar"
                    " 0.9.0. To get the fractional octave center frequencies,"
-                   " use `pyfar.dsp.filter.fractional_octave_frequencies` "
-                   "instead."), PyfarDeprecationWarning, stacklevel=2)
+                   " use `pyfar.constants.fractional_octave_frequencies_exact`"
+                   " instead."), PyfarDeprecationWarning, stacklevel=2)
 
     if signal is None:
         # return the filter object
