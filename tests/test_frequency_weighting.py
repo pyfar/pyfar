@@ -8,13 +8,42 @@ import re
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
 @pytest.mark.parametrize("num_fractions", [1, 3])
-@pytest.mark.parametrize("freq_range", [(20, 20000), (0, 100),
-                                        (4000, 100_000)])
+@pytest.mark.parametrize("freq_range", [(20, 20000)])
 def test_frequency_weighting_constants(weighting, num_fractions, freq_range):
     nominals, iec_weights = pyfar.constants. \
             frequency_weighting_band_corrections(weighting,
                                                  num_fractions,
                                                  freq_range)
+    calculated_weights = pyfar.constants. \
+            frequency_weighting_curve(weighting, nominals)
+
+    assert isinstance(iec_weights, np.ndarray)
+    assert isinstance(calculated_weights, np.ndarray)
+
+    # maybe there is a better way of testing. tolerance is 0.2, because
+    # we need 0.1 for rounding the weight and then larger error
+    # due to the difference in nominal vs exact frequency being evaluated
+    npt.assert_allclose(calculated_weights, iec_weights, atol=0.3)
+
+
+@pytest.mark.parametrize("weighting", ["A", "C"])
+@pytest.mark.parametrize("num_fractions", [1, 3])
+@pytest.mark.parametrize("freq_range", [(0, 100), (4000, 100_000)])
+def test_frequency_weighting_constants_warning(
+    weighting, num_fractions, freq_range):
+
+    if num_fractions == 1:
+        message = 'octave-band are defined only from 11.2 Hz to 22387.2 Hz'
+    else:
+        message = ('one-third-octave-band are defined only from 8.91 Hz '
+                       'to 22387.2 Hz')
+
+    with pytest.warns(UserWarning, match=message):
+        nominals, iec_weights = pyfar.constants. \
+            frequency_weighting_band_corrections(weighting,
+                                                 num_fractions,
+                                                 freq_range)
+
     calculated_weights = pyfar.constants. \
             frequency_weighting_curve(weighting, nominals)
 
