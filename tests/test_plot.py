@@ -132,8 +132,11 @@ def test_complex_freq_plots_2d(function, side_flag,
     functionality.
     """
 
-    signal = pf.utils.concatenate_channels((
-        handsome_complex_signal, handsome_complex_signal_v2))
+    if function == pf.plot.spectrogram:
+        signal = handsome_complex_signal
+    else:
+        signal = pf.utils.concatenate_channels((
+            handsome_complex_signal, handsome_complex_signal_v2))
 
     # plot
     filename = f'{function.__name__}_side_{side_flag}'
