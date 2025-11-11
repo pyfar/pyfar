@@ -967,9 +967,9 @@ def _read_comsol_get_headerline(filename):
 
 def read_ita(filename):
     """
-    Read an `*.ita` file created using the ITA-toolbox.
+    Read an `*.ita` file created using the ITA-Toolbox.
 
-    ITA-Tollbox is a MATLAB Toolbox for Acoustics [#]_.
+    ITA-Toolbox is a MATLAB Toolbox for Acoustics [#]_.
 
     Parameters
     ----------
@@ -980,10 +980,12 @@ def read_ita(filename):
     -------
     data : pyfar.Signal, pyfar.TimeData, pyfar.FrequencyData
         The audio data contained in the `*.ita` file.
-    object_coordinates : pyfar.Coordinates
-        The object coordinates of the `*.ita` file.
-    channel_coordinates : pyfar.Coordinates
-        The channel coordinates of the `*.ita` file.
+    object_coordinates : pyfar.Coordinates, None
+        The object coordinates of the `*.ita` file if they exist,
+        ``None`` otherwise.
+    channel_coordinates : pyfar.Coordinates, None
+        The channel coordinates of the `*.ita` file if they exist,
+        ``None`` otherwise.
     metadata : dict
         Additional metadata contained in the `*.ita` file.
 
@@ -1011,7 +1013,8 @@ def read_ita(filename):
 
     data_in = np.ascontiguousarray((matlab_data.data.T).astype(float))
 
-    # checks if *.ita object is itaAudio or itaResult
+    # Check the type of the *.ita object according to the logic
+    # of the ITA-Toolbox
     if (hasattr(matlab_data, 'signalType')):  # itaAudio
         fft_norm = 'none' if matlab_data.signalType == 'energy' else 'rms'
         data = pf.Signal(
@@ -1034,6 +1037,22 @@ def read_ita(filename):
 
 
 def _ita_to_pyfar_coordinates(ita_coordinates):
+    """
+    Extract coordinates from `ita_coordinates` if they exist,
+    and create an instance of pf.Coordinates with these coordinates.
+
+    Parameters
+    ----------
+    ita_coordinates : scipy.io.matlab.mat_struct
+        The struct containing the coordinates.
+
+    Returns
+    -------
+    pyfar.Coordinates, None
+        An instance of pyfar.Coordinates containing the coordinate
+        data from `ita_coordinates` if `ita_coordinates` is not empty,
+        otherwise ``None``.
+    """
     if hasattr(ita_coordinates, 'weights'):
         ita_contains_weights = ita_coordinates.weights.size > 0
         weights = ita_coordinates.weights if ita_contains_weights else None
@@ -1043,7 +1062,7 @@ def _ita_to_pyfar_coordinates(ita_coordinates):
     # import as cartesian coordinates: x, y, z
     if hasattr(ita_coordinates, 'cart'):
         if ita_coordinates.cart.size == 0:
-            return pf.Coordinates()
+            return None
         if ita_coordinates.cart.shape[-1] != 3:
             raise ValueError(
                 "ITA coordinates must have three "
@@ -1055,9 +1074,9 @@ def _ita_to_pyfar_coordinates(ita_coordinates):
             weights=weights)
 
     # import as spherical coordinates: r, theta, phi
-    if hasattr(ita_coordinates, 'sph'):
+    elif hasattr(ita_coordinates, 'sph'):
         if ita_coordinates.cart.size == 0:
-            return pf.Coordinates()
+            return None
         if ita_coordinates.sph.shape[-1] != 3:
             raise ValueError(
                 "ITA coordinates must have three "
@@ -1072,11 +1091,22 @@ def _ita_to_pyfar_coordinates(ita_coordinates):
 
 
 def _matlab_to_dict(mat_obj):
-    """Recursively transform MATLAB struct objects to nested dictionaries."""
+    """Recursively transform MATLAB struct objects to nested dictionaries.
+
+    Parameters
+    ----------
+    mat_obj : scipy.io.matlab.mat_struct
+        The MATLAB struct containing the data to be transformed.
+
+    Returns
+    -------
+    mat_dict : dict
+        A dictionary contaning the transformed data from the `mat_obj`.
+    """
     mat_dict = {}
     for fieldname in mat_obj._fieldnames:
         elem = mat_obj.__dict__[fieldname]
-        if isinstance(elem, spio.matlab.mio5_params.mat_struct):
+        if isinstance(elem, spio.matlab.mat_struct):
             mat_dict[fieldname] = _matlab_to_dict(elem)
         else:
             mat_dict[fieldname] = elem
