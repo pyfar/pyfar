@@ -13,7 +13,7 @@ def test_exceptions(filename):
     coordinates and the number of weights for the coordinates do not match.
     """
 
-    filepath = os.path.join('tests', 'test_io_data', filename)
+    filepath = os.path.join('tests', 'test_io_data', 'read_ita', filename)
     message = "weights must have same size as self.csize"
     with pytest.raises(AssertionError, match=message):
             pf.io.read_ita(filepath)
@@ -27,8 +27,10 @@ def test_exceptions(filename):
 def test_read_ita_domain(filename, domain):
     """Test correct reading of domain of some files."""
 
-    filepath = os.path.join('tests', 'test_io_data', filename)
-    _, _, _, metadata = pf.io.read_ita(filepath)
+    filepath = os.path.join('tests', 'test_io_data', 'read_ita', filename)
+    data, _, _, metadata = pf.io.read_ita(filepath)
+    print(metadata)
+    print("HIER FÄNGT DATA AN", data._data)
     assert metadata["domain"] == domain
 
 @pytest.mark.parametrize(('filename', 'channelCoordinates'), [
@@ -42,13 +44,13 @@ def test_read_ita_channel_coordinates(filename, channelCoordinates):
     conversion of this data to pf.Coordinates.
     """
 
-    filepath = os.path.join('tests', 'test_io_data', filename)
+    filepath = os.path.join('tests', 'test_io_data', 'read_ita',  filename)
     _, _, channel_coords, metadata = pf.io.read_ita(filepath)
     metadata_channel_coords_reshaped = \
         metadata["channelCoordinates"]["cart"].reshape(channel_coords.cartesian.shape)
     assert np.array_equal(metadata_channel_coords_reshaped,
-                            channel_coords.cartesian) and \
-        np.array_equal(channel_coords.cartesian, channelCoordinates)
+                          channel_coords.cartesian)
+    assert np.array_equal(channel_coords.cartesian, channelCoordinates)
 
 @pytest.mark.parametrize(('filename', 'data_to_test', 'expected_data'), [
     ('freq_itaResult.ita', 'n_bins', 31),
@@ -62,7 +64,7 @@ def test_read_ita_data_samples_bins(filename, data_to_test, expected_data):
     and the number of bins for frequency domain data.
     """
 
-    filepath = os.path.join('tests', 'test_io_data', filename)
+    filepath = os.path.join('tests', 'test_io_data', 'read_ita',  filename)
     data, _, _, _ = pf.io.read_ita(filepath)
     if data_to_test == "n_bins":
         assert data.n_bins == expected_data
@@ -81,6 +83,8 @@ def test_read_ita_data_samples_bins(filename, data_to_test, expected_data):
 def test_read_ita_data_dimension(filename, dimension):
     """Test the correct reading of the number of dimensions from the data."""
 
-    filepath = os.path.join('tests', 'test_io_data', filename)
+    filepath = os.path.join('tests', 'test_io_data', 'read_ita', filename)
     data, _, _, _ = pf.io.read_ita(filepath)
     assert data.cshape == dimension
+
+test_read_ita_domain('freq_itaResult_mult.ita', 'freq')
