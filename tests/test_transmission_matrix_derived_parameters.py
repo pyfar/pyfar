@@ -257,6 +257,9 @@ def _expected_voltage_to_current_tf(
 
     return TF
 
+@pytest.mark.filterwarnings("ignore::RuntimeWarning")
+# Warnings for multiplication/division with inf/zero in some cases
+# are meaningful, but clutter the test output.
 @pytest.mark.parametrize("impedance_type", ["input", "output"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
 def test_input_impedance(impedance_type : str, twoport_type : str,
@@ -279,6 +282,10 @@ def test_input_impedance(impedance_type : str, twoport_type : str,
         Zres.freq[idx_default], Zexpected.freq[idx_default], atol=1e-15)
     assert(np.all(np.abs(Zres.freq[idx_inf]) > 1e15))
 
+
+@pytest.mark.filterwarnings("ignore::RuntimeWarning")
+# Warnings for multiplication/division with inf/zero in some cases
+# are meaningful, but clutter the test output.
 @pytest.mark.parametrize("tf_type", ["voltage", "current", "voltage/current",
                                      "current/voltage"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
