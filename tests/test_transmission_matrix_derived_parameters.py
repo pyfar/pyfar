@@ -115,21 +115,20 @@ def impedance_random(frequencies) -> FrequencyData:
     rng = np.random.default_rng()
     return FrequencyData(rng.random(len(frequencies)), frequencies)
 
-@pytest.fixture(scope="module",
-                params=["random_load", "inf_load", "zero_load", "mixed_load"])
-def load_impedance(request, frequencies) -> FrequencyData:
-    """Parametrized fixture for load impedance as FrequencyData object with
+
+def _special_load_impedance(load_type, frequencies) -> FrequencyData:
+    """Returns load impedance as FrequencyData object with
     different types of data:
     1) random, 2) infinite load, 3) zero load, 4) mix of all.
     """
-    if request.param == "random_load":
+    if load_type == "random_load":
         rng = np.random.default_rng()
         return FrequencyData(rng.random(len(frequencies)), frequencies)
-    elif request.param == "inf_load":
+    elif load_type == "inf_load":
         return FrequencyData(np.ones_like(frequencies)*np.inf, frequencies)
-    elif request.param == "zero_load":
+    elif load_type == "zero_load":
         return FrequencyData(np.zeros_like(frequencies), frequencies)
-    elif request.param == "mixed_load":
+    elif load_type == "mixed_load":
         return FrequencyData([0, 2, np.inf], frequencies)
 
 def _special_twoport_tmatrix(
@@ -257,16 +256,18 @@ def _expected_voltage_to_current_tf(
 
     return TF
 
-@pytest.mark.filterwarnings("ignore::RuntimeWarning")
-# Warnings for multiplication/division with inf/zero in some cases
-# are meaningful, but clutter the test output.
+
 @pytest.mark.parametrize("impedance_type", ["input", "output"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
+@pytest.mark.parametrize(
+    "load_type", ["random_load", "inf_load", "zero_load", "mixed_load"])
 def test_input_impedance(impedance_type : str, twoport_type : str,
-                         load_impedance : FrequencyData, impedance_random):
+                         load_type : str, impedance_random):
     """Significantly parametrized test for result of input/output impedance
     method.
     """
+    load_impedance = _special_load_impedance(
+        load_type, impedance_random.frequencies)
     tmat = _special_twoport_tmatrix(
         twoport_type, load_impedance, impedance_random)
     if impedance_type == "input":
@@ -283,15 +284,17 @@ def test_input_impedance(impedance_type : str, twoport_type : str,
     assert(np.all(np.abs(Zres.freq[idx_inf]) > 1e15))
 
 
-@pytest.mark.filterwarnings("ignore::RuntimeWarning")
-# Warnings for multiplication/division with inf/zero in some cases
-# are meaningful, but clutter the test output.
+
 @pytest.mark.parametrize("tf_type", ["voltage", "current", "voltage/current",
                                      "current/voltage"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
+@pytest.mark.parametrize(
+    "load_type", ["random_load", "inf_load", "zero_load", "mixed_load"])
 def test_transfer_function(tf_type, twoport_type,
-                           load_impedance, impedance_random):
+                           load_type, impedance_random):
     """Significantly parametrized test for result of TF method."""
+    load_impedance = _special_load_impedance(
+        load_type, impedance_random.frequencies)
     tmat = _special_twoport_tmatrix(
         twoport_type, load_impedance, impedance_random)
 
