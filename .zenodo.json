@@ -18,21 +18,17 @@
   "language": "eng",
   "creators": [
     {
-      "name": "pyfar developers"
+      "name": "The pyfar developers"
     }
   ],
   "contributors": [
     {
-        "name": "Developer, One",
-        "affiliation": "Institute of Advanced Procrastination",
-        "type": "Developer"
-    },
-    {
-        "name": "Developer, Two",
-        "affiliation": "Institute of Advanced Procrastination",
-        "type": "Developer"
+      "name": "Berzborn, Marco",
+      "affiliation": "Eindhoven University of Technology",
+      "orchid": "0000-0002-4421-1702",
+      "type": "Maintainer"
     }
-],
+  ],
   "communities": [
     {
       "identifier": "pyfar"
