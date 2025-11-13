@@ -4,6 +4,7 @@ import pytest
 import re
 from pyfar import TransmissionMatrix
 from pyfar import FrequencyData
+import warnings
 
 
 @pytest.fixture(scope="module")
@@ -261,7 +262,9 @@ def _expected_voltage_to_current_tf(
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
 @pytest.mark.parametrize(
     "load_type", ["random_load", "inf_load", "zero_load", "mixed_load"])
-def test_input_impedance(impedance_type : str, twoport_type : str,
+# Ignore warnings related to special load impedances
+@pytest.mark.filterwarnings("ignore::UserWarning",  message = "Denominator*")
+def test_input_output_impedance(impedance_type : str, twoport_type : str,
                          load_type : str, impedance_random):
     """Significantly parametrized test for result of input/output impedance
     method.
