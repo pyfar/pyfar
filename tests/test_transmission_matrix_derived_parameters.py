@@ -257,9 +257,11 @@ def _expected_voltage_to_current_tf(
 
     return TF
 
-@pytest.mark.filterwarnings("ignore::RuntimeWarning")
-# Warnings for multiplication/division with inf/zero in some cases
-# are meaningful, but clutter the test output.
+@pytest.mark.filterwarnings("ignore:.*encountered:RuntimeWarning")
+# These tests check meaningful cases, such as zero or infinite load impedances.
+# RuntimeWarning may be raised because these values are involved in
+# multiplications or divisions. Catching all these cases in the class itself
+# would require some substantial refactoring.
 @pytest.mark.parametrize("impedance_type", ["input", "output"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
 def test_input_impedance(impedance_type : str, twoport_type : str,
@@ -283,9 +285,11 @@ def test_input_impedance(impedance_type : str, twoport_type : str,
     assert(np.all(np.abs(Zres.freq[idx_inf]) > 1e15))
 
 
-@pytest.mark.filterwarnings("ignore::RuntimeWarning")
-# Warnings for multiplication/division with inf/zero in some cases
-# are meaningful, but clutter the test output.
+@pytest.mark.filterwarnings("ignore:.*encountered:RuntimeWarning")
+# These tests check meaningful cases, such as zero or infinite load impedances.
+# RuntimeWarning may be raised because these values are involved in
+# multiplications or divisions. Catching all these cases in the class itself
+# would require some substantial refactoring.
 @pytest.mark.parametrize("tf_type", ["voltage", "current", "voltage/current",
                                      "current/voltage"])
 @pytest.mark.parametrize("twoport_type", _twoport_type_list())
