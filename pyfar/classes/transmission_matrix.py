@@ -33,6 +33,7 @@ import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
 from numbers import Number
+import warnings
 
 
 class TransmissionMatrix(FrequencyData):
@@ -343,12 +344,18 @@ class TransmissionMatrix(FrequencyData):
 
         # Admittance form for Zl = inf
         idx_inf, __, __ = self._check_for_inf(Zl)
-        nominator.freq[idx_inf] = (self.A + self.B / Zl).freq[idx_inf]
-        denominator.freq[idx_inf] = (self.C + self.D / Zl).freq[idx_inf]
+        if np.any(idx_inf): # Avoid RuntimeWarning for empty index
+            nominator.freq[idx_inf] = (self.A + self.B / Zl).freq[idx_inf]
+            denominator.freq[idx_inf] = (self.C + self.D / Zl).freq[idx_inf]
 
         # Avoid cases where denominator is zero, examples
         # Zl = inf & C = 0; Zl = 0 & D = 0
-        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        if np.any(denominator.freq == 0):
+            warnings.warn(
+                "Denominator for impedance calculation contains " \
+                "zero values. These are replaced by a small value (eps).",
+                UserWarning, stacklevel=2)
+            denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
     def output_impedance(self, Zl: complex | FrequencyData) -> FrequencyData:
@@ -389,12 +396,18 @@ class TransmissionMatrix(FrequencyData):
 
         # Admittance form for Zl = inf
         idx_inf, __, __ = self._check_for_inf(Zl)
-        nominator.freq[idx_inf] = (self.D + self.B / Zl).freq[idx_inf]
-        denominator.freq[idx_inf] = (self.C + self.A / Zl).freq[idx_inf]
+        if np.any(idx_inf): # Avoid RuntimeWarning for empty index
+            nominator.freq[idx_inf] = (self.D + self.B / Zl).freq[idx_inf]
+            denominator.freq[idx_inf] = (self.C + self.A / Zl).freq[idx_inf]
 
         # Avoid cases where denominator is zero, examples
         # Zl = 0 & A = 0; Zl = inf & C = 0
-        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        if np.any(denominator.freq == 0):
+            warnings.warn(
+                "Denominator for impedance calculation contains " \
+                "zero values. These are replaced by a small value (eps).",
+                UserWarning, stacklevel=2)
+            denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
     def transfer_function(self, quantity_indices,
@@ -481,7 +494,12 @@ class TransmissionMatrix(FrequencyData):
 
         # Avoid cases where denominator is zero, examples
         # Zl = 0 & B = 0; Zl = inf & A = 0
-        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        if np.any(denominator.freq == 0):
+            warnings.warn(
+                "Denominator for transfer function calculation contains " \
+                "zero values. These are replaced by a small value (eps).",
+                UserWarning, stacklevel=2)
+            denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
     def _transfer_function_q2q1(self,
@@ -493,7 +511,12 @@ class TransmissionMatrix(FrequencyData):
 
         # In cases where the denominator is zero, e.g. Zl = 0 & B = 0,
         # are related to short-circuated outputs (undefined current) => NaN
-        denominator.freq[denominator.freq == 0] = np.nan
+        if np.any(denominator.freq == 0):
+            warnings.warn(
+                "Denominator for transfer function calculation contains " \
+                "zero values. These are replaced by nan.",
+                UserWarning, stacklevel=2)
+            denominator.freq[denominator.freq == 0] = np.nan
         return nominator / denominator
 
     def _transfer_function_q2q2(self,
@@ -510,7 +533,12 @@ class TransmissionMatrix(FrequencyData):
 
         # Avoid cases where denominator is zero, examples
         # Zl = 0 & D = 0; Zl = inf & C = 0
-        denominator.freq[denominator.freq == 0] = np.finfo(float).eps
+        if np.any(denominator.freq == 0):
+            warnings.warn(
+                "Denominator for transfer function calculation contains " \
+                "zero values. These are replaced by a small value (eps).",
+                UserWarning, stacklevel=2)
+            denominator.freq[denominator.freq == 0] = np.finfo(float).eps
         return nominator / denominator
 
     def _transfer_function_q1q2(self,
@@ -528,7 +556,12 @@ class TransmissionMatrix(FrequencyData):
         # In cases where the denominator is zero, e.g. Zl = inf & C = 0,
         # are related to non-physical cases (e.g. undefined current/voltage)
         # => NaN
-        denominator.freq[denominator.freq == 0] = np.nan
+        if np.any(denominator.freq == 0):
+            warnings.warn(
+                "Denominator for transfer function calculation contains " \
+                "zero values. These are replaced by nan.",
+                UserWarning, stacklevel=2)
+            denominator.freq[denominator.freq == 0] = np.nan
         return nominator / denominator
 
     @staticmethod
