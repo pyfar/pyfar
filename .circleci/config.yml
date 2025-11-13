@@ -129,7 +129,7 @@ jobs:
           name: build distribution
           command: |
             python -m build
-            twine_check dist/*
+            twine check dist/*
       - persist_to_workspace:
           root: .
           paths:
