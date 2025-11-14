@@ -6,6 +6,8 @@ import pyfar
 from pyfar.dsp import fft
 import warnings
 import scipy.fft as sfft
+from typing import Literal
+from typing import Union
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -559,6 +561,80 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         return signal_win, window_fin
     else:
         return signal_win
+
+
+def time_crop(signal, interval: Union[list[float], tuple[float, float],
+                                       np.ndarray],
+              unit: Literal["samples", "s"]='samples'):
+    """This function can be used to crop a pf.Signal or pf.TimeData object.
+
+    Parameters
+    ----------
+    signal : pyfar.Signal, pyfar.TimeData
+        pf.Signal or pf.TimeData object to be cropped.
+
+    interval : list, tuple, or numpy.ndarray
+        Must contain exactly two entries, these specify the beginning and
+        the end of the section to be cropped. The unit of `interval`
+        is specified by the parameter `unit`.
+
+    unit : string, optional
+        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        Time values are rounded to the nearest sample. The default is
+        ``'samples'``.
+
+    Returns
+    -------
+    cropped_signal : pyfar.Signal, pyfar.TimeData
+        Cropped pf.Signal or pf.TimeData object.
+
+    """
+    # Check the input
+    if not isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        raise TypeError("The parameter signal has to be of type " \
+        "pyfar.Signal or pyfar.TimeData.")
+
+    if not isinstance(interval, (list, tuple, np.ndarray)):
+        raise TypeError(
+            "The parameter interval has to be of type" \
+            " list, tuple or numpy.array.")
+    if len(interval) != 2:
+        raise ValueError(
+            "The parameter interval must consist of 2 entries.")
+
+    # Convert to samples
+    interval = np.array(interval)
+    if unit == 's':
+        if isinstance(signal, pyfar.Signal):
+            interval = np.round(interval * signal.sampling_rate).astype(int)
+        else:
+            times  = np.array(signal.times)
+            start, end = (np.argmin(np.abs(times - point)) for
+                          point in interval)
+            interval = (start, end)
+    elif unit == 'samples':
+            interval = interval.astype(int)
+    else:
+        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+
+    # Check the start and the end points
+    start, end = interval
+    if start >= end:
+        raise ValueError("The start point in the parameter interval must" \
+        "be smaller than the end point.")
+
+    start_index = max(start, 0)
+    end_index = min(end, np.size(signal.time))
+
+    if isinstance(signal, pyfar.Signal):
+        time_data = signal.time[:, start_index:end_index]
+        cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
+    else:
+        time_data = signal.time[:, start_index:end_index]
+        times = signal.times[start_index:end_index]
+        cropped_signal = pyfar.TimeData(time_data, times)
+
+    return cropped_signal
 
 
 def kaiser_window_beta(A):
