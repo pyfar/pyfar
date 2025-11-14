@@ -29,6 +29,7 @@ consecutive T-matrices simply using the ``@`` operator:
 
 """
 from __future__ import annotations # required for Python <= 3.9
+from numbers import Number
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
@@ -132,6 +133,19 @@ class TransmissionMatrix(FrequencyData):
         """
         return cls(data, frequencies, comment)
 
+    def _tmat_from_abcd(A, B, C, D):
+        """Create a T-matrix from A-, B-, C-, D-data."""
+        if not (
+            (isinstance(A, Number) or isinstance(A, complex))
+            and (isinstance(B, Number) or isinstance(B, complex))
+            and (isinstance(C, Number) or isinstance(C, complex))
+            and (isinstance(D, Number) or isinstance(D, complex))
+        ):
+            raise TypeError(
+                "A, B, C, and D must be scalars (real or complex).",
+            )
+        return np.array([[A, B], [C, D]])
+
     @classmethod
     def from_abcd(cls, A, B, C, D, frequencies = None):
         """Create a TransmissionMatrix object from A-, B-, C-, D-data, and
@@ -139,14 +153,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        A : FrequencyData, array_like, double
+        A : FrequencyData, array_like
             Raw data for the matrix entries A. The data need to match the
             B, C and D entry or be broadcastable into one ``shape``.
-        B : FrequencyData, array_like, double
+        B : FrequencyData, array_like
             See A.
-        C : FrequencyData, array_like, double
+        C : FrequencyData, array_like
             See A.
-        D : FrequencyData, array_like, double
+        D : FrequencyData, array_like
             See A.
         frequencies : array, double, None
             Frequencies of the data in Hz. This is optional if using the
@@ -184,7 +198,7 @@ class TransmissionMatrix(FrequencyData):
 
         if num_freqdata == 4:
             frequencies = A.frequencies
-            for obj in (B,C,D): #Frequency bins must match
+            for obj in (B,C,D):  # Frequency bins must match
                 npt.assert_allclose(frequencies, obj.frequencies, atol=1e-15)
             (A,B,C,D) = (A.freq, B.freq, C.freq, D.freq)
         elif num_freqdata != 0:
@@ -195,10 +209,21 @@ class TransmissionMatrix(FrequencyData):
         if frequencies is None:
             raise ValueError("'frequencies' must be specified if not using "
                              "'FrequencyData' objects as input.")
+
+        (A, B, C, D) = (
+            np.atleast_1d(np.asarray(A)),
+            np.atleast_1d(np.asarray(B)),
+            np.atleast_1d(np.asarray(C)),
+            np.atleast_1d(np.asarray(D)),
+        )
+
         # broadcast shapes
         shape = np.broadcast_shapes(
-            np.array(A).shape, np.array(B).shape,
-            np.array(C).shape, np.array(D).shape)
+            A.shape,
+            B.shape,
+            C.shape,
+            D.shape,
+        )
         A = np.broadcast_to(A, shape)
         B = np.broadcast_to(B, shape)
         C = np.broadcast_to(C, shape)
@@ -579,12 +604,12 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        impedance : scalar | FrequencyData
+        impedance : scalar, FrequencyData
             The impedance data of the series impedance.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing the series connection
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -592,9 +617,7 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(impedance) and not isinstance(impedance, str):
-            tmat = np.identity(2)
-            tmat[0,1] = impedance
-            return tmat
+            return TransmissionMatrix._tmat_from_abcd(1, impedance, 0, 1)
 
         if not isinstance(impedance, FrequencyData):
             raise ValueError("'impedance' must be a "
@@ -620,12 +643,12 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        admittance : scalar | FrequencyData
+        admittance : scalar, FrequencyData
             The admittance data of the element connected in parallel.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing a parallel connection
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -633,9 +656,7 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(admittance) and not isinstance(admittance, str):
-            tmat = np.identity(2)
-            tmat[1,0] = admittance
-            return tmat
+            return TransmissionMatrix._tmat_from_abcd(1, 0, admittance, 1)
 
         if not isinstance(admittance, FrequencyData):
             raise ValueError("'admittance' must be a "
@@ -659,7 +680,7 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar | FrequencyData
+        transducer_constant : scalar, FrequencyData
             The transmission ratio with respect to voltage-like quantity,
             i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
@@ -667,7 +688,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing the transformer
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -675,11 +696,15 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(transducer_constant) and not isinstance(
-            transducer_constant, str):
-            tmat = np.identity(2)
-            tmat[0,0] = transducer_constant
-            tmat[1,1] = 1/transducer_constant
-            return tmat
+            transducer_constant,
+            str,
+        ):
+            return TransmissionMatrix._tmat_from_abcd(
+                transducer_constant,
+                0,
+                0,
+                1 / transducer_constant,
+            )
 
         if not isinstance(transducer_constant, FrequencyData):
             raise ValueError("'transducer_constant' must be a "
@@ -710,14 +735,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar | FrequencyData
+        transducer_constant : scalar, FrequencyData
             The transducer constant :math:`M`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
             return value will be a 2x2 np.ndarray instead.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A the transmission matrix representing the gyrator and can be
             cascaded with TransmissionMatrix objects. If a scalar was used as
             input a frequency-independent matrix is returned, namely an
@@ -725,11 +750,15 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(transducer_constant) and not isinstance(
-            transducer_constant, str):
-            tmat = np.zeros([2,2])
-            tmat[0,1] = transducer_constant
-            tmat[1,0] = 1/transducer_constant
-            return tmat
+            transducer_constant,
+            str,
+        ):
+            return TransmissionMatrix._tmat_from_abcd(
+                0,
+                transducer_constant,
+                1 / transducer_constant,
+                0,
+            )
 
         if not isinstance(transducer_constant, FrequencyData):
             raise ValueError("'transducer_constant' must be a "
