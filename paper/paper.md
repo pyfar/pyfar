@@ -1,31 +1,17 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'Pyfar: A Python package and ecosystem for acoustics research'
 tags:
   - Python
   - signal processing
   - acoustics
 authors:
-  - name: Pyfar developer
-    orcid: 0000-0000-0000-0000
+  - name: Marco Berzborn
+    orcid: 0000-0002-4421-1702
     equal-contrib: true
     affiliation: "1" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
 affiliations:
- - name: Institute for Hearing Technology and Acoustics, RWTH Aachen University
+ - name: Department of the Built Environment, Technical University of Eindhoven, The Netherlands
    index: 1
- - name: Institution Name, Country
-   index: 2
- - name: Independent Researcher, Country
-   index: 3
 date: 17 May 2024
 bibliography: paper.bib
 
