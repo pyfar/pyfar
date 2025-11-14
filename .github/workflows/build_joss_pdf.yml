@@ -1,6 +1,9 @@
 name: joss pdf
 on:
-  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
 
 jobs:
   paper:
