@@ -170,6 +170,7 @@ workflows:
                 - "3.11"
                 - "3.12"
                 - "3.13"
+                - "3.14"
       - ruff:
           matrix:
             parameters:
@@ -190,7 +191,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.13"
+                - "3.14"
           requires:
             - build_and_test
 
@@ -217,6 +218,7 @@ workflows:
                 - "3.11"
                 - "3.12"
                 - "3.13"
+                - "3.14"
           filters:
             branches:
               ignore: /.*/
@@ -256,7 +258,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.13"
+                - "3.14"
           requires:
             - build_and_test
           filters:
