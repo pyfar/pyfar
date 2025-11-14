@@ -108,6 +108,5 @@ Figure sizes can be customized by adding an optional second parameter:
 # Acknowledgements
 
 We gratefully acknowledge contributions by the open-source community in the form of bug-fixes, functionality additions, and usability or documentation improvements.
-<!-- Oh, and support from Kathryn Johnston during the genesis of this project. -->
 
 # References
