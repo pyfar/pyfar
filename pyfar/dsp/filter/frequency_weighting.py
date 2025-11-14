@@ -122,9 +122,9 @@ def frequency_weighting_filter(
         >>> plt.ylim(-45, 5)
         >>> plt.legend()
 
-    Use the ``error_weighting`` parameter to improve filter accuracy
-    near the nyquist frequency. Doing so often leads to better results
-    for typical sampling rates, but much worse for very high rates.
+    Use the ``error_weighting`` parameter to emphasize filter accuracy
+    near the Nyquist frequency. Note that the results depend on the
+    sampling rate and your device (operating system, hardware).
 
     .. plot::
 
