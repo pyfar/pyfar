@@ -123,7 +123,7 @@ def frequency_weighting_filter(
         >>> plt.legend()
 
     Use the ``error_weighting`` parameter to emphasize filter accuracy
-    near the nyquist frequency. Note that the results depend on the
+    near the Nyquist frequency. Note that the results depend on the
     sampling rate and your device (operating system, hardware).
 
     .. plot::
