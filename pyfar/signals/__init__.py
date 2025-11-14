@@ -16,7 +16,10 @@ from .deterministic import (
     linear_perfect_sweep, magnitude_spectrum_weighted_sweep)
 
 from .stochastic import (
-    noise, pulsed_noise)
+    noise, pulsed_noise,
+    reflection_density_room,
+    dirac_sequence,
+    )
 
 from . import files
 
@@ -25,4 +28,7 @@ __all__ = [
     'linear_sweep_time', 'exponential_sweep_time',
     'linear_sweep_freq', 'exponential_sweep_freq',
     'linear_perfect_sweep', 'magnitude_spectrum_weighted_sweep',
-    'files']
+    'reflection_density_room',
+    'dirac_sequence',
+    'files',
+    ]
