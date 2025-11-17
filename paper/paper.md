@@ -37,6 +37,19 @@ On top of that `pyfar` provides functionality for
 
 # Statement of need
 
+- Researchers in acoustics and audio signal processing often need to implement similar algorithms and functionality.
+- Existing implementations are often developed at single institutions for in-house use and later shared as open source solutions.
+- This leads to duplicated work, slower research progress, and less reliable results.
+- `Pyfar` is a cross-institutional community effort to provide a common foundation for acoustics research in Python.
+- `Pyfar` provides a well-documented and tested package that researchers can use and contribute to.
+- `Pyfar` is designed to be user-friendly and intuitive, making it easier for researchers to implement their ideas and share their work with others.
+- Encapsulated data structures and relevant operators facilitate readable and easy-to-use code which reduces the chance of errors.
+
+# Additional information and future developments
+
+- Example gallery with tutorials and use cases
+- Open educational resources are available to support learning and teaching in acoustics and audio signal processing using `pyfar`.
+- Additional packages in the `pyfar` ecosystem provide functionality for specific use cases, e.g., room acoustics analysis, spherical array signal processing, and reading and writing of _sofa_ files standardized in AES69.
 
 # Acknowledgements
 
