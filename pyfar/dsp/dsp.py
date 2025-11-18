@@ -566,7 +566,7 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 def time_crop(signal, interval: Union[list[float], tuple[float, float],
                                        np.ndarray],
               unit: Literal["samples", "s"]='samples'):
-    """This function can be used to crop a pf.Signal or pf.TimeData object.
+    """Crop a pf.Signal or pf.TimeData object in time.
 
     Parameters
     ----------
@@ -588,6 +588,38 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
     cropped_signal : pyfar.Signal, pyfar.TimeData
         Cropped pf.Signal or pf.TimeData object.
 
+    Examples
+    --------
+    Create a sine wave signal and extract an interval from it.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.5))
+        >>> signal = pf.signals.sine(100, 4410)
+        >>> signal_cropped = pf.dsp.time_crop(signal, interval=[565, 1220])
+        >>> pf.plot.time(signal, label='original, pf.Signal',
+        ...                             unit = 'samples', ax=ax1)
+        >>> ax1.axvline(565, color='k', linestyle='-.', label='interval')
+        >>> ax1.axvline(1220, color='k',  linestyle='-.')
+        >>> pf.plot.time(signal_cropped, color='y',
+        ...     label='cropped, pf.Signal', unit='samples', ax=ax2)
+        >>> fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(9, 3.5))
+        >>> time_signal = pf.TimeData((1, 2, 2.5, 2, 1, -1 ),
+        ...                             (0, 0.1, 0.2, 0.3, 0.4, 0.5))
+        >>> time_signal_cropped = pf.dsp.time_crop(time_signal,
+        ...                             interval=[0.1, 0.38], unit='s')
+        >>> pf.plot.time(time_signal, label='original, pf.TimeData',
+        ...                                             unit = 's', ax=ax3)
+        >>> ax3.axvline(0.1, color='k', linestyle='-.', label='interval')
+        >>> ax3.axvline(0.3, color='k',  linestyle='-.')
+        >>> pf.plot.time(time_signal_cropped, color='y',
+        ...     label='cropped, pf.TimeData', unit = 's', ax=ax4)
+        >>> for ax in [ax1, ax2, ax3, ax4]:
+        >>>     ax.legend()
+
     """
     # Check the input
     if not isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
@@ -597,41 +629,45 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
     if not isinstance(interval, (list, tuple, np.ndarray)):
         raise TypeError(
             "The parameter interval has to be of type" \
-            " list, tuple or numpy.array.")
+            " list, tuple or numpy.ndarray.")
     if len(interval) != 2:
         raise ValueError(
             "The parameter interval must consist of 2 entries.")
 
-    # Convert to samples
     interval = np.array(interval)
+    start, end = interval[0], interval[1]
+    if start >= end:
+        raise ValueError("The interval start point must be smaller " \
+        "than the end point.")
+    if start < 0 or end < 0:
+        raise ValueError("The interval boundaries must be non-negative.")
+
     if unit == 's':
-        if isinstance(signal, pyfar.Signal):
-            interval = np.round(interval * signal.sampling_rate).astype(int)
-        else:
-            times  = np.array(signal.times)
-            start, end = (np.argmin(np.abs(times - point)) for
-                          point in interval)
-            interval = (start, end)
+            times = np.array(signal.times)
+            mask = ((times >= interval[0]) & (
+                times <= interval[1]))
+            # Find the indices of the time instances that do not exceed
+            # the boundaries of the interval.
+            times_indices = np.nonzero(mask)[0]
+            if times_indices.size > 0 :
+                interval = (times_indices[0], times_indices[-1])
+            else:
+                raise ValueError("Interval is out of the boundaries" \
+                " of signal.times")
     elif unit == 'samples':
-            interval = interval.astype(int)
+        interval = interval.astype(int)
+        indices = np.arange(len(signal.times))
+        mask = ((indices >= interval[0]) & (
+                indices <= interval[1]))
     else:
         raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
 
-    # Check the start and the end points
-    start, end = interval
-    if start >= end:
-        raise ValueError("The start point in the parameter interval must" \
-        "be smaller than the end point.")
-
-    start_index = max(start, 0)
-    end_index = min(end, np.size(signal.time))
+    time_data = signal.time[:, mask]
 
     if isinstance(signal, pyfar.Signal):
-        time_data = signal.time[:, start_index:end_index]
         cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
     else:
-        time_data = signal.time[:, start_index:end_index]
-        times = signal.times[start_index:end_index]
+        times = signal.times[mask]
         cropped_signal = pyfar.TimeData(time_data, times)
 
     return cropped_signal
