@@ -88,19 +88,8 @@ exclude = [
     "pyfar/dsp/filter/_audiofilter.py",
 ]
 line-length = 79
-lint.ignore = [
-    "D200",   # One-line docstring should fit on one line with quotes
-    "D202",   # No blank lines allowed after function docstring
-    "D205",   # 1 blank line required between summary line and description
-    "D401",   # First line should be in imperative mood
-    "D404",   # First word of the docstring should not be "This"
-    "B006",   # Do not use mutable data structures for argument defaults
-    "B008",   # Do not perform calls in argument defaults
-    "PT018",  # Assertion should be broken down into multiple parts
-    "PT019",  # Fixture `_` without value is injected as parameter
-
-]
-lint.select = [
+[tool.ruff.lint]
+select = [
     "B",      # bugbear extension
     "ARG",    # Remove unused function/method arguments
     "C4",     # Check for common security issues
@@ -118,6 +107,17 @@ lint.select = [
     "I002",   # missing required import
     "TID252", # Use absolute over relative imports
     "FIX",    # Code should not contain FIXME, TODO, etc
+]
+ignore = [
+    "D200",   # One-line docstring should fit on one line with quotes
+    "D202",   # No blank lines allowed after function docstring
+    "D205",   # 1 blank line required between summary line and description
+    "D401",   # First line should be in imperative mood
+    "D404",   # First word of the docstring should not be "This"
+    "B006",   # Do not use mutable data structures for argument defaults
+    "B008",   # Do not perform calls in argument defaults
+    "PT018",  # Assertion should be broken down into multiple parts
+    "PT019",  # Fixture `_` without value is injected as parameter
 ]
 # Ignore missing docstrings in tests
 [tool.ruff.lint.per-file-ignores]
