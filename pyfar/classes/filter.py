@@ -109,7 +109,7 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
     return representation
 
 
-class LTISystem(ABC):
+class _LTISystem(ABC):
     """Abstract base class for LTI systems."""
 
     def __init__(self, sampling_rate=None, state=None, comment=""):
@@ -172,7 +172,7 @@ class LTISystem(ABC):
 
     @abstractmethod
     def impulse_response(self, n_samples):
-        """Abstract method that computes the system impulse response."""
+        """Abstract method that computes the system's impulse response."""
 
 
 class Filter(LTISystem):
