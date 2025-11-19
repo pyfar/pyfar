@@ -154,7 +154,7 @@ class _LTISystem(ABC):
             self._comment = value
 
     def copy(self):
-        """Return a copy of the LTISystem object."""
+        """Return a copy of the _LTISystem object."""
         return deepcopy(self)
 
     def _encode(self):
@@ -174,7 +174,7 @@ class _LTISystem(ABC):
         """Abstract method that computes the system's impulse response."""
 
 
-class Filter(LTISystem):
+class Filter(_LTISystem):
     """Abstract base class for digital filters."""
 
     def __init__(
