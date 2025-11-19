@@ -34,7 +34,7 @@ from .interpolation import (
     InterpolateSpectrum,
 )
 
-from . import filter
+from . import filter  # noqa: A004
 from . import fft
 
 from .regularization import RegularizedSpectrumInversion

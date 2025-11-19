@@ -379,7 +379,7 @@ class TimeData(_Audio):
         """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
-    @complex.setter
+    @complex.setter  # noqa: A003 Not relevant here
     def complex(self, value):
         # set from complex=True to complex=False
         if self._complex and not value:
@@ -975,7 +975,7 @@ class Signal(FrequencyData, TimeData):
         """Return or set the flag indicating if the time data is complex."""
         return self._complex
 
-    @complex.setter
+    @complex.setter  # noqa: A003 Not relevant here
     def complex(self, value):
         # from complex=True to complex=False
         if self._complex and not value:
