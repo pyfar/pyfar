@@ -89,6 +89,8 @@ exclude = [
 ]
 line-length = 79
 [tool.ruff.lint]
+preview = true
+explicit-preview-rules = true
 select = [
     "B",      # bugbear extension
     "ARG",    # Remove unused function/method arguments
