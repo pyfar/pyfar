@@ -129,8 +129,7 @@ class _LTISystem(ABC):
     @property
     def state(self):
         """
-        The current state of the system as an array with dimensions
-        corresponding to the order of the filter and number of filter channels.
+        The internal state of the system as an array.
         """
         return self._state
 
