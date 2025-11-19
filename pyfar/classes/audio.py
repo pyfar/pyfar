@@ -165,7 +165,7 @@ class _Audio():
         else:
             assert all(a > -len(self.cshape) - 1 for a in axes), \
                 "Negative axes index out of bounds."
-            axes = tuple([a % len(self.cshape) if a < 0 else a for a in axes])
+            axes = tuple(a % len(self.cshape) if a < 0 else a for a in axes)
 
         # throw exception before deepcopy
         np.empty(np.ones(len(self.cshape), dtype=int)).transpose(axes)
@@ -1817,7 +1817,7 @@ def _matrix_multiplication(a, b, axes, audio_type):
         a = np.expand_dims(a, 0) if a.ndim == 2 else a
         b = np.expand_dims(b, 1) if b.ndim == 2 else b
         # note: axes is implicitly copied
-        axes = [tuple([ax-1 if ax < 0 else ax for ax in t]) for t in axes]
+        axes = [tuple(ax-1 if ax < 0 else ax for ax in t) for t in axes]
     return np.matmul(a, b, axes=axes)
 
 
