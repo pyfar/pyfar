@@ -696,7 +696,6 @@ def test_time_crop_signal_types():
 @pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
                                      pf.TimeData([1, 2], [1, 2])])
 @pytest.mark.parametrize("interval", [(1, 2), [1, 2], np.array([1, 2])])
-
 def test_time_crop_interval_types(signal, interval):
     """Accept list, tuple or np.array for `interval`."""
     dsp.time_crop(signal, interval)
@@ -729,7 +728,7 @@ def test_time_crop_interval_entries_error(signal):
 @pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
                                      pf.TimeData([1, 2], [1, 2])])
 def test_time_crop_interval_boundaries_errors(signal):
-    """Raise ValueError if `interval` boundaries are outside signal range."""
+    """Raise ValueError if `interval` has negative values."""
     with pytest.raises(ValueError, match='boundaries must be non-negative'):
         dsp.time_crop(signal, interval=[-1, 0])
     with pytest.raises(ValueError, match='boundaries must be non-negative'):
@@ -773,12 +772,13 @@ def test_time_crop_signal(interval, unit):
     assert np.allclose(right_time, cropped.time)
 
 
-def test_time_crop_unit_seconds_error():
+@pytest.mark.parametrize("signal", [pf.signals.sine(100, 44100),
+                                     pf.TimeData([1, 2], [4, 5])])
+def test_time_crop_unit_seconds_error(signal):
     """
     Raise ValueError if the unit is 's' and if the interval
     is out of the limits of signal.times.
     """
-    signal = pf.signals.sine(100, 44100)
     with pytest.raises(ValueError, match='Interval is out of' \
     ' the boundaries'):
         dsp.time_crop(signal, interval=[2, 3], unit='s')

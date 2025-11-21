@@ -566,12 +566,15 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 def time_crop(signal, interval: Union[list[float], tuple[float, float],
                                        np.ndarray],
               unit: Literal["samples", "s"]='samples'):
-    """Crop a pf.Signal or pf.TimeData object in time.
+    """Crop a :py:class:`Signal <pyfar.Signal>` or a
+    :py:class:`TimeData <pyfar.TimeData>` object in time.
+    Returns the signal within the specified `interval`.
 
     Parameters
     ----------
     signal : pyfar.Signal, pyfar.TimeData
-        pf.Signal or pf.TimeData object to be cropped.
+        :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object to be cropped.
 
     interval : list, tuple, or numpy.ndarray
         Must contain exactly two entries, these specify the beginning and
@@ -580,45 +583,63 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
 
     unit : string, optional
         Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
-        Time values are rounded to the nearest sample. The default is
-        ``'samples'``.
+        Values in seconds are rounded to the nearest sample within the
+        specified `interval` range. The default is ``'samples'``.
 
     Returns
     -------
     cropped_signal : pyfar.Signal, pyfar.TimeData
-        Cropped pf.Signal or pf.TimeData object.
+        Cropped :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object.
 
     Examples
     --------
-    Create a sine wave signal and extract an interval from it.
+    Create a sine wave signal and extract an interval from it. The starting
+    point of the cropped signal is reset to zero.
 
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
-        >>> fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.5))
+        >>> fig, (ax1, ax2) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
         >>> signal = pf.signals.sine(100, 4410)
         >>> signal_cropped = pf.dsp.time_crop(signal, interval=[565, 1220])
-        >>> pf.plot.time(signal, label='original, pf.Signal',
+        >>> pf.plot.time(signal, label='original',
         ...                             unit = 'samples', ax=ax1)
         >>> ax1.axvline(565, color='k', linestyle='-.', label='interval')
         >>> ax1.axvline(1220, color='k',  linestyle='-.')
         >>> pf.plot.time(signal_cropped, color='y',
-        ...     label='cropped, pf.Signal', unit='samples', ax=ax2)
-        >>> fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(9, 3.5))
+        ...     label='cropped', unit='samples', ax=ax2)
+        >>> for ax in [ax1, ax2]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a Signal object')
+
+    Create a TimeData object and extract an interval from it. The starting
+    point in time is NOT reset; the cropped signal starts from the time
+    instance closest to the first point in the `interval`.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax3, ax4) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
         >>> time_signal = pf.TimeData((1, 2, 2.5, 2, 1, -1 ),
         ...                             (0, 0.1, 0.2, 0.3, 0.4, 0.5))
         >>> time_signal_cropped = pf.dsp.time_crop(time_signal,
         ...                             interval=[0.1, 0.38], unit='s')
-        >>> pf.plot.time(time_signal, label='original, pf.TimeData',
+        >>> pf.plot.time(time_signal, label='original',
         ...                                             unit = 's', ax=ax3)
         >>> ax3.axvline(0.1, color='k', linestyle='-.', label='interval')
-        >>> ax3.axvline(0.3, color='k',  linestyle='-.')
+        >>> ax3.axvline(0.38, color='k',  linestyle='-.')
         >>> pf.plot.time(time_signal_cropped, color='y',
-        ...     label='cropped, pf.TimeData', unit = 's', ax=ax4)
-        >>> for ax in [ax1, ax2, ax3, ax4]:
+        ...     label='cropped', unit = 's', ax=ax4)
+        >>> for ax in [ax3, ax4]:
         >>>     ax.legend()
+        >>> fig.suptitle('Crop a TimeData object')
 
     """
     # Check the input
@@ -635,32 +656,29 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
             "The parameter interval must consist of 2 entries.")
 
     interval = np.array(interval)
-    start, end = interval[0], interval[1]
-    if start >= end:
+
+    if np.diff(interval) <= 0:
         raise ValueError("The interval start point must be smaller " \
         "than the end point.")
-    if start < 0 or end < 0:
+    if np.any(interval < 0):
         raise ValueError("The interval boundaries must be non-negative.")
 
     if unit == 's':
-            times = np.array(signal.times)
-            mask = ((times >= interval[0]) & (
-                times <= interval[1]))
-            # Find the indices of the time instances that do not exceed
-            # the boundaries of the interval.
-            times_indices = np.nonzero(mask)[0]
-            if times_indices.size > 0 :
-                interval = (times_indices[0], times_indices[-1])
-            else:
-                raise ValueError("Interval is out of the boundaries" \
-                " of signal.times")
+        indices = signal.times
     elif unit == 'samples':
         interval = interval.astype(int)
         indices = np.arange(len(signal.times))
-        mask = ((indices >= interval[0]) & (
-                indices <= interval[1]))
     else:
         raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+
+    mask = ((indices >= interval[0]) & (
+            indices <= interval[1]))
+
+    # If there are no True values in the mask, the interval lies
+    # outside the boundaries of signal.times.
+    if not mask.any():
+         raise ValueError("Interval is out of the boundaries" \
+                " of signal.times")
 
     time_data = signal.time[:, mask]
 
