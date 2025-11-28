@@ -120,35 +120,13 @@ def test_tmatrix_from_abcd_single_frequency():
     TransmissionMatrix.from_abcd(A, B, C, D, frequency)
     TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
 
-def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list):
+@pytest.mark.parametrize("frequencies", [
+    [100, 200],
+    [100],
+    100,
+])
+def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list, frequencies):
     """Test from_abcd throws error if frequencies length does not match."""
-    frequencies = [100, 200]
-    with pytest.raises(
-        ValueError,
-        match="Number of frequency values does not match the number",
-    ):
-        TransmissionMatrix.from_abcd(
-            A_list,
-            A_list,
-            A_list,
-            A_list,
-            frequencies,
-        )
-
-    frequencies = [100]
-    with pytest.raises(
-        ValueError,
-        match="Number of frequency values does not match the number",
-    ):
-        TransmissionMatrix.from_abcd(
-            A_list,
-            A_list,
-            A_list,
-            A_list,
-            frequencies,
-        )
-
-    frequencies = 100
     with pytest.raises(
         ValueError,
         match="Number of frequency values does not match the number",
