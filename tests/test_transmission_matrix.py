@@ -81,26 +81,18 @@ def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     _expect_error_abcd_same_type(A_np, A_FreqDat, A_np, A_np)
     _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
 
-def test_tmatrix_from_abcd_broadcasting(frequencies):
-    A = [1, 2, 3]
-    B = [1]
-    C = [1]
-    D = [1]
+@pytest.mark.parametrize("D", [
+    [1], [[1]], [[1], [2]], 1,
+])
+def test_tmatrix_from_abcd_broadcasting_correct(frequencies, D):
+    A, B, C = [1, 2, 3], [1], [1]
     TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
-    D = [[1]]
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-
-    D = [[1], [2]]
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-
-    D = 1
-    TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
-
-    D = [1, 2]
-    _expect_error_abcd_broadcast(A, B, C, D, frequencies)
-
-    D = [1, 2, 3, 4]
+@pytest.mark.parametrize("D", [
+    [1, 2], [1, 2, 3, 4],
+])
+def test_tmatrix_from_abcd_broadcasting_error(frequencies, D):
+    A, B, C = [1, 2, 3], [1], [1]
     _expect_error_abcd_broadcast(A, B, C, D, frequencies)
 
 @pytest.mark.parametrize("coefficients", [
