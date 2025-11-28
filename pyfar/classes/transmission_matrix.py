@@ -1018,11 +1018,6 @@ class TransmissionMatrix(FrequencyData):
                 "The input medium_impedance must be a number"
                 "or a FrequencyData object.",
             )
-        if not isinstance(propagation_direction, str):
-            raise TypeError(
-                "The input propagation_direction must be a string"
-                "with value 'forwards' or 'backwards'.",
-            )
         if propagation_direction not in ("forwards", "backwards"):
             raise ValueError(
                 "The string propagation_direction must either be"
