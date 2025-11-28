@@ -103,19 +103,12 @@ def test_tmatrix_from_abcd_broadcasting(frequencies):
     D = [1, 2, 3, 4]
     _expect_error_abcd_broadcast(A, B, C, D, frequencies)
 
-def test_tmatrix_from_abcd_single_frequency():
-    A = [1]
-    B = [2]
-    C = [3]
-    D = [4]
-    frequency = 1000
-    TransmissionMatrix.from_abcd(A, B, C, D, frequency)
-    TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
-
-    A = 1
-    B = 2
-    C = 3
-    D = 4
+@pytest.mark.parametrize("coefficients", [
+    ([1], [2], [3], [4]),
+    (1, 2, 3, 4),
+])
+def test_tmatrix_from_abcd_single_frequency(coefficients):
+    A, B, C, D = coefficients
     frequency = 1000
     TransmissionMatrix.from_abcd(A, B, C, D, frequency)
     TransmissionMatrix.from_abcd(A, B, C, D, [frequency])
