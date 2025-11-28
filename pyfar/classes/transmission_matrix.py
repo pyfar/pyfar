@@ -105,7 +105,7 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        data : array_like, double
+        data : array_like
             Raw data in the frequency domain.
             In contrast to the :py:class:`~pyfar.classes.audio.FrequencyData`
             class, data must have a shape of the form (..., 2, 2, N), e.g.
@@ -113,7 +113,7 @@ class TransmissionMatrix(FrequencyData):
             the number of frequency bins and the two dimensions before that to
             the (2x2) ABCD matrices. Supported data types are ``int``,
             ``float`` or ``complex``, where ``int`` is converted to ``float``.
-        frequencies : array_like, double
+        frequencies : array_like
             Frequencies of the data in Hz. The number of frequencies must match
             the size of the last dimension of data.
         comment : str, optional
