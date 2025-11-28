@@ -989,7 +989,7 @@ class TransmissionMatrix(FrequencyData):
         """
         if not (isinstance(k, FrequencyData) or isinstance(k, Number)):
             raise TypeError(
-                "The wave number k must be a float, complex,"
+                "The wave number k must be a float, complex, "
                 "or FrequencyData object.",
             )
         elif isinstance(k, FrequencyData):
@@ -1008,7 +1008,7 @@ class TransmissionMatrix(FrequencyData):
                 atol=1e-15,
             ):
                 raise ValueError(
-                    "The frequencies of characteristic_impedance must"
+                    "The frequencies of characteristic_impedance must "
                     "match those of k.",
                 )
             else:
@@ -1020,7 +1020,7 @@ class TransmissionMatrix(FrequencyData):
             )
         if propagation_direction not in ("forwards", "backwards"):
             raise ValueError(
-                "The string propagation_direction must either be"
+                "The string propagation_direction must either be "
                 "'forwards' or 'backwards'.",
             )
 
