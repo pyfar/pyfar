@@ -1018,6 +1018,11 @@ class TransmissionMatrix(FrequencyData):
                 "The input medium_impedance must be a number"
                 "or a FrequencyData object.",
             )
+        if not isinstance(propagation_direction, str):
+            raise TypeError(
+            "The input propagation_direction must be a string"
+            "with value 'forwards' or 'backwards'.",
+            )
         if propagation_direction not in ("forwards", "backwards"):
             raise ValueError(
                 "The string propagation_direction must either be "
@@ -1042,6 +1047,7 @@ class TransmissionMatrix(FrequencyData):
             )  # Error handling inside the helper function
             L = -1 * L
 
+        # Calculate T-matrix entries according to Equation (5-18) of [1]
         A = b / a * np.cos(k * L) - 1 / (k * a) * np.sin(k * L)
         B = 1j * medium_impedance / (a * b * Omega) * np.sin(k * L)
         C = (
