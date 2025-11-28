@@ -879,11 +879,11 @@ class TransmissionMatrix(FrequencyData):
             the wide end to the same virtual apex.
         """
         if not isinstance(S0, Number) or isinstance(S0, complex) or S0 <= 0:
-            raise ValueError("The input S0 must be a positive number.")
+            raise ValueError("The input S0 must be a positive real number.")
         if not isinstance(S1, Number) or isinstance(S1, complex) or S1 <= 0:
-            raise ValueError("The input S1 must be a positive number.")
+            raise ValueError("The input S1 must be a positive real number.")
         if not isinstance(L, Number) or isinstance(L, complex) or L <= 0:
-            raise ValueError("The input L must be a positive number.")
+            raise ValueError("The input L must be a positive real number.")
         if S0 > S1:
             raise ValueError("S0 must be strictly smaller than S1.")
         if S0 == S1:
