@@ -1,6 +1,5 @@
 from pyfar.classes._pyfar_base import _PyfarBase
 from unittest.mock import patch
-import pytest
 
 @patch.multiple(_PyfarBase, __abstractmethods__=set())
 def test_comment():
