@@ -5,7 +5,6 @@ import re
 import pyfar as pf
 from pyfar import TransmissionMatrix
 from pyfar import FrequencyData
-from pyfar.constants import reference_air_impedance
 
 @pytest.fixture(scope="module")
 def frequencies():
@@ -503,22 +502,15 @@ def test_create_conical_horn_imp_number():
         "forwards",
     )
 
-    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
-        k.freq * (b - a),
-    )
-    B = 1j * Z / (a * b * Omega) * np.sin(k.freq * (b - a))
-    C = (
-        1j
-        * Omega
-        / (k.freq * k.freq * Z)
-        * (
-            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
-            - k.freq * (b - a) * np.cos(k.freq * (b - a))
-        )
-    )
-    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
-        k.freq * (b - a),
-    )
+    A = np.array([[1.02899125+0.j, 0.88607109+0.j, 1.26838249+0.j]])
+
+    B = np.array([[-13.42240017 -0.33556j, -0.64903057+25.96122282j,
+        -42.44357214 -1.0610893j ]])
+
+    C = np.array([[-0.00328572+8.21430330e-05j, 0.00015905+6.36214741e-03j,
+        -0.01037249+2.59312342e-04j]])
+
+    D = np.array([[1.01471206+0.j, 0.94205494+0.j, 1.13571485+0.j]])
 
     inv_prefix = 1 / (A * D - B * C)
 
@@ -565,22 +557,15 @@ def test_create_conical_horn_imp_frequency_data():
         "forwards",
     )
 
-    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
-        k.freq * (b - a),
-    )
-    B = 1j * Z.freq / (a * b * Omega) * np.sin(k.freq * (b - a))
-    C = (
-        1j
-        * Omega
-        / (k.freq * k.freq * Z.freq)
-        * (
-            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
-            - k.freq * (b - a) * np.cos(k.freq * (b - a))
-        )
-    )
-    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
-        k.freq * (b - a),
-    )
+    A = np.array([[1.02899125+0.j, 0.88607109+0.j, 1.26838249+0.j]])
+
+    B = np.array([[ -3.35560004 -3.35560004j, -12.98061141+12.98061141j,
+        -31.83267911-10.61089304j]])
+
+    C = np.array([[-0.00657555+0.00657555j, 0.00636612+0.00636612j,
+        -0.01245477+0.00415159j]])
+
+    D = np.array([[1.01471206+0.j, 0.94205494+0.j, 1.13571485+0.j]])
 
     inv_prefix = 1 / (A * D - B * C)
 
@@ -627,22 +612,14 @@ def test_create_conical_horn_k_number():
         "forwards",
     )
 
-    A = b / a * np.cos(k * (b - a)) - 1 / (k * a) * np.sin(
-        k * (b - a),
-    )
-    B = 1j * Z / (a * b * Omega) * np.sin(k * (b - a))
-    C = (
-        1j
-        * Omega
-        / (k * k * Z)
-        * (
-            (1 + k * k * a * b) * np.sin(k * (b - a))
-            - k * (b - a) * np.cos(k * (b - a))
-        )
-    )
-    D = a / b * np.cos(k * (b - a)) + 1 / (k * b) * np.sin(
-        k * (b - a),
-    )
+    A = np.float64(-0.6787560082005961)
+
+    B = np.complex64(1.4526262873559803-58.10505149423922j)
+
+    C = np.complex64(-0.00031990900057045704-0.01279636002281828j)
+
+    D = np.float64(-0.3771637092247614)
+
     inv_prefix = 1 / (A * D - B * C)
 
     assert isinstance(tmat_backwards, TransmissionMatrix)
@@ -688,22 +665,15 @@ def test_create_conical_horn_k_frequency_data():
         "forwards",
     )
 
-    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
-        k.freq * (b - a),
-    )
-    B = 1j * Z.freq / (a * b * Omega) * np.sin(k.freq * (b - a))
-    C = (
-        1j
-        * Omega
-        / (k.freq * k.freq * Z.freq)
-        * (
-            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
-            - k.freq * (b - a) * np.cos(k.freq * (b - a))
-        )
-    )
-    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
-        k.freq * (b - a),
-    )
+    A = np.array([[1.02899125+0.j, 0.88607109+0.j, 1.26838249+0.j]])
+
+    B = np.array([[ -3.35560004 -3.35560004j, -12.98061141+12.98061141j,
+        -31.83267911-10.61089304j]])
+
+    C = np.array([[-0.00657555+0.00657555j, 0.00636612+0.00636612j,
+        -0.01245477+0.00415159j]])
+
+    D = np.array([[1.01471206+0.j, 0.94205494+0.j, 1.13571485+0.j]])
 
     inv_prefix = 1 / (A * D - B * C)
 
@@ -750,22 +720,21 @@ def test_create_conical_horn_broadcasting():
         "forwards",
     )
 
-    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
-        k.freq * (b - a),
-    )
-    B = 1j * Z.freq / (a * b * Omega) * np.sin(k.freq * (b - a))
-    C = (
-        1j
-        * Omega
-        / (k.freq * k.freq * Z.freq)
-        * (
-            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
-            - k.freq * (b - a) * np.cos(k.freq * (b - a))
-        )
-    )
-    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
-        k.freq * (b - a),
-    )
+    A = np.array([[1.02899125+0.j, 0.88607109+0.j, 1.26838249+0.j],
+       [1.48896993+0.j, 0.33952319+0.j, 2.17916964+0.j]])
+
+    B = np.array([[ -3.35560004 -3.35560004j, -12.98061141+12.98061141j,
+        -31.83267911-10.61089304j],
+       [-14.80176637-14.80176637j, -28.04903283+28.04903283j,
+        -75.47306777-25.15768926j]])
+
+    C = np.array([[-0.00657555+0.00657555j,  0.00636612+0.00636612j,
+        -0.01245477+0.00415159j],
+       [-0.0289162 +0.0289162j ,  0.01382674+0.01382674j,
+        -0.02938139+0.0097938j ]])
+
+    D = np.array([[1.01471206+0.j, 0.94205494+0.j, 1.13571485+0.j],
+       [1.24651396+0.j, 0.66076978+0.j, 1.58954713+0.j]])
 
     inv_prefix = 1 / (A * D - B * C)
 
@@ -785,7 +754,6 @@ def test_create_conical_horn_broadcasting():
 def test_create_conical_horn_default_parameters():
     """Test `create_conical_horn` default parameters."""
     k = FrequencyData([1j, 2, 3j], [1, 2, 3])
-    Z = reference_air_impedance
 
     a = 0.3
     b = 0.5
@@ -802,22 +770,15 @@ def test_create_conical_horn_default_parameters():
         k,
     )  # using default Z and default propagation_direction
 
-    A = b / a * np.cos(k.freq * (b - a)) - 1 / (k.freq * a) * np.sin(
-        k.freq * (b - a),
-    )
-    B = 1j * Z / (a * b * Omega) * np.sin(k.freq * (b - a))
-    C = (
-        1j
-        * Omega
-        / (k.freq * k.freq * Z)
-        * (
-            (1 + k.freq * k.freq * a * b) * np.sin(k.freq * (b - a))
-            - k.freq * (b - a) * np.cos(k.freq * (b - a))
-        )
-    )
-    D = a / b * np.cos(k.freq * (b - a)) + 1 / (k.freq * b) * np.sin(
-        k.freq * (b - a),
-    )
+    A = np.array([[1.02899125+0.j, 0.88607109+0.j, 1.26838249+0.j]])
+
+    B = np.array([[-1386.57688918+0.j,0.+2681.87739328j,
+        -4384.55682183+0.j]])
+
+    C = np.array([[-3.18264574e-05+0.0e+00j, 0.0e+00+6.162562e-05j,
+        -1.00471007e-04+0.0e+00j]])
+
+    D = np.array([[1.01471206+0.j, 0.94205494+0.j, 1.13571485+0.j]])
 
     inv_prefix = 1 / (A * D - B * C)
 
