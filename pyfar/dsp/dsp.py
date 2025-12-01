@@ -566,9 +566,12 @@ def time_window(signal, interval, window='hann', shape='symmetric',
 def time_crop(signal, interval: Union[list[float], tuple[float, float],
                                        np.ndarray],
               unit: Literal["samples", "s"]='samples'):
-    """Crop a :py:class:`Signal <pyfar.Signal>` or a
+    r"""Crop a :py:class:`Signal <pyfar.Signal>` or a
     :py:class:`TimeData <pyfar.TimeData>` object in time.
-    Returns the signal within the specified `interval`.
+
+    Returns the signal :math:`x(t)` defined for all :math:`t` within the
+    interval :math:`interval[0] \le t \le interval[1]`, where :math:`t`
+    can be time or samples.
 
     Parameters
     ----------
@@ -591,6 +594,14 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
     cropped_signal : pyfar.Signal, pyfar.TimeData
         Cropped :py:class:`Signal <pyfar.Signal>` or
         :py:class:`TimeData <pyfar.TimeData>` object.
+
+    Notes
+    -----
+    For :py:class:`Signal <pyfar.Signal>`, the starting point of
+    the cropped signal is always set to zero, while for
+    :py:class:`TimeData <pyfar.TimeData>`, the starting point is set to the
+    point where cropping begins in the original signal.
+
 
     Examples
     --------
