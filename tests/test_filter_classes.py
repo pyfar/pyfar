@@ -44,24 +44,24 @@ def test_filter_state_setter_errors():
     """Test errors when setting a state with wrong shape."""
     fs = 44100
     coeff_iir = np.array([[[1, 0, 0], [1, 0, 0]]])
+    f = fo.FilterIIR(coeff_iir, fs)
     with pytest.raises(ValueError, match=re.escape(
         "The state does not match the filter structure. Required "
         "shape for FilterIIR is (n_channels, *cshape, order).")):
-        f = fo.FilterIIR(coeff_iir, fs)
         f.state = [[[1, 0, 0]]]
 
     coeff_fir = np.array([1, 0, 0])
+    f = fo.FilterFIR(coeff_fir, fs)
     with pytest.raises(ValueError, match=re.escape(
         "The state does not match the filter structure. Required "
         "shape for FilterFIR is (n_channels, *cshape, order).")):
-        f = fo.FilterFIR(coeff_fir, fs)
         f.state = [[[1, 0, 0]]]
 
     coeff_sos = [[[1, .5, .25, 1, .5, .25], [1, .5, .25, 1, .5, .25]]]
+    f = fo.FilterSOS(coeff_sos, fs)
     with pytest.raises(ValueError, match=re.escape(
         "The state does not match the filter structure. Required shape for "
         "FilterSOS is (n_channels, *cshape, n_sections, 2).")):
-            f = fo.FilterSOS(coeff_sos, fs)
             f.state = [[[[0], [1]]]]
 
 
