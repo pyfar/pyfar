@@ -37,11 +37,11 @@ def frequency_weighting_filter(
     .. note::
         This function will run a least-squares algorithm to iteratively
         approach the filter coefficients for the target weighting curve.
-        The coefficients are cached, but only when the ``error_weighting``
+        The coefficients are cached, but only when the `error_weighting`
         and ``kwargs`` arguments are unused, which are unhashable.
         Therefore, it may be much faster to create the filter once and
         reuse that filter when calling this function repeatedly
-        with an ``error_weighting`` or ``kwargs``.
+        with an `error_weighting` or `kwargs`.
 
     .. note::
         When using default parameters for `n_bins` and `error_weighting`
@@ -97,8 +97,8 @@ def frequency_weighting_filter(
     filter: FilterSOS
         The frequency weighting filter as SOS Filter object.
         Only returned if ``signal = None``.
-        If weighting is 'A' the filter order will be 6. 'C' weighting will
-        return a filter of order 4.
+        If weighting is ``'A'`` the filter order will be 6.
+        ``'C'`` weighting will return a filter of order 4.
 
     References
     ----------
