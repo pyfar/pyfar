@@ -110,7 +110,17 @@ def _repr_string(filter_type, order, n_channels, sampling_rate):
 
 
 class _LTISystem(ABC):
-    """Abstract base class for LTI systems."""
+    """Abstract base class for LTI systems.
+
+    Parameters
+    ----------
+    sampling_rate : number
+        The sampling rate of the system in Hz.
+    state : array, double, optional
+        The internal state of the system as an array.
+    comment : str
+        A comment. The default is ``''``, which initializes an empty string.
+    """
 
     def __init__(self, sampling_rate=None, state=None, comment=""):
         self._state = state
@@ -175,7 +185,19 @@ class _LTISystem(ABC):
 
 
 class Filter(_LTISystem):
-    """Abstract base class for digital filters."""
+    """Abstract base class for digital filters.
+
+    Parameters
+    ----------
+    coefficients : array, double
+        The filter coefficients as an array.
+    sampling_rate : number
+        The sampling rate of the filter in Hz.
+    state : array, double, optional
+        The state of the buffer elements.
+    comment : str
+        A comment. The default is ``''``, which initializes an empty string.
+    """
 
     def __init__(
             self,
@@ -183,28 +205,6 @@ class Filter(_LTISystem):
             sampling_rate=None,
             state=None,
             comment=""):
-        """
-        Initialize a general Filter object.
-
-        Parameters
-        ----------
-        coefficients : array, double
-            The filter coefficients as an array.
-        sampling_rate : number
-            The sampling rate of the filter in Hz.
-        state : array, double, optional
-            The state of the buffer elements.
-        comment : str
-            A comment. The default is ``''``, which initializes an empty
-            string.
-
-        Returns
-        -------
-        Filter
-            The filter object.
-
-        """
-
         if coefficients is not None:
             self.coefficients = coefficients
         else:
@@ -395,13 +395,7 @@ class FilterFIR(Filter):
         the channel shape of the :py:class:`~pyfar.Signal`
         to be filtered.
     comment : str
-            A comment. The default is ``''``, which initializes an empty
-            string.
-
-    Returns
-    -------
-    FilterFIR
-        The FIR filter object.
+        A comment. The default is ``''``, which initializes an empty string.
     """
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
@@ -661,17 +655,10 @@ class FilterIIR(Filter):
         the channel shape of the :py:class:`~pyfar.Signal`
         to be filtered.
     comment : str
-            A comment. The default is ``''``, which initializes an empty
-            string.
-
-    Returns
-    -------
-    FilterIIR
-        The IIR filter object.
+        A comment. The default is ``''``, which initializes an empty string.
     """
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
-
         if state is not None and np.asarray(state).ndim < 3:
             state = _atleast_3d_first_dim(state)
             warnings.warn(
@@ -927,17 +914,10 @@ class FilterSOS(Filter):
         the channel shape of the :py:class:`~pyfar.Signal`
         to be filtered.
     comment : str
-            A comment. The default is ``''``, which initializes an emptry
-            string.
-
-    Returns
-    -------
-    FilterSOS
-        The SOS filter object.
+        A comment. The default is ``''``, which initializes an empty string.
     """
 
     def __init__(self, coefficients, sampling_rate, state=None, comment=""):
-
         if state is not None and np.asarray(state).ndim < 4:
             state = _atleast_4d_first_dim(state)
             warnings.warn(
