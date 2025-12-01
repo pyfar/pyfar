@@ -144,6 +144,12 @@ def test_frequency_weighting_filter_errors():
 
 
 def test_frequency_weighting_filter_caching():
+    """
+    The caching function should give a new copy of the cached value
+    after each call, rather than returning multiple references to the
+    same array.
+    This is to avoid bugs if the user mutates the array.
+    """
     fs = 48000
     # mutating coefficients of one filter should not affect other filters built
     # from the same cached coefficients
