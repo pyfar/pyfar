@@ -38,10 +38,9 @@ def frequency_weighting_filter(
         This function will run a least-squares algorithm to iteratively
         approach the filter coefficients for the target weighting curve.
         The coefficients are cached, but only when the `error_weighting`
-        and ``kwargs`` arguments are unused, which are unhashable.
-        Therefore, it may be much faster to create the filter once and
-        reuse that filter when calling this function repeatedly
-        with an `error_weighting` or `kwargs`.
+        and `kwargs` arguments are unused, which are unhashable.
+        When using these parameters, it is faster to create the filter once
+        and reuse it than calling this function repeatedly.
 
     .. note::
         When using default parameters for `n_bins` and `error_weighting`
