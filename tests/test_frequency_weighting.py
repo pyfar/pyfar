@@ -168,3 +168,32 @@ def test_frequency_weighting_filter_errors():
     with pytest.warns(UserWarning, match=re.compile(regex)):
         pffilt.frequency_weighting_filter(signal, "A",
                                           error_weighting=lambda _: 0)
+
+
+def test_frequency_weighting_filter_caching():
+    """
+    The caching function should give a new copy of the cached value
+    after each call, rather than returning multiple references to the
+    same array.
+    This is to avoid bugs if the user mutates the array.
+    """
+    fs = 48000
+    # mutating coefficients of one filter should not affect other filters built
+    # from the same cached coefficients
+    a = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
+    b = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
+    assert np.all(a.coefficients == b.coefficients)
+    # if both share a reference to the same coefficients object,
+    # this would mutate both
+    a.coefficients[0][0][1] = 10
+    assert a.coefficients[0][0][1] != b.coefficients[0][0][1]
+
+    # just to be safe, the private (internal) function should also not expose
+    # references to cached arrays, which must not be mutated
+    a = pffilt.frequency_weighting. \
+        _design_frequency_weighting_filter_cached(fs, "A", 100)
+    b = pffilt.frequency_weighting. \
+        _design_frequency_weighting_filter_cached(fs, "A", 100)
+    assert np.all(a == b)
+    a[0][0] = 10
+    assert not np.all(a == b)
