@@ -191,7 +191,10 @@ class Coordinates():
     @classmethod
     def from_cartesian(
             cls, x, y, z, weights: np.array = None, comment: str = ""):
-        r"""nd :ref:`coordinates` for
+        r"""
+        Create a Coordinates class object from a set of points in the
+        right-handed cartesian coordinate system. See
+        see :ref:`coordinate_systems` and :ref:`coordinates` for
         more information.
 
         Parameters
@@ -1295,7 +1298,8 @@ class Coordinates():
         Convert all points into at least 1d numpy arrays and broadcast them
         to the same shape by calling ``_check_points``, then check the weights
         by calling ``_check_weights`` and reshape them to the cshape if needed.
-        Finally, ``_data`` is set to ``x``, ``y``, ``z`` and optional ``weights``.
+        Finally, ``_data`` is set to ``x``, ``y``, ``z`` and optional
+        ``weights``.
 
         Parameters
         ----------
