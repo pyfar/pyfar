@@ -170,6 +170,7 @@ class Coordinates():
     """
 
     _comment: str = None
+    """Comment about the stored coordinate object."""
 
     def __init__(
             self, x: np.array = np.asarray([]),
@@ -190,10 +191,7 @@ class Coordinates():
     @classmethod
     def from_cartesian(
             cls, x, y, z, weights: np.array = None, comment: str = ""):
-        r"""
-        Create a Coordinates class object from a set of points in the
-        right-handed cartesian coordinate system. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
+        r"""nd :ref:`coordinates` for
         more information.
 
         Parameters
