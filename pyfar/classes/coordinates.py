@@ -163,6 +163,12 @@ class Coordinates():
     """
 
     _data: np.array = np.empty
+    """Internal storage for coordinates and optional weights.
+
+    Stored as a numpy array with shape (..., 3) for [x, y, z] or (..., 4)
+    for [x, y, z, weights]. The last axis contains the components.
+    """
+
     _comment: str = None
 
     def __init__(
