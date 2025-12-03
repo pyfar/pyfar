@@ -962,8 +962,8 @@ def test__repr__weights():
 
 
 def test_change_points_after_weights():
-    coords = Coordinates(np.ones((2,2)), 0, 0, weights=1)
-    npt.assert_allclose(coords.weights, np.ones((2,2)))
+    coords = Coordinates(np.ones((2, 2)), 0, 0, weights=1)
+    npt.assert_allclose(coords.weights, np.ones((2, 2)))
     coords.x = 0
-    npt.assert_allclose(coords.weights, np.ones((2,2)))
+    npt.assert_allclose(coords.weights, np.ones((2, 2)))
 
