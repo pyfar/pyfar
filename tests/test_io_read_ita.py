@@ -86,5 +86,3 @@ def test_read_ita_data_dimension(filename, dimension):
     filepath = os.path.join('tests', 'test_io_data', 'read_ita', filename)
     data, _, _, _ = pf.io.read_ita(filepath)
     assert data.cshape == dimension
-
-test_read_ita_domain('freq_itaResult_mult.ita', 'freq')

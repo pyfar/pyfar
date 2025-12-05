@@ -1003,10 +1003,12 @@ def read_ita(filename):
 
     domain = matlab_data.domain
 
-    # convert coordinates
+    # Сonvert coordinates
+    # channelCoordinates: coordinates for each channel
     if hasattr(matlab_data, "channelCoordinates"):
         channel_coordinates = _ita_to_pyfar_coordinates(
             matlab_data.channelCoordinates)
+    # objectCoordinates: the coordinates of the measured object
     if hasattr(matlab_data, "objectCoordinates"):
         object_coordinates = _ita_to_pyfar_coordinates(
             matlab_data.objectCoordinates)
@@ -1031,7 +1033,8 @@ def read_ita(filename):
                 data_in, matlab_data.abscissa,
                 comment=comment)
 
-    metadata = _matlab_to_dict(matlab_data)
+    metadata = {key: value for key, value in
+            (_matlab_to_dict(matlab_data)).items() if key not in ['data']}
 
     return data, object_coordinates, channel_coordinates, metadata
 
@@ -1059,7 +1062,7 @@ def _ita_to_pyfar_coordinates(ita_coordinates):
     else:
         weights = None
 
-    # import as cartesian coordinates: x, y, z
+    # Import as cartesian coordinates: x, y, z
     if hasattr(ita_coordinates, 'cart'):
         if ita_coordinates.cart.size == 0:
             return None
@@ -1073,7 +1076,7 @@ def _ita_to_pyfar_coordinates(ita_coordinates):
             ita_coordinates.cart[..., 2],
             weights=weights)
 
-    # import as spherical coordinates: r, theta, phi
+    # Import as spherical coordinates: r, theta, phi
     elif hasattr(ita_coordinates, 'sph'):
         if ita_coordinates.cart.size == 0:
             return None
