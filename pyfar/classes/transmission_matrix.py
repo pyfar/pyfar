@@ -133,7 +133,8 @@ class TransmissionMatrix(FrequencyData):
         """
         return cls(data, frequencies, comment)
 
-    def _tmat_from_abcd(A, B, C, D):
+    @staticmethod
+    def create_frequency_independent_abcd(A, B, C, D):
         """Create a T-matrix from A-, B-, C-, D-data."""
         if not (
             (isinstance(A, Number) or isinstance(A, complex))
@@ -617,7 +618,8 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(impedance) and not isinstance(impedance, str):
-            return TransmissionMatrix._tmat_from_abcd(1, impedance, 0, 1)
+            return TransmissionMatrix.create_frequency_independent_abcd(
+                1, impedance, 0, 1)
 
         if not isinstance(impedance, FrequencyData):
             raise ValueError("'impedance' must be a "
@@ -656,7 +658,8 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(admittance) and not isinstance(admittance, str):
-            return TransmissionMatrix._tmat_from_abcd(1, 0, admittance, 1)
+            return TransmissionMatrix.create_frequency_independent_abcd(
+                1, 0, admittance, 1)
 
         if not isinstance(admittance, FrequencyData):
             raise ValueError("'admittance' must be a "
@@ -699,7 +702,7 @@ class TransmissionMatrix(FrequencyData):
             transducer_constant,
             str,
         ):
-            return TransmissionMatrix._tmat_from_abcd(
+            return TransmissionMatrix.create_frequency_independent_abcd(
                 transducer_constant,
                 0,
                 0,
@@ -753,7 +756,7 @@ class TransmissionMatrix(FrequencyData):
             transducer_constant,
             str,
         ):
-            return TransmissionMatrix._tmat_from_abcd(
+            return TransmissionMatrix.create_frequency_independent_abcd(
                 0,
                 transducer_constant,
                 1 / transducer_constant,
