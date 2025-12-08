@@ -271,6 +271,28 @@ def test_tmatrix_abcd_entries(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1,
 # ------------------------
 # TESTS FOR CREATE METHODS
 # ------------------------
+def test_tmatrix_create_frequency_independent_abcd():
+    """Test creation of frequency-independent ABCD matrix."""
+    tmat = TransmissionMatrix.create_frequency_independent_abcd(1, 2, 3, 4)
+    assert isinstance(tmat, np.ndarray)
+    assert tmat.shape == (2, 2)
+    npt.assert_allclose(tmat, [[1, 2], [3, 4]], atol=1e-15)
+    
+@pytest.mark.parametrize("wrong_input", ["input", [1,2], (1,2), { 'A':1 }])
+def test_tmatrix_create_frequency_independent_abcd_wrong_input(wrong_input):
+    """Test whether creation of frequency-independent ABCD matrix raises
+    error on invalid input data.
+    """
+    error_msg = "A, B, C, and D must be scalars"
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(wrong_input, 2, 3, 4)
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(1, wrong_input, 3, 4)
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(1, 2, wrong_input, 4)
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(1, 2, 3, wrong_input)
+
 def test_tmatrix_create_identity(frequencies):
     """Test whether creation of identity matrix with frequencies."""
     tmat_eye = TransmissionMatrix.create_identity(frequencies)
