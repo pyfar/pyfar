@@ -5,8 +5,10 @@ import pyfar.classes.filter as fo
 import pyfar as pf
 import re
 from scipy import signal as spsignal
+from unittest.mock import patch
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_filter_init_empty_coefficients():
     filt = fo.Filter(coefficients=None, state=None, sampling_rate=None)
     assert filt.coefficients is None
@@ -15,11 +17,13 @@ def test_filter_init_empty_coefficients():
     assert filt.comment == ''
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_filter_init_empty_coefficients_with_state():
     with pytest.raises(ValueError, match="Cannot set a state without"):
         fo.Filter(coefficients=None, state=[1, 0], sampling_rate=None)
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_filter_init():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     filt = fo.Filter(coefficients=coeff, sampling_rate=None)
@@ -27,6 +31,7 @@ def test_filter_init():
     assert filt.state is None
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_filter_init_with_state():
     coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
     state = np.array([[[1, 0]]])
@@ -35,34 +40,29 @@ def test_filter_init_with_state():
     npt.assert_array_equal(filt.state, state)
 
 
-def test_filter_state_setter():
-    coeff = np.array([[[1, 0, 0], [1, 0, 0]]])
-    state = np.array([[[1, 0]]])
-    filt = fo.Filter(coefficients=coeff)
-    filt.state = state
-    npt.assert_array_equal(filt.state, state)
-
-
 def test_filter_state_setter_errors():
     """Test errors when setting a state with wrong shape."""
     fs = 44100
     coeff_iir = np.array([[[1, 0, 0], [1, 0, 0]]])
+    f = fo.FilterIIR(coeff_iir, fs)
     with pytest.raises(ValueError, match=re.escape(
         "The state does not match the filter structure. Required "
         "shape for FilterIIR is (n_channels, *cshape, order).")):
-        fo.FilterIIR(coeff_iir, fs, state=[[[1, 0, 0]]])
+        f.state = [[[1, 0, 0]]]
 
     coeff_fir = np.array([1, 0, 0])
+    f = fo.FilterFIR(coeff_fir, fs)
     with pytest.raises(ValueError, match=re.escape(
         "The state does not match the filter structure. Required "
         "shape for FilterFIR is (n_channels, *cshape, order).")):
-        fo.FilterFIR(coeff_fir, fs, state=[[[1, 0, 0]]])
+        f.state = [[[1, 0, 0]]]
 
     coeff_sos = [[[1, .5, .25, 1, .5, .25], [1, .5, .25, 1, .5, .25]]]
+    f = fo.FilterSOS(coeff_sos, fs)
     with pytest.raises(ValueError, match=re.escape(
         "The state does not match the filter structure. Required shape for "
         "FilterSOS is (n_channels, *cshape, n_sections, 2).")):
-        fo.FilterSOS(coeff_sos, fs, state=[[[[0], [1]]]])
+            f.state = [[[[0], [1]]]]
 
 
 def test_filter_state_process_errors():
@@ -90,6 +90,7 @@ def test_filter_state_process_errors():
             coeff_sos, fs, state=[[[[0, 0], [1, 0]]]]).process(impulse)
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_filter_comment():
     filt = fo.Filter(coefficients=None, state=None, comment='Bla')
     assert filt.comment == 'Bla'
@@ -719,11 +720,12 @@ def test_extend_sos_coefficients():
     npt.assert_allclose(imp_filt, imp)
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test___eq___equal(filterObject):
     actual = filterObject.copy()
     assert filterObject == actual
 
-
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test___eq___notEqual(filterObject, coeffs, state):
     actual = fo.Filter(coefficients=2 * coeffs, state=state)
     assert not filterObject == actual

@@ -272,6 +272,7 @@ def test_write_read_transmissionmatrix(tmpdir):
     assert actual == tmatrix
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_write_read_filter(filterObject, tmpdir):
     """Filter
     Make sure `read` understands the bits written by `write`.
@@ -287,7 +288,7 @@ def test_write_filterFIR(filterFIR, tmpdir):
     """filterFIR
     Make sure `read` understands the bits written by `write`.
     """
-    filename = os.path.join(tmpdir, 'filterIIR.far')
+    filename = os.path.join(tmpdir, 'filterFIR.far')
     io.write(filename, filterFIR=filterFIR)
     actual = io.read(filename)['filterFIR']
     assert isinstance(actual, fo.Filter)
@@ -392,6 +393,7 @@ def test_write_read_builtins(dict_of_builtins, tmpdir):
     assert dict_of_builtins.items() <= actual.items()
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_write_read_multiplePyfarObjects(
         filterObject,
         filterFIR,
@@ -456,6 +458,7 @@ def test_write_read_compression(sine, tmpdir):
         filename_compressed)
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_write_read_multiplePyfarObjectsWithCompression(
         filterObject,
         filterFIR,
