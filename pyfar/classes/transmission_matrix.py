@@ -136,7 +136,7 @@ class TransmissionMatrix(FrequencyData):
     @staticmethod
     def create_frequency_independent_abcd(A, B, C, D):
         """Create a T-matrix from frequency-independentA-, B-, C-, D-data.
-        
+
         Parameters
         ----------
         A : scalar (real or complex)
@@ -152,11 +152,6 @@ class TransmissionMatrix(FrequencyData):
         -------
         np.ndarray
             A 2x2 numpy array representing the transmission matrix.
-            
-        Examples
-        --------
-        >>> import pyfar as pf
-        >>> tmat = pf.TransmissionMatrix.create_frequency_independent_abcd(1, 2, 3, 4)
         """
         if not (
             (isinstance(A, Number) or isinstance(A, complex))
