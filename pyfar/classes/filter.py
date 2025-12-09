@@ -14,6 +14,7 @@ import warnings
 
 import numpy as np
 import scipy.signal as spsignal
+import scipy.linalg as spla
 
 import pyfar as pf
 from copy import deepcopy
@@ -1146,25 +1147,29 @@ class StateSpaceModel(_LTISystem):
     """
     Class for discrete-time state-space models.
 
-    A state-space model is defined by the matrices :math:`A`, :math:`B`, :math:`C`, and :math:`D`.
-    Contrary to an impulse response or filter model, a state-space model can represent multi-input
-    multi-output (MIMO) linear time-invariant (LTI) systems in a numerically stable and efficient
-    way. The system is described by the following equations (discrete-time):
+    A state-space model is defined by the matrices :math:`A`, :math:`B`,
+    :math:`C`, and :math:`D`. Contrary to an impulse response or filter model,
+    a state-space model can represent multi-input multi-output (MIMO) linear
+    time-invariant (LTI) systems in a numerically stable and efficient way. The
+    system is described by the following equations (discrete-time):
 
     .. math:
         x_{t+1} = A x_t + B u_t
         y_t   = C x_t + D u_t,
 
-    where :math:`x_t` is the state, :math:`u` the input, and :math:`y` the output at time step :math:`t`.
+    where :math:`x_t` is the state, :math:`u` the input, and :math:`y` the
+    output at time step :math:`t`.
 
-    The matrix :math:`A` is the state matrix, defining the internal dynamics of the system, i.e. how
-    the internal state evolves on its own; :math:`B` is the input matrix, defining the action of the
-    input :math: `u` on the state; :math:`C` is the output matrix, defining the action of the state
-    :math:`x` on the output :math:`y`; and :math:`D` is the feedthrough matrix, defining the direct
-    action of the input :math:`u` on the output :math:`y`.
+    The matrix :math:`A` is the state matrix, defining the internal dynamics of
+    the system, i.e. how the internal state evolves on its own; :math:`B` is
+    the input matrix, defining the action of the input :math: `u` on the state;
+    :math:`C` is the output matrix, defining the action of the state :math:`x`
+    on the output :math:`y`; and :math:`D` is the feedthrough matrix, defining
+    the direct action of the input :math:`u` on the output :math:`y`.
 
-    Note that, unlike an impulse response or transfer function representation, the state-space
-    representation is not unique. Different state-space models can represent the same input-output
+    Note that, unlike an impulse response or transfer function representation,
+    the state-space representation is not unique. Different state-space models
+    can represent the same input-output
     behaviour.
 
     For a short introduction, see: https://ccrma.stanford.edu/~jos/StateSpace/
@@ -1178,8 +1183,9 @@ class StateSpaceModel(_LTISystem):
     C : array
         The output matrix :math:`C` with dimensions ``(n_outputs, order)``.
     D : array, optional
-        The feedthrough matrix :math:`D` with dimensions ``(n_outputs, n_inputs)``.
-        The default is ``None``, which initializes an all-zero matrix.
+        The feedthrough matrix :math:`D` with dimensions ``(n_outputs,
+        n_inputs)``. The default is ``None``, which initializes an all-zero
+        matrix.
     sampling_rate : number, optional
         The sampling rate of the system in Hz. The default is ``None``.
     state : array, double, optional
@@ -1191,12 +1197,11 @@ class StateSpaceModel(_LTISystem):
         A comment. The default is ``''``.
     """
 
-    def __init__(
-            self, A, B, C, D=None, sampling_rate=None, state=None, dtype=None, comment=""
-    ):
+    def __init__(self, A, B, C, D=None, sampling_rate=None, state=None,
+            dtype=None, comment=""):
         D = np.zeros((C.shape[0], B.shape[1])) if D is None else D
         assert all(
-            [isinstance(M, np.ndarray) and (M.ndim == 2) for M in (A, B, C, D)]
+            isinstance(M, np.ndarray) and (M.ndim == 2) for M in (A, B, C, D)
         )
         assert A.shape[1] == A.shape[0], "A needs to be square."
         assert B.shape[0] == A.shape[0], (
@@ -1209,30 +1214,33 @@ class StateSpaceModel(_LTISystem):
             f"D needs to be of shape ({C.shape[0], B.shape[1]})."
         )
         dtype = np.result_type(A, B, C, D) if dtype is None else dtype
-        A, B, C, D = A.astype(dtype, order='F'), B.astype(dtype, order='F'), C.astype(dtype, order='F'), D.astype(dtype, order='F')
+        A = A.astype(dtype, order='F')
+        B = B.astype(dtype, order='F')
+        C = C.astype(dtype, order='F')
+        D = D.astype(dtype, order='F')
         super().__init__(
-            sampling_rate=sampling_rate, state=state, comment=comment
+            sampling_rate=sampling_rate, state=state, comment=comment,
         )
         self._A, self._B, self._C, self._D, self._dtype = A, B, C, D, dtype
 
     @property
     def A(self):
-        """Get the state matrix :math:`A` which represents the internal dynamics of the system."""
+        """Get the state matrix :math:`A` (internal dynamics of the system)."""
         return self._A
 
     @property
     def B(self):
-        """Get the input matrix :math:`B` which represents the input-to-state mapping."""
+        """Get the input matrix :math:`B` (input-to-state mapping)."""
         return self._B
 
     @property
     def C(self):
-        """Get the output matrix :math:`C` which represents the state-to-output mapping."""
+        """Get the output matrix :math:`C` (state-to-output mapping)."""
         return self._C
 
     @property
     def D(self):
-        """Get the feedthrough matrix :math:`D` which represents the instant action from input to output."""
+        """Get the feedthrough matrix :math:`D` (instant in-out dynamics)."""
         return self._D
 
     @property
@@ -1259,8 +1267,8 @@ class StateSpaceModel(_LTISystem):
     def state(self):
         """Get or set the internal state :math:`x` of the system.
 
-        The state can be used to set the initial condition of the system and to save the system's
-        state after processing a signal.
+        The state can be used to set the initial condition of the system and to
+        save the system's state after processing a signal.
 
         Parameters
         ----------
@@ -1271,23 +1279,41 @@ class StateSpaceModel(_LTISystem):
 
     @state.setter
     def state(self, state):
-        assert state.shape = (self.order,)
+        assert state.shape == (self.order,)
         assert state.dtype == self.dtype
         self._state = state
 
     def init_state(self):
+        """Initialize the internal state :math:`x` of the system to zero."""
         self._state = np.zeros(self.order, self.dtype)
 
     def process(self, signal, reset=False):
+        """Apply the state-space model to a signal.
+
+        Parameters
+        ----------
+        signal : Signal
+            The input signal to be processed.
+        reset : bool, optional
+            If ``True``, the internal state of the system is reset before
+            processing the signal. The default is ``False``.
+
+        Returns
+        -------
+        out : Signal
+            The processed output signal.
+        """
         assert signal.sampling_rate == self.sampling_rate, (
-            "The sampling rates of the signal and the state-space model need to match."
+            "The sampling rates of the signal and the state-space model"
+            "need to match."
         )
         if signal.n_samples == 1:
             u = np.squeeze(signal.time)[:, np.newaxis]
         else:
             u = np.atleast_2d(signal.time.squeeze())
         assert u.shape[0] == self.n_inputs, (
-            f"The input signal ({u.shape}) needs to be compatible with the number of inputs to the state-space system ({self.n_inputs})."
+            f"The input signal ({u.shape}) needs to be compatible with the"
+            f" number of inputs to the state-space system ({self.n_inputs})."
         )
         if self.state is None or reset:
             self.init_state()
@@ -1297,13 +1323,40 @@ class StateSpaceModel(_LTISystem):
     def _process(self, u):
         u = np.asfortranarray(u)
         y = np.zeros((self.n_outputs, u.shape[1]), self.dtype, order='F')
-        gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)
+        gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)[0]
         for i in range(u.shape[1]):
-            y[:, i] = gemv(1., self._C, self._state, beta=1, y=gemv(1., self._D, u[:, i], beta=0, y=y[:, i]))
-            self._state = gemv(1., self._B, u[:, i], beta=1, y=gemv(1., self._A, self._state, beta=0, y=self._state))
+            y[:, i] = gemv(
+                1.,
+                self._C,
+                self._state,
+                beta=1,
+                y=gemv(1., self._D, u[:, i], beta=0, y=y[:, i]),
+            )
+            self._state = gemv(
+                1.,
+                self._B,
+                u[:, i],
+                beta=1,
+                y=gemv(1., self._A, self._state, beta=0, y=self._state),
+            )
         return y
 
     def impulse_response(self, n_samples):
+        """Compute the impulse response of the system.
+
+        Parameters
+        ----------
+        n_samples : int, None
+            The number of samples up to which to compute the impulse response.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the state-space system with ``cshape =
+            (n_inputs, n_outputs)``. Note that, somewhat unintuitively, the
+            mathematical definition is different and would be ``(n_outputs,
+            n_inputs)``.
+        """
         y = np.zeros((self.n_inputs, self.n_outputs, n_samples), self.dtype)
         y[..., 0] = self.D.T
         x = self.B
@@ -1320,4 +1373,9 @@ class StateSpaceModel(_LTISystem):
         return obj
 
     def __repr__(self):
-        return f"Order {self.order} state-space model with {self.n_inputs} inputs and {self.n_outputs} outputs @ {self.sampling_rate} Hz sampling rate ({self.dtype})."
+        """Representation of the state-space model."""
+        return (
+            f"Order {self.order} state-space model with {self.n_inputs} inputs"
+            f" and {self.n_outputs} outputs"
+            f" @ {self.sampling_rate} Hz sampling rate ({self.dtype})."
+        )
