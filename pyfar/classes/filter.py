@@ -1209,7 +1209,7 @@ class StateSpaceModel(_LTISystem):
             f"D needs to be of shape ({C.shape[0], B.shape[1]})."
         )
         dtype = np.result_type(A, B, C, D) if dtype is None else dtype
-        A, B, C, D = A.astype(dtype), B.astype(dtype), C.astype(dtype), D.astype(dtype)
+        A, B, C, D = A.astype(dtype, order='F'), B.astype(dtype, order='F'), C.astype(dtype, order='F'), D.astype(dtype, order='F')
         super().__init__(
             sampling_rate=sampling_rate, state=state, comment=comment
         )
@@ -1282,18 +1282,26 @@ class StateSpaceModel(_LTISystem):
         assert signal.sampling_rate == self.sampling_rate, (
             "The sampling rates of the signal and the state-space model need to match."
         )
-        u = np.atleast_2d(signal.time.squeeze())
-        assert u.shape[1] == self.n_inputs, (
+        if signal.n_samples == 1:
+            u = np.squeeze(signal.time)[:, np.newaxis]
+        else:
+            u = np.atleast_2d(signal.time.squeeze())
+        assert u.shape[0] == self.n_inputs, (
             f"The input signal ({u.shape}) needs to be compatible with the number of inputs to the state-space system ({self.n_inputs})."
         )
         if self.state is None or reset:
             self.init_state()
-        y = np.zeros((self.n_outputs, signal.n_samples), self.dtype)
-        for i in range(signal.n_samples):
-            y[:, i] = self.C @ self.state + self.D @ u[:, i]
-            self._state = self.A @ self.state + self.B @ u[:, i]
 
-        return pf.Signal(y, self.sampling_rate)
+        return pf.Signal(self._process(u), self.sampling_rate)
+
+    def _process(self, u):
+        u = np.asfortranarray(u)
+        y = np.zeros((self.n_outputs, u.shape[1]), self.dtype, order='F')
+        gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)
+        for i in range(u.shape[1]):
+            y[:, i] = gemv(1., self._C, self._state, beta=1, y=gemv(1., self._D, u[:, i], beta=0, y=y[:, i]))
+            self._state = gemv(1., self._B, u[:, i], beta=1, y=gemv(1., self._A, self._state, beta=0, y=self._state))
+        return y
 
     def impulse_response(self, n_samples):
         y = np.zeros((self.n_inputs, self.n_outputs, n_samples), self.dtype)
