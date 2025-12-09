@@ -1187,7 +1187,6 @@ class StateSpaceModel(_LTISystem):
     dtype : np.dtype, optional
         The data type of the system matrices. Can be used to set the precision
         of the response calculation. If ``None``, ``np.promote_types`` is used.
-    of the calculations.
     comment : str, optional
         A comment. The default is ``''``.
     """
@@ -1218,44 +1217,63 @@ class StateSpaceModel(_LTISystem):
 
     @property
     def A(self):
+        """Get the state matrix :math:`A` which represents the internal dynamics of the system."""
         return self._A
 
     @property
     def B(self):
+        """Get the input matrix :math:`B` which represents the input-to-state mapping."""
         return self._B
 
     @property
     def C(self):
+        """Get the output matrix :math:`C` which represents the state-to-output mapping."""
         return self._C
 
     @property
     def D(self):
+        """Get the feedthrough matrix :math:`D` which represents the instant action from input to output."""
         return self._D
 
     @property
     def dtype(self):
+        """Get the data type of the system matrices."""
         return self._dtype
 
     @property
     def n_inputs(self):
+        """Get the number of inputs :math:`m` of the system."""
         return self.B.shape[1]
 
     @property
     def n_outputs(self):
+        """Get the number of outputs :math:`p` of the system."""
         return self.C.shape[0]
 
     @property
     def order(self):
-        """The order of the state-space system."""
+        """Get the order :math:`n` of the state-space system."""
         return self.A.shape[0]
 
     @property
     def state(self):
+        """Get or set the internal state :math:`x` of the system.
+
+        The state can be used to set the initial condition of the system and to save the system's
+        state after processing a signal.
+
+        Parameters
+        ----------
+        state : array, self.dtype
+            The internal state of the system with dimensions ``(order,)``.
+        """
         return self._state
 
     @state.setter
     def state(self, state):
-        pass
+        assert state.shape = (self.order,)
+        assert state.dtype == self.dtype
+        self._state = state
 
     def init_state(self):
         self._state = np.zeros(self.order, self.dtype)
