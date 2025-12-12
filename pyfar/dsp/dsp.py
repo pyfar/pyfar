@@ -6,6 +6,8 @@ import pyfar
 from pyfar.dsp import fft
 import warnings
 import scipy.fft as sfft
+from typing import Literal
+from typing import Union
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -559,6 +561,145 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         return signal_win, window_fin
     else:
         return signal_win
+
+
+def time_crop(signal, interval: Union[list[float], tuple[float, float],
+                                       np.ndarray],
+              unit: Literal["samples", "s"]='samples'):
+    r"""Crop a :py:class:`Signal <pyfar.Signal>` or a
+    :py:class:`TimeData <pyfar.TimeData>` object in time.
+
+    Returns the signal :math:`x(t)` defined for all :math:`t` within the
+    interval :math:`interval[0] \le t \le interval[1]`, where :math:`t`
+    can be time or samples.
+
+    Parameters
+    ----------
+    signal : pyfar.Signal, pyfar.TimeData
+        :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object to be cropped.
+
+    interval : list, tuple, or numpy.ndarray
+        Must contain exactly two entries, these specify the beginning and
+        the end of the section to be cropped. The unit of `interval`
+        is specified by the parameter `unit`.
+
+    unit : string, optional
+        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        Values in seconds are rounded to the nearest sample within the
+        specified `interval` range. The default is ``'samples'``.
+
+    Returns
+    -------
+    cropped_signal : pyfar.Signal, pyfar.TimeData
+        Cropped :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object.
+
+    Notes
+    -----
+    For :py:class:`Signal <pyfar.Signal>`, the starting point of
+    the cropped signal is always set to zero, while for
+    :py:class:`TimeData <pyfar.TimeData>`, the starting point is set to the
+    point where cropping begins in the original signal.
+
+
+    Examples
+    --------
+    Create a sine wave signal and extract an interval from it. The starting
+    point of the cropped signal is reset to zero.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax1, ax2) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
+        >>> signal = pf.signals.sine(100, 4410)
+        >>> signal_cropped = pf.dsp.time_crop(signal, interval=[565, 1220])
+        >>> pf.plot.time(signal, label='original',
+        ...                             unit = 'samples', ax=ax1)
+        >>> ax1.axvline(565, color='k', linestyle='-.', label='interval')
+        >>> ax1.axvline(1220, color='k',  linestyle='-.')
+        >>> pf.plot.time(signal_cropped, color='y',
+        ...     label='cropped', unit='samples', ax=ax2)
+        >>> for ax in [ax1, ax2]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a Signal object')
+
+    Create a TimeData object and extract an interval from it. The starting
+    point in time is NOT reset; the cropped signal starts from the time
+    instance closest to the first point in the `interval`.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax3, ax4) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
+        >>> time_signal = pf.TimeData((1, 2, 2.5, 2, 1, -1 ),
+        ...                             (0, 0.1, 0.2, 0.3, 0.4, 0.5))
+        >>> time_signal_cropped = pf.dsp.time_crop(time_signal,
+        ...                             interval=[0.1, 0.38], unit='s')
+        >>> pf.plot.time(time_signal, label='original',
+        ...                                             unit = 's', ax=ax3)
+        >>> ax3.axvline(0.1, color='k', linestyle='-.', label='interval')
+        >>> ax3.axvline(0.38, color='k',  linestyle='-.')
+        >>> pf.plot.time(time_signal_cropped, color='y',
+        ...     label='cropped', unit = 's', ax=ax4)
+        >>> for ax in [ax3, ax4]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a TimeData object')
+
+    """
+    # Check the input
+    if not isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        raise TypeError("The parameter signal has to be of type " \
+        "pyfar.Signal or pyfar.TimeData.")
+
+    if not isinstance(interval, (list, tuple, np.ndarray)):
+        raise TypeError(
+            "The parameter interval has to be of type" \
+            " list, tuple or numpy.ndarray.")
+    if len(interval) != 2:
+        raise ValueError(
+            "The parameter interval must consist of 2 entries.")
+
+    interval = np.array(interval)
+
+    if np.diff(interval) <= 0:
+        raise ValueError("The interval start point must be smaller " \
+        "than the end point.")
+    if np.any(interval < 0):
+        raise ValueError("The interval boundaries must be non-negative.")
+
+    if unit == 's':
+        indices = signal.times
+    elif unit == 'samples':
+        interval = interval.astype(int)
+        indices = np.arange(len(signal.times))
+    else:
+        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+
+    mask = ((indices >= interval[0]) & (
+            indices <= interval[1]))
+
+    # If there are no True values in the mask, the interval lies
+    # outside the boundaries of signal.times.
+    if not mask.any():
+         raise ValueError("Interval is out of the boundaries" \
+                " of signal.times")
+
+    time_data = signal.time[:, mask]
+
+    if isinstance(signal, pyfar.Signal):
+        cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
+    else:
+        times = signal.times[mask]
+        cropped_signal = pyfar.TimeData(time_data, times)
+
+    return cropped_signal
 
 
 def kaiser_window_beta(A):
