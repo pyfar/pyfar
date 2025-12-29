@@ -2,9 +2,25 @@
 History
 =======
 
-0.7.4
------
+[Unreleased]
+-------------
+
+Added
+^^^^^
 * CI: Add GitHub Actions workflow to check if HISTORY.rst is modified in a pull request to force writing history during development (PR #873)
+
+Changed
+^^^^^^^
+
+Deprecated
+^^^^^^^^^
+
+Removed
+^^^^^^^
+
+Fixed
+^^^^
+
 
 0.7.3 (2025-06-23)
 ------------------
