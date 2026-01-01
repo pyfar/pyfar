@@ -77,11 +77,11 @@ def test_nominal_iec_ocatve_subset():
     nominal_octs_part = [125, 250, 500, 1000, 2000, 4000]
     npt.assert_allclose(actual_octs, nominal_octs_part)
 
+
 def test_exact_octave():
     actual_exact = constants.fractional_octave_frequencies_exact(
         num_fractions=1, frequency_range=(4e3, 64e3))[0]
-    npt.assert_allclose(actual_exact, [3981.071706, 7943.282347, 15848.93192,
-                                       31622.7766, 63095.73445])
+    npt.assert_allclose(actual_exact, [3981.071706, 7943.282347, 15848.93192])
 
 
 def test_exact_octave_subset():
@@ -89,6 +89,22 @@ def test_exact_octave_subset():
                                         1, (2e3, 20e3))[0]
     expected = np.array([1995.262315, 3981.071706, 7943.282347, 15848.93192])
     np.testing.assert_allclose(exact, expected)
+
+
+def test_exact_octave_empty():
+    exact = constants.fractional_octave_frequencies_exact(
+                                        3, (51, 62))[0]
+    expected = np.array([])
+    npt.assert_allclose(exact, expected)
+
+
+def test_exact_third_octave_subset():
+    exact = constants.fractional_octave_frequencies_exact(
+                                        3, (12, 62))[0]
+    expected = np.array([12.58925412, 15.84893192, 19.95262315, 25.11886432,
+                          31.6227766, 39.81071706, 50.11872336])
+    npt.assert_allclose(exact, expected)
+
 
 def test_exact_twelfth_octave_subset():
     exact = constants.fractional_octave_frequencies_exact(
