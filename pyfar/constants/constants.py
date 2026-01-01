@@ -628,6 +628,13 @@ def fractional_octave_frequencies_exact(
     r"""Return the exact center and cutoff frequencies for
     fractional-octave-band filters.
 
+    .. note ::
+        For ``num_fractions = 1`` and ``num_fractions = 3``, the exact
+        center frequencies correspond to the nominal frequencies. This means
+        that the returned exact frequencies are limited to the nominal
+        frequency ranges (11.2–22387.2 Hz and 8.91–22387.2 Hz, respectively),
+        regardless of a specified larger `frequency_range`.
+
     The frequencies are calculated in accordance with the IEC 61260-1:2014
     standard [#]_ (Sections 5.2, 5.3, 5.4 and 5.6).
 
@@ -722,10 +729,23 @@ def fractional_octave_frequencies_exact(
         # IEC 61260-1 Eq. (3)
         center_frequencies = ref_freq * (G)**((2*indices + 1)/
                                               (2*num_fractions))
-
     # IEC 61260-1 Eq. (5)
     upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
     # IEC 61260-1 Eq. (4)
     lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
+
+    # Adjust the exact frequencies to the nominal frequencies
+    if num_fractions in {1, 3}:
+        nominal = fractional_octave_frequencies_nominal(num_fractions,
+                                                    frequency_range)
+        if nominal.size > 0:
+            mask = (upper_cutoff_frequencies>=nominal[0]) & (
+                lower_cutoff_frequencies<=nominal[-1])
+        else:
+            mask = np.full(center_frequencies.shape, False)
+        center_frequencies = center_frequencies[mask]
+        lower_cutoff_frequencies = lower_cutoff_frequencies[mask]
+        upper_cutoff_frequencies = upper_cutoff_frequencies[mask]
+
     return (center_frequencies,
             lower_cutoff_frequencies, upper_cutoff_frequencies)
