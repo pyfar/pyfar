@@ -687,7 +687,7 @@ def fractional_octave_frequencies_exact(
         Part 1: Specifications", IEC, 2014.
     """
     if not isinstance(frequency_range, (tuple, np.ndarray, list)):
-        raise TypeError("The frequency range must be a tuple, list or" \
+        raise TypeError("The frequency range must be a tuple, list or"
         " np.ndarray of float or integer values.")
     if not isinstance(num_fractions, (int)):
         raise TypeError("Number of fractions must be an integer.")
