@@ -2,33 +2,10 @@
 import numpy as np
 from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
-    FixedFormatter,
     FixedLocator,
-    LogFormatter,
     LogLocator,
     MultipleLocator,
     Formatter)
-
-
-class FractionalOctaveFormatter(FixedFormatter):
-    """Formatter for fractional octave bands."""
-
-    def __init__(self, n_fractions=1):
-        if n_fractions == 1:
-            ticks = [
-                '16', '31.5', '63', '125', '250', '500',
-                '1k', '2k', '4k', '8k', '16k']
-        elif n_fractions == 3:
-            ticks = [
-                '12.5', '16', '20', '25', '31.5', '40',
-                '50', '63', '80', '100', '125', '160',
-                '200', '250', '315', '400', '500', '630',
-                '800', '1k', '1.25k', '1.6k', '2k', '2.5k',
-                '3.15k', '4k', '5k', '6.3k', '8k', '10k',
-                '12.5k', '16k', '20k']
-        else:
-            raise ValueError("Unsupported number of fractions.")
-        super().__init__(ticks)
 
 
 class FractionalOctaveLocator(FixedLocator):
@@ -65,24 +42,43 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class LogFormatterITAToolbox(LogFormatter):
+class FrequencyFormatter(Formatter):
     """
-    Log-formatter inspired by the tick labels used in the ITA-Toolbox
-    for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
+    Formatter which uses unit inspired labels particularly
+    suitable for frequency axes, e.g. `1e3 = 1k`, `1e6 = 1M`.
+
+
+    Parameters
+    ----------
+    **kwargs
+        Keyword arguments to be passed to :py:func:`Formatter`.
+
+    Examples
+    --------
+    The formatter is used per default for frequency axes in pyfar plots:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> signal = pf.signals.noise(1e3)
+        >>> pf.plot.freq(signal)
+
+    It can also be used manually:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> fig, ax = plt.subplots()
+        >>> ax.plot([500, 1000, 1500], [1, 2, 3])
+        >>> ax.xaxis.set_major_formatter(
+        ...     pf.plot.ticker.FrequencyFormatter())
+
+
     """
 
-    def __init__(
-        self,
-        base=10.0,
-        labelOnlyBase=False,
-        minor_thresholds=None,
-        linthresh=None,
-    ):
-        super().__init__(
-            base=base,
-            labelOnlyBase=labelOnlyBase,
-            minor_thresholds=minor_thresholds,
-            linthresh=linthresh)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def _num_to_string(self, x, vmin, vmax):
         if x >= 1000 and x < 1e6:
@@ -95,7 +91,7 @@ class LogFormatterITAToolbox(LogFormatter):
             try:
                 s = self._pprint_val(x, vmax - vmin)
             except AttributeError:
-                s = self.pprint_val(x, vmax - vmin)
+                s = str(x).rstrip('0').rstrip('.')
         return s
 
     def __call__(self, x, pos=None):  # noqa: ARG002

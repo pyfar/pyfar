@@ -4,7 +4,7 @@ import pyfar.dsp as dsp
 from . import _utils
 import warnings
 from .ticker import (
-    LogFormatterITAToolbox,
+    FrequencyFormatter,
     LogLocatorITAToolbox,
     MultipleFractionLocator,
     MultipleFractionFormatter)
@@ -108,7 +108,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
     if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
         axis[0].set_minor_formatter(NullFormatter())
-    axis[0].set_major_formatter(LogFormatterITAToolbox())
+    axis[0].set_major_formatter(FrequencyFormatter())
 
     # color limits
     if dB and "vmin" not in kwargs:
@@ -173,7 +173,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
     if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
         axis[0].set_minor_formatter(NullFormatter())
-    axis[0].set_major_formatter(LogFormatterITAToolbox())
+    axis[0].set_major_formatter(FrequencyFormatter())
 
     # colorbar
     cb = _utils._add_colorbar(colorbar, fig, ax, qm,
@@ -236,7 +236,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
     if freq_scale == "log":
         axis[0].set_major_locator(LogLocatorITAToolbox())
         axis[0].set_minor_formatter(NullFormatter())
-    axis[0].set_major_formatter(LogFormatterITAToolbox())
+    axis[0].set_major_formatter(FrequencyFormatter())
 
     # color limits
     if "vmin" not in kwargs:
@@ -405,7 +405,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
         ax[0].set_yscale('symlog')
         ax[0].yaxis.set_major_locator(LogLocatorITAToolbox())
         ax[0].yaxis.set_minor_formatter(NullFormatter())
-    ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
+    ax[0].yaxis.set_major_formatter(FrequencyFormatter())
     ax[0].grid(ls='dotted', color='white')
 
     # colorbar
