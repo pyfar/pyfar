@@ -7,7 +7,9 @@ from matplotlib.ticker import (
     LogFormatter,
     LogLocator,
     MultipleLocator,
-    Formatter)
+    Formatter,
+    NullFormatter,
+)
 
 
 class FractionalOctaveFormatter(FixedFormatter):
@@ -175,3 +177,52 @@ class MultipleFractionFormatter(Formatter):
                         np.abs(num), self._base_str, den)
 
         return string
+
+
+def attach_fractional_octave_ticker(ax, major=1, minor=3, axis='xaxis'):
+    """Attach a fractional octave band locator and formatter to the given axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.Axes
+        The axis to be used.
+    major : int, optional
+        Number of octave fractions for the major ticks, by default 1.
+    minor : int, optional
+        Number of octave fractions for the minor ticks, by default 3.
+    axis : str, optional
+        The axis to attach the ticker to, by default 'xaxis'. Options are
+        'xaxis' and 'yaxis'.
+
+    Examples
+    --------
+
+    .. plot::
+
+        Create some axes and remove the y-axis visualization
+
+        >>> import matplotlib.pyplot as plt
+        >>> from matplotlib.ticker import NullLocator
+        >>> fig, ax = plt.subplots(figsize=(4, 1), layout='constrained')
+        >>> ax.spines[['left', 'right', 'top']].set_visible(False)
+        >>> ax.yaxis.set_major_locator(NullLocator())
+
+        Attach a fractional octave ticker to the log-spaced x-axis
+
+        >>> from pyfar.plot.ticker import attach_fractional_octave_ticker
+        >>> ax.set_xscale('log')
+        >>> attach_fractional_octave_ticker(
+        >>>    ax, major=1, minor=3, axis='xaxis')
+        >>> ax.set_xlabel('Frequency (Hz)')
+        >>> ax.set_xlim(20, 20e3)
+
+    """
+    if axis == 'xaxis':
+        axis = ax.xaxis
+    elif axis == 'yaxis':
+        axis = ax.yaxis
+
+    axis.set_major_locator(FractionalOctaveLocator(major))
+    axis.set_major_formatter(FractionalOctaveFormatter(major))
+    axis.set_minor_locator(FractionalOctaveLocator(minor))
+    axis.set_minor_formatter(NullFormatter())
