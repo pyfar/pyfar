@@ -44,6 +44,8 @@ from .utils import (
     shortcuts,
 )
 
+from . import ticker
+
 __all__ = [
     'freq',
     'freq_2d',
@@ -68,4 +70,5 @@ __all__ = [
     'use',
     'color',
     'shortcuts',
+    'ticker',
 ]
