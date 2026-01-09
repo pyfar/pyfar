@@ -68,20 +68,30 @@ class LogLocatorITAToolbox(LogLocator):
 class UnitLogFormatter(LogFormatter):
     """
     Log-formatter which uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
+
+
+    Parameters
+    ----------
+    **kwargs
+        Keyword arguments to be passed to :py:func:`LogFormatter`.
+
+    Examples
+    --------
+    The formatter is used by :py:func:`pyfar.plot.freq` per default for the
+    x-axis. It can also be set manually:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> signal = pf.signals.noise(1e3)
+        >>> ax = pf.plot.freq(signal)
+        >>> ax.xaxis.set_major_formatter(
+        ...     pf.plot.ticker.UnitLogFormatter())
+
     """
 
-    def __init__(
-        self,
-        base=10.0,
-        labelOnlyBase=False,
-        minor_thresholds=None,
-        linthresh=None,
-    ):
-        super().__init__(
-            base=base,
-            labelOnlyBase=labelOnlyBase,
-            minor_thresholds=minor_thresholds,
-            linthresh=linthresh)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def _num_to_string(self, x, vmin, vmax):
         if x >= 1000 and x < 1e6:
