@@ -51,18 +51,47 @@ class FractionalOctaveLocator(FixedLocator):
 
 
 class FrequencyLogLocator(LogLocator):
-    """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
+    """
+    Log-locator particularly suited for frequency axes.
+
+    This locator is a wrapper of matplotlib's standard LogLocator
+    with default subdivisions optimized for frequency axes.
+
+    Parameters
+    ----------
+    base : float, default: 10.0
+        The base of the log used, so major ticks are placed at ``base**n``,
+        where ``n`` is an integer.
+    subs : None, string, or sequence of float, default: (0.2, 0.4, 0.6, 1)
+        Gives the multiples of integer powers of the base at which to place
+        ticks.
+        The default ``(0.2, 0.4, 0.6, 1)`` places ticks at 20 Hz, 40 Hz,
+        60 Hz, 100 Hz, 200 Hz, etc. for a base of 10.
+        See :class:`matplotlib.ticker.LogLocator` for other options than
+        sequence of float.
+
+    Examples
+    --------
+    Use the locator to customize frequency axes in pyfar plots:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> signal = pf.signals.noise(1e3)
+        >>> ax = pf.plot.freq(signal)
+        >>> ax.xaxis.set_major_locator(
+        ...     pf.plot.ticker.FrequencyLogLocator(subs=(0.2, 0.5, 1)))
+
+    """
 
     def __init__(
         self,
         base=10.0,
         subs=(0.2, 0.4, 0.6, 1),
-        numticks=None,
     ):
         super().__init__(
             base=base,
-            subs=subs,
-            numticks=numticks)
+            subs=subs)
 
 
 class LogFormatterITAToolbox(LogFormatter):
