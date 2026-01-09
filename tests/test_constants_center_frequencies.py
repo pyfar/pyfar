@@ -44,6 +44,32 @@ def test_nominal_iec_error():
                       match="one-third-octave-band are defined only"):
         constants.fractional_octave_frequencies_nominal(num_fractions=3,
                                                 frequency_range=(7, 20e3))
+def test_exact_frequency_range_type_error():
+    with pytest.raises(TypeError, match="must be a tuple, list or np.ndarray"):
+        constants.fractional_octave_frequencies_exact(frequency_range=2)
+    with pytest.raises(TypeError, match="must contain only integer or float"):
+        constants.fractional_octave_frequencies_exact(frequency_range=['1',
+                                                                     '2'])
+
+def test_exact_frequency_range_value_error():
+    with pytest.raises(ValueError, match="upper frequency must be greater"):
+        constants.fractional_octave_frequencies_exact(frequency_range=(60, 12))
+    with pytest.raises(ValueError, match="must contain exactly two"):
+        constants.fractional_octave_frequencies_exact(frequency_range=(1,))
+    with pytest.raises(ValueError, match="must contain exactly two"):
+        constants.fractional_octave_frequencies_exact(frequency_range=(
+                                                                    3, 4, 5))
+    with pytest.raises(ValueError, match="frequencies must be" \
+                                    " positive numbers"):
+        constants.fractional_octave_frequencies_exact(frequency_range=(-1, 0))
+
+def test_exact_num_fractions_type_error():
+    with pytest.raises(TypeError, match="must be an integer"):
+        constants.fractional_octave_frequencies_exact(num_fractions=0.5)
+
+def test_exact_num_fractions_value_error():
+    with pytest.raises(ValueError, match="must be a positive number"):
+        constants.fractional_octave_frequencies_exact(num_fractions=-1)
 
 def test_nominal_iec_ocatve_subset():
     actual_octs = constants.fractional_octave_frequencies_nominal(

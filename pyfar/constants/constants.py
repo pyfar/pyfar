@@ -686,6 +686,28 @@ def fractional_octave_frequencies_exact(
         Electroacoustics - Octave-band and fractional-octave-band filters -
         Part 1: Specifications", IEC, 2014.
     """
+    if not isinstance(frequency_range, (tuple, np.ndarray, list)):
+        raise TypeError("The frequency range must be a tuple, list or"
+        " np.ndarray of float or integer values.")
+    if not isinstance(num_fractions, (int)):
+        raise TypeError("Number of fractions must be an integer.")
+    if not all(isinstance(f, (int, float)) for f in frequency_range):
+        raise TypeError("The frequency range must contain only integer"
+        " or float values.")
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "The frequency range must contain exactly two values.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The upper frequency must be greater than the lower frequency.")
+    if f_lims[0] <=0 or f_lims[1]<=0:
+        raise ValueError(
+            "The frequencies must be positive numbers.")
+    if num_fractions <= 0:
+        raise ValueError(
+            "Number of fractions must be a positive number.")
+
     # IEC 61260-1 Eq. (1)
     G = 10**(3/10)
     ref_freq = 1e3
