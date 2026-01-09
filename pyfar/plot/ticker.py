@@ -77,16 +77,25 @@ class UnitLogFormatter(LogFormatter):
 
     Examples
     --------
-    The formatter is used by :py:func:`pyfar.plot.freq` per default for the
-    x-axis. It can also be set manually:
+    The formatter is used per default for frequency axes in pyfar plots:
 
     .. plot::
 
         >>> import pyfar as pf
         >>> signal = pf.signals.noise(1e3)
-        >>> ax = pf.plot.freq(signal)
-        >>> ax.xaxis.set_major_formatter(
-        ...     pf.plot.ticker.UnitLogFormatter())
+        >>> pf.plot.freq(signal)
+
+    It can also be used manually:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> fig, ax = plt.subplots()
+        >>> ax.plot([20, 20e3], [1, 2])
+        >>> ax.set_xscale('log')
+        >>> ax.xaxis.set_major_formatter(pf.plot.ticker.UnitLogFormatter())
+
 
     """
 
