@@ -56,6 +56,8 @@ class FrequencyLogLocator(LogLocator):
 
     This locator is a wrapper of matplotlib's standard LogLocator
     with default subdivisions optimized for frequency axes.
+    The locator is used per default for frequency axes in pyfar plots.
+
 
     Parameters
     ----------
