@@ -50,7 +50,7 @@ class FractionalOctaveLocator(FixedLocator):
         super().__init__(ticks)
 
 
-class LogLocatorITAToolbox(LogLocator):
+class FrequencyLogLocator(LogLocator):
     """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
 
     def __init__(
