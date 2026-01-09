@@ -29,10 +29,11 @@ consecutive T-matrices simply using the ``@`` operator:
 
 """
 from __future__ import annotations # required for Python <= 3.9
+from numbers import Number
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
-from numbers import Number
+from pyfar.constants import reference_air_impedance, reference_speed_of_sound
 
 
 class TransmissionMatrix(FrequencyData):
@@ -133,6 +134,19 @@ class TransmissionMatrix(FrequencyData):
         """
         return cls(data, frequencies, comment)
 
+    def _tmat_from_abcd(A, B, C, D):
+        """Create a T-matrix from A-, B-, C-, D-data."""
+        if not (
+            (isinstance(A, Number) or isinstance(A, complex))
+            and (isinstance(B, Number) or isinstance(B, complex))
+            and (isinstance(C, Number) or isinstance(C, complex))
+            and (isinstance(D, Number) or isinstance(D, complex))
+        ):
+            raise TypeError(
+                "A, B, C, and D must be scalars (real or complex).",
+            )
+        return np.array([[A, B], [C, D]])
+
     @classmethod
     def from_abcd(cls, A, B, C, D, frequencies = None):
         """Create a TransmissionMatrix object from A-, B-, C-, D-data, and
@@ -140,14 +154,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        A : FrequencyData, array_like, double
+        A : FrequencyData, array_like
             Raw data for the matrix entries A. The data need to match the
             B, C and D entry or be broadcastable into one ``shape``.
-        B : FrequencyData, array_like, double
+        B : FrequencyData, array_like
             See A.
-        C : FrequencyData, array_like, double
+        C : FrequencyData, array_like
             See A.
-        D : FrequencyData, array_like, double
+        D : FrequencyData, array_like
             See A.
         frequencies : array, double, None
             Frequencies of the data in Hz. This is optional if using the
@@ -185,7 +199,7 @@ class TransmissionMatrix(FrequencyData):
 
         if num_freqdata == 4:
             frequencies = A.frequencies
-            for obj in (B,C,D): #Frequency bins must match
+            for obj in (B,C,D):  # Frequency bins must match
                 npt.assert_allclose(frequencies, obj.frequencies, atol=1e-15)
             (A,B,C,D) = (A.freq, B.freq, C.freq, D.freq)
         elif num_freqdata != 0:
@@ -196,10 +210,21 @@ class TransmissionMatrix(FrequencyData):
         if frequencies is None:
             raise ValueError("'frequencies' must be specified if not using "
                              "'FrequencyData' objects as input.")
+
+        (A, B, C, D) = (
+            np.atleast_1d(np.asarray(A)),
+            np.atleast_1d(np.asarray(B)),
+            np.atleast_1d(np.asarray(C)),
+            np.atleast_1d(np.asarray(D)),
+        )
+
         # broadcast shapes
         shape = np.broadcast_shapes(
-            np.array(A).shape, np.array(B).shape,
-            np.array(C).shape, np.array(D).shape)
+            A.shape,
+            B.shape,
+            C.shape,
+            D.shape,
+        )
         A = np.broadcast_to(A, shape)
         B = np.broadcast_to(B, shape)
         C = np.broadcast_to(C, shape)
@@ -580,12 +605,12 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        impedance : scalar | FrequencyData
+        impedance : scalar, FrequencyData
             The impedance data of the series impedance.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing the series connection
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -593,9 +618,7 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(impedance) and not isinstance(impedance, str):
-            tmat = np.identity(2)
-            tmat[0,1] = impedance
-            return tmat
+            return TransmissionMatrix._tmat_from_abcd(1, impedance, 0, 1)
 
         if not isinstance(impedance, FrequencyData):
             raise ValueError("'impedance' must be a "
@@ -621,12 +644,12 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        admittance : scalar | FrequencyData
+        admittance : scalar, FrequencyData
             The admittance data of the element connected in parallel.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing a parallel connection
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -634,9 +657,7 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(admittance) and not isinstance(admittance, str):
-            tmat = np.identity(2)
-            tmat[1,0] = admittance
-            return tmat
+            return TransmissionMatrix._tmat_from_abcd(1, 0, admittance, 1)
 
         if not isinstance(admittance, FrequencyData):
             raise ValueError("'admittance' must be a "
@@ -660,7 +681,7 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar | FrequencyData
+        transducer_constant : scalar, FrequencyData
             The transmission ratio with respect to voltage-like quantity,
             i.e. :math:`N=U_\mathrm{out}/U_\mathrm{in}`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
@@ -668,7 +689,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A transmission matrix representing the transformer
             and can be cascaded with TransmissionMatrix objects.
             If a scalar was used as input a frequency-independent
@@ -676,11 +697,15 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(transducer_constant) and not isinstance(
-            transducer_constant, str):
-            tmat = np.identity(2)
-            tmat[0,0] = transducer_constant
-            tmat[1,1] = 1/transducer_constant
-            return tmat
+            transducer_constant,
+            str,
+        ):
+            return TransmissionMatrix._tmat_from_abcd(
+                transducer_constant,
+                0,
+                0,
+                1 / transducer_constant,
+            )
 
         if not isinstance(transducer_constant, FrequencyData):
             raise ValueError("'transducer_constant' must be a "
@@ -711,14 +736,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        transducer_constant : scalar | FrequencyData
+        transducer_constant : scalar, FrequencyData
             The transducer constant :math:`M`. If a scalar is given,
             i.e. a frequency-independent transformer matrix is requested, the
             return value will be a 2x2 np.ndarray instead.
 
         Returns
         -------
-        tmat : np.ndarray | TransmissionMatrix
+        tmat : np.ndarray, TransmissionMatrix
             A the transmission matrix representing the gyrator and can be
             cascaded with TransmissionMatrix objects. If a scalar was used as
             input a frequency-independent matrix is returned, namely an
@@ -726,11 +751,15 @@ class TransmissionMatrix(FrequencyData):
 
         """
         if np.isscalar(transducer_constant) and not isinstance(
-            transducer_constant, str):
-            tmat = np.zeros([2,2])
-            tmat[0,1] = transducer_constant
-            tmat[1,0] = 1/transducer_constant
-            return tmat
+            transducer_constant,
+            str,
+        ):
+            return TransmissionMatrix._tmat_from_abcd(
+                0,
+                transducer_constant,
+                1 / transducer_constant,
+                0,
+            )
 
         if not isinstance(transducer_constant, FrequencyData):
             raise ValueError("'transducer_constant' must be a "
@@ -825,6 +854,211 @@ class TransmissionMatrix(FrequencyData):
         return TransmissionMatrix.from_abcd(
             A, B, C, D, kl.frequencies)
 
+    @staticmethod
+    def _calculate_horn_geometry_parameters(
+        S0: Number,
+        S1: Number,
+        L: Number,
+    ) -> tuple[Number, Number, Number]:
+        """Calculate the geometry parameters of a conical horn.
+
+        Parameters
+        ----------
+        S0 : float
+            Cross-sectional area at the narrow end of the horn.
+        S1 : float
+            Cross-sectional area at the wide end of the horn.
+        L : float
+            Length of the horn.
+
+        Returns
+        -------
+        tuple[float, float, float]
+            A tuple containing the area constant Omega, the distance a from the
+            narrow end to the virtual apex of the cone, and the distance b from
+            the wide end to the same virtual apex.
+        """
+        if not isinstance(S0, Number) or isinstance(S0, complex) or S0 <= 0:
+            raise ValueError("The input S0 must be a positive real number.")
+        if not isinstance(S1, Number) or isinstance(S1, complex) or S1 <= 0:
+            raise ValueError("The input S1 must be a positive real number.")
+        if not isinstance(L, Number) or isinstance(L, complex) or L <= 0:
+            raise ValueError("The input L must be a positive real number.")
+        if S0 > S1:
+            raise ValueError("S0 must be strictly smaller than S1.")
+        if S0 == S1:
+            raise ValueError(
+                "For a conical horn S0 must be strictly smaller than S1."
+                "If S0 == S1, use :fun:`create_transmission_line` instead.",
+            )
+
+        r0 = np.sqrt(S0 / np.pi)
+        r1 = np.sqrt(S1 / np.pi)
+
+        d0 = 2 * r0
+        d1 = 2 * r1
+
+        a = r0 * (2 * L) / (d1 - d0)
+        b = a + L
+
+        Omega0 = S0 / a**2
+        Omega1 = S1 / b**2
+
+        if not np.isclose(Omega0, Omega1, atol=1e-15):
+            raise ValueError(
+                f"S0/a² is not equal to S1/b²: {Omega0} != {Omega1}."
+                "This should never happen.",
+            )
+
+        Omega = Omega0  # or Omega1, they are equal
+
+        return Omega, a, b
+
+    @staticmethod
+    def create_conical_horn(
+        S0: Number,
+        S1: Number,
+        L: Number,
+        k: Number | FrequencyData,
+        medium_impedance: Number | FrequencyData = reference_air_impedance,
+        propagation_direction: str = "forwards",
+    ) -> TransmissionMatrix:
+        r"""Create a transmission matrix representing a conical horn.
+
+        The transmission matrix is calculated based on the starting point
+        :math:`a`, end point :math:`b`, area constant :math:`\Omega`,
+        wave number :math:`k`, and medium impedance :math:`Z_0`
+        following Equation (5-18) of Reference [1]_:
+
+        .. math::
+            T = \begin{bmatrix}
+                \frac{b}{a}cos(kl)-\frac{1}{ka}sin(kl) &
+                \frac{jZ_0}{ab\Omega} \sin{kl} \\
+                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} -
+                kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
+                \end{bmatrix}
+
+        Parameters
+        ----------
+        S0 : float
+            The surface area of the horn's narrow end.
+        S1 : float
+            The surface area of the horn's wide end.
+        L : float
+            The distance between the narrow and wide end of the horn,
+            i.e. the horn's length.
+        k : FrequencyData, scalar
+            Wave number.
+        medium_impedance : FrequencyData, scalar
+            The impedance of the medium filling the horn. Default is
+            ``pyfar.constants.reference_air_impedance``
+        propagation_direction : {'forwards', 'backwards'}
+            Defines the direction of sound propagation through the horn,
+            where ``'forwards'`` means from narrow to wide end
+            and ``'backwards'`` means from wide to narrow end.
+            Default is ``'forwards'``.
+
+        Returns
+        -------
+        pf.TransmissionMatrix
+            Transmission matrix for the conical horn section.
+
+        Example
+        -------
+        Arbitrarily sized lossless conical horn section.
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>> # Horn parameters
+            >>> S0 = 0.003
+            >>> S1 = 0.005
+            >>> L = 0.3
+            >>> frequencies = np.linspace(20, 20e3, 1000)
+            >>> omega = 2 * np.pi * frequencies
+            >>> k = pf.FrequencyData(
+            >>>    omega / pf.constants.reference_speed_of_sound, frequencies)
+            >>> Z0 = pf.constants.reference_air_impedance
+            >>> # Create the transmission matrix
+            >>> T = pf.TransmissionMatrix.create_conical_horn(
+            >>>    S0, S1, L, k, Z0, 'backwards')
+            >>> # Plot the transmission matrix
+            >>> pf.plot.freq(T.input_impedance(np.inf))
+
+        """
+        if not (isinstance(k, FrequencyData) or isinstance(k, Number)):
+            raise TypeError(
+                "The wave number k must be a float, complex, "
+                "or FrequencyData object.",
+            )
+        elif isinstance(k, FrequencyData):
+            frequencies = k.frequencies
+            k = k.freq
+        else:
+            if isinstance(k, complex):
+                k_re = k.real
+            else:
+                k_re = k
+            frequencies = (k_re * reference_speed_of_sound) / (2 * np.pi)
+        if isinstance(medium_impedance, FrequencyData):
+            if not np.allclose(
+                medium_impedance.frequencies,
+                frequencies,
+                atol=1e-15,
+            ):
+                raise ValueError(
+                    "The frequencies of characteristic_impedance must "
+                    "match those of k.",
+                )
+            else:
+                medium_impedance = medium_impedance.freq
+        elif not isinstance(medium_impedance, Number):
+            raise TypeError(
+                "The input medium_impedance must be a number"
+                "or a FrequencyData object.",
+            )
+        if not isinstance(propagation_direction, str):
+            raise TypeError(
+            "The input propagation_direction must be a string"
+            "with value 'forwards' or 'backwards'.",
+            )
+        if propagation_direction not in ("forwards", "backwards"):
+            raise ValueError(
+                "The string propagation_direction must either be "
+                "'forwards' or 'backwards'.",
+            )
+
+        if propagation_direction == "backwards":
+            Omega, a, b = (
+                TransmissionMatrix._calculate_horn_geometry_parameters(
+                    S0,
+                    S1,
+                    L,
+                )
+            )  # Error handling inside the helper function
+        else:
+            Omega, b, a = (
+                TransmissionMatrix._calculate_horn_geometry_parameters(
+                    S0,
+                    S1,
+                    L,
+                )
+            )  # Error handling inside the helper function
+            L = -1 * L
+
+        # Calculate T-matrix entries according to Equation (5-18) of [1]
+        A = b / a * np.cos(k * L) - 1 / (k * a) * np.sin(k * L)
+        B = 1j * medium_impedance / (a * b * Omega) * np.sin(k * L)
+        C = (
+            1j
+            * Omega
+            / (k * k * medium_impedance)
+            * ((1 + k * k * a * b) * np.sin(k * L) - k * L * np.cos(k * L))
+        )
+        D = a / b * np.cos(k * L) + 1 / (k * b) * np.sin(k * L)
+
+        return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
