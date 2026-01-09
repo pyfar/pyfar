@@ -8,6 +8,7 @@ from matplotlib.ticker import (
     LogLocator,
     MultipleLocator,
     Formatter)
+from pyfar.constants import fractional_octave_frequencies_nominal
 
 
 class FractionalOctaveFormatter(FixedFormatter):
@@ -32,21 +33,35 @@ class FractionalOctaveFormatter(FixedFormatter):
 
 
 class FractionalOctaveLocator(FixedLocator):
-    """Locator for fractional octave bands."""
+    """
+    Locator for fractional octave frequencies.
 
-    def __init__(self, n_fractions=1):
-        if n_fractions == 1:
-            ticks = [
-                16, 31.5, 63, 125, 250, 500,
-                1e3, 2e3, 4e3, 8e3, 16e3]
-        elif n_fractions == 3:
-            ticks = [
-                12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160,
-                200, 250, 315, 400, 500, 630, 800, 1e3, 1250,
-                1600, 2e3, 2500, 3150, 4e3, 5e3, 6300, 8e3, 10e3,
-                12.5e3, 16e3, 20e3]
-        else:
-            raise ValueError("Unsupported number of fractions.")
+    Applies fixed ticks at nominal fractional octave band center frequencies
+    using :py:func:`pyfar.constants.fractional_octave_frequencies_nominal`.
+
+    Parameters
+    ----------
+    num_fractions : {1, 3}
+        The number of octave fractions. ``1`` for octave center
+        frequencies (default), ``3`` for third-octave center frequencies.
+
+    Examples
+    --------
+    Replace the x-axis ticks of a frequency plot with octave
+    center frequencies:
+
+    .. plot::
+
+    >>> import pyfar as pf
+    >>> signal = pf.signals.noise(1e3)
+    >>> ax = pf.plot.freq(signal)
+    >>> ax.xaxis.set_major_locator(
+    ...     pf.plot.ticker.FractionalOctaveLocator(num_fractions=1))
+
+    """
+
+    def __init__(self, num_fractions=1):
+        ticks = fractional_octave_frequencies_nominal(num_fractions)
         super().__init__(ticks)
 
 
