@@ -4,7 +4,6 @@ from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
     FixedFormatter,
     FixedLocator,
-    LogFormatter,
     LogLocator,
     MultipleLocator,
     Formatter)
@@ -65,16 +64,16 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class FrequencyLogFormatter(LogFormatter):
+class FrequencyFormatter(Formatter):
     """
-    Log-formatter which uses unit inspired labels particularly
+    Formatter which uses unit inspired labels particularly
     suitable for frequency axes, e.g. `1e3 = 1k`, `1e6 = 1M`.
 
 
     Parameters
     ----------
     **kwargs
-        Keyword arguments to be passed to :py:func:`LogFormatter`.
+        Keyword arguments to be passed to :py:func:`Formatter`.
 
     Examples
     --------
@@ -93,10 +92,9 @@ class FrequencyLogFormatter(LogFormatter):
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>> fig, ax = plt.subplots()
-        >>> ax.plot([20, 20e3], [1, 2])
-        >>> ax.set_xscale('log')
+        >>> ax.plot([500, 1000, 1500], [1, 2, 3])
         >>> ax.xaxis.set_major_formatter(
-        ...     pf.plot.ticker.FrequencyLogFormatter())
+        ...     pf.plot.ticker.FrequencyFormatter())
 
 
     """
@@ -115,7 +113,7 @@ class FrequencyLogFormatter(LogFormatter):
             try:
                 s = self._pprint_val(x, vmax - vmin)
             except AttributeError:
-                s = self.pprint_val(x, vmax - vmin)
+                s = str(x).rstrip('0').rstrip('.')
         return s
 
     def __call__(self, x, pos=None):  # noqa: ARG002
