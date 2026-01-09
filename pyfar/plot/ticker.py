@@ -65,9 +65,10 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class UnitLogFormatter(LogFormatter):
+class FrequencyLogFormatter(LogFormatter):
     """
-    Log-formatter which uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
+    Log-formatter which uses unit inspired labels particularly
+    suitable for frequency axes, e.g. `1e3 = 1k`, `1e6 = 1M`.
 
 
     Parameters
@@ -94,7 +95,8 @@ class UnitLogFormatter(LogFormatter):
         >>> fig, ax = plt.subplots()
         >>> ax.plot([20, 20e3], [1, 2])
         >>> ax.set_xscale('log')
-        >>> ax.xaxis.set_major_formatter(pf.plot.ticker.UnitLogFormatter())
+        >>> ax.xaxis.set_major_formatter(
+        ...     pf.plot.ticker.FrequencyLogFormatter())
 
 
     """
