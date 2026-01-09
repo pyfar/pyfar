@@ -439,7 +439,7 @@ def _is_dtype(obj):
     """True if object is `numpy.dtype`.
     """
     return isinstance(obj, type) and (
-        obj.__module__ == 'numpy' or obj == complex)
+        obj.__module__ == 'numpy' or isinstance(obj, complex))
 
 
 def _is_numpy_scalar(obj):
