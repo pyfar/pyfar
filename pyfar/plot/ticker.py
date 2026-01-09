@@ -65,10 +65,9 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class LogFormatterITAToolbox(LogFormatter):
+class UnitLogFormatter(LogFormatter):
     """
-    Log-formatter inspired by the tick labels used in the ITA-Toolbox
-    for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
+    Log-formatter which uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
     """
 
     def __init__(
