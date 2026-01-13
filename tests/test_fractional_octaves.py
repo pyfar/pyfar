@@ -6,6 +6,10 @@ import pyfar
 from pyfar.dsp import filter
 from pyfar import FilterSOS, Signal
 
+message = ('pyfar.dsp.filter.fractional_octave_frequencies '
+           'will removed in pyfar 0.10.0')
+pytestmark = pytest.mark.filterwarnings(
+    f"ignore:{message}:pyfar.classes.warnings.PyfarDeprecationWarning")
 
 def test_center_frequencies_iec():
     nominal_octs = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
