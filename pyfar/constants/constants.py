@@ -575,6 +575,13 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     nominal : numpy.ndarray of float
         The nominal center frequencies.
 
+    Notes
+    -----
+    The specified ``frequency_range`` is interpreted as frequencies lying
+    within octave bands, not as strict lower and upper center-frequency
+    limits. All bands whose frequency intervals overlap with the
+    specified frequency range are included in the result.
+
     References
     ----------
     .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
@@ -594,6 +601,8 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     if f_lims[0] > f_lims[1]:
         raise ValueError(
             "The second frequency needs to be higher than the first.")
+    _, lower, upper = fractional_octave_frequencies_exact(num_fractions,
+                                                           frequency_range)
 
     if num_fractions == 1:
         if (f_lims[0] < 15.8*G**(-1/2)) or (f_lims[1] >
@@ -619,7 +628,7 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     else:
         raise ValueError('num_fractions must be 1 or 3')
 
-    mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+    mask = (nominal >= lower[0]) & (nominal <= upper[-1])
     nominal = nominal[mask]
     return nominal
 
@@ -627,13 +636,6 @@ def fractional_octave_frequencies_exact(
         num_fractions:int=1, frequency_range: tuple[float, float]=(20, 20e3)):
     r"""Return the exact center and cutoff frequencies for
     fractional-octave-band filters.
-
-    .. note ::
-        For ``num_fractions = 1`` and ``num_fractions = 3``, the exact
-        center frequencies correspond to the nominal frequencies. This means
-        that the returned exact frequencies are limited to the nominal
-        frequency ranges (11.2–22387.2 Hz and 8.91–22387.2 Hz, respectively),
-        regardless of a specified larger `frequency_range`.
 
     The frequencies are calculated in accordance with the IEC 61260-1:2014
     standard [#]_ (Sections 5.2, 5.3, 5.4 and 5.6).
@@ -692,6 +694,13 @@ def fractional_octave_frequencies_exact(
     .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
         Electroacoustics - Octave-band and fractional-octave-band filters -
         Part 1: Specifications", IEC, 2014.
+
+    Notes
+    -----
+    The specified ``frequency_range`` is interpreted as frequencies lying
+    within octave bands, not as strict lower and upper center-frequency
+    limits. All bands whose frequency intervals overlap with the
+    specified frequency range are included in the result.
     """
     if not isinstance(frequency_range, (tuple, np.ndarray, list)):
         raise TypeError("The frequency range must be a tuple, list or"
@@ -718,10 +727,10 @@ def fractional_octave_frequencies_exact(
     # IEC 61260-1 Eq. (1)
     G = 10**(3/10)
     ref_freq = 1e3
-    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
-    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
+    Nmax = np.rint((10/3)*np.log10(frequency_range[1]/ref_freq)*num_fractions)
+    Nmin = np.rint((10/3)*np.log10(frequency_range[0]/ref_freq)*num_fractions)
 
-    indices = np.arange(-Nmin, Nmax+1)
+    indices = np.arange(Nmin, Nmax+1)
     if num_fractions % 2 != 0:
         # IEC 61260-1 Eq. (2)
         center_frequencies = ref_freq * (G)**(indices / num_fractions)
@@ -733,19 +742,6 @@ def fractional_octave_frequencies_exact(
     upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
     # IEC 61260-1 Eq. (4)
     lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
-
-    # Adjust the exact frequencies to the nominal frequencies
-    if num_fractions in {1, 3}:
-        nominal = fractional_octave_frequencies_nominal(num_fractions,
-                                                    frequency_range)
-        if nominal.size > 0:
-            mask = (upper_cutoff_frequencies>=nominal[0]) & (
-                lower_cutoff_frequencies<=nominal[-1])
-        else:
-            mask = np.full(center_frequencies.shape, False)
-        center_frequencies = center_frequencies[mask]
-        lower_cutoff_frequencies = lower_cutoff_frequencies[mask]
-        upper_cutoff_frequencies = upper_cutoff_frequencies[mask]
 
     return (center_frequencies,
             lower_cutoff_frequencies, upper_cutoff_frequencies)
