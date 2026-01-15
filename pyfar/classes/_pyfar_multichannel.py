@@ -87,11 +87,31 @@ class _PyfarMultichannel(_PyfarBase, ABC):
         """Return a copy of the object collapsed into one channel dimension."""
         return self.reshape(self.csize)
 
-    @abstractmethod
-    def transpose(self, caxes=None):
-        """Returns a copy of the object with channel axes transposed."""
+    def transpose(self, *caxes):
+        """Return a copy of the object with channel axes transposed.
 
-        pass
+        Parameters
+        ----------
+        caxes : iterable of int or None
+            Define how the axes are ordered in the transposed object.
+            If not specified, reverses the order of ``self.caxes``.
+        """
+
+        if not caxes:
+            caxes = tuple(range(len(self.cshape)))[::-1]
+        elif len(caxes) == 1 and isinstance(caxes[0], (tuple, list)):
+            caxes = tuple(caxes[0])
+        print(caxes)
+        caxes = tuple(a + self.cdim if a < 0 else a for a in caxes)
+        if len(caxes) != self.cdim:
+            raise ValueError("Number of axes must match the cdim of the object")
+        if sorted(caxes) != list(range(self.cdim)):
+            raise ValueError("Axes must be a rearrangement of cdim")
+
+        result = deepcopy(self)
+        result._data = result._data.transpose(*caxes, self.cdim)
+
+        return result
 
     def broadcast_cshape(self, cshape):
         """
