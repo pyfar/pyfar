@@ -28,7 +28,7 @@ def test_frequency_weighting_constants(weighting, num_fractions, freq_range):
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
 @pytest.mark.parametrize("num_fractions", [1, 3])
-@pytest.mark.parametrize("freq_range", [(0, 100), (4000, 100_000)])
+@pytest.mark.parametrize("freq_range", [(1, 100), (4000, 100_000)])
 def test_frequency_weighting_constants_warning(
     weighting, num_fractions, freq_range):
 
@@ -64,8 +64,8 @@ def test_frequency_weighting_band_corrections_errors():
                                                              (100, 1000))
 
     # invalid bands
-    match = "num_fractions must be 1 or 3"
-    with pytest.raises(ValueError, match=match):
+    match = "Number of fractions must be an integer."
+    with pytest.raises(TypeError, match=match):
         pyfar.constants.frequency_weighting_band_corrections("A", "octave",
                                                              (100, 1000))
 
