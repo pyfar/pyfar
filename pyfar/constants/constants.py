@@ -578,9 +578,9 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     Notes
     -----
     The specified ``frequency_range`` is interpreted as frequencies lying
-    within octave bands, not as strict lower and upper center-frequency
-    limits. All bands whose frequency intervals overlap with the
-    specified frequency range are included in the result.
+    within (fractional) octave bands defined by their cutoff frequencies
+    (not their center frequencies). All bands that overlap with the
+    specified frequency range are returned.
 
     References
     ----------
@@ -698,9 +698,9 @@ def fractional_octave_frequencies_exact(
     Notes
     -----
     The specified ``frequency_range`` is interpreted as frequencies lying
-    within octave bands, not as strict lower and upper center-frequency
-    limits. All bands whose frequency intervals overlap with the
-    specified frequency range are included in the result.
+    within (fractional) octave bands defined by their cutoff frequencies
+    (not their center frequencies). All bands that overlap with the
+    specified frequency range are returned.
     """
     if not isinstance(frequency_range, (tuple, np.ndarray, list)):
         raise TypeError("The frequency range must be a tuple, list or"
