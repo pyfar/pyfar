@@ -727,14 +727,20 @@ def fractional_octave_frequencies_exact(
     # IEC 61260-1 Eq. (1)
     G = 10**(3/10)
     ref_freq = 1e3
-    Nmax = np.rint((10/3)*np.log10(frequency_range[1]/ref_freq)*num_fractions)
-    Nmin = np.rint((10/3)*np.log10(frequency_range[0]/ref_freq)*num_fractions)
-
-    indices = np.arange(Nmin, Nmax+1)
     if num_fractions % 2 != 0:
+        Nmax = np.rint((10/3)*np.log10(frequency_range[1]/ref_freq)*
+                                                    num_fractions)
+        Nmin = np.rint((10/3)*np.log10(frequency_range[0]/ref_freq)*
+                                                    num_fractions)
+        indices = np.arange(Nmin, Nmax+1)
         # IEC 61260-1 Eq. (2)
         center_frequencies = ref_freq * (G)**(indices / num_fractions)
     else:
+        Nmax = np.rint(((10/6)*np.log10(frequency_range[1]/ref_freq)*2*
+                                                    num_fractions - 1/2))
+        Nmin = np.rint(((10/6)*np.log10(frequency_range[0]/ref_freq)*2*
+                                                    num_fractions - 1/2))
+        indices = np.arange(Nmin, Nmax+1)
         # IEC 61260-1 Eq. (3)
         center_frequencies = ref_freq * (G)**((2*indices + 1)/
                                               (2*num_fractions))

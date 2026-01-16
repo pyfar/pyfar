@@ -114,12 +114,28 @@ def test_exact_octave_empty():
     npt.assert_allclose(exact, expected)
 
 
+def test_exact_half_octave_subset():
+    exact = constants.fractional_octave_frequencies_exact(
+                                        2, (500, 1000))[0]
+    expected = np.array([421.6965034, 595.66214435, 841.3951416, 1188.502227])
+    np.testing.assert_allclose(exact, expected)
+
+
 def test_exact_third_octave_subset():
     exact = constants.fractional_octave_frequencies_exact(
                                         3, (12, 62))[0]
     expected = np.array([12.58925412, 15.84893192, 19.95262315, 25.11886432,
                           31.6227766, 39.81071706, 50.11872336, 63.09573445])
     npt.assert_allclose(exact, expected)
+
+
+def test_exact_fourth_octave_subset():
+    exact = constants.fractional_octave_frequencies_exact(
+                                        4, (22, 200))[0]
+    expected = np.array([20.53525026, 24.40619068, 29.00681199, 34.474660066,
+     40.97321098, 48.69675252, 57.87619883, 68.78599123, 81.75230379,
+      97.16279516, 115.4781985, 137.2460961, 163.1172909, 193.8652636 ])
+    np.testing.assert_allclose(exact, expected)
 
 
 def test_exact_twelfth_octave_subset():
@@ -131,21 +147,32 @@ def test_exact_twelfth_octave_subset():
     np.testing.assert_allclose(exact, expected)
 
 
-@pytest.mark.parametrize(
-    "frac",
-    [2, 5])
-def test_exact_octave_cutoff(frac):
+@pytest.mark.parametrize("num_fractions",[2, 5])
+def test_exact_octave_cutoff(num_fractions):
     exact, lower, upper = constants.fractional_octave_frequencies_exact(
-        frac, (2e3, 20e3))
-
+                                        num_fractions, (2e3, 20e3))
     G = 10**(3/10)
     np.testing.assert_allclose(
-        lower, exact*G**(-1/2/frac))
+        lower, exact*G**(-1/2/num_fractions))
     np.testing.assert_allclose(
-        upper, exact*G**(1/2/frac))
+        upper, exact*G**(1/2/num_fractions))
 
 
-@pytest.mark.parametrize( ("num_fractions","freq_range"),
+@pytest.mark.parametrize("num_fractions", [1, 2, 3])
+@pytest.mark.parametrize("freq_range", [(500, 1000), (12, 63),
+                                                        (1400, 2230)])
+def test_exact_limits_within_bands(num_fractions, freq_range):
+    exact, lower, upper = constants.fractional_octave_frequencies_exact(
+        num_fractions, freq_range)
+    # It should be lower[0] <= freq_range[0] <= upper[0]
+    assert lower[0] - freq_range[0] <= 1e-10
+    assert freq_range[0] - upper[0] <= 1e-10
+    # It should be lower[-1] <= freq_range[1] <= upper[-1]
+    assert lower[-1] - freq_range[1] <= 1e-10
+    assert freq_range[1] - upper[-1] <= 1e-10
+
+
+@pytest.mark.parametrize(("num_fractions", "freq_range"),
     [(1, (63, 15000)),
     (3, (13.9, 177.9)),
     (3, (31.5, 1250)),
