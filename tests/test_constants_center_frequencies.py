@@ -144,9 +144,15 @@ def test_exact_octave_cutoff(frac):
     np.testing.assert_allclose(
         upper, exact*G**(1/2/frac))
 
-def test_exact_nominal_correlation():
+
+@pytest.mark.parametrize( ("num_fractions","freq_range"),
+    [(1, (63, 15000)),
+    (3, (13.9, 177.9)),
+    (3, (31.5, 1250)),
+    (3, (2238.8, 11220.2))])
+def test_exact_nominal_correlation(num_fractions, freq_range):
     exact = constants.fractional_octave_frequencies_exact(
-                                        3, (13.9, 177.9))[0]
-    actual_nominal = constants.fractional_octave_frequencies_nominal(3,
-                                                        (13.9, 177.9))
+                                        num_fractions, freq_range)[0]
+    actual_nominal = constants.fractional_octave_frequencies_nominal(
+                                        num_fractions, freq_range)
     np.testing.assert_allclose(exact, actual_nominal, rtol=1e-01)
