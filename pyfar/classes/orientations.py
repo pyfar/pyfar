@@ -66,6 +66,49 @@ class Orientations(Rotation):
         super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
+    def from_matrix(cls, matrix, assume_valid=False):
+        """{Rotation._from_matrix__doc__}"""
+        rot = Rotation.from_matrix(matrix=matrix, assume_valid=assume_valid)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_quat(cls, quat, *, scalar_first=False):
+        """{Rotation._from_quat.__doc__}"""
+        rot = Rotation.from_quat(quat=quat, scalar_first=scalar_first)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_rotvec(cls, rotvec, degrees=False):
+        """{Rotation._from_rotvec.__doc__}"""
+        rot = Rotation.from_rotvec(rotvec=rotvec, degrees=degrees)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_mrp(cls, mrp):
+        """{Rotation._from_mrp.__doc__}"""
+        rot = Rotation.from_mrp(mrp)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_euler(cls, seq, angles, degrees=False):
+        """{Rotation._from_euler.__doc__}"""
+        rot = Rotation.from_euler(seq=seq, angles=angles, degrees=degrees)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_davenport(cls, axes, order, angles, degrees=False):
+        """{Rotation._from_euler.__doc__}"""
+        rot = Rotation.from_davenport(axes=axes, order=order, angles=angles,
+                                      degrees=degrees)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
     def from_view_up(cls, views, ups):
         """Initialize Orientations from a view an up vector.
 
