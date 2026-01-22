@@ -7,7 +7,7 @@ import numpy.testing as npt
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_cshape():
     """Test the cshape property."""
-    data = np.array([[[1, 1, 1], [1, 1, 1]], [[2, 2, 2], [2, 2, 2]]])
+    data = np.ones((2, 2, 2))
     instance = _PyfarMultichannel()
     instance._data = data
     assert instance.cshape == (2,2)
@@ -16,7 +16,7 @@ def test_cshape():
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_cdim():
     """Test the cdim property."""
-    data = np.array([[1, 2, 3], [4, 5, 6]])
+    data = np.ones((2, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     assert instance.cdim == (1)
@@ -25,7 +25,7 @@ def test_cdim():
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_csize():
     """Test the csize property."""
-    data = np.array([[[1, 1, 1], [1, 1, 1]], [[2, 2, 2], [2, 2, 2]]])
+    data = np.ones((1, 2, 2, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     assert instance.csize == 4
@@ -35,7 +35,7 @@ def test_csize():
 @pytest.mark.parametrize('cshape', [(4, 1), (1, 4)])
 def test_reshape(cshape):
     """Test the reshape method."""
-    data = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+    data = np.ones((1, 2, 2, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     reshaped = instance.reshape(cshape)
@@ -46,7 +46,7 @@ def test_reshape(cshape):
 @pytest.mark.parametrize('cshape', [(5, 1), (2, 3)])
 def test_reshape_value_error(cshape):
     """Test whether ValueError is raised for the reshape method."""
-    data = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+    data = np.ones((1, 2, 2, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     with pytest.raises(ValueError, match='reshape an object of cshape'):
@@ -56,7 +56,7 @@ def test_reshape_value_error(cshape):
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_flatten():
     """Test the flatten method."""
-    data = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+    data = np.ones((1, 2, 2, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     flatted = instance.flatten()
@@ -67,7 +67,7 @@ def test_flatten():
 @pytest.mark.parametrize('cshape', [(3, 3), (6, 3), (7, 5, 3)])
 def test_broadcast_cshape(cshape):
     """Test the broadcast_cshape method."""
-    data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    data = np.ones((1, 3, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     broadcasted = instance.broadcast_cshape(cshape)
@@ -75,10 +75,37 @@ def test_broadcast_cshape(cshape):
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
+def test_broadcast_cshape_data_type_error():
+    """
+    Test whether TypeError is raised when cshape has an incorrect
+    data type.
+    """
+    data = np.ones((1, 3, 3))
+    instance = _PyfarMultichannel()
+    instance._data = data
+    with pytest.raises(TypeError, match='The cshape must contain only'
+                                                            ' integer'):
+        instance.broadcast_cshape((3.0, 3))
+
+
+@patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
+def test_broadcast_cshape_structure_error():
+    """
+    Test whether TypeError is raised when cshape has an incorrect
+    structure.
+    """
+    data = np.ones((1, 3, 3))
+    instance = _PyfarMultichannel()
+    instance._data = data
+    with pytest.raises(TypeError, match='The cshape must be a tuple, list or'):
+        instance.broadcast_cshape(("6, 3"))
+
+
+@patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 @pytest.mark.parametrize('cdim', [1, 2, 5, 9])
 def test_broadcast_cdim(cdim):
     """Test the broadcast_cdim method."""
-    data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    data = np.ones((3, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     broadcasted = instance.broadcast_cdim(cdim)
@@ -97,8 +124,8 @@ def test_broadcast_cdim_value_error():
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_transpose():
-    rng = np.random.default_rng()
-    data = rng.random((6, 2, 5, 256))
+    """Test the transpose method."""
+    data = np.arange(2*3*4).reshape((1, 2, 3, 4))
     instance1 = _PyfarMultichannel()
     instance1._data = data
     instance2 = instance1.transpose()
@@ -109,8 +136,11 @@ def test_transpose():
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 @pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
 def test_transpose_positional_arguments(taxis):
-    rng = np.random.default_rng()
-    data = rng.random((6, 2, 5, 256))
+    """
+    Test the transpose method with positional arguments packed into a tuple
+    via *cshape.
+    """
+    data = np.arange(2*3*4).reshape((1, 2, 3, 4))
     instance1 = _PyfarMultichannel()
     instance1._data = data
     instance2 = instance1.transpose(taxis)
@@ -121,11 +151,12 @@ def test_transpose_positional_arguments(taxis):
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_transpose_errors():
-    rng = np.random.default_rng()
-    data = rng.random((10, 10, 256))
+    """Test whether ValueError is raised for the transpose method."""
+    data = np.arange(3*3).reshape((1, 3, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     with pytest.raises(ValueError, match="Number of axes must match the cdim"):
         instance.transpose(1, 0, 2, 3)
-    with pytest.raises(ValueError, match="Axes must be a rearrangement of cdim"):
+    with pytest.raises(ValueError, match="Axes must be a rearrangement"
+                                                                " of cdim"):
         instance.transpose(2, 1)
