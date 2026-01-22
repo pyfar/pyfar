@@ -3,13 +3,13 @@ The following documents the abstract class for multichannel pyfar classes,
 which implements functionality similar to NumPy arrays.
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import numpy as np
 from copy import deepcopy
 from math import prod
 from pyfar.classes._pyfar_base import _PyfarBase
 
-class _PyfarMultichannel(_PyfarBase, ABC):
+class _PyfarMultichannel(_PyfarBase):
     """
     Internal abstract base class for multichannel pyfar classes.
 
@@ -101,10 +101,10 @@ class _PyfarMultichannel(_PyfarBase, ABC):
             caxes = tuple(range(len(self.cshape)))[::-1]
         elif len(caxes) == 1 and isinstance(caxes[0], (tuple, list)):
             caxes = tuple(caxes[0])
-        print(caxes)
         caxes = tuple(a + self.cdim if a < 0 else a for a in caxes)
         if len(caxes) != self.cdim:
-            raise ValueError("Number of axes must match the cdim of the object")
+            raise ValueError("Number of axes must match the cdim"
+                                                    " of the object")
         if sorted(caxes) != list(range(self.cdim)):
             raise ValueError("Axes must be a rearrangement of cdim")
 
@@ -119,14 +119,18 @@ class _PyfarMultichannel(_PyfarBase, ABC):
 
         Parameters
         ----------
-        cshape : tuple
-            The cshape to which the object is broadcasted.
+        cshape : tuple, list, np.ndarray
+            The channel shape to which the object is broadcasted.
 
         Returns
         -------
         object : _PyfarMultichannel
             Broadcasted copy of the object.
         """
+        if not isinstance(cshape, (tuple, np.ndarray, list)):
+            raise TypeError("The cshape must be a tuple, list or np.ndarray.")
+        if not all(isinstance(a, int) for a in cshape):
+            raise TypeError("The cshape must contain only integer values.")
 
         signal = self.copy()
         signal._data = np.broadcast_to(
