@@ -67,42 +67,241 @@ class Orientations(Rotation):
 
     @classmethod
     def from_matrix(cls, matrix, assume_valid=False):
-        """{Rotation._from_matrix__doc__}"""
+        """
+        Initialize from rotation matrix.
+
+        Rotations in 3 dimensions can be represented with 3 x 3 orthogonal
+        matrices [1]_. If the input is not orthogonal, an approximation is
+        created by orthogonalizing the input matrix using the method described
+        in [2]_, and then converting the orthogonal rotation matrices to
+        quaternions using the algorithm described in [3]_. Matrices must be
+        right-handed.
+
+        Parameters
+        ----------
+        matrix : array_like, shape (..., 3, 3)
+            A single matrix or an ND array of matrices, where the last two
+            dimensions contain the rotation matrices.
+        assume_valid : bool, optional
+            Must be False unless users can guarantee the input is a valid
+            rotation matrix, i.e. it is orthogonal, rows and columns have unit
+            norm and the determinant is 1. Setting this to True without
+            ensuring these properties is unsafe and will silently lead to
+            incorrect results. If True, normalization steps are skipped, which
+            can improve runtime performance.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+        .. [2] https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
+        .. [3] F. Landis Markley, "Unit Quaternion from Rotation Matrix",
+               Journal of guidance, control, and dynamics vol. 31.2, pp.
+               440-442, 2008.
+        """
+
         rot = Rotation.from_matrix(matrix=matrix, assume_valid=assume_valid)
         quat = rot.as_quat()
         return cls(quat)
 
     @classmethod
-    def from_quat(cls, quat, *, scalar_first=False):
-        """{Rotation._from_quat.__doc__}"""
+    def from_quat(cls, quat, scalar_first=False):
+        """
+        Initialize from quaternions.
+
+        Rotations in 3 dimensions can be represented using unit norm
+        quaternions [1]_.
+
+        The 4 components of a quaternion are divided into a scalar part ``w``
+        and a vector part ``(x, y, z)`` and can be expressed from the angle
+        ``theta`` and the axis ``n`` of a rotation as follows::
+
+            w = cos(theta / 2)
+            x = sin(theta / 2) * n_x
+            y = sin(theta / 2) * n_y
+            z = sin(theta / 2) * n_z
+
+        There are 2 conventions to order the components in a quaternion:
+
+        - scalar-first order -- ``(w, x, y, z)``
+        - scalar-last order -- ``(x, y, z, w)``
+
+        The choice is controlled by `scalar_first` argument.
+        By default, it is False and the scalar-last order is assumed.
+
+        Advanced users may be interested in the "double cover" of 3D space by
+        the quaternion representation [2]_. As of version 1.11.0, the
+        following subset (and only this subset) of operations on a `Rotation`
+        ``r`` corresponding to a quaternion ``q`` are guaranteed to preserve
+        the double cover property: ``r = Rotation.from_quat(q)``,
+        ``r.as_quat(canonical=False)``, ``r.inv()``, and composition using the
+        ``*`` operator such as ``r*r``.
+
+        Parameters
+        ----------
+        quat : array_like, shape (..., 4)
+            Each row is a (possibly non-unit norm) quaternion representing an
+            active rotation. Each quaternion will be normalized to unit norm.
+        scalar_first : bool, optional
+            Whether the scalar component goes first or last.
+            Default is False, i.e. the scalar-last order is assumed.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+        .. [2] Hanson, Andrew J. "Visualizing quaternions."
+            Morgan Kaufmann Publishers Inc., San Francisco, CA. 2006.
+        """
         rot = Rotation.from_quat(quat=quat, scalar_first=scalar_first)
         quat = rot.as_quat()
         return cls(quat)
 
     @classmethod
     def from_rotvec(cls, rotvec, degrees=False):
-        """{Rotation._from_rotvec.__doc__}"""
+        """Initialize from rotation vectors.
+
+        A rotation vector is a 3 dimensional vector which is co-directional to
+        the axis of rotation and whose norm gives the angle of rotation [1]_.
+
+        Parameters
+        ----------
+        rotvec : array_like, shape (..., 3)
+            A single vector or an ND array of vectors, where the last dimension
+            contains the rotation vectors.
+        degrees : bool, optional
+            If True, then the given magnitudes are assumed to be in degrees.
+            Default is False.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
+        """
         rot = Rotation.from_rotvec(rotvec=rotvec, degrees=degrees)
         quat = rot.as_quat()
         return cls(quat)
 
     @classmethod
     def from_mrp(cls, mrp):
-        """{Rotation._from_mrp.__doc__}"""
+        """
+        Initialize from Modified Rodrigues Parameters (MRPs).
+
+        MRPs are a 3 dimensional vector co-directional to the axis of rotation
+        and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
+        the angle of rotation (in radians) [1]_.
+
+        MRPs have a singularity at 360 degrees which can be avoided by ensuring
+        the angle of rotation does not exceed 180 degrees, i.e. switching the
+        direction of the rotation when it is past 180 degrees.
+
+        Parameters
+        ----------
+        mrp : array_like, shape (..., 3)
+            A single vector or an ND array of vectors, where the last dimension
+            contains the rotation parameters.
+
+        References
+        ----------
+        .. [1] Shuster, M. D. "A Survey of Attitude Representations",
+               The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
+               pp. 475-476
+        """
         rot = Rotation.from_mrp(mrp)
         quat = rot.as_quat()
         return cls(quat)
 
     @classmethod
     def from_euler(cls, seq, angles, degrees=False):
-        """{Rotation._from_euler.__doc__}"""
+        """Initialize from Euler angles.
+
+        Rotations in 3-D can be represented by a sequence of 3
+        rotations around a sequence of axes. In theory, any three axes spanning
+        the 3-D Euclidean space are enough. In practice, the axes of rotation
+        are chosen to be the basis vectors.
+
+        The three rotations can either be in a global frame of reference
+        (extrinsic) or in a body centred frame of reference (intrinsic), which
+        is attached to, and moves with, the object under rotation [1]_.
+
+        Parameters
+        ----------
+        seq : string
+            Specifies sequence of axes for rotations. Up to 3 characters
+            belonging to the set {'X', 'Y', 'Z'} for intrinsic rotations, or
+            {'x', 'y', 'z'} for extrinsic rotations. Extrinsic and intrinsic
+            rotations cannot be mixed in one function call.
+        angles : float or array_like, shape (...,  [1 or 2 or 3])
+            Euler angles specified in radians (`degrees` is False) or degrees
+            (`degrees` is True).
+            Each character in `seq` defines one axis around which `angles`
+            turns. The resulting rotation has the shape
+            np.atleast_1d(angles).shape[:-1]. Dimensionless angles are thus
+            only valid for single character `seq`.
+
+        degrees : bool, optional
+            If True, then the given angles are assumed to be in degrees.
+            Default is False.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        """
         rot = Rotation.from_euler(seq=seq, angles=angles, degrees=degrees)
         quat = rot.as_quat()
         return cls(quat)
 
     @classmethod
     def from_davenport(cls, axes, order, angles, degrees=False):
-        """{Rotation._from_euler.__doc__}"""
+        """Initialize from Davenport angles.
+
+        Rotations in 3-D can be represented by a sequence of 3
+        rotations around a sequence of axes.
+
+        The three rotations can either be in a global frame of reference
+        (extrinsic) or in a body centred frame of reference (intrinsic), which
+        is attached to, and moves with, the object under rotation [1]_.
+
+        For both Euler angles and Davenport angles, consecutive axes must
+        be are orthogonal (``axis2`` is orthogonal to both ``axis1`` and
+        ``axis3``). For Euler angles, there is an additional relationship
+        between ``axis1`` or ``axis3``, with two possibilities:
+
+            - ``axis1`` and ``axis3`` are also orthogonal (asymmetric sequence)
+            - ``axis1 == axis3`` (symmetric sequence)
+
+        For Davenport angles, this last relationship is relaxed [2]_, and only
+        the consecutive orthogonal axes requirement is maintained.
+
+        Parameters
+        ----------
+        axes : array_like, shape (3,) or (..., [1 or 2 or 3], 3)
+            Axis of rotation, if one dimensional. If two or more dimensional,
+            describes the sequence of axes for rotations, where each
+            axes[..., i, :] is the ith axis. If more than one axis is given,
+            then the second axis must be orthogonal to both the first and third
+            axes.
+        order : string
+            If it is equal to 'e' or 'extrinsic', the sequence will be
+            extrinsic. If it is equal to 'i' or 'intrinsic', sequence
+            will be treated as intrinsic.
+        angles : float or array_like, shape (..., [1 or 2 or 3])
+            Angles specified in radians (`degrees` is False) or degrees
+            (`degrees` is True).
+            Each angle i in the last dimension of `angles` turns around the
+            corresponding axis axis[..., i, :]. The resulting rotation has the
+            shape np.broadcast_shapes(np.atleast_2d(axes).shape[:-2],
+            np.atleast_1d(angles).shape[:-1]) Dimensionless angles are thus
+            only valid for a single axis.
+
+        degrees : bool, optional
+            If True, then the given angles are assumed to be in degrees.
+            Default is False.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        .. [2] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
+               the Euler Angles. Journal of the Astronautical Sciences. 51.
+               123-132. 10.1007/BF03546304.
+        """
         rot = Rotation.from_davenport(axes=axes, order=order, angles=angles,
                                       degrees=degrees)
         quat = rot.as_quat()
@@ -173,7 +372,7 @@ class Orientations(Rotation):
         rotation_matrix = np.asarray([views, ups, rights])
         rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
 
-        return super().from_matrix(rotation_matrix)
+        return cls.from_matrix(rotation_matrix)
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
@@ -278,15 +477,66 @@ class Orientations(Rotation):
         val : array_like
             quaternion(s), shape (N, 4) or (4,)
         """
-        if isinstance(val, Orientations):
-            val = val.as_quat()
-        quat = np.atleast_2d(val)
+        if isinstance(val, Rotation):
+            quat = val.as_quat()
+        elif isinstance(val, Orientations):
+            quat = val.as_quat()
+        else:
+            quat = np.atleast_2d(val)
+
+        quat = np.atleast_2d(quat)
         if quat.ndim > 2 or quat.shape[-1] != 4:
             raise ValueError(f"Expected assigned value to have shape"
                              f" or (1, 4), got {quat.shape}")
+
         quats = self.as_quat()
         quats[idx] = quat
-        self = super().from_quat(quats)
+        self = Orientations(quats)
+
+    def __getitem__(self, idx):
+        """Get orientation(s) at given indices.
+
+        Parameters
+        ----------
+        idx : indexes
+            see NumPy Indexing
+        """
+        quat = self.as_quat()
+        return Orientations(quat[idx])
+
+    def __mul__(self, other):
+        """
+        Multiply Orientations object with another Orientations or
+        Rotation object.
+
+        Parameters
+        ----------
+        other : Orientations or Rotation
+            The object to multiply with. If an Orientations object is provided,
+            it will be converted to a Rotation object for the multiplication.
+        """
+        if isinstance(other, Orientations):
+            other = Rotation.from_quat(other.as_quat())
+        if isinstance(other, Rotation):
+            rot = Rotation.from_quat(self.as_quat()) * other
+            return Orientations(rot.as_quat())
+
+    def __rmul__(self, other):
+        """
+        Right multiplication of Orientations or Rotation with Orientations.
+
+        Parameters
+        ----------
+        other : Orientations or Rotation
+            The object to multiply with this Orientations object on the left
+            side. If an Orientations object is provided, it will be converted
+            to a Rotation object using quaternion representation.
+        """
+        if isinstance(other, Orientations):
+            other = Rotation.from_quat(other.as_quat())
+        if isinstance(other, Rotation):
+            rot = other * Rotation.from_quat(self.as_quat())
+            return Orientations(rot.as_quat())
 
     def __eq__(self, other):
         """Check for equality of two objects."""
