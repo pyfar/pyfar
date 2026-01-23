@@ -71,10 +71,10 @@ class Orientations(Rotation):
         Initialize from rotation matrix.
 
         Rotations in 3 dimensions can be represented with 3 x 3 orthogonal
-        matrices [1]_. If the input is not orthogonal, an approximation is
+        matrices [#]_. If the input is not orthogonal, an approximation is
         created by orthogonalizing the input matrix using the method described
-        in [2]_, and then converting the orthogonal rotation matrices to
-        quaternions using the algorithm described in [3]_. Matrices must be
+        in [#]_, and then converting the orthogonal rotation matrices to
+        quaternions using the algorithm described in [#]_. Matrices must be
         right-handed.
 
         Parameters
@@ -92,9 +92,9 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
-        .. [2] https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
-        .. [3] F. Landis Markley, "Unit Quaternion from Rotation Matrix",
+        .. [#] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+        .. [#] https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
+        .. [#] F. Landis Markley, "Unit Quaternion from Rotation Matrix",
                Journal of guidance, control, and dynamics vol. 31.2, pp.
                440-442, 2008.
         """
@@ -109,7 +109,7 @@ class Orientations(Rotation):
         Initialize from quaternions.
 
         Rotations in 3 dimensions can be represented using unit norm
-        quaternions [1]_.
+        quaternions [#]_.
 
         The 4 components of a quaternion are divided into a scalar part ``w``
         and a vector part ``(x, y, z)`` and can be expressed from the angle
@@ -129,7 +129,7 @@ class Orientations(Rotation):
         By default, it is False and the scalar-last order is assumed.
 
         Advanced users may be interested in the "double cover" of 3D space by
-        the quaternion representation [2]_. As of version 1.11.0, the
+        the quaternion representation [#]_. As of version 1.11.0, the
         following subset (and only this subset) of operations on a `Rotation`
         ``r`` corresponding to a quaternion ``q`` are guaranteed to preserve
         the double cover property: ``r = Rotation.from_quat(q)``,
@@ -147,8 +147,8 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-        .. [2] Hanson, Andrew J. "Visualizing quaternions."
+        .. [#] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+        .. [#] Hanson, Andrew J. "Visualizing quaternions."
             Morgan Kaufmann Publishers Inc., San Francisco, CA. 2006.
         """
         rot = Rotation.from_quat(quat=quat, scalar_first=scalar_first)
@@ -160,7 +160,7 @@ class Orientations(Rotation):
         """Initialize from rotation vectors.
 
         A rotation vector is a 3 dimensional vector which is co-directional to
-        the axis of rotation and whose norm gives the angle of rotation [1]_.
+        the axis of rotation and whose norm gives the angle of rotation [#]_.
 
         Parameters
         ----------
@@ -173,7 +173,7 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
+        .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
         """
         rot = Rotation.from_rotvec(rotvec=rotvec, degrees=degrees)
         quat = rot.as_quat()
@@ -186,7 +186,7 @@ class Orientations(Rotation):
 
         MRPs are a 3 dimensional vector co-directional to the axis of rotation
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
-        the angle of rotation (in radians) [1]_.
+        the angle of rotation (in radians) [#]_.
 
         MRPs have a singularity at 360 degrees which can be avoided by ensuring
         the angle of rotation does not exceed 180 degrees, i.e. switching the
@@ -200,7 +200,7 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [1] Shuster, M. D. "A Survey of Attitude Representations",
+        .. [#] Shuster, M. D. "A Survey of Attitude Representations",
                The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
                pp. 475-476
         """
@@ -219,7 +219,7 @@ class Orientations(Rotation):
 
         The three rotations can either be in a global frame of reference
         (extrinsic) or in a body centred frame of reference (intrinsic), which
-        is attached to, and moves with, the object under rotation [1]_.
+        is attached to, and moves with, the object under rotation [#]_.
 
         Parameters
         ----------
@@ -242,7 +242,7 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
         """
         rot = Rotation.from_euler(seq=seq, angles=angles, degrees=degrees)
         quat = rot.as_quat()
@@ -257,7 +257,7 @@ class Orientations(Rotation):
 
         The three rotations can either be in a global frame of reference
         (extrinsic) or in a body centred frame of reference (intrinsic), which
-        is attached to, and moves with, the object under rotation [1]_.
+        is attached to, and moves with, the object under rotation [#]_.
 
         For both Euler angles and Davenport angles, consecutive axes must
         be are orthogonal (``axis2`` is orthogonal to both ``axis1`` and
@@ -267,7 +267,7 @@ class Orientations(Rotation):
             - ``axis1`` and ``axis3`` are also orthogonal (asymmetric sequence)
             - ``axis1 == axis3`` (symmetric sequence)
 
-        For Davenport angles, this last relationship is relaxed [2]_, and only
+        For Davenport angles, this last relationship is relaxed [#]_, and only
         the consecutive orthogonal axes requirement is maintained.
 
         Parameters
@@ -297,8 +297,8 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
-        .. [2] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
+        .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        .. [#] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
                the Euler Angles. Journal of the Astronautical Sciences. 51.
                123-132. 10.1007/BF03546304.
         """
