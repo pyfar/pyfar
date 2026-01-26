@@ -100,7 +100,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_matrix(matrix=matrix, assume_valid=assume_valid)
         quat = rot.as_quat()
         return cls(quat)
@@ -155,7 +155,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_quat(quat=quat, scalar_first=scalar_first)
         quat = rot.as_quat()
         return cls(quat)
@@ -182,7 +182,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_rotvec(rotvec=rotvec, degrees=degrees)
         quat = rot.as_quat()
         return cls(quat)
@@ -214,7 +214,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_mrp(mrp)
         quat = rot.as_quat()
         return cls(quat)
@@ -257,7 +257,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_euler(seq=seq, angles=angles, degrees=degrees)
         quat = rot.as_quat()
         return cls(quat)
@@ -318,7 +318,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_davenport(axes=axes, order=order, angles=angles,
                                       degrees=degrees)
         quat = rot.as_quat()
@@ -517,7 +517,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         quat = self.as_quat()
         return Orientations(quat[idx])
 
@@ -534,7 +534,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         if isinstance(other, Orientations):
             other = Rotation.from_quat(other.as_quat())
         if isinstance(other, Rotation):
@@ -554,7 +554,7 @@ class Orientations(Rotation):
         """
         # Methods inherited from scipy.spatial.transforms.Rotation return an
         # instance of the parent class for scipy >= 1.17 and are therefore
-        # wrapped to return an Orientations-onject instead.
+        # wrapped to return an Orientations-object instead.
         if isinstance(other, Orientations):
             other = Rotation.from_quat(other.as_quat())
         if isinstance(other, Rotation):
