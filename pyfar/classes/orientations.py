@@ -98,7 +98,9 @@ class Orientations(Rotation):
                Journal of guidance, control, and dynamics vol. 31.2, pp.
                440-442, 2008.
         """
-
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         rot = Rotation.from_matrix(matrix=matrix, assume_valid=assume_valid)
         quat = rot.as_quat()
         return cls(quat)
@@ -151,6 +153,9 @@ class Orientations(Rotation):
         .. [#] Hanson, Andrew J. "Visualizing quaternions."
             Morgan Kaufmann Publishers Inc., San Francisco, CA. 2006.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         rot = Rotation.from_quat(quat=quat, scalar_first=scalar_first)
         quat = rot.as_quat()
         return cls(quat)
@@ -175,6 +180,9 @@ class Orientations(Rotation):
         ----------
         .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         rot = Rotation.from_rotvec(rotvec=rotvec, degrees=degrees)
         quat = rot.as_quat()
         return cls(quat)
@@ -204,6 +212,9 @@ class Orientations(Rotation):
                The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
                pp. 475-476
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         rot = Rotation.from_mrp(mrp)
         quat = rot.as_quat()
         return cls(quat)
@@ -244,6 +255,9 @@ class Orientations(Rotation):
         ----------
         .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         rot = Rotation.from_euler(seq=seq, angles=angles, degrees=degrees)
         quat = rot.as_quat()
         return cls(quat)
@@ -302,6 +316,9 @@ class Orientations(Rotation):
                the Euler Angles. Journal of the Astronautical Sciences. 51.
                123-132. 10.1007/BF03546304.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         rot = Rotation.from_davenport(axes=axes, order=order, angles=angles,
                                       degrees=degrees)
         quat = rot.as_quat()
@@ -477,14 +494,11 @@ class Orientations(Rotation):
         val : array_like
             quaternion(s), shape (N, 4) or (4,)
         """
-        if isinstance(val, Rotation):
-            quat = val.as_quat()
-        elif isinstance(val, Orientations):
-            quat = val.as_quat()
+        if isinstance(val, (Rotation, Orientations)):
+            quat = np.atleast_2d(val.as_quat())
         else:
             quat = np.atleast_2d(val)
 
-        quat = np.atleast_2d(quat)
         if quat.ndim > 2 or quat.shape[-1] != 4:
             raise ValueError(f"Expected assigned value to have shape"
                              f" or (1, 4), got {quat.shape}")
@@ -501,6 +515,9 @@ class Orientations(Rotation):
         idx : indexes
             see NumPy Indexing
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         quat = self.as_quat()
         return Orientations(quat[idx])
 
@@ -515,6 +532,9 @@ class Orientations(Rotation):
             The object to multiply with. If an Orientations object is provided,
             it will be converted to a Rotation object for the multiplication.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         if isinstance(other, Orientations):
             other = Rotation.from_quat(other.as_quat())
         if isinstance(other, Rotation):
@@ -532,6 +552,9 @@ class Orientations(Rotation):
             side. If an Orientations object is provided, it will be converted
             to a Rotation object using quaternion representation.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-onject instead.
         if isinstance(other, Orientations):
             other = Rotation.from_quat(other.as_quat())
         if isinstance(other, Rotation):
