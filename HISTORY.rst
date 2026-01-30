@@ -8,13 +8,13 @@ History
 Changed
 ^^^^^^^
 * Improve pyfar project description in pyproject.toml (PR #812)
-* Test Python 3.13 and 3.13 in continuous integration (PR #853)
-* Include the `unit` parameter used in the  `pyfar.plot` module (PR #861)
+* Test Python 3.13 and 3.14 in continuous integration (PR #853)
+* Add input validation for the parameter `unit` parameter used in the module `pyfar.plot` (PR #861)
 
 Fixed
 ^^^^^
 *  Make `pyfar.Coordinates.from_spherical_elevation` and `pyfar.Coordinates.from_spherical_side` work with lists as input (PR #809)
-* `pyfar.TransmissionMatrix.from_abc` now works with scalar input values as intended (PR #823)
+* `pyfar.TransmissionMatrix.from_abc` now works with scalar input values as intended (PR #823, #822)
 * `pyfar.dsp.average` can now average across axes with only one channel (PR #828)
 * Improve docstring of the `slope` paramter in `pyfar.dsp.filter.reconstructiong_fractional_octave_bands` (PR #841)
 * Remove warning for converting complex-valued `pyfar.Signals` to real-valued signals (PR #858)
