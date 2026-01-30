@@ -34,9 +34,9 @@ class FractionalOctaveFormatter(FixedFormatter):
 
 class FractionalOctaveLocator(FixedLocator):
     """
-    Locator for fractional octave frequencies.
+    Locator for fractional-octave frequencies.
 
-    Applies fixed ticks at nominal fractional octave band center frequencies
+    Applies fixed ticks at nominal fractional-octave band center frequencies
     using :py:func:`pyfar.constants.fractional_octave_frequencies_nominal`.
 
     Parameters
@@ -52,11 +52,16 @@ class FractionalOctaveLocator(FixedLocator):
 
     .. plot::
 
-    >>> import pyfar as pf
-    >>> signal = pf.signals.noise(1e3)
-    >>> ax = pf.plot.freq(signal)
-    >>> ax.xaxis.set_major_locator(
-    ...     pf.plot.ticker.FractionalOctaveLocator(num_fractions=1))
+        >>> import pyfar as pf
+        >>> import matplotlib.pyplot as plt
+        >>> signal = pf.signals.noise(1e3)
+        >>> plt.figure(figsize=(8.4, 4.0))
+        >>> ax = pf.plot.freq(signal)
+        >>> ax.xaxis.set_major_locator(
+        ...     pf.plot.ticker.FractionalOctaveLocator(num_fractions=1))
+        >>> ax.xaxis.set_minor_locator(
+        ...     pf.plot.ticker.FractionalOctaveLocator(num_fractions=3))
+
 
     """
 
