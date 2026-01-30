@@ -284,7 +284,7 @@ def test_methods_return_type(method, args):
 
 
 def test__pow__():
-    """Test wrapped __pow__ method"""
+    """Test wrapped __pow__ method."""
     orientation = Orientations.from_rotvec([1, 0, 0])
 
     assert isinstance(orientation, Orientations)
@@ -292,7 +292,7 @@ def test__pow__():
     npt.assert_allclose((orientation**0.5).as_rotvec(), [0.5, 0, 0])
 
 def tests_instance_methods():
-    """Test wrapped reduce method"""
+    """Test wrapped reduce method."""
     orientation = Orientations.from_rotvec([1, 0, 0])
 
     obj = orientation.reduce()
@@ -305,7 +305,7 @@ def tests_instance_methods():
     assert isinstance(obj, Orientations)
 
 def test__iter__():
-    """Test iteration over Orientations"""
+    """Test iteration over Orientations."""
     orientations = Orientations.from_rotvec([[1, 0, 0], [2, 0, 0]])
 
     for i, orientation in enumerate(orientations):

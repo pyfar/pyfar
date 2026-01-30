@@ -444,8 +444,8 @@ class Orientations(Rotation):
                 positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
 
     def align_vectors(a, b, weights=None, return_sensitivity=False):
-        """
-        Estimate a rotation to optimally align two sets of vectors.
+        r"""
+        Estimate an orientation to optimally align two sets of vectors.
 
         Find a rotation between frames A and B which best aligns a set of
         vectors `a` and `b` observed in these frames. The following loss
@@ -506,7 +506,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        rotation : `Rotation` instance
+        orientation : Orientations
             Best estimate of the rotation that transforms `b` to `a`.
         rssd : float
             Stands for "root sum squared distance". Square root of the weighted
@@ -599,28 +599,28 @@ class Orientations(Rotation):
         return vector_triple
 
     @staticmethod
-    def concatenate(rotations):
+    def concatenate(orientations):
         """
-        Concatenate a sequence of `Rotation` objects into a single object.
+        Concatenate a sequence of Orientations objects into a single object.
 
         This is useful if you want to, for example, take the mean of a set of
-        rotations and need to pack them into a single object to do so.
+        orientations and need to pack them into a single object to do so.
 
         Parameters
         ----------
-        rotations : sequence of `Rotation` objects
-            The rotations to concatenate. If a single `Rotation` object is
+        orientations : sequence of Orientations objects
+            The orientations to concatenate. If a single Orientations object is
             passed in, a copy is returned.
 
         Returns
         -------
-        concatenated : `Rotation` instance
-            The concatenated rotations.
+        concatenated : Orientations
+            The concatenated orientations.
         """
-        rotations = [Rotation.from_quat(rotation.as_quat()) for rotation
-                     in rotations if isinstance(rotation, Orientations)]
+        orientations = [Rotation.from_quat(rotation.as_quat()) for rotation
+                     in orientations if isinstance(rotation, Orientations)]
 
-        rot = Rotation.concatenate(rotations)
+        rot = Rotation.concatenate(orientations)
         return Orientations(rot.as_quat())
 
     def copy(self):
@@ -629,22 +629,22 @@ class Orientations(Rotation):
 
     def identity(num=None, *, shape=None):
         """
-        Get identity rotation(s).
+        Get identity orientation(s).
 
-        Composition with the identity rotation has no effect.
+        Composition with the identity orientation has no effect.
 
         Parameters
         ----------
         num : int or None, optional
-            Number of identity rotations to generate. If None (default), then a
-            single rotation is generated.
+            Number of identity orientations to generate. If None (default),
+            then a single rotation is generated.
         shape : int or tuple of ints, optional
-            Shape of identity rotations to generate. If specified, `num` must
-            be None.
+            Shape of identity orientations to generate. If specified, `num`
+            must be None.
 
         Returns
         -------
-        identity : Rotation object
+        identity : Orientations
             The identity rotation.
         """
         rot = Rotation.identity(num, shape=shape)
@@ -652,23 +652,24 @@ class Orientations(Rotation):
 
     def inverse(self):
         """
-        Invert this rotation.
+        Invert this orientation.
 
-        Composition of a rotation with its inverse results in an identity
+        Composition of an orientation with its inverse results in an identity
         transformation.
 
         Returns
         -------
-        inverse : `Rotation` instance
-            Object containing inverse of the rotations in the current instance.
+        inverse : Orientations
+            Object containing inverse of the orientations in the current
+            instance.
         """
         rot = Rotation.from_quat(self.as_quat())
         inv = rot.inv()
         return Orientations(inv.as_quat())
 
     def mean(self, weights=None, axis=None):
-        """
-        Get the mean of the rotations.
+        r"""
+        Get the mean of the orientations.
 
         The mean used is the chordal L2 mean (also called the projected or
         induced arithmetic mean) [#]_. If ``A`` is a set of rotation matrices,
@@ -685,18 +686,18 @@ class Orientations(Rotation):
         Parameters
         ----------
         weights : array_like shape (..., N), optional
-            Weights describing the relative importance of the rotations. If
+            Weights describing the relative importance of the orientations. If
             None (default), then all values in `weights` are assumed to be
             equal. If given, the shape of `weights` must be broadcastable to
             the rotation shape. Weights must be non-negative.
         axis : None, int, or tuple of ints, optional
             Axis or axes along which the means are computed. The default is to
-            compute the mean of all rotations.
+            compute the mean of all orientations.
 
         Returns
         -------
-        mean : `Rotation` instance
-            Single rotation containing the mean of the rotations in the
+        mean : Orientations
+            Single orientation containing the mean of the orientations in the
             current instance.
 
         References
@@ -712,27 +713,28 @@ class Orientations(Rotation):
 
     def random(num=None, rng=None, *, shape=None):
         """
-        Generate rotations that are uniformly distributed on a sphere.
+        Generate orientations that are uniformly distributed on a sphere.
 
-        Formally, the rotations follow the Haar-uniform distribution over the
-        SO(3) group.
+        Formally, the orientations follow the Haar-uniform distribution over
+        the SO(3) group.
 
         Parameters
         ----------
         num : int or None, optional
-            Number of random rotations to generate. If None (default), then a
-            single rotation is generated.
+            Number of random orientations to generate. If None (default), then
+            a single orientation is generated.
         rng : `numpy.random.Generator`, optional
             Pseudorandom number generator state. When `rng` is None, a new
             `numpy.random.Generator` is created using entropy from the
             operating system. Types other than `numpy.random.Generator` are
             passed to `numpy.random.default_rng` to instantiate a `Generator`.
         shape : tuple of ints, optional
-            Shape of random rotations to generate. If specified, `num` must be None.
+            Shape of random orientations to generate. If specified, `num` must
+            be None.
 
         Returns
         -------
-        random_rotation : `Orienations` instance
+        random_orientation : Orienations
             Contains a single orientation if `num` is None. Otherwise contains
             a stack of `num` orientations.
 
@@ -746,32 +748,32 @@ class Orientations(Rotation):
         return Orientations(rot.as_quat())
 
     def reduce(self, left=None, right=None, return_indices=False):
-        """Reduce this rotation with the provided rotation groups.
+        """Reduce this orientation with the provided orientation groups.
 
-        Reduction of a rotation ``p`` is a transformation of the form
+        Reduction of a orientation ``p`` is a transformation of the form
         ``q = l * p * r``, where ``l`` and ``r`` are chosen from `left` and
-        `right` respectively, such that rotation ``q`` has the smallest
+        `right` respectively, such that orientation ``q`` has the smallest
         magnitude.
 
-        If `left` and `right` are rotation groups representing symmetries of
-        two objects rotated by ``p``, then ``q`` is the rotation of the
+        If `left` and `right` are orientation groups representing symmetries of
+        two objects rotated by ``p``, then ``q`` is the orientation of the
         smallest magnitude to align these objects considering their symmetries.
 
         Parameters
         ----------
-        left : `Rotation` instance, optional
-            Object containing the left rotation(s). Default value (None)
-            corresponds to the identity rotation.
-        right : `Rotation` instance, optional
-            Object containing the right rotation(s). Default value (None)
-            corresponds to the identity rotation.
+        left : Orientation, optional
+            Object containing the left orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        right : Orientation, optional
+            Object containing the right orientation(s). Default value (None)
+            corresponds to the identity orientation.
         return_indices : bool, optional
-            Whether to return the indices of the rotations from `left` and
+            Whether to return the indices of the orientations from `left` and
             `right` used for reduction.
 
         Returns
         -------
-        reduced : `Orientations` instance
+        reduced : Orientations
             Object containing reduced orientations.
         left_best, right_best: integer ndarray
             Indices of elements from `left` and `right` used for reduction.
@@ -884,19 +886,20 @@ class Orientations(Rotation):
         return np.array_equal(self.as_quat(), other.as_quat())
 
     def __pow__(self, n):
-        """Compose rotation with itself n times"""
+        """Compose orientation with itself n times."""
         rot = super().__pow__(n)
         return Orientations(rot.as_quat())
 
     def __iter__(self):
+        """Iterate over orientations."""
         if self.as_quat().ndim == 1:
-            raise TypeError("Single rotation is not iterable.")
+            raise TypeError("Single orientation is not iterable.")
 
         for i in range(self.as_quat().shape[0]):
             yield Orientations(self.as_quat()[i, ...])
 
     def __repr__(self):
-        """String representation of Orientations object"""
+        """String representation of Orientations object."""
         num_orientations = self.as_quat().shape[0]
 
         _repr = f"Orientations object with {num_orientations} orientations."
