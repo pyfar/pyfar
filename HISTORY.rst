@@ -2,14 +2,19 @@
 History
 =======
 
-[Unreleased]
-------------
+0.7.4 (2026-30-01)
+------------------
+
+Added
+^^^^^
+* CI: Add GitHub Actions workflow to check if HISTORY.rst is modified in a pull request to force writing history during development (PR #873)
 
 Changed
 ^^^^^^^
 * Improve pyfar project description in pyproject.toml (PR #812)
-* Test Python 3.13 and 3.14 in continuous integration (PR #853)
+* Test Python 3.13 and 3.13 in continuous integration (PR #853)
 * Add input validation for the parameter `unit` parameter used in the module `pyfar.plot` (PR #861)
+* Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
 
 Fixed
 ^^^^^

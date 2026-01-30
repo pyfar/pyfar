@@ -1,0 +1,27 @@
+name : modified_history_check
+
+on :
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  check-history:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check if HISTORY.rst was modified or created
+        run: |
+          git diff origin/${{ github.base_ref }} HEAD \
+            --diff-filter=AMR \
+            --name-only \
+            -- HISTORY.rst | grep -q . || {
+              echo "ERROR: HISTORY.rst was not modified"
+              exit 1
+            }
+
+
