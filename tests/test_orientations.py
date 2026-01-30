@@ -220,3 +220,42 @@ def test___eq___notEqual(orientations, views, ups):
     rot_z45 = Rotation.from_euler('z', 45, degrees=True)
     actual = Orientations.from_view_up(views, ups) * rot_z45
     assert not orientations == actual
+
+
+@pytest.mark.parametrize(
+    ("method", "args"),
+    [
+        (
+            Orientations.from_davenport,
+            ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], "extrinsic", [90, 0, 0]),
+        ),
+        (
+            Orientations.from_euler,
+            ('zyx', [90, 45, 30]),
+        ),
+        (
+            Orientations.from_matrix,
+            ([[0, -1, 0], [1, 0, 0], [0, 0, 1]],),
+        ),
+        (
+            Orientations.from_mrp,
+            ([0, 0, 1],),
+        ),
+        (
+            Orientations.from_quat,
+            ([0, 0, 0, 1],),
+        ),
+        (
+            Orientations.from_rotvec,
+            (np.pi/2 * np.array([0, 0, 1]),),
+        ),
+        (
+            Orientations.from_view_up,
+            ([1, 0, 0], [0, 0, 1]),
+        ),
+    ],
+)
+def test_methods_return_type(method, args):
+    """Test if class-methods return Orientations instance."""
+    obj = method(*args)
+    assert isinstance(obj, Orientations)
