@@ -11,6 +11,7 @@ Added
 
 Changed
 ^^^^^^^
+* Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
 
 Deprecated
 ^^^^^^^^^^
@@ -20,6 +21,7 @@ Removed
 
 Fixed
 ^^^^^
+
 
 
 0.7.3 (2025-06-23)

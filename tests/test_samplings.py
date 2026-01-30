@@ -300,3 +300,9 @@ def test_sph_equal_area():
     # test with user radius
     c = samplings.sph_equal_area(10, 1.5)
     npt.assert_allclose(c.radius, 1.5, atol=1e-15)
+
+
+def test_sph_gaussian_higher_order():
+    s = samplings.sph_gaussian(sh_order=121)
+    assert s.csize == (2 * (121 + 1)**2)
+    npt.assert_allclose(np.sum(s.weights), 1)
