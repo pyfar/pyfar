@@ -2,6 +2,27 @@
 History
 =======
 
+[Unreleased]
+------------
+
+Changed
+^^^^^^^
+* Improve pyfar project description in pyproject.toml (PR #812)
+* Test Python 3.13 and 3.13 in continuous integration (PR #853)
+* Include the `unit` parameter used in the  `pyfar.plot` module (PR #861)
+
+Fixed
+^^^^^
+*  Make `pyfar.Coordinates.from_spherical_elevation` and `pyfar.Coordinates.from_spherical_side` work with lists as input (PR #809)
+* `pyfar.TransmissionMatrix.from_abc` now works with scalar input values as intended (PR #823)
+* `pyfar.dsp.average` can now average across axes with only one channel (PR #828)
+* Improve docstring of the `slope` paramter in `pyfar.dsp.filter.reconstructiong_fractional_octave_bands` (PR #841)
+* Remove warning for converting complex-valued `pyfar.Signals` to real-valued signals (PR #858)
+* Update `test_frequency_weighting.py::test_frequency_weighting_filter_errwgt_recommended` to work on all operating systems (PR #862)
+* Ignore warnings that can not be avoided in `test_transmission_matrix_derived_parameters.py` to remove clutter from the `pytest` output (PR #864)
+* `pyfar.samplings.sph_gaussian` now works correctly for very high orders as intended (PR #887)
+
+
 0.7.3 (2025-06-23)
 ------------------
 * Enhancement: Separate checking and setting coordinate points and weights in `pyfar.Coordinates` (PR #804 & #805)
