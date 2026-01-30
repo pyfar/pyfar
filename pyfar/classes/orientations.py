@@ -549,18 +549,18 @@ class Orientations(Rotation):
 
         References
         ----------
-        .. [#]] https://en.wikipedia.org/wiki/Kabsch_algorithm
-        .. [#]] https://en.wikipedia.org/wiki/Wahba%27s_problem
-        .. [#]] Magner, Robert,
+        .. [#] https://en.wikipedia.org/wiki/Kabsch_algorithm
+        .. [#] https://en.wikipedia.org/wiki/Wahba%27s_problem
+        .. [#] Magner, Robert,
                 "Extending target tracking capabilities through trajectory and
                 momentum setpoint optimization." Small Satellite Conference,
                 2018.
-        .. [#]] https://en.wikipedia.org/wiki/Harmonic_mean
-        .. [#]] F. Landis Markley,
+        .. [#] https://en.wikipedia.org/wiki/Harmonic_mean
+        .. [#] F. Landis Markley,
                 "Attitude determination using vector observations: a fast
                 optimal matrix algorithm", Journal of Astronautical Sciences,
                 Vol. 41, No.2, 1993, pp. 261-280.
-        .. [#]] Bar-Itzhack, Itzhack Y., Daniel Hershkowitz, and Leiba Rodman,
+        .. [#] Bar-Itzhack, Itzhack Y., Daniel Hershkowitz, and Leiba Rodman,
                 "Pointing in Real Euclidean Space", Journal of Guidance,
                 Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
         """
