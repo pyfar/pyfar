@@ -301,7 +301,7 @@ def tests_instance_methods():
     obj = obj.mean()
     assert isinstance(obj, Orientations)
 
-    obj.inv()
+    obj = obj.inv()
     assert isinstance(obj, Orientations)
 
 def test__iter__():

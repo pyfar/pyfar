@@ -617,6 +617,9 @@ class Orientations(Rotation):
         concatenated : Orientations
             The concatenated orientations.
         """
+        if np.asarray(orientations).shape[0] == 1:
+            return orientations[0].copy()
+
         orientations = [Rotation.from_quat(rotation.as_quat()) for rotation
                      in orientations if isinstance(rotation, Orientations)]
 
@@ -734,7 +737,7 @@ class Orientations(Rotation):
 
         Returns
         -------
-        random_orientation : Orienations
+        random_orientation : Orientaions
             Contains a single orientation if `num` is None. Otherwise contains
             a stack of `num` orientations.
 
@@ -787,7 +790,7 @@ class Orientations(Rotation):
 
         if return_indices:
             rot, left_idx, right_idx = rot.reduce(left, right, return_indices)
-            return left_idx, right_idx, Orientations(rot.as_quat())
+            return Orientations(rot.as_quat()), left_idx, right_idx
 
         rot = rot.reduce(left, right, return_indices)
         return Orientations(rot.as_quat())
@@ -900,7 +903,8 @@ class Orientations(Rotation):
 
     def __repr__(self):
         """String representation of Orientations object."""
-        num_orientations = self.as_quat().shape[0]
+        quats = self.as_quat()
+        num_orientations = 1 if quats.ndim == 1 else quats.shape[0]
 
         _repr = f"Orientations object with {num_orientations} orientations."
         return _repr
