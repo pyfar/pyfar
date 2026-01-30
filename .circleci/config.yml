@@ -108,7 +108,7 @@ jobs:
           name: Run tests
           command: pytest tests -W error::DeprecationWarning
 
-  test_pypi_publish:
+  build_distribution:
     parameters:
       version:
         description: "version tag"
@@ -126,10 +126,14 @@ jobs:
           name: install dependencies
           command: pip install ".[deploy]"
       - run:
-          name: deploy
-          command: |  # create whl, install twine and publish to Test PyPI
+          name: build distribution
+          command: |
             python -m build
             twine check dist/*
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/
 
   run_pypi_publish:
     parameters:
@@ -141,19 +145,26 @@ jobs:
       name: python-docker
       version: <<parameters.version>>
     steps:
-      - checkout
-      - run:
-          name: Install System Dependencies
-          command: sudo apt-get update && sudo apt-get install -y libsndfile1
+      - attach_workspace:
+          at: .
       - run:
           name: install dependencies
           command: pip install ".[deploy]"
       - run:
           name: deploy
-          command: |  # create whl, install twine and publish to Test PyPI
-            python -m build
-            twine check dist/*
+          command: |  # upload whl from build_distribution job to PyPI
             twine upload dist/*
+
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ./dist/
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -195,7 +206,7 @@ workflows:
           requires:
             - build_and_test
 
-      - test_pypi_publish:
+      - build_distribution:
           matrix:
             parameters:
               version:
@@ -268,7 +279,7 @@ workflows:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
-      - run_pypi_publish:
+      - build_distribution:
           matrix:
             parameters:
               version:
@@ -278,6 +289,30 @@ workflows:
             - ruff
             - test_documentation_build
             - test_deprecation_warnings
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
+      - run_pypi_publish:
+          matrix:
+            parameters:
+              version:
+                - "3.12"
+          requires:
+            - build_distribution
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
+      - publish-github-release:
+          requires:
+            - run_pypi_publish
           filters:
             branches:
               ignore: /.*/
