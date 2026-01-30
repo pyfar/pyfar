@@ -5,7 +5,7 @@ from . import _utils
 import warnings
 from .ticker import (
     LogFormatterITAToolbox,
-    FrequencyLogLocator,
+    LogFrequencyLocator,
     MultipleFractionLocator,
     MultipleFractionFormatter)
 from matplotlib.ticker import NullFormatter
@@ -106,7 +106,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
 
     ax_scale[0](freq_scale)
     if freq_scale == "log":
-        axis[0].set_major_locator(FrequencyLogLocator())
+        axis[0].set_major_locator(LogFrequencyLocator())
         axis[0].set_minor_formatter(NullFormatter())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
@@ -171,7 +171,7 @@ def _phase_2d(signal, deg, unwrap, freq_scale, indices, orientation, method,
 
     ax_scale[0](freq_scale)
     if freq_scale == "log":
-        axis[0].set_major_locator(FrequencyLogLocator())
+        axis[0].set_major_locator(LogFrequencyLocator())
         axis[0].set_minor_formatter(NullFormatter())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
@@ -234,7 +234,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
 
     ax_scale[0](freq_scale)
     if freq_scale == "log":
-        axis[0].set_major_locator(FrequencyLogLocator())
+        axis[0].set_major_locator(LogFrequencyLocator())
         axis[0].set_minor_formatter(NullFormatter())
     axis[0].set_major_formatter(LogFormatterITAToolbox())
 
@@ -403,7 +403,7 @@ def _spectrogram(signal, dB=True, log_prefix=None, log_reference=1,
     # scales and ticks
     if freq_scale == 'log':
         ax[0].set_yscale('symlog')
-        ax[0].yaxis.set_major_locator(FrequencyLogLocator())
+        ax[0].yaxis.set_major_locator(LogFrequencyLocator())
         ax[0].yaxis.set_minor_formatter(NullFormatter())
     ax[0].yaxis.set_major_formatter(LogFormatterITAToolbox())
     ax[0].grid(ls='dotted', color='white')
