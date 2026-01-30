@@ -894,3 +894,10 @@ class Orientations(Rotation):
 
         for i in range(self.as_quat().shape[0]):
             yield Orientations(self.as_quat()[i, ...])
+
+    def __repr__(self):
+        """String representation of Orientations object"""
+        num_orientations = self.as_quat().shape[0]
+
+        _repr = f"Orientations object with {num_orientations} orientations."
+        return _repr
