@@ -2,9 +2,26 @@
 History
 =======
 
-unreleased
-----------
+[Unreleased]
+------------
+
+Added
+^^^^^
+* CI: Add GitHub Actions workflow to check if HISTORY.rst is modified in a pull request to force writing history during development (PR #873)
+
+Changed
+^^^^^^^
 * Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
+
+Deprecated
+^^^^^^^^^^
+
+Removed
+^^^^^^^
+
+Fixed
+^^^^^
+
 
 
 0.7.3 (2025-06-23)
