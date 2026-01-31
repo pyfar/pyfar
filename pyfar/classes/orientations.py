@@ -443,6 +443,136 @@ class Orientations(Rotation):
             ax = pf.plot.quiver(
                 positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
 
+    def align_vectors(a, b, weights=None, return_sensitivity=False):
+        r"""
+        Estimate an orientation to optimally align two sets of vectors.
+
+        Find a rotation between frames A and B which best aligns a set of
+        vectors `a` and `b` observed in these frames. The following loss
+        function is minimized to solve for the rotation matrix
+        :math:`C`:
+
+        .. math::
+
+            L(C) = \\frac{1}{2} \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{a}_i -
+            C \\mathbf{b}_i \\rVert^2 ,
+
+        where :math:`w_i`'s are the `weights` corresponding to each vector.
+
+        The rotation is estimated with Kabsch algorithm [#]_, and solves what
+        is known as the "pointing problem", or "Wahba's problem" [#]_.
+
+        Note that the length of each vector in this formulation acts as an
+        implicit weight. So for use cases where all vectors need to be
+        weighted equally, you should normalize them to unit length prior to
+        calling this method.
+
+        There are two special cases. The first is if a single vector is given
+        for `a` and `b`, in which the shortest distance rotation that aligns
+        `b` to `a` is returned.
+
+        The second is when one of the weights is infinity. In this case, the
+        shortest distance rotation between the primary infinite weight vectors
+        is calculated as above. Then, the rotation about the aligned primary
+        vectors is calculated such that the secondary vectors are optimally
+        aligned per the above loss function. The result is the composition
+        of these two rotations. The result via this process is the same as the
+        Kabsch algorithm as the corresponding weight approaches infinity in
+        the limit. For a single secondary vector this is known as the
+        "align-constrain" algorithm [#]_.
+
+        For both special cases (single vectors or an infinite weight), the
+        sensitivity matrix does not have physical meaning and an error will be
+        raised if it is requested. For an infinite weight, the primary vectors
+        act as a constraint with perfect alignment, so their contribution to
+        `rssd` will be forced to 0 even if they are of different lengths.
+
+        Parameters
+        ----------
+        a : array_like, shape (3,) or (N, 3)
+            Vector components observed in initial frame A. Each row of `a`
+            denotes a vector.
+        b : array_like, shape (3,) or (N, 3)
+            Vector components observed in another frame B. Each row of `b`
+            denotes a vector.
+        weights : array_like shape (N,), optional
+            Weights describing the relative importance of the vector
+            observations. If None (default), then all values in `weights` are
+            assumed to be 1. One and only one weight may be infinity, and
+            weights must be positive.
+        return_sensitivity : bool, optional
+            Whether to return the sensitivity matrix. See Notes for details.
+            Default is False.
+
+        Returns
+        -------
+        orientation : Orientations
+            Best estimate of the rotation that transforms `b` to `a`.
+        rssd : float
+            Stands for "root sum squared distance". Square root of the weighted
+            sum of the squared distances between the given sets of vectors
+            after alignment. It is equal to ``sqrt(2 * minimum_loss)``, where
+            ``minimum_loss`` is the loss function evaluated for the found
+            optimal rotation.
+            Note that the result will also be weighted by the vectors'
+            magnitudes, so perfectly aligned vector pairs will have nonzero
+            `rssd` if they are not of the same length. This can be avoided by
+            normalizing them to unit length prior to calling this method,
+            though note that doing this will change the resulting rotation.
+        sensitivity_matrix : ndarray, shape (3, 3)
+            Sensitivity matrix of the estimated rotation estimate as explained
+            in Notes. Returned only when `return_sensitivity` is True. Not
+            valid if aligning a single pair of vectors or if there is an
+            infinite weight, in which cases an error will be raised.
+
+        Notes
+        -----
+        The sensitivity matrix gives the sensitivity of the estimated rotation
+        to small perturbations of the vector measurements. Specifically we
+        consider the rotation estimate error as a small rotation vector of
+        frame A. The sensitivity matrix is proportional to the covariance of
+        this rotation vector assuming that the vectors in `a` was measured with
+        errors significantly less than their lengths. To get the true
+        covariance matrix, the returned sensitivity matrix must be multiplied
+        by harmonic mean [#]_ of variance in each observation. Note that
+        `weights` are supposed to be inversely proportional to the observation
+        variances to get consistent results. For example, if all vectors are
+        measured with the same accuracy of 0.01 (`weights` must be all equal),
+        then you should multiple the sensitivity matrix by 0.01**2 to get the
+        covariance.
+
+        Refer to [#]_ for more rigorous discussion of the covariance
+        estimation. See [#]_ for more discussion of the pointing problem and
+        minimal proper pointing.
+
+        This function does not support broadcasting or ND arrays with N > 2.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Kabsch_algorithm
+        .. [#] https://en.wikipedia.org/wiki/Wahba%27s_problem
+        .. [#] Magner, Robert,
+                "Extending target tracking capabilities through trajectory and
+                momentum setpoint optimization." Small Satellite Conference,
+                2018.
+        .. [#] https://en.wikipedia.org/wiki/Harmonic_mean
+        .. [#] F. Landis Markley,
+                "Attitude determination using vector observations: a fast
+                optimal matrix algorithm", Journal of Astronautical Sciences,
+                Vol. 41, No.2, 1993, pp. 261-280.
+        .. [#] Bar-Itzhack, Itzhack Y., Daniel Hershkowitz, and Leiba Rodman,
+                "Pointing in Real Euclidean Space", Journal of Guidance,
+                Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
+        """
+        if return_sensitivity:
+            rot, rssd, sens = Rotation.align_vectors(a, b, weights,
+                                                     return_sensitivity)
+            return Orientations.from_quat(rot.as_quat()), rssd, sens
+
+        rot, rssd = Rotation.align_vectors(a, b, weights, return_sensitivity)
+        return Orientations.from_quat(rot.as_quat()), rssd
+
+
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.
 
@@ -468,9 +598,204 @@ class Orientations(Rotation):
             return np.swapaxes(vector_triple, 0, 1)
         return vector_triple
 
+    @staticmethod
+    def concatenate(orientations):
+        """
+        Concatenate a sequence of Orientations objects into a single object.
+
+        This is useful if you want to, for example, take the mean of a set of
+        orientations and need to pack them into a single object to do so.
+
+        Parameters
+        ----------
+        orientations : sequence of Orientations objects
+            The orientations to concatenate. If a single Orientations object is
+            passed in, a copy is returned.
+
+        Returns
+        -------
+        concatenated : Orientations
+            The concatenated orientations.
+        """
+        if np.asarray(orientations).shape[0] == 1:
+            return orientations[0].copy()
+
+        orientations = [Rotation.from_quat(rotation.as_quat()) for rotation
+                     in orientations if isinstance(rotation, Orientations)]
+
+        rot = Rotation.concatenate(orientations)
+        return Orientations(rot.as_quat())
+
     def copy(self):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
+
+    @staticmethod
+    def identity(num=None, *, shape=None):
+        """
+        Get identity orientation(s).
+
+        Composition with the identity orientation has no effect.
+
+        Parameters
+        ----------
+        num : int or None, optional
+            Number of identity orientations to generate. If None (default),
+            then a single rotation is generated.
+        shape : int or tuple of ints, optional
+            Shape of identity orientations to generate. If specified, `num`
+            must be None.
+
+        Returns
+        -------
+        identity : Orientations
+            The identity rotation.
+        """
+        rot = Rotation.identity(num, shape=shape)
+        return Orientations(rot.as_quat())
+
+    def inv(self):
+        """
+        Invert this orientation.
+
+        Composition of an orientation with its inverse results in an identity
+        transformation.
+
+        Returns
+        -------
+        inverse : Orientations
+            Object containing inverse of the orientations in the current
+            instance.
+        """
+        rot = Rotation.from_quat(self.as_quat())
+        inv = rot.inv()
+        return Orientations(inv.as_quat())
+
+    def mean(self, weights=None, axis=None):
+        r"""
+        Get the mean of the orientations.
+
+        The mean used is the chordal L2 mean (also called the projected or
+        induced arithmetic mean) [#]_. If ``A`` is a set of rotation matrices,
+        then the mean ``M`` is the rotation matrix that minimizes the
+        following loss function:
+
+        .. math::
+
+            L(M) = \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{A}_i -
+            \\mathbf{M} \\rVert^2 ,
+
+        where :math:`w_i`'s are the `weights` corresponding to each matrix.
+
+        Parameters
+        ----------
+        weights : array_like shape (..., N), optional
+            Weights describing the relative importance of the orientations. If
+            None (default), then all values in `weights` are assumed to be
+            equal. If given, the shape of `weights` must be broadcastable to
+            the rotation shape. Weights must be non-negative.
+        axis : None, int, or tuple of ints, optional
+            Axis or axes along which the means are computed. The default is to
+            compute the mean of all orientations.
+
+        Returns
+        -------
+        mean : Orientations
+            Single orientation containing the mean of the orientations in the
+            current instance.
+
+        References
+        ----------
+        .. [#] Hartley, Richard, et al.,
+                "Rotation Averaging", International Journal of Computer Vision
+                103, 2013, pp. 267-305.
+        """
+        rot = Rotation.from_quat(self.as_quat())
+        rot = rot.mean(weights, axis)
+        return Orientations(rot.as_quat())
+
+
+    @staticmethod
+    def random(num=None, rng=None, *, shape=None):
+        """
+        Generate orientations that are uniformly distributed on a sphere.
+
+        Formally, the orientations follow the Haar-uniform distribution over
+        the SO(3) group.
+
+        Parameters
+        ----------
+        num : int or None, optional
+            Number of random orientations to generate. If None (default), then
+            a single orientation is generated.
+        rng : `numpy.random.Generator`, optional
+            Pseudorandom number generator state. When `rng` is None, a new
+            `numpy.random.Generator` is created using entropy from the
+            operating system. Types other than `numpy.random.Generator` are
+            passed to `numpy.random.default_rng` to instantiate a `Generator`.
+        shape : tuple of ints, optional
+            Shape of random orientations to generate. If specified, `num` must
+            be None.
+
+        Returns
+        -------
+        random_orientation : Orientaions
+            Contains a single orientation if `num` is None. Otherwise contains
+            a stack of `num` orientations.
+
+        Notes
+        -----
+        This function is optimized for efficiently sampling random rotation
+        matrices in three dimensions. For generating random rotation matrices
+        in higher dimensions, see `scipy.stats.special_ortho_group`.
+        """
+        rot = Rotation.random(num, rng, shape=shape)
+        return Orientations(rot.as_quat())
+
+    def reduce(self, left=None, right=None, return_indices=False):
+        """Reduce this orientation with the provided orientation groups.
+
+        Reduction of a orientation ``p`` is a transformation of the form
+        ``q = l * p * r``, where ``l`` and ``r`` are chosen from `left` and
+        `right` respectively, such that orientation ``q`` has the smallest
+        magnitude.
+
+        If `left` and `right` are orientation groups representing symmetries of
+        two objects rotated by ``p``, then ``q`` is the orientation of the
+        smallest magnitude to align these objects considering their symmetries.
+
+        Parameters
+        ----------
+        left : Orientation, optional
+            Object containing the left orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        right : Orientation, optional
+            Object containing the right orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        return_indices : bool, optional
+            Whether to return the indices of the orientations from `left` and
+            `right` used for reduction.
+
+        Returns
+        -------
+        reduced : Orientations
+            Object containing reduced orientations.
+        left_best, right_best: integer ndarray
+            Indices of elements from `left` and `right` used for reduction.
+        """
+        if isinstance(left, Orientations):
+            left = Rotation.from_quat(left.as_quat())
+        if isinstance(right, Orientations):
+            right = Rotation.from_quat(right.as_quat())
+
+        rot = Rotation.from_quat(self.as_quat())
+
+        if return_indices:
+            rot, left_idx, right_idx = rot.reduce(left, right, return_indices)
+            return Orientations(rot.as_quat()), left_idx, right_idx
+
+        rot = rot.reduce(left, right, return_indices)
+        return Orientations(rot.as_quat())
 
     def _encode(self):
         """Return object in a proper encoding format."""
@@ -564,3 +889,24 @@ class Orientations(Rotation):
     def __eq__(self, other):
         """Check for equality of two objects."""
         return np.array_equal(self.as_quat(), other.as_quat())
+
+    def __pow__(self, n):
+        """Compose orientation with itself n times."""
+        rot = super().__pow__(n)
+        return Orientations(rot.as_quat())
+
+    def __iter__(self):
+        """Iterate over orientations."""
+        if self.as_quat().ndim == 1:
+            raise TypeError("Single orientation is not iterable.")
+
+        for i in range(self.as_quat().shape[0]):
+            yield Orientations(self.as_quat()[i, ...])
+
+    def __repr__(self):
+        """String representation of Orientations object."""
+        quats = self.as_quat()
+        num_orientations = 1 if quats.ndim == 1 else quats.shape[0]
+
+        _repr = f"Orientations object with {num_orientations} orientations."
+        return _repr

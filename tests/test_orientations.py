@@ -253,9 +253,65 @@ def test___eq___notEqual(orientations, views, ups):
             Orientations.from_view_up,
             ([1, 0, 0], [0, 0, 1]),
         ),
+        (
+            Orientations.align_vectors,
+            ([[0, 1, 0], [0, 1, 1], [0, 1, 1]],
+             [[1, 0, 0], [1, 1.1, 0], [1, 0.9, 0]]),
+        ),
+        (
+            Orientations.random,
+            (),
+        ),
+        (
+            Orientations.identity,
+            (),
+        ),
+        (
+            Orientations.concatenate,
+            ([[Orientations.from_rotvec([0, 0, 1]),
+             Orientations.from_rotvec([0, 0, 2])]]),
+        ),
     ],
 )
 def test_methods_return_type(method, args):
     """Test if class-methods return Orientations instance."""
     obj = method(*args)
+
+    if method.__name__ in ["align_vectors"]:
+        assert isinstance(obj[0], Orientations)
+    else:
+        assert isinstance(obj, Orientations)
+
+
+def test__pow__():
+    """Test wrapped __pow__ method."""
+    orientation = Orientations.from_rotvec([1, 0, 0])
+
+    assert isinstance(orientation, Orientations)
+    npt.assert_allclose((orientation**2).as_rotvec(), [2, 0, 0])
+    npt.assert_allclose((orientation**0.5).as_rotvec(), [0.5, 0, 0])
+
+def tests_instance_methods():
+    """Test wrapped reduce method."""
+    orientation = Orientations.from_rotvec([1, 0, 0])
+
+    obj = orientation.reduce()
     assert isinstance(obj, Orientations)
+
+    obj = obj.mean()
+    assert isinstance(obj, Orientations)
+
+    obj = obj.inv()
+    assert isinstance(obj, Orientations)
+
+def test__iter__():
+    """Test iteration over Orientations."""
+    orientations = Orientations.from_rotvec([[1, 0, 0], [2, 0, 0]])
+
+    for i, orientation in enumerate(orientations):
+        if i == 0:
+            npt.assert_equal(orientation.as_rotvec(), [1, 0, 0])
+        if i == 1:
+            npt.assert_equal(orientation.as_rotvec(), [2, 0, 0])
+
+        assert isinstance(orientation, Orientations)
