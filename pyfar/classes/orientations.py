@@ -630,6 +630,7 @@ class Orientations(Rotation):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
 
+    @staticmethod
     def identity(num=None, *, shape=None):
         """
         Get identity orientation(s).
@@ -653,7 +654,7 @@ class Orientations(Rotation):
         rot = Rotation.identity(num, shape=shape)
         return Orientations(rot.as_quat())
 
-    def inverse(self):
+    def inv(self):
         """
         Invert this orientation.
 
@@ -714,6 +715,7 @@ class Orientations(Rotation):
         return Orientations(rot.as_quat())
 
 
+    @staticmethod
     def random(num=None, rng=None, *, shape=None):
         """
         Generate orientations that are uniformly distributed on a sphere.
