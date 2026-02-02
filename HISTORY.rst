@@ -2,7 +2,7 @@
 History
 =======
 
-0.7.4 (2026-30-01)
+0.7.4 (2026-02-02)
 ------------------
 
 Added
@@ -12,7 +12,7 @@ Added
 Changed
 ^^^^^^^
 * Improve pyfar project description in pyproject.toml (PR #812)
-* Test Python 3.13 and 3.13 in continuous integration (PR #853)
+* Test Python 3.13 and 3.14 in continuous integration (PR #853)
 * Add input validation for the parameter `unit` used in the module `pyfar.plot` (PR #861)
 * Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
 
