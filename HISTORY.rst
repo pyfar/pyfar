@@ -2,6 +2,52 @@
 History
 =======
 
+
+[Unreleased]
+------------
+
+Added
+^^^^^
+- Common acoustic constants are now defined in the module `pyfar.constants`. This includes the speed of sound, air density, air impedance, air temperature, sound attenuation in air, the saturation vapor pressure, reference sound pressure and power, exact and nominal fractional octave frequencies, fractional octave band tolerances, and frequency weighting curves and values (PRs #827, #824, #818, #774, #773, #771, #770, #739, #734, #732)
+- Functions to get and apply A and C-weighting curves standardized in IEC 61672-1. This includes `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals, `pyfar.constants.frequency_weighting_curve` for evaluating the weighting curves at arbitrary frequencies, and `pyfar.constants.frequency_weighting_band_corrections` for obtaining weighting values for nominal (fractional) octave bands (PRs #811, #852)
+- The new class `pyfar.TransmissionMatrix` can represent Two-ports or Quadrupoles. These can represent systems from various fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission lines. (PRs #783)
+- The new class `pyfar.dsp.RegularizedSpectrumInversion` handles regularized inversion. It replaces `pyfar.dsp.regularized_spectrum_inversion` (PR #716)
+- `pyfar.dsp.correlate` to compute the auto or cross correlation between pyfar Signals as a function of the delay applied to one Signal (PR #719, #713)
+- `pyfar.dsp.time_crop` for quickly cropping a pyfar Signal or TimeData object (PR #849)
+- All pyfar Filter objects can now return their impulse response through the class method `impulse_response` and estimate the minimum required length using the class method `minimum_impulse_response_length` (PRs #826, #768, #755)
+- `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals with the A and C-weighting curve standardised in IEC 61672-1 (PR #811, #852)
+- `pyfar.dsp.filter.check_fractional_octave_band_filter_tolerance` to check if a (fractional) octave filter bank meets the class I or II tolerances defined in IEC 61260-1 (PR #829)
+- All plots showing the magnitude response now have the `mode` parameter to specify if the absolute (default), real, or imaginary value of the spectrum is shown. This can also be toggled using the shortcut 'shift+m' in interactive plots (PR #817)
+- Abstract `_LTISystem` base class to better structure inheritance of the pyfar Filter classes (PR #798)
+
+Changed
+^^^^^^^
+- The `pyfar.FIRFilter` class now uses `numpy.convolve`, instead of `scipy.signal.lfilter` for filtering to speed up the computation for long filters (PR #753)
+- Improve check of input data in `pyfar.constants.fractional_octave_frequencies_exact` and tests thereof (PR #876)
+- Improved testing for the parameter `side` used in 2D plots in the module `pyfar.plot` (PR #820)
+- Improved documentation to remove clutter form the secondary sidebar (PR #788)
+- Files accessed by the module `pyfar.signals.files` are no stored on github (PR #807)
+- Remove command line cluttering print outs when loading `pf.signals.files.binaural_room_impulse_response` and `pf.signals.files.headphone_impulse_responses` (PR #718)
+- Improved internal documentation of the `_codec` module that handles reading and writing pyfar data from and to disk (PR #712)
+
+Deprecated
+^^^^^^^^^^
+- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructiong_fractional_octave_bands` is deprecated and will be removed in pyfar v0.9.0 (PR #725)
+
+Removed
+^^^^^^^
+- The following functionality is removed from pyfar v0.8.0 after being deprecated in pyfar v0.6.0 (see below)
+- The `pyfar.samplings` module was removed and move to `spharpy.samplings` (PR #740)
+- The `pyfar.Coordinates` class methods and properties `set_cart`, `get_cart`, `set_sph`, `get_sph`, `set_cyl`, `get_cyl`, `sh_order`, `systems`, `find_nearest_k`, `find_nearest_cart`, `find_nearest_sph`, and `find_slice` were removed in favor of the new API (PRs #741, #786)
+- The Parameter `freq_range` that was used in multiple functions was removed in favor of the `frequency_range` parameter (PR #746)
+- The `length` method for Audio classes was removed in favor of the attributes `n_sampels` and `n_bins` (PR #745)
+- The values 'before' and 'after' can not be used to define the parameter `mode` in `pyfar.dsp.pad_zeros` and 'beginning' and 'end' must be used instead (PR #748)
+
+Fixed
+^^^^^
+- Fix warnings in tests (PR #859)
+
+
 0.7.4 (2026-02-02)
 ------------------
 
