@@ -408,6 +408,64 @@ def test_tmatrix_create_gyrator(transducer_constant, frequencies):
     Zin = tmat.input_impedance(Zl)
     npt.assert_allclose(Zin.freq, Zin_expected, atol = 1e-15)
 
+def test_create_transmission_line_number():
+    """Test `create_transmission_line` with impedance as number."""
+    kl = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = 4+0.1j
+    tmat = TransmissionMatrix.create_transmission_line(kl, Z)
+    assert isinstance(tmat, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat,
+        np.cos(kl.freq), 1j*Z*np.sin(kl.freq),
+        1j/Z*np.sin(kl.freq), np.cos(kl.freq))
+
+def test_create_transmission_line_frequency_data():
+    """Test `create_transmission_line` with impedance as FrequencyData."""
+    kl = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = FrequencyData([1+1j, 2+2j, 3+1j], [1, 2, 3])
+    tmat = TransmissionMatrix.create_transmission_line(kl, Z)
+    assert isinstance(tmat, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat,
+        np.cos(kl.freq), 1j*Z.freq*np.sin(kl.freq),
+        1j/Z.freq*np.sin(kl.freq), np.cos(kl.freq))
+
+def test_create_transmission_line_broadcasting():
+    """Test `create_transmission_line` broadcasting."""
+    kl = FrequencyData(np.array([[1j, 2, 3j],[4j, 5, 6j]]) , [1, 2, 3])
+    Z = FrequencyData([1+1j, 2+2j, 3+1j], [1, 2, 3])
+    tmat = TransmissionMatrix.create_transmission_line(kl, Z)
+    assert isinstance(tmat, TransmissionMatrix)
+    _compare_tmat_vs_abcd(
+        tmat,
+        np.cos(kl.freq), 1j*Z.freq*np.sin(kl.freq),
+        1j/Z.freq*np.sin(kl.freq), np.cos(kl.freq))
+
+@pytest.mark.parametrize(
+        "kl",
+        [2j, np.array([1, 2, 3]), "term"])
+def test_create_transmission_line_kl_error(kl):
+    """Test `create_transmission_line` error for kl input."""
+    Z = 4+0.1j
+    with pytest.raises(
+        ValueError, match="The input kl"):
+        TransmissionMatrix.create_transmission_line(kl, Z)
+
+@pytest.mark.parametrize("Z", [np.array([1, 2, 3]), "imp"])
+def test_create_transmission_line_characteristic_impedance_errors(Z):
+    """Test `create_transmission_line` errors for impedance parameter."""
+    kl = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    with pytest.raises(
+        ValueError, match="characteristic impedance must be"):
+        TransmissionMatrix.create_transmission_line(kl, Z)
+
+def test_create_transmission_line_frequency_matching():
+    """Test `create_transmission_line` frequency matching."""
+    kl = FrequencyData([1j, 2, 3j], [1, 2, 3])
+    Z = FrequencyData([1+1j, 2+2j, 3+1j], [1, 2, 4])
+    with pytest.raises(
+        ValueError, match="The frequencies do not match"):
+        TransmissionMatrix.create_transmission_line(kl, Z)
 
 def test_tmatrix_slicing(frequencies):
     """Test whether slicing a T-Matrix object return T-Matrix or raises correct

@@ -4,10 +4,10 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
-from pyfar.classes.warnings import PyfarDeprecationWarning
-from pyfar._utils import rename_arg
 import warnings
 import scipy.fft as sfft
+from typing import Literal
+from typing import Union
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -563,6 +563,145 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         return signal_win
 
 
+def time_crop(signal, interval: Union[list[float], tuple[float, float],
+                                       np.ndarray],
+              unit: Literal["samples", "s"]='samples'):
+    r"""Crop a :py:class:`Signal <pyfar.Signal>` or a
+    :py:class:`TimeData <pyfar.TimeData>` object in time.
+
+    Returns the signal :math:`x(t)` defined for all :math:`t` within the
+    interval :math:`interval[0] \le t \le interval[1]`, where :math:`t`
+    can be time or samples.
+
+    Parameters
+    ----------
+    signal : pyfar.Signal, pyfar.TimeData
+        :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object to be cropped.
+
+    interval : list, tuple, or numpy.ndarray
+        Must contain exactly two entries, these specify the beginning and
+        the end of the section to be cropped. The unit of `interval`
+        is specified by the parameter `unit`.
+
+    unit : string, optional
+        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        Values in seconds are rounded to the nearest sample within the
+        specified `interval` range. The default is ``'samples'``.
+
+    Returns
+    -------
+    cropped_signal : pyfar.Signal, pyfar.TimeData
+        Cropped :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object.
+
+    Notes
+    -----
+    For :py:class:`Signal <pyfar.Signal>`, the starting point of
+    the cropped signal is always set to zero, while for
+    :py:class:`TimeData <pyfar.TimeData>`, the starting point is set to the
+    point where cropping begins in the original signal.
+
+
+    Examples
+    --------
+    Create a sine wave signal and extract an interval from it. The starting
+    point of the cropped signal is reset to zero.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax1, ax2) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
+        >>> signal = pf.signals.sine(100, 4410)
+        >>> signal_cropped = pf.dsp.time_crop(signal, interval=[565, 1220])
+        >>> pf.plot.time(signal, label='original',
+        ...                             unit = 'samples', ax=ax1)
+        >>> ax1.axvline(565, color='k', linestyle='-.', label='interval')
+        >>> ax1.axvline(1220, color='k',  linestyle='-.')
+        >>> pf.plot.time(signal_cropped, color='y',
+        ...     label='cropped', unit='samples', ax=ax2)
+        >>> for ax in [ax1, ax2]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a Signal object')
+
+    Create a TimeData object and extract an interval from it. The starting
+    point in time is NOT reset; the cropped signal starts from the time
+    instance closest to the first point in the `interval`.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax3, ax4) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
+        >>> time_signal = pf.TimeData((1, 2, 2.5, 2, 1, -1 ),
+        ...                             (0, 0.1, 0.2, 0.3, 0.4, 0.5))
+        >>> time_signal_cropped = pf.dsp.time_crop(time_signal,
+        ...                             interval=[0.1, 0.38], unit='s')
+        >>> pf.plot.time(time_signal, label='original',
+        ...                                             unit = 's', ax=ax3)
+        >>> ax3.axvline(0.1, color='k', linestyle='-.', label='interval')
+        >>> ax3.axvline(0.38, color='k',  linestyle='-.')
+        >>> pf.plot.time(time_signal_cropped, color='y',
+        ...     label='cropped', unit = 's', ax=ax4)
+        >>> for ax in [ax3, ax4]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a TimeData object')
+
+    """
+    # Check the input
+    if not isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        raise TypeError("The parameter signal has to be of type " \
+        "pyfar.Signal or pyfar.TimeData.")
+
+    if not isinstance(interval, (list, tuple, np.ndarray)):
+        raise TypeError(
+            "The parameter interval has to be of type" \
+            " list, tuple or numpy.ndarray.")
+    if len(interval) != 2:
+        raise ValueError(
+            "The parameter interval must consist of 2 entries.")
+
+    interval = np.array(interval)
+
+    if np.diff(interval) <= 0:
+        raise ValueError("The interval start point must be smaller " \
+        "than the end point.")
+    if np.any(interval < 0):
+        raise ValueError("The interval boundaries must be non-negative.")
+
+    if unit == 's':
+        indices = signal.times
+    elif unit == 'samples':
+        interval = interval.astype(int)
+        indices = np.arange(len(signal.times))
+    else:
+        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+
+    mask = ((indices >= interval[0]) & (
+            indices <= interval[1]))
+
+    # If there are no True values in the mask, the interval lies
+    # outside the boundaries of signal.times.
+    if not mask.any():
+         raise ValueError("Interval is out of the boundaries" \
+                " of signal.times")
+
+    time_data = signal.time[:, mask]
+
+    if isinstance(signal, pyfar.Signal):
+        cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
+    else:
+        times = signal.times[mask]
+        cropped_signal = pyfar.TimeData(time_data, times)
+
+    return cropped_signal
+
+
 def kaiser_window_beta(A):
     """Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
@@ -748,9 +887,6 @@ def _time_window_symmetric_interval_four(interval, window):
     return win, win_start, win_stop
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def regularized_spectrum_inversion(
         signal, frequency_range,
         regu_outside=1., regu_inside=10**(-200/20), regu_final=None,
@@ -797,11 +933,6 @@ def regularized_spectrum_inversion(
     normalized : bool
         Flag to indicate if the normalized spectrum (according to
         `signal.fft_norm`) should be inverted. The default is ``True``.
-    freq_range: tuple, array_like, double
-        The upper and lower frequency limits outside of which the
-        regularization factor is to be applied.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
 
     Returns
@@ -1042,13 +1173,6 @@ def pad_zeros(signal, pad_width, mode='end'):
 
     if not isinstance(signal, pyfar.Signal):
         raise TypeError('Input data has to be of type: Signal.')
-
-    if mode in ['before', 'after']:
-        warnings.warn(('Mode "before" and "after" will be renamed into '
-                       '"beginning" and "end" and can no longer be used in '
-                       'Pyfar 0.8.0.'), PyfarDeprecationWarning, stacklevel=2)
-
-        mode = 'beginning' if mode == 'before' else 'end'
 
     padded_signal = signal.flatten()
 
@@ -1494,9 +1618,6 @@ def find_impulse_response_start(
     return ir_start
 
 
-@rename_arg({"freq_range": "frequency_range"},
-            "freq_range parameter will be deprecated in pyfar 0.8.0 in "
-            "favor of frequency_range")
 def deconvolve(system_output, system_input, fft_length=None,
                frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
@@ -1546,14 +1667,6 @@ def deconvolve(system_output, system_input, fft_length=None,
     kwargs : key value arguments
         Key value arguments to control the inversion of :math:`H(\omega)` are
         passed to to :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
-    freq_range: tuple, array_like, double
-        The upper and lower frequency limits outside of which the
-        regularization factor is to be applied. The default ``None``
-        bypasses the regularization, which might cause numerical
-        instabilities in case of band-limited `system_input`. Also see
-        :py:func:`~pyfar.dsp.regularized_spectrum_inversion`.
-        ``'freq_range'`` parameter will be deprecated in pyfar 0.8.0 in favor
-        of ``'frequency_range'``.
 
 
     Returns
@@ -2693,3 +2806,194 @@ def normalize(signal, reference_method='max', domain='auto',
         return normalized_signal, reference_norm
     else:
         return normalized_signal
+
+
+def correlate(signal_1, signal_2, mode='full', normalize=False):
+    r"""
+    Compute the channel-wise correlation function between signals.
+
+    The correlation function of the time signals :math:`x_1[n]` and
+    :math:`x_2[n]` is given by
+
+    .. math:: c[l] = \sum_n x_1[n] x_2[n-l]
+
+    with the index :math:`n` and time lag :math:`l` in samples. The computation
+    is realized in the frequency domain using the corresponding spectra
+    :math:`X_1[k]` and :math:`X_2[k]`
+
+    .. math:: c = \mathrm{IFFT\{X_1 X_2^-\}}
+
+    with the inverse fourier transform denoted by IFFT and :math:`X^-` denoting
+    the spectrum of a time-reversed and complex conjugated time signal, i.e.,
+    ``X_minus = fft(conj(x[::-1]))`` where the conjugate is required if the
+    input has complex-valued time data.
+
+    Parameters
+    ----------
+    signal_1 : Signal
+        The first input signal. It must have the same sample rate as
+        `signal_2` and its ``cshape`` must be broadcastable to that of
+        `signal_2`.
+    signal_2 : Signal
+        The second input signal. It must have the same sample rate as
+        `signal_1` and its ``cshape`` must be broadcastable to that of
+        `signal_1`.
+    mode : str, optional
+        Specifies how the correlation is computed.
+
+        ``'full'``
+            Computes the full correlation function by zero padding the input
+            signals to a length of
+            ``signal_1.n_samples + signal_2.n_samples - 1`` before applying the
+            Fourier transform (see equations above).
+        ``'cyclic'``
+            Computes the cyclic correlation function, which uses the input
+            signals as they are. In this case `signal_1` and `signal_2` must
+            have the same number of samples (length).
+
+        The default is ``'full'``.
+    normalize : bool, optional
+        If ``True``, the correlation function is normalized to force
+        :math:`|c[l]|\leq1`. This is done by the division
+        :math:`c[l]/\sqrt{E(x_1[n])\,E(x_2[n])}`, where :math:`E(\cdot)`
+        denotes the :py:func:`~energy`. The default ``False`` does not apply
+        any normalization. Normalization is not available for complex-valued
+        time signals.
+
+    Returns
+    -------
+    correlation : TimeData
+        The correlation function :math:`c[l]` is contained in
+        ``correlation.time`` and the lags in seconds, i.e., the delays applied
+        to `signal_2` (see equations above) are contained in
+        ``correlation.times``. ``correlation.time`` is complex if one of the
+        input signals has complex-valued time data. The cshape of `correlation`
+        matches the cshape to which `signal_1` and `signal_2` were broadcasted.
+        The lags can be converted to samples by multiplication with
+        ``signal_1.sampling_rate``. In this case, they are in the interval
+        ``[-signal_2.n_samples + 1, signal_1.n_samples - 1]`` if the full
+        correlation was computed. In case of the cyclic correlation, they are
+        in the interval
+        ``[-(signal_1.n_samples // 2) + 1, signal_1.n_samples // 2]``
+        if the signals have an even number of samples, and in the interval
+        ``[-(signal_1.n_samples // 2), signal_1.n_samples // 2]``
+        if the signals have an odd number of samples.
+
+    Examples
+    --------
+    Compute the lags (delay) that are required to maximize the
+    cross-correlation between a one and multi-dimensional signal
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>>
+        >>> # one-dimensional signal: impulse with zero delay
+        >>> signal_1 = pf.signals.impulse(5, 0)
+        >>>
+        >>> # multi-dimension signal with cshape = (2, 2):
+        >>> # impulses with non-zero delays
+        >>> delays = np.array([[0, 1], [2, 3]], dtype=int)
+        >>> signal_2 = pf.signals.impulse(5, delays)
+        >>>
+        >>> cor = pf.dsp.correlate(signal_1, signal_2, 'full')
+        >>>
+        >>> # compute the lags in samples
+        >>> argmax = cor.times[np.argmax(cor.time, axis=-1)]
+        >>>
+        >>> # plot correlation and indicate maximum
+        >>> ax = pf.plot.time(cor, unit='ms')
+        >>> ax.set_title('Correlation and position of maxima (dots)')
+        >>> ax.set_xlabel('Time lag in ms')
+        >>> ax.set_ylabel('Auto correlation')
+        >>> for amax, color in zip(argmax.flatten(), 'bryp'):
+        >>>     ax.axvline(amax, color=pf.plot.color(color), linestyle=':')
+
+    Linear and cyclic auto-correlation of a perfect sequence. Perfect sequences
+    have unit auto-correlation for :math:`l=0` and zero auto-correlation
+    otherwise
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>>
+        >>> signal = pf.signals.linear_perfect_sweep(2**7)
+        >>>
+        >>> for mode in ['full', 'cyclic']:
+        >>>     line = '--' if mode == 'cyclic' else '-'
+        >>>     cor = pf.dsp.correlate(signal, signal, mode, normalize=True)
+        >>>     ax = pf.plot.time(cor, unit='ms', label=mode, ls=line)
+        >>>
+        >>> ax.set_xlabel('Time lag in ms')
+        >>> ax.set_ylabel('Auto correlation')
+        >>> ax.legend()
+    """
+
+    # check input
+    if type(signal_1) is not pyfar.Signal or \
+            type(signal_2) is not pyfar.Signal:
+        raise TypeError("signal_1 and signal_2 must be pyfar.Signal objects")
+
+    if signal_1.sampling_rate != signal_2.sampling_rate:
+        raise ValueError("Both signals must have the same sampling rate.")
+
+    if mode not in ['full', 'cyclic']:
+        raise ValueError(f"mode is '{mode}' but must be 'full' or 'cyclic'")
+
+    # copy input to avoid changing mutual data
+    signal_1 = signal_1.copy()
+    signal_2 = signal_2.copy()
+
+    # check for complex signals
+    if signal_1.complex and not signal_2.complex:
+        signal_2.complex = True
+    if signal_2.complex and not signal_1.complex:
+        signal_1.complex = True
+
+    # compute normalization factor before zero padding
+    if normalize:
+        normalization = np.sqrt(energy(signal_1) * energy(signal_2))
+
+    # determine signal length for the FFT
+    n_samples = np.array([signal_1.n_samples, signal_2.n_samples], dtype=int)
+    if mode == 'cyclic':
+        if n_samples[0] != n_samples[1]:
+            raise ValueError(("signal_1 and signal_2 must be of the same "
+                              "length in 'cyclic' mode"))
+        n_fft = n_samples[0]
+    else:
+        n_fft = np.sum(n_samples) - 1
+
+        # zero pad signals to match lengths
+        if signal_1.n_samples < n_fft:
+            signal_1 = pyfar.dsp.pad_zeros(
+                signal_1, n_fft - signal_1.n_samples, 'end')
+        if signal_2.n_samples < n_fft:
+            signal_2 = pyfar.dsp.pad_zeros(
+                signal_2, n_fft - signal_2.n_samples, 'beginning')
+
+    # compute correlation as frequency domain convolution
+    # with time flipped and conjugate values for second signal
+    signal_2.time = signal_2.time[..., ::-1].conj()
+    correlation = signal_1 * signal_2
+    correlation = correlation.time
+
+    # apply normalization
+    if normalize:
+        correlation /= normalization
+
+    # compute lags, i.e., times that the second signal was shifted
+    # with respect to the first
+    if mode == 'cyclic':
+        roll = n_fft // 2
+        correlation = np.roll(correlation, -roll, -1)
+        if n_fft % 2:
+            lags = np.arange(-roll, roll + 1)
+        else:
+            lags = np.arange(-roll + 1, roll + 1)
+    else:
+        lags = np.arange(-n_samples[1] + 1, n_samples[0])
+
+    return pyfar.TimeData(correlation, lags / signal_1.sampling_rate,
+                          is_complex=signal_1.complex)

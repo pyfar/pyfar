@@ -12,6 +12,7 @@ from .dsp import (
     pad_zeros,
     time_shift,
     time_window,
+    time_crop,
     kaiser_window_beta,
     find_impulse_response_delay,
     find_impulse_response_start,
@@ -24,6 +25,7 @@ from .dsp import (
     rms,
     normalize,
     average,
+    correlate,
 )
 
 from .interpolation import (
@@ -35,6 +37,8 @@ from .interpolation import (
 
 from . import filter
 from . import fft
+
+from .regularization import RegularizedSpectrumInversion
 
 
 __all__ = [
@@ -51,6 +55,7 @@ __all__ = [
     'pad_zeros',
     'time_shift',
     'time_window',
+    'time_crop',
     'kaiser_window_beta',
     'find_impulse_response_delay',
     'find_impulse_response_start',
@@ -67,4 +72,6 @@ __all__ = [
     'average',
     'normalize',
     'fractional_time_shift',
+    'correlate',
+    'RegularizedSpectrumInversion',
 ]

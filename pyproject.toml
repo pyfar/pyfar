@@ -88,7 +88,6 @@ exclude = [
     "docs",
     "setup.py",
     "pyfar/dsp/filter/_audiofilter.py",
-    "pyfar/samplings/external",
 ]
 line-length = 79
 lint.ignore = [

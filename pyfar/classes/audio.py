@@ -35,7 +35,6 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
-from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 class _Audio():
@@ -1111,15 +1110,6 @@ class Signal(FrequencyData, TimeData):
             "FFT normalization\n")
 
         return repr_string
-
-    def __len__(self):
-        """Length of the object which is the number of samples stored.
-        """
-        warnings.warn(
-            ("len(Signal) will be deprecated in pyfar 0.8.0 "
-             "Use Signal.n_samples instead"),
-             PyfarDeprecationWarning, stacklevel=2)
-        return self.n_samples
 
     def __iter__(self):
         """Iterator for :py:func:`Signal` objects.

@@ -29,7 +29,8 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
         data = signal.time
 
     # get data defined in 'mode'
-    data, y_label = _utils._assert_and_match_data_to_mode(data, signal, mode)
+    data, y_label = _utils._assert_and_match_time_data_to_mode(
+        data, signal, mode)
 
     data = data.T if orientation == "vertical" else data
     # auto detect the time unit
@@ -72,7 +73,8 @@ def _time_2d(signal, dB, log_prefix, log_reference, unit, indices,
 
 
 def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
-             orientation, method, colorbar, ax, side='right', **kwargs):
+             orientation, method, colorbar, ax, side='right', mode='abs',
+             **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
@@ -82,15 +84,8 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
 
     # prepare input
     kwargs = _utils._return_default_colors_rgb(**kwargs)
-    if dB:
-        data = dsp.decibel(signal, 'freq', log_prefix, log_reference)
-        ymax = np.nanmax(data)
-        ymin = ymax - 90
-        ymax = ymax + 10
-    else:
-        data = np.abs(signal.freq)
-
-    # get data according to side
+    data, ymin, ymax, ylabel = _utils._assert_and_match_freq_data_to_mode(
+        signal, mode, dB, log_prefix, log_reference)
     data, frequencies, xlabel = _utils._assert_and_match_data_to_side(data,
                                                                       signal,
                                                                       side)
@@ -127,8 +122,7 @@ def _freq_2d(signal, dB, log_prefix, log_reference, freq_scale, indices,
     qm = _plot_2d(indices_x, indices_y, data, method, ax[0], **kwargs)
 
     # colorbar
-    cb = _utils._add_colorbar(colorbar, fig, ax, qm,
-                              "Magnitude in dB" if dB else "Magnitude")
+    cb = _utils._add_colorbar(colorbar, fig, ax, qm, ylabel)
 
     return ax[0], qm, cb
 
@@ -264,7 +258,8 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
 
 def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
                   log_reference, freq_scale, unit, indices, orientation,
-                  method, colorbar, ax,  mode='real', side='right', **kwargs):
+                  method, colorbar, ax,  mode_time='real', side='right',
+                  mode_freq='abs', **kwargs):
     """
     Plot the time signal and magnitude spectrum in a 2 by 1 subplot layout.
     """
@@ -273,10 +268,10 @@ def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
 
     _, qm_0, cb_0 = _time_2d(
         signal, dB_time, log_prefix_time, log_reference, unit, indices,
-        orientation, method, colorbar, ax[0], mode, **kwargs)
+        orientation, method, colorbar, ax[0], mode_time, **kwargs)
     _, qm_1, cb_1 = _freq_2d(
         signal, dB_freq, log_prefix_freq, log_reference, freq_scale, indices,
-        orientation, method, colorbar, ax[1], side, **kwargs)
+        orientation, method, colorbar, ax[1], side, mode_freq, **kwargs)
     fig.align_ylabels()
 
     return ax, [qm_0, qm_1], [cb_0, cb_1]
@@ -284,14 +279,14 @@ def _time_freq_2d(signal, dB_time, dB_freq, log_prefix_time, log_prefix_freq,
 
 def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
                    unwrap, indices, orientation, method, colorbar, ax,
-                   side='right', **kwargs):
+                   side='right', mode='abs', **kwargs):
     """Plot the magnitude and phase spectrum in a 2 by 1 subplot layout."""
 
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
                              indices, orientation, method, colorbar,
-                             ax[0], side, **kwargs)
+                             ax[0], side, mode, **kwargs)
     _, qm_1, cb_1 = _phase_2d(signal, deg, unwrap, freq_scale, indices,
                               orientation, method, colorbar, ax[1],
                               side, **kwargs)
@@ -303,7 +298,8 @@ def _freq_phase_2d(signal, dB, log_prefix, log_reference, freq_scale, deg,
 
 def _freq_group_delay_2d(
         signal, dB, log_prefix, log_reference, unit, freq_scale, indices,
-        orientation, method, colorbar, ax, side='right', **kwargs):
+        orientation, method, colorbar, ax, side='right', mode='abs',
+        **kwargs):
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
@@ -313,7 +309,7 @@ def _freq_group_delay_2d(
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,
                              indices, orientation, method, colorbar,
-                             ax[0], side, **kwargs)
+                             ax[0], side, mode, **kwargs)
     _, qm_1, cb_1 = _group_delay_2d(
         signal, unit, freq_scale, indices, orientation, method,
         colorbar, ax[1], side, **kwargs)

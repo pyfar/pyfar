@@ -14,7 +14,6 @@ import re
 from pyfar import io
 from pyfar import Signal
 from pyfar import Coordinates
-from pyfar.samplings import SphericalVoronoi
 import pyfar.classes.filter as fo
 from pyfar import FrequencyData, TimeData, TransmissionMatrix
 
@@ -273,17 +272,7 @@ def test_write_read_transmissionmatrix(tmpdir):
     assert actual == tmatrix
 
 
-def test_write_read_sphericalvoronoi(sphericalvoronoi, tmpdir):
-    """SphericalVoronoi
-    Make sure `read` understands the bits written by `write`.
-    """
-    filename = os.path.join(tmpdir, 'sphericalvoronoi.far')
-    io.write(filename, sphericalvoronoi=sphericalvoronoi)
-    actual = io.read(filename)['sphericalvoronoi']
-    assert isinstance(actual, SphericalVoronoi)
-    assert actual == sphericalvoronoi
-
-
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_write_read_filter(filterObject, tmpdir):
     """Filter
     Make sure `read` understands the bits written by `write`.
@@ -299,7 +288,7 @@ def test_write_filterFIR(filterFIR, tmpdir):
     """filterFIR
     Make sure `read` understands the bits written by `write`.
     """
-    filename = os.path.join(tmpdir, 'filterIIR.far')
+    filename = os.path.join(tmpdir, 'filterFIR.far')
     io.write(filename, filterFIR=filterFIR)
     actual = io.read(filename)['filterFIR']
     assert isinstance(actual, fo.Filter)
@@ -404,6 +393,7 @@ def test_write_read_builtins(dict_of_builtins, tmpdir):
     assert dict_of_builtins.items() <= actual.items()
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_write_read_multiplePyfarObjects(
         filterObject,
         filterFIR,
@@ -411,7 +401,6 @@ def test_write_read_multiplePyfarObjects(
         filterSOS,
         coordinates,
         orientations,
-        sphericalvoronoi,
         time_data,
         frequency_data,
         sine,
@@ -430,7 +419,6 @@ def test_write_read_multiplePyfarObjects(
         filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
-        sphericalvoronoi=sphericalvoronoi,
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
@@ -449,8 +437,6 @@ def test_write_read_multiplePyfarObjects(
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
     assert actual['orientations'] == orientations
-    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
-    assert actual['sphericalvoronoi'] == sphericalvoronoi
     assert isinstance(actual['timedata'], TimeData)
     assert actual['timedata'] == time_data
     assert isinstance(actual['frequencydata'], FrequencyData)
@@ -472,6 +458,7 @@ def test_write_read_compression(sine, tmpdir):
         filename_compressed)
 
 
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def test_write_read_multiplePyfarObjectsWithCompression(
         filterObject,
         filterFIR,
@@ -479,7 +466,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filterSOS,
         coordinates,
         orientations,
-        sphericalvoronoi,
         time_data,
         frequency_data,
         sine,
@@ -499,7 +485,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         filterSOS=filterSOS,
         coordinates=coordinates,
         orientations=orientations,
-        sphericalvoronoi=sphericalvoronoi,
         timedata=time_data,
         frequencydata=frequency_data,
         signal=sine,
@@ -518,8 +503,6 @@ def test_write_read_multiplePyfarObjectsWithCompression(
     assert actual['coordinates'] == coordinates
     assert isinstance(actual['orientations'], Orientations)
     assert actual['orientations'] == orientations
-    assert isinstance(actual['sphericalvoronoi'], SphericalVoronoi)
-    assert actual['sphericalvoronoi'] == sphericalvoronoi
     assert isinstance(actual['timedata'], TimeData)
     assert actual['timedata'] == time_data
     assert isinstance(actual['frequencydata'], FrequencyData)
@@ -725,7 +708,7 @@ def test_audio_subtypes(audio_subtypes_mock):
 def test_default_audio_subtype(default_audio_subtype_mock):
     """Test correct call of the wrapped soundfile function."""
     audio_format = 'wav'
-    subtype_return = pyfar.io.default_audio_subtype(format=audio_format)
+    subtype_return = pyfar.io.default_audio_subtype(audio_format=audio_format)
     assert subtype_return == 'bla'
     default_audio_subtype_mock.assert_called_with(audio_format)
 

@@ -205,10 +205,12 @@ def test_n_samples():
     signal = Signal([1, 2, 3], 44100, domain='time', is_complex=True)
     assert signal.n_samples == 3
 
-    signal = Signal([1, 2, 3], 44100, domain='freq')
+    with pytest.warns(UserWarning, match='Number of samples not given'):
+        signal = Signal([1, 2, 3], 44100, domain='freq')
     assert signal.n_samples == 4
 
-    signal = Signal([1, 2, 3], 44100, domain='freq', is_complex=True)
+    with pytest.warns(UserWarning, match='Number of samples not given'):
+        signal = Signal([1, 2, 3], 44100, domain='freq', is_complex=True)
     assert signal.n_samples == 3
 
 

@@ -4,7 +4,6 @@ import os.path
 import sofar as sf
 import pyfar as pf
 
-from pyfar.samplings import SphericalVoronoi
 from pyfar import Orientations
 from pyfar import Coordinates
 from pyfar import FrequencyData, TimeData
@@ -12,6 +11,8 @@ import pyfar.classes.filter as fo
 import pyfar.signals
 
 from pyfar.testing import stub_utils
+
+from unittest.mock import patch
 
 collect_ignore_glob = [
     "private/*",
@@ -772,6 +773,7 @@ def state():
 
 
 @pytest.fixture()
+@patch.multiple(fo.Filter, __abstractmethods__=set())
 def filterObject(coeffs, state):
     """Filter object.
     """
@@ -802,16 +804,6 @@ def filterSOS():
     """
     sos = np.array([[1, 1 / 2, 0, 1, 0, 0]])
     return fo.FilterSOS(sos, sampling_rate=2 * np.pi)
-
-
-@pytest.fixture()
-def sphericalvoronoi():
-    """SphericalVoronoi object.
-    """
-    points = np.array(
-        [[0, 0, 1], [0, 0, -1], [1, 0, 0], [0, 1, 0], [0, -1, 0], [-1, 0, 0]])
-    sampling = Coordinates(points[:, 0], points[:, 1], points[:, 2])
-    return SphericalVoronoi(sampling)
 
 
 @pytest.fixture()
