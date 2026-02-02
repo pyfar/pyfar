@@ -10,7 +10,7 @@ Added
 ^^^^^
 - Common acoustic constants are now defined in the module `pyfar.constants`. This includes the speed of sound, air density, air impedance, air temperature, sound attenuation in air, the saturation vapor pressure, reference sound pressure and power, exact and nominal fractional octave frequencies, fractional octave band tolerances, and frequency weighting curves and values (PRs #827, #824, #818, #774, #773, #771, #770, #739, #734, #732)
 - Functions to get and apply A and C-weighting curves standardized in IEC 61672-1. This includes `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals, `pyfar.constants.frequency_weighting_curve` for evaluating the weighting curves at arbitrary frequencies, and `pyfar.constants.frequency_weighting_band_corrections` for obtaining weighting values for nominal (fractional) octave bands (PRs #811, #852)
-- The new class `pyfar.TransmissionMatrix` can represent Two-ports or Quadrupoles. These can represent systems from various fields, e.g. electrical circuits, mechanical vibration, (acoustic) transmission lines. (PRs #783)
+- The `pyfar.TransmissionMatrix` can now be created from a transmission line. (PRs #783)
 - The new class `pyfar.dsp.RegularizedSpectrumInversion` handles regularized inversion. It replaces `pyfar.dsp.regularized_spectrum_inversion` (PR #716)
 - `pyfar.dsp.correlate` to compute the auto or cross correlation between pyfar Signals as a function of the delay applied to one Signal (PR #719, #713)
 - `pyfar.dsp.time_crop` for quickly cropping a pyfar Signal or TimeData object (PR #849)
@@ -32,7 +32,7 @@ Changed
 
 Deprecated
 ^^^^^^^^^^
-- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructiong_fractional_octave_bands` is deprecated and will be removed in pyfar v0.9.0 (PR #725)
+- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructing_fractional_octave_bands` is deprecated and will be removed in pyfar v0.9.0 (PR #725)
 
 Removed
 ^^^^^^^
