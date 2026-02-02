@@ -2,8 +2,8 @@
 History
 =======
 
-[Unreleased]
-------------
+0.7.4 (2026-02-02)
+------------------
 
 Added
 ^^^^^
@@ -11,17 +11,21 @@ Added
 
 Changed
 ^^^^^^^
+* Improve pyfar project description in pyproject.toml (PR #812)
+* Test Python 3.13 and 3.14 in continuous integration (PR #853)
+* Add input validation for the parameter `unit` used in the module `pyfar.plot` (PR #861)
 * Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
-
-Deprecated
-^^^^^^^^^^
-
-Removed
-^^^^^^^
 
 Fixed
 ^^^^^
-
+*  Make `pyfar.Coordinates.from_spherical_elevation` and `pyfar.Coordinates.from_spherical_side` work with lists as input (PR #809)
+* `pyfar.TransmissionMatrix.from_abc` now works with scalar input values as intended (PR #823, #822)
+* `pyfar.dsp.average` can now average across axes with only one channel (PR #828)
+* Improve docstring of the `slope` paramter in `pyfar.dsp.filter.reconstructiong_fractional_octave_bands` (PR #841)
+* Remove warning for converting complex-valued `pyfar.Signals` to real-valued signals (PR #858)
+* Update `test_frequency_weighting.py::test_frequency_weighting_filter_errwgt_recommended` to work on all operating systems (PR #862)
+* Ignore warnings that can not be avoided in `test_transmission_matrix_derived_parameters.py` to remove clutter from the `pytest` output (PR #864)
+* `pyfar.samplings.sph_gaussian` now works correctly for very high orders as intended (PR #887)
 
 
 0.7.3 (2025-06-23)
