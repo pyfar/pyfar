@@ -1,6 +1,6 @@
 [project]
 name = "pyfar"
-version = "0.7.3"
+version = "0.7.4"
 description = "Python package for acoustics research."
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -134,7 +134,7 @@ lint.select = [
 convention = "numpy"
 
 [tool.bumpversion]
-current_version = "0.7.3"
+current_version = "0.7.4"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
