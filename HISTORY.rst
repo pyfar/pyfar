@@ -8,13 +8,14 @@ History
 
 Added
 ^^^^^
-- Common acoustic constants are now defined in the module `pyfar.constants`. This includes the speed of sound, air density, air impedance, air temperature, sound attenuation in air, the saturation vapor pressure, reference sound pressure and power, exact and nominal fractional octave frequencies, fractional octave band tolerances, and frequency weighting curves and values (PRs #827, #824, #818, #774, #773, #771, #770, #739, #734, #732)
+- Common acoustic constants are now defined in the module `pyfar.constants`. This includes the speed of sound, air density, air impedance, air temperature, sound attenuation in air, the saturation vapor pressure, reference sound pressure and power, exact and nominal fractional octave frequencies, fractional octave band tolerances, and frequency weighting curves and values (PRs #827, #824, #818, #774, #773, #771, #770, #744, #739, #734, #732)
 - Functions to get and apply A and C-weighting curves standardized in IEC 61672-1. This includes `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals, `pyfar.constants.frequency_weighting_curve` for evaluating the weighting curves at arbitrary frequencies, and `pyfar.constants.frequency_weighting_band_corrections` for obtaining weighting values for nominal (fractional) octave bands (PRs #811, #852)
 - The `pyfar.TransmissionMatrix` can now be created from a transmission line. (PRs #783)
 - The new class `pyfar.dsp.RegularizedSpectrumInversion` handles regularized inversion. It replaces `pyfar.dsp.regularized_spectrum_inversion` (PR #716)
-- `pyfar.dsp.correlate` to compute the auto or cross correlation between pyfar Signals as a function of the delay applied to one Signal (PR #719, #713)
+- `pyfar.dsp.correlate` to compute the auto or cross correlation between pyfar Signals as a function of the delay applied to one Signal (PR #719, #713, #733)
 - `pyfar.dsp.time_crop` for quickly cropping a pyfar Signal or TimeData object (PR #849)
 - All pyfar Filter objects can now return their impulse response through the class method `impulse_response` and estimate the minimum required length using the class method `minimum_impulse_response_length` (PRs #826, #768, #755)
+- `pyfar.io.read_sofa` now has the parameter `verbose` to avoid unwanted command line clutter when reading sofa files (PR #708)
 - `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals with the A and C-weighting curve standardised in IEC 61672-1 (PR #811, #852)
 - `pyfar.dsp.filter.check_fractional_octave_band_filter_tolerance` to check if a (fractional) octave filter bank meets the class I or II tolerances defined in IEC 61260-1 (PR #829)
 - All plots showing the magnitude response now have the `mode` parameter to specify if the absolute (default), real, or imaginary value of the spectrum is shown. This can also be toggled using the shortcut 'shift+m' in interactive plots (PR #817)
@@ -45,7 +46,7 @@ Removed
 
 Fixed
 ^^^^^
-- Fix warnings in tests (PR #859)
+- Fix warnings and errors in tests (PR #859, #897)
 
 
 0.7.4 (2026-02-02)
