@@ -44,15 +44,15 @@ def air_attenuation(
         accuracy of the results according to the standard:
 
         ``10``, +/- 10% accuracy
-            - molar concentration of water vapour: 0.05% to 5 %.
-            - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+            - molar concentration of water vapour: 0.05% to 5%.
+            - air temperature: 253.15 K to 323.15 (-20 °C to +50 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
         ``20``, +/- 20% accuracy
-            - molar concentration of water vapour: 0.005 % to 0.05 %,
+            - molar concentration of water vapour: 0.005% to 0.05%,
               and greater than 5%
-            - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+            - air temperature: 253.15 K to 323.15 (-20 °C to +50 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
@@ -193,13 +193,13 @@ def _air_attenuation_accuracy(
         accuracy of the results according to the standard:
 
             ``10``, +/- 10% accuracy
-                - molar concentration of water vapour: 0.05% to 5 %.
+                - molar concentration of water vapour: 0.05% to 5%.
                 - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
                 - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``20``, +/- 20% accuracy
-                - molar concentration of water vapour: 0.005 % to 0.05 %,
+                - molar concentration of water vapour: 0.005% to 0.05%,
                   and greater than 5%
                 - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
                 - atmospheric pressure: less than 200 000 Pa (2 atm)
@@ -247,9 +247,9 @@ def _air_attenuation_accuracy(
         frequency_pressure_ratio <= 10)
     common_mask = atm_mask & frequency_pressure_ratio_mask
 
-    # molar concentration of water vapour: 0.05% to 5 %
+    # molar concentration of water vapour: 0.05% to 5%
     vapor_10_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5)
-    # molar concentration of water vapour: 0.005% to 0.05 % and greater than 5%
+    # molar concentration of water vapour: 0.005% to 0.05% and greater than 5%
     vapor_20_mask = (5 < h_water_vapor) | (
         (0.005 <= h_water_vapor) & (h_water_vapor < 0.05))
     # molar concentration of water vapour: less than 0.005%
