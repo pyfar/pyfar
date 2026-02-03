@@ -19,7 +19,7 @@ def air_attenuation(
     Parameters
     ----------
     temperature : float, array_like
-        Temperature in degree Celsius.
+        Temperature in °C.
         Must be in the range of -20°C to 50°C for accuracy of +/-10% or
         must be greater than -70°C for accuracy of +/-50%.
     frequencies : float, array_like
@@ -34,8 +34,8 @@ def air_attenuation(
     Returns
     -------
     alpha : np.ndarray[float]
-        Pure tone air attenuation coefficient in decibels per meter for
-        atmospheric absorption.
+        Pure tone air attenuation coefficient in dB/m for atmospheric
+        absorption.
     m : :py:class:`~pyfar.FrequencyData`
         Pure tone energy attenuation coefficient in 1/m for atmospheric
         absorption. The parameter ``m`` is calculated as
