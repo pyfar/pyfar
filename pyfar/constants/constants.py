@@ -37,9 +37,9 @@ def air_attenuation(
         Pure tone air attenuation coefficient in decibels per meter for
         atmospheric absorption.
     m : :py:class:`~pyfar.FrequencyData`
-        Pure tone air attenuation coefficient per meter for
-        atmospheric absorption. The parameter ``m`` is calculated as
-        :math:`m = \alpha / (10 \cdot \log_{10}(e))`.
+        Pure tone energy attenuation coefficient in 1/m for atmospheric
+        absorption. The parameter ``m`` is calculated as
+        :math:`m = \alpha / (10 \log_{10}(e))`.
     accuracy : :py:class:`~pyfar.FrequencyData`
         accuracy of the results according to the standard:
 
