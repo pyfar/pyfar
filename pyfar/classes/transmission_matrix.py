@@ -33,7 +33,6 @@ from numbers import Number
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
-from numbers import Number
 
 
 class TransmissionMatrix(FrequencyData):
