@@ -929,7 +929,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         response is truncated to a length of
         ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
         aliasing described above in any case but might distort the magnitude
-        response if ``signal.n_samples`` is to low. If truncate is ``False``
+        response if ``signal.n_samples`` is too low. If truncate is ``False``
         the output signal has the same length as the input signal. The default
         is ``True``.
 
