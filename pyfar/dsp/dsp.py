@@ -2592,6 +2592,9 @@ def normalize(signal, reference_method='max', domain='auto',
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
 
+    # Store signal domain for later.
+    signal_domain = signal.domain
+
     if domain not in ('time', 'freq', 'auto'):
         raise ValueError("domain must be 'time', 'freq' or 'auto' but is"
                          f" '{domain}'.")
@@ -2693,6 +2696,12 @@ def normalize(signal, reference_method='max', domain='auto',
     normalized_signal = pyfar.divide(
         (pyfar.multiply((signal.copy(), target), domain=signal.domain),
          reference_norm), domain=signal.domain)
+
+    # Restore original domain of Signals. This only affects edge cases where
+    # normalization is not applied in the signal's native domain.
+    if isinstance(normalized_signal, pyfar.Signal):
+        normalized_signal.domain = signal_domain
+
     if return_reference:
         return normalized_signal, reference_norm
     else:
