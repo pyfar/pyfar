@@ -20,8 +20,8 @@ def air_attenuation(
     ----------
     temperature : float, array_like
         Temperature in °C.
-        Must be in the range of -20°C to 50°C for accuracy of +/-10% or
-        must be greater than -70°C for accuracy of +/-50%.
+        Must be in the range of -20 °C to 50 °C for accuracy of +/-10% or
+        must be greater than -70 °C for accuracy of +/-50%.
     frequencies : float, array_like
         Frequency in Hz. Must be greater than 50 Hz.
         Just one dimensional array is allowed.
@@ -45,14 +45,14 @@ def air_attenuation(
 
         ``10``, +/- 10% accuracy
             - molar concentration of water vapour: 0.05% to 5%.
-            - air temperature: 253.15 K to 323.15 (-20 °C to +50 °C)
+            - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
         ``20``, +/- 20% accuracy
             - molar concentration of water vapour: 0.005% to 0.05%,
               and greater than 5%
-            - air temperature: 253.15 K to 323.15 (-20 °C to +50 °C)
+            - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
@@ -194,14 +194,14 @@ def _air_attenuation_accuracy(
 
             ``10``, +/- 10% accuracy
                 - molar concentration of water vapour: 0.05% to 5%.
-                - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+                - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
                 - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``20``, +/- 20% accuracy
                 - molar concentration of water vapour: 0.005% to 0.05%,
                   and greater than 5%
-                - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+                - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
                 - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
