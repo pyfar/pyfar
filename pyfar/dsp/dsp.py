@@ -2687,8 +2687,12 @@ def normalize(signal, reference_method='max', domain='auto',
         reference_norm = np.sqrt(reference_norm)
         target = np.sqrt(target)
 
-    # apply normalization
-    normalized_signal = signal.copy() * target / reference_norm
+    # Apply normalization in the current domain of the signal. This avoids
+    # unnecessary conversions between the time and frequency domain which
+    # introduce numerical errors.
+    normalized_signal = pyfar.divide(
+        (pyfar.multiply((signal.copy(), target), domain=signal.domain),
+         reference_norm), domain=signal.domain)
     if return_reference:
         return normalized_signal, reference_norm
     else:
