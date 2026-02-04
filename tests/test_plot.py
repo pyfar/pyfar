@@ -554,17 +554,18 @@ def test_2d_time_unit(function, unit, handsome_signal_2d):
                      filename, file_type, compare_output)
 
 
-def test_2d_time_unit_assertion(handsome_signal_2d):
+@pytest.mark.parametrize(
+        ('function'),
+        [(plot.time_2d), (plot.time_freq_2d), (plot.freq_group_delay_2d),
+         (plot.group_delay_2d)],
+)
+def test_2d_time_unit_assertion(function, handsome_signal_2d):
     """Test if all 2d plots raise an assertion for a wrong unit parameter."""
 
     create_figure()
     match = 'Unit is pascal but must be s, ms, mus, samples, auto.'
     with pytest.raises(ValueError, match=match):
-        plot.time_2d(handsome_signal_2d, unit="pascal")
-
-    match = "'pascal' is not in list"
-    with pytest.raises(ValueError, match=match):
-        plot.group_delay_2d(handsome_signal_2d, unit="pascal")
+        function(handsome_signal_2d, unit="pascal")
 
     plt.close("all")
 

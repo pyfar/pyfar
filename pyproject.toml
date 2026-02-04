@@ -1,7 +1,7 @@
 [project]
 name = "pyfar"
-version = "0.7.3"
-description = "Project for data formats in acoustics."
+version = "0.7.4"
+description = "Python package for acoustics research."
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.9"
@@ -28,10 +28,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "numpy>=1.23.0",
-    "scipy>=1.5.0",
+    "scipy>=1.5.0,<1.17.0",
     "matplotlib",
     "sofar>=0.1.2",
     "urllib3",
@@ -131,7 +133,7 @@ lint.select = [
 convention = "numpy"
 
 [tool.bumpversion]
-current_version = "0.7.3"
+current_version = "0.7.4"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"

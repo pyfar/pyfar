@@ -73,6 +73,100 @@ def test_tmatrix_from_abcd_input_types(frequencies, A_list, A_np, A_FreqDat):
     _expect_error_abcd_same_type(A_np, A_FreqDat, A_np, A_np)
     _expect_error_abcd_same_type(A_FreqDat, A_np, A_np, A_np)
 
+@pytest.mark.parametrize(("A","B","C","D"), [
+    ([1., 2., 3.], [1.], [1.], [1.]),
+    ([1., 2., 3.], [1.], [1.], [[1.]]),
+    ([1., 2., 3.], [1.], [1.], [[1.], [2.]]),
+    ([1., 2., 3.], [1.], [1.], 1.),
+])
+def test_tmatrix_from_abcd_broadcasting_working(frequencies, A, B, C, D):
+    """Test from_abcd with valid broadcasting combinations."""
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+    broadcast_BCD = [1., 1., 1.]
+
+    assert isinstance(tmat, TransmissionMatrix)
+    npt.assert_allclose(tmat.A.freq[0], A, atol=1e-15)
+    npt.assert_allclose(tmat.B.freq[0], broadcast_BCD, atol=1e-15)
+    npt.assert_allclose(tmat.C.freq[0], broadcast_BCD, atol=1e-15)
+    npt.assert_allclose(tmat.D.freq[0], broadcast_BCD, atol=1e-15)
+
+
+@pytest.mark.parametrize(("A","B","C","D"), [
+    ([1, 2, 3], [1], [1], [1, 2]),
+    ([1, 2, 3], [1], [1], [1, 2, 3, 4]),
+])
+def test_tmatrix_from_abcd_broadcasting_expect_error(frequencies, A, B, C, D):
+    """Test from_abcd raises error for invalid broadcasting combinations."""
+    with pytest.raises(
+        ValueError,
+        match="shape mismatch: objects cannot be broadcast to a single shape",
+    ):
+        TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+
+
+@pytest.mark.parametrize(("A","B","C","D","frequency"), [
+    ([1], [2], [3], [4], 1000),
+    ([1], [2], [3], [4], [1000]),
+    (1, 2, 3, 4, 1000),
+    (1, 2, 3, 4, [1000]),
+])
+def test_tmatrix_from_abcd_single_frequency(A, B, C, D, frequency):
+    """Test from_abcd with single frequency values."""
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D, frequency)
+    assert isinstance(tmat, TransmissionMatrix)
+    npt.assert_allclose(tmat.A.freq[0], A, atol=1e-15)
+    npt.assert_allclose(tmat.B.freq[0], B, atol=1e-15)
+    npt.assert_allclose(tmat.C.freq[0], C, atol=1e-15)
+    npt.assert_allclose(tmat.D.freq[0], D, atol=1e-15)
+
+    # Check all frequency vectors
+    npt.assert_allclose(tmat.A.frequencies, frequency, atol=1e-15)
+    npt.assert_allclose(tmat.B.frequencies, frequency, atol=1e-15)
+    npt.assert_allclose(tmat.C.frequencies, frequency, atol=1e-15)
+    npt.assert_allclose(tmat.D.frequencies, frequency, atol=1e-15)
+
+
+def test_tmatrix_from_abcd_frequencies_length_mismatch(A_list):
+    """Test from_abcd throws error if frequencies length does not match."""
+    frequencies = [100, 200]
+    with pytest.raises(
+        ValueError,
+        match="Number of frequency values does not match the number",
+    ):
+        TransmissionMatrix.from_abcd(
+            A_list,
+            A_list,
+            A_list,
+            A_list,
+            frequencies,
+        )
+
+    frequencies = [100]
+    with pytest.raises(
+        ValueError,
+        match="Number of frequency values does not match the number",
+    ):
+        TransmissionMatrix.from_abcd(
+            A_list,
+            A_list,
+            A_list,
+            A_list,
+            frequencies,
+        )
+
+    frequencies = 100
+    with pytest.raises(
+        ValueError,
+        match="Number of frequency values does not match the number",
+    ):
+        TransmissionMatrix.from_abcd(
+            A_list,
+            A_list,
+            A_list,
+            A_list,
+            frequencies,
+        )
+
 def test_tmatrix_from_abcd_optional_frequencies(A_list, A_FreqDat):
     """Test from_abcd throws error if handing in arrays but no frequencies."""
     TransmissionMatrix.from_abcd(A_FreqDat, A_FreqDat, A_FreqDat, A_FreqDat)
@@ -121,6 +215,18 @@ def abcd_data_3x3x1():
     D = A + 3
     tmat = TransmissionMatrix.from_abcd(A, B, C, D)
     return tmat, A, B, C, D
+@pytest.fixture(scope="module")
+def abcd_data_complex():
+    """ABCD matrices with 2 frequency bins and one additional
+    dimension of size 3.
+    """
+    frequencies = [100, 200]
+    A = FrequencyData([[1j, 1+1j]], frequencies)
+    B = FrequencyData([[2j, 2+1j]], frequencies)
+    C = FrequencyData([[3j, 3+1j]], frequencies)
+    D = FrequencyData([[4j, 4+1j]], frequencies)
+    tmat = TransmissionMatrix.from_abcd(A, B, C, D)
+    return tmat, A, B, C, D
 
 def test_tmatrix_abcd_cshape(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1):
     """Test whether abcd_cshape matches cshape of A-property."""
@@ -144,20 +250,53 @@ def _compare_tmat_vs_abcd(tmat, A, B, C, D):
         assert np.all(tmat.C.freq == C)
         assert np.all(tmat.D.freq == D)
 
-def test_tmatrix_abcd_entries(abcd_data_3x2, abcd_data_3x3x1):
+def test_tmatrix_abcd_entries(abcd_data_1x2, abcd_data_3x2, abcd_data_3x3x1,
+        abcd_data_complex):
     """Test whether ABCD entries of T-Matrix match ABCD data used for
     initialization.
     """
+    tmat, A, B, C, D = abcd_data_1x2
+    _compare_tmat_vs_abcd(tmat, A, B, C, D)
+
     tmat, A, B, C, D = abcd_data_3x2
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
     tmat, A, B, C, D = abcd_data_3x3x1
     _compare_tmat_vs_abcd(tmat, A, B, C, D)
 
+    tmat, A, B, C, D = abcd_data_complex
+    _compare_tmat_vs_abcd(tmat, A, B, C, D)
+
 
 # ------------------------
 # TESTS FOR CREATE METHODS
 # ------------------------
+def test_tmatrix_create_frequency_independent_abcd():
+    """Test creation of frequency-independent ABCD matrix."""
+    tmat = TransmissionMatrix.create_frequency_independent_abcd(1, 2, 3, 4)
+    assert isinstance(tmat, np.ndarray)
+    assert tmat.shape == (2, 2)
+    npt.assert_allclose(tmat, [[1, 2], [3, 4]], atol=1e-15)
+
+@pytest.mark.parametrize("wrong_input", ["input", [1,2], (1,2), { 'A':1 }])
+def test_tmatrix_create_frequency_independent_abcd_wrong_input(wrong_input):
+    """Test whether creation of frequency-independent ABCD matrix raises
+    error on invalid input data.
+    """
+    error_msg = "A, B, C, and D must be scalars"
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(
+            wrong_input, 2, 3, 4)
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(
+            1, wrong_input, 3, 4)
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(
+            1, 2, wrong_input, 4)
+    with pytest.raises(TypeError, match=error_msg):
+        TransmissionMatrix.create_frequency_independent_abcd(
+            1, 2, 3, wrong_input)
+
 def test_tmatrix_create_identity(frequencies):
     """Test whether creation of identity matrix with frequencies."""
     tmat_eye = TransmissionMatrix.create_identity(frequencies)
