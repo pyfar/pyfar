@@ -28,7 +28,7 @@ Changed
 - Improve check of input data in `pyfar.constants.fractional_octave_frequencies_exact` and tests thereof (PR #876)
 - Improved testing for the parameter `side` used in 2D plots in the module `pyfar.plot` (PR #820)
 - Improved documentation to remove clutter from the secondary sidebar (PR #788)
-- Files accessed by the module `pyfar.signals.files` are no stored on https://github.com/pyfar/files (PR #807)
+- Files accessed by the module `pyfar.signals.files` are now stored on https://github.com/pyfar/files (PR #807)
 - Remove command line cluttering print outs when loading `pf.signals.files.binaural_room_impulse_response` and `pf.signals.files.headphone_impulse_responses` (PR #718)
 - Improved internal documentation of the `_codec` module that handles reading and writing pyfar data from and to disk (PR #712)
 
