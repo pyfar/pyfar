@@ -23,11 +23,12 @@ Added
 
 Changed
 ^^^^^^^
-- The `pyfar.FIRFilter` class now uses `numpy.convolve`, instead of `scipy.signal.lfilter` for filtering to speed up the computation for long filters (PR #753)
+- The `pyfar.FIRFilter` class now uses `scipy.signal.oaconvolve`, instead of `scipy.signal.lfilter` for filtering to speed up the computation for long filters (PR #753)
+
 - Improve check of input data in `pyfar.constants.fractional_octave_frequencies_exact` and tests thereof (PR #876)
 - Improved testing for the parameter `side` used in 2D plots in the module `pyfar.plot` (PR #820)
-- Improved documentation to remove clutter form the secondary sidebar (PR #788)
-- Files accessed by the module `pyfar.signals.files` are no stored on github (PR #807)
+- Improved documentation to remove clutter from the secondary sidebar (PR #788)
+- Files accessed by the module `pyfar.signals.files` are no stored on https://github.com/pyfar/files (PR #807)
 - Remove command line cluttering print outs when loading `pf.signals.files.binaural_room_impulse_response` and `pf.signals.files.headphone_impulse_responses` (PR #718)
 - Improved internal documentation of the `_codec` module that handles reading and writing pyfar data from and to disk (PR #712)
 
@@ -41,7 +42,7 @@ Removed
 - The `pyfar.samplings` module was removed and move to `spharpy.samplings` (PR #740)
 - The `pyfar.Coordinates` class methods and properties `set_cart`, `get_cart`, `set_sph`, `get_sph`, `set_cyl`, `get_cyl`, `sh_order`, `systems`, `find_nearest_k`, `find_nearest_cart`, `find_nearest_sph`, and `find_slice` were removed in favor of the new API (PRs #741, #786)
 - The Parameter `freq_range` that was used in multiple functions was removed in favor of the `frequency_range` parameter (PR #746)
-- The `length` method for Audio classes was removed in favor of the attributes `n_sampels` and `n_bins` (PR #745)
+- The `length` method for Audio classes was removed in favor of the attributes `n_samples` and `n_bins` (PR #745)
 - The values 'before' and 'after' can not be used to define the parameter `mode` in `pyfar.dsp.pad_zeros` and 'beginning' and 'end' must be used instead (PR #748)
 
 Fixed
