@@ -723,9 +723,9 @@ class Signal(FrequencyData, TimeData):
         3 x 2 channels with 1024 samples or frequency bins each, depending
         on the specified ``domain``. Integer arrays will be converted to
         floating point precision. Note that providing complex valued time
-        domain data is only possible when the parameter ``complex`` is
+        domain data is only possible when the parameter ``is_complex`` is
         ``True``. If the specified ``domain`` is ``freq`` and
-        ``complex`` is ``True`` the data needs to represent a double-sided
+        ``is_complex`` is ``True`` the data needs to represent a double-sided
         spectrum, otherwise the single-sided spectrum for positive
         frequencies needs to be provided.
     sampling_rate : double
