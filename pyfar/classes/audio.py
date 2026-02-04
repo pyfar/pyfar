@@ -145,7 +145,7 @@ class _Audio():
         Parameters
         ----------
         axes : empty, ``None``, iterable of ints, or n ints
-            Define how the :py:mod:` caxes <pyfar._concepts.audio_classes>`
+            Define how the :doc:`caxes<gallery:gallery/interactive/pyfar_audio_objects>`
             are ordered in the transposed audio object.
             Note that the last dimension of the data in the audio object
             always contains the time samples or frequency bins and can not
