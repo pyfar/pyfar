@@ -8,7 +8,7 @@ History
 
 Fixed
 ^^^^^
-* Apply normalization in the signal's native domain to prevent floating point errors (PR #900)
+* Make `pyfar.dsp.normalize` use the signal's native domain to avoid floating point errors (PR #900)
 
 0.7.4 (2026-02-02)
 ------------------
