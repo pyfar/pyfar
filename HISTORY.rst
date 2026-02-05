@@ -23,6 +23,7 @@ Changed
 * Test Python 3.13 and 3.14 in continuous integration (PR #853)
 * Add input validation for the parameter `unit` used in the module `pyfar.plot` (PR #861)
 * Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
+* Docs: General improvements to the documentation
 
 Fixed
 ^^^^^
