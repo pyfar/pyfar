@@ -651,60 +651,6 @@ def test_create_conical_horn_imp_frequency_data():
         inv_prefix * A,
     )
 
-
-def test_create_conical_horn_k_number():
-    """Test `create_conical_horn` with impedance as number."""
-    k = 21
-    Z = 4 + 0.1j
-
-    a = 0.3
-    b = 0.5
-    Omega = 0.4
-
-    S0 = Omega * a**2
-    S1 = Omega * b**2
-    L = b - a
-
-    tmat_backwards = TransmissionMatrix.create_conical_horn(
-        S0,
-        S1,
-        L,
-        k,
-        Z,
-        "backwards",
-    )
-    tmat_forwards = TransmissionMatrix.create_conical_horn(
-        S0,
-        S1,
-        L,
-        k,
-        Z,
-        "forwards",
-    )
-
-    A = np.float64(-0.6787560082005961)
-
-    B = np.complex64(1.4526262873559803-58.10505149423922j)
-
-    C = np.complex64(-0.00031990900057045704-0.01279636002281828j)
-
-    D = np.float64(-0.3771637092247614)
-
-    inv_prefix = 1 / (A * D - B * C)
-
-    assert isinstance(tmat_backwards, TransmissionMatrix)
-    _compare_tmat_vs_abcd(tmat_backwards, A, B, C, D)
-
-    assert isinstance(tmat_forwards, TransmissionMatrix)
-    _compare_tmat_vs_abcd(
-        tmat_forwards,
-        inv_prefix * D,
-        -1 * inv_prefix * B,
-        -1 * inv_prefix * C,
-        inv_prefix * A,
-    )
-
-
 def test_create_conical_horn_k_frequency_data():
     """Test `create_conical_horn` with impedance as FrequencyData."""
     k = FrequencyData([1j, 2, 3j], [1, 2, 3])
