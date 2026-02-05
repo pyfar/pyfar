@@ -141,7 +141,8 @@ def fft(data, n_samples, sampling_rate, fft_norm):
     The function returns the double sided spectrum. The normalization is
     considered according to ``'fft_norm'`` as described in
     :py:func:`~pyfar.dsp.fft.normalization`
-    and in the :doc:`gallery<gallery:gallery/interactive/fast_fourier_transform>`.
+    and in the
+    :doc:`gallery<gallery:gallery/interactive/fast_fourier_transform>`.
 
     Parameters
     ----------
@@ -181,7 +182,8 @@ def ifft(spec, n_samples, sampling_rate, fft_norm):
     The function takes double-sided spectrum and returns a  time signal.
     The normalization is considered according to
     ``'fft_norm'`` as described in :py:func:`~pyfar.dsp.fft.normalization`
-    and in the :doc:`gallery<gallery:gallery/interactive/fast_fourier_transform>`.
+    and in the
+    :doc:`gallery<gallery:gallery/interactive/fast_fourier_transform>`.
 
     Parameters
     ----------
