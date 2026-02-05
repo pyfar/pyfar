@@ -601,8 +601,9 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     if f_lims[0] > f_lims[1]:
         raise ValueError(
             "The second frequency needs to be higher than the first.")
+
     _, lower, upper = fractional_octave_frequencies_exact(num_fractions,
-                                                           frequency_range)
+        frequency_range)
 
     if num_fractions == 1:
         if (f_lims[0] < 15.8*G**(-1/2)) or (f_lims[1] >
