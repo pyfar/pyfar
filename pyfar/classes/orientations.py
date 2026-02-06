@@ -519,7 +519,7 @@ class Orientations(Rotation):
         # instance of the parent class for scipy >= 1.17 and are therefore
         # wrapped to return an Orientations-object instead.
         quat = self.as_quat()
-        return Orientations(quat[idx])
+        return Orientations.from_quat(quat[idx])
 
     def __mul__(self, other):
         """
