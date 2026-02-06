@@ -898,23 +898,32 @@ class TransmissionMatrix(FrequencyData):
             narrow end to the virtual apex of the cone, and the distance b from
             the wide end to the same virtual apex.
         """
-        if not isinstance(area_narrow_end, Number) or isinstance(area_narrow_end, complex) or area_narrow_end <= 0:
-            raise ValueError("The input S0 must be a positive real number.")
-        if not isinstance(area_wide_end, Number) or isinstance(area_wide_end, complex) or area_wide_end <= 0:
-            raise ValueError("The input S1 must be a positive real number.")
-        if not isinstance(horn_length, Number) or isinstance(horn_length, complex) or horn_length <= 0:
-            raise ValueError("The input L must be a positive real number.")
+        if not isinstance(area_narrow_end, Number) \
+            or isinstance(area_narrow_end, complex) or area_narrow_end <= 0:
+            raise ValueError("The input area_narrow_end "
+                             "must be a positive real number.")
+        if not isinstance(area_wide_end, Number) \
+            or isinstance(area_wide_end, complex) or area_wide_end <= 0:
+            raise ValueError("The input area_wide_end "
+                             "must be a positive real number.")
+        if not isinstance(horn_length, Number) \
+            or isinstance(horn_length, complex) or horn_length <= 0:
+            raise ValueError("The input horn_length "
+                             "must be a positive real number.")
         if area_narrow_end > area_wide_end:
-            raise ValueError("S0 must be strictly smaller than S1.")
+            raise ValueError("area_narrow_end must be "
+                             "strictly smaller than area_wide_end.")
         if area_narrow_end == area_wide_end:
             raise ValueError(
-                "For a conical horn S0 must be strictly smaller than S1."
-                "If S0 == S1, use :fun:`create_transmission_line` instead.",
+                "For a conical horn area_narrow_end "
+                "must be strictly smaller than area_wide_end."
+                "If area_narrow_end == area_wide_end, "
+                "use :fun:`create_transmission_line` instead.",
             )
 
         r0 = np.sqrt(area_narrow_end / np.pi)
         r1 = np.sqrt(area_wide_end / np.pi)
-        
+
         a = r0 * horn_length / (r1 - r0)
         b = a + horn_length
 
