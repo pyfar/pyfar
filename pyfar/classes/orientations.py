@@ -505,7 +505,7 @@ class Orientations(Rotation):
 
         quats = self.as_quat()
         quats[idx] = quat
-        self = Orientations(quats)
+        self = Orientations.from_quat(quats)
 
     def __getitem__(self, idx):
         """Get orientation(s) at given indices.
