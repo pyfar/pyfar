@@ -949,8 +949,9 @@ class TransmissionMatrix(FrequencyData):
         area of the horn's narrow end, the surface area of the
         horn's wide end, the horn's length, wave number, and
         medium impedance.The surface areas are internally
-        transformed into starting point, end point, and area
-        constant of the horn to calculate the transmission
+        transformed into starting point :math:`a`,
+        end point :math:`b`, and area constant :math:`\Omega`
+        of the horn to calculate the transmission
         matrix following Equation (5-18) of Reference [1]_:
 
         .. math::
@@ -1010,7 +1011,8 @@ class TransmissionMatrix(FrequencyData):
             >>> pf.plot.freq(T.input_impedance(np.inf))
 
         """
-        if not (isinstance(wave_number, FrequencyData) or isinstance(wave_number, Number)):
+        if not (isinstance(wave_number, FrequencyData)
+                or isinstance(wave_number, Number)):
             raise TypeError(
                 "The wave number k must be a float, complex, "
                 "or FrequencyData object.",
@@ -1071,15 +1073,19 @@ class TransmissionMatrix(FrequencyData):
             horn_length = -1 * horn_length
 
         # Calculate T-matrix entries according to Equation (5-18) of [1]
-        A = b / a * np.cos(wave_number * horn_length) - 1 / (wave_number * a) * np.sin(wave_number * horn_length)
-        B = 1j * medium_impedance / (a * b * Omega) * np.sin(wave_number * horn_length)
+        A = (b / a * np.cos(wave_number * horn_length)
+            - 1 / (wave_number * a) * np.sin(wave_number * horn_length))
+        B = (1j * medium_impedance
+            / (a * b * Omega) * np.sin(wave_number * horn_length))
         C = (
-            1j
-            * Omega
+            1j * Omega
             / (wave_number * wave_number * medium_impedance)
-            * ((1 + wave_number * wave_number * a * b) * np.sin(wave_number * horn_length) - wave_number * horn_length * np.cos(wave_number * horn_length))
+            * ((1 + wave_number * wave_number * a * b)
+            * np.sin(wave_number * horn_length) - wave_number * horn_length
+            * np.cos(wave_number * horn_length))
         )
-        D = a / b * np.cos(wave_number * horn_length) + 1 / (wave_number * b) * np.sin(wave_number * horn_length)
+        D = (a / b * np.cos(wave_number * horn_length)
+            + 1 / (wave_number * b) * np.sin(wave_number * horn_length))
 
         return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
