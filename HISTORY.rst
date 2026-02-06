@@ -6,9 +6,14 @@ History
 [Unreleased]
 ------------
 
+Changed
+^^^^^^^
+* Docs: General improvements to the documentation (PR #901)
+
 Fixed
 ^^^^^
 * Make `pyfar.dsp.normalize` use the signal's current domain to avoid floating point errors (PR #900)
+
 
 0.7.4 (2026-02-02)
 ------------------
@@ -23,7 +28,6 @@ Changed
 * Test Python 3.13 and 3.14 in continuous integration (PR #853)
 * Add input validation for the parameter `unit` used in the module `pyfar.plot` (PR #861)
 * Maintenance: Require scipy<1.17.0 due to breaking changes in the private Rotation API (`PR #892 <https://github.com/pyfar/pyfar/pull/892>`_)
-* Docs: General improvements to the documentation (PR #901)
 
 Fixed
 ^^^^^
