@@ -33,7 +33,7 @@ from numbers import Number
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
-from pyfar.constants import reference_air_impedance, reference_speed_of_sound
+from pyfar.constants import reference_air_impedance
 
 
 class TransmissionMatrix(FrequencyData):
@@ -1012,7 +1012,8 @@ class TransmissionMatrix(FrequencyData):
             frequencies = wave_number.frequencies
             wave_number = wave_number.freq
             singular_frequency = False
-        elif isinstance(wave_number, complex) or isinstance(wave_number, Number):
+        elif isinstance(wave_number, complex) \
+            or isinstance(wave_number, Number):
             frequencies = []
             singular_frequency = True
         else:
@@ -1081,10 +1082,11 @@ class TransmissionMatrix(FrequencyData):
         D = (a / b * np.cos(wave_number * horn_length)
             + 1 / (wave_number * b) * np.sin(wave_number * horn_length))
 
-        if(singular_frequency == False):
+        if not singular_frequency:
             return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
         else:
-            return TransmissionMatrix.create_frequency_independent_abcd(A, B, C, D)
+            return TransmissionMatrix.\
+                        create_frequency_independent_abcd(A, B, C, D)
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""

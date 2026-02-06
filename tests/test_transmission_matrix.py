@@ -471,39 +471,45 @@ def test_create_transmission_line_frequency_matching():
     "area_narrow_end",
     [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
 )
-def test_calculate_horn_geometry_parameters_area_narrow_end_value_error(area_narrow_end):
+def test_calculate_horn_geometry_parameters_S0_value_error(area_narrow_end):
     area_wide_end = 0.2
     horn_length = 0.35
 
     with pytest.raises(ValueError, match="The input area_narrow_end"):
-        TransmissionMatrix._calculate_horn_geometry_parameters(area_narrow_end, area_wide_end, horn_length)
+        TransmissionMatrix.\
+            _calculate_horn_geometry_parameters\
+            (area_narrow_end, area_wide_end, horn_length)
 
 
 @pytest.mark.parametrize(
     "area_wide_end",
     [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
 )
-def test_calculate_horn_geometry_parameters_area_wide_end_value_error(area_wide_end):
+def test_calculate_horn_geometry_parameters_S1_value_error(area_wide_end):
     area_narrow_end = 0.2
     horn_length = 0.35
 
     with pytest.raises(ValueError, match="The input area_wide_end"):
-        TransmissionMatrix._calculate_horn_geometry_parameters(area_narrow_end, area_wide_end, horn_length)
+        TransmissionMatrix.\
+            _calculate_horn_geometry_parameters\
+            (area_narrow_end, area_wide_end, horn_length)
 
 
 @pytest.mark.parametrize(
     "horn_length",
     [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
 )
-def test_calculate_horn_geometry_parameters_horn_length_value_error(horn_length):
+def test_calculate_horn_geometry_parameters_L_value_error(horn_length):
     area_narrow_end = 0.2
     area_wide_end = 0.3
 
     with pytest.raises(ValueError, match="The input horn_length"):
-        TransmissionMatrix._calculate_horn_geometry_parameters(area_narrow_end, area_wide_end, horn_length)
+        TransmissionMatrix.\
+            _calculate_horn_geometry_parameters\
+            (area_narrow_end, area_wide_end, horn_length)
 
 
-def test_calculate_horn_geometry_parameters_area_narrow_end_larger_area_wide_end_value_error():
+def test_calculate_horn_geometry_parameters_S0_larger_S1_value_error():
     area_narrow_end = 0.35
     area_wide_end = 0.3
     horn_length = 0.35
@@ -512,16 +518,21 @@ def test_calculate_horn_geometry_parameters_area_narrow_end_larger_area_wide_end
         ValueError,
         match="area_narrow_end must be strictly smaller than area_wide_end.",
     ):
-        TransmissionMatrix._calculate_horn_geometry_parameters(area_narrow_end, area_wide_end, horn_length)
+        TransmissionMatrix.\
+            _calculate_horn_geometry_parameters\
+            (area_narrow_end, area_wide_end, horn_length)
 
 
-def test_calculate_horn_geometry_parameters_area_narrow_end_equal_area_wide_end_value_error():
+def test_calculate_horn_geometry_parameters_S0_equal_S1_value_error():
     area_narrow_end = 0.35
     area_wide_end = 0.35
     horn_length = 0.2
 
-    with pytest.raises(ValueError, match="For a conical horn area_narrow_end must be"):
-        TransmissionMatrix._calculate_horn_geometry_parameters(area_narrow_end, area_wide_end, horn_length)
+    with pytest.raises(ValueError, match=\
+        "For a conical horn area_narrow_end must be"):
+        TransmissionMatrix.\
+            _calculate_horn_geometry_parameters\
+            (area_narrow_end, area_wide_end, horn_length)
 
 
 def test_calculate_horn_geometry_calculations():
@@ -534,7 +545,8 @@ def test_calculate_horn_geometry_calculations():
     horn_length = b - a
 
     Omega_ret, a_ret, b_ret = (
-        TransmissionMatrix._calculate_horn_geometry_parameters(area_narrow_end, area_wide_end, horn_length)
+        TransmissionMatrix._calculate_horn_geometry_parameters\
+            (area_narrow_end, area_wide_end, horn_length)
     )
 
     assert np.isclose(Omega, Omega_ret, atol=1e-15)
@@ -816,8 +828,10 @@ def test_create_conical_horn_k_errors(k):
     area_wide_end = 0.04
     horn_length = 0.25
 
-    with pytest.raises(TypeError, match="The wavenumber k"):
-        TransmissionMatrix.create_conical_horn(area_narrow_end, area_wide_end, horn_length, k, Z, "backwards")
+    with pytest.raises(TypeError, match=\
+        "The wavenumber k"):
+        TransmissionMatrix.create_conical_horn\
+            (area_narrow_end, area_wide_end, horn_length, k, Z, "backwards")
 
 
 @pytest.mark.parametrize("Z", [np.array([1, 2, 3]), "imp"])
@@ -828,8 +842,10 @@ def test_create_conical_horn_medium_impedance_errors(Z):
     area_wide_end = 0.04
     horn_length = 0.25
 
-    with pytest.raises(TypeError, match="The input medium_impedance"):
-        TransmissionMatrix.create_conical_horn(area_narrow_end, area_wide_end, horn_length, k, Z, "backwards")
+    with pytest.raises(TypeError, match=\
+        "The input medium_impedance"):
+        TransmissionMatrix.create_conical_horn\
+            (area_narrow_end, area_wide_end, horn_length, k, Z, "backwards")
 
 
 @pytest.mark.parametrize(
@@ -894,7 +910,8 @@ def test_create_conical_horn_frequency_matching():
     horn_length = 0.25
 
     with pytest.raises(ValueError, match="The frequencies of"):
-        TransmissionMatrix.create_conical_horn(area_narrow_end, area_wide_end, horn_length, k, Z, "backwards")
+        TransmissionMatrix.create_conical_horn\
+            (area_narrow_end, area_wide_end, horn_length, k, Z, "backwards")
 
 def test_tmatrix_slicing(frequencies):
     """Test whether slicing a T-Matrix object return T-Matrix or raises correct
