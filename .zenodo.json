@@ -1,0 +1,37 @@
+{
+  "title": "pyfar: Python package for acoustics research",
+  "version": "0.7.3",
+  "license": "mit",
+  "upload_type": "software",
+  "description": "<p>Python package for acoustics research.<\/p>",
+  "keywords": [
+    "pyfar",
+    "acoustics",
+    "Fourier transforms",
+    "audio signal processing",
+    "filterbanks",
+    "parametric filters",
+    "audio signal visualization",
+    "read and write audio signals"
+  ],
+  "access_right": "open",
+  "language": "eng",
+  "creators": [
+    {
+      "name": "The pyfar developers"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Berzborn, Marco",
+      "affiliation": "Eindhoven University of Technology",
+      "orchid": "0000-0002-4421-1702",
+      "type": "Maintainer"
+    }
+  ],
+  "communities": [
+    {
+      "identifier": "pyfar"
+    }
+  ]
+}

@@ -163,3 +163,8 @@ replace = '\nversion = "{new_version}"'
 filename = "pyfar/__init__.py"
 search = "__version__ = '{current_version}'"
 replace = "__version__ = '{new_version}'"
+
+[[tool.bumpversion.files]]
+filename = ".zenodo.json"
+search = '"version": "{current_version}",'
+replace = '"version": "{new_version}",'
