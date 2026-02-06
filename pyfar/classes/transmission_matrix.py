@@ -876,19 +876,19 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def _calculate_horn_geometry_parameters(
-        S0: Number,
-        S1: Number,
-        L: Number,
+        area_narrow_end: Number,
+        area_wide_end: Number,
+        horn_length: Number,
     ) -> tuple[Number, Number, Number]:
         """Calculate the geometry parameters of a conical horn.
 
         Parameters
         ----------
-        S0 : float
+        area_narrow_end : float
             Cross-sectional area at the narrow end of the horn.
-        S1 : float
+        area_wide_end : float
             Cross-sectional area at the wide end of the horn.
-        L : float
+        horn_length : float
             Length of the horn.
 
         Returns
@@ -898,27 +898,27 @@ class TransmissionMatrix(FrequencyData):
             narrow end to the virtual apex of the cone, and the distance b from
             the wide end to the same virtual apex.
         """
-        if not isinstance(S0, Number) or isinstance(S0, complex) or S0 <= 0:
+        if not isinstance(area_narrow_end, Number) or isinstance(area_narrow_end, complex) or area_narrow_end <= 0:
             raise ValueError("The input S0 must be a positive real number.")
-        if not isinstance(S1, Number) or isinstance(S1, complex) or S1 <= 0:
+        if not isinstance(area_wide_end, Number) or isinstance(area_wide_end, complex) or area_wide_end <= 0:
             raise ValueError("The input S1 must be a positive real number.")
-        if not isinstance(L, Number) or isinstance(L, complex) or L <= 0:
+        if not isinstance(horn_length, Number) or isinstance(horn_length, complex) or horn_length <= 0:
             raise ValueError("The input L must be a positive real number.")
-        if S0 > S1:
+        if area_narrow_end > area_wide_end:
             raise ValueError("S0 must be strictly smaller than S1.")
-        if S0 == S1:
+        if area_narrow_end == area_wide_end:
             raise ValueError(
                 "For a conical horn S0 must be strictly smaller than S1."
                 "If S0 == S1, use :fun:`create_transmission_line` instead.",
             )
 
-        r0 = np.sqrt(S0 / np.pi)
-        r1 = np.sqrt(S1 / np.pi)
+        r0 = np.sqrt(area_narrow_end / np.pi)
+        r1 = np.sqrt(area_wide_end / np.pi)
         
-        a = r0 * L / (r1 - r0)
-        b = a + L
+        a = r0 * horn_length / (r1 - r0)
+        b = a + horn_length
 
-        Omega = S0 / a**2   # equal to S1 / b**2
+        Omega = area_narrow_end / a**2   # equal to S1 / b**2
 
         return Omega, a, b
 
