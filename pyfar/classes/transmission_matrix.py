@@ -893,7 +893,7 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        tuple[float, float, float]
+        Omega, a, b: tuple[float, float, float]
             A tuple containing the area constant Omega, the distance a from the
             narrow end to the virtual apex of the cone, and the distance b from
             the wide end to the same virtual apex.
@@ -914,23 +914,11 @@ class TransmissionMatrix(FrequencyData):
 
         r0 = np.sqrt(S0 / np.pi)
         r1 = np.sqrt(S1 / np.pi)
-
-        d0 = 2 * r0
-        d1 = 2 * r1
-
-        a = r0 * (2 * L) / (d1 - d0)
+        
+        a = r0 * L / (r1 - r0)
         b = a + L
 
-        Omega0 = S0 / a**2
-        Omega1 = S1 / b**2
-
-        if not np.isclose(Omega0, Omega1, atol=1e-15):
-            raise ValueError(
-                f"S0/a² is not equal to S1/b²: {Omega0} != {Omega1}."
-                "This should never happen.",
-            )
-
-        Omega = Omega0  # or Omega1, they are equal
+        Omega = S0 / a**2   # equal to S1 / b**2
 
         return Omega, a, b
 
@@ -947,7 +935,7 @@ class TransmissionMatrix(FrequencyData):
 
         The transmission matrix is determined based on the surface
         area of the horn's narrow end, the surface area of the
-        horn's wide end, the horn's length, wave number, and
+        horn's wide end, the horn's length, wavenumber, and
         medium impedance.The surface areas are internally
         transformed into starting point :math:`a`,
         end point :math:`b`, and area constant :math:`\Omega`
@@ -972,7 +960,7 @@ class TransmissionMatrix(FrequencyData):
             The distance between the narrow and wide end of the horn,
             i.e. the horn's length.
         wave_number : FrequencyData, scalar
-            Wave number.
+            Wavenumber.
         medium_impedance : FrequencyData, scalar
             The impedance of the medium filling the horn. Default is
             ``pyfar.constants.reference_air_impedance``
@@ -1014,7 +1002,7 @@ class TransmissionMatrix(FrequencyData):
         if not (isinstance(wave_number, FrequencyData)
                 or isinstance(wave_number, Number)):
             raise TypeError(
-                "The wave number k must be a float, complex, "
+                "The wavenumber k must be a float, complex, "
                 "or FrequencyData object.",
             )
         elif isinstance(wave_number, FrequencyData):
@@ -1079,8 +1067,8 @@ class TransmissionMatrix(FrequencyData):
             / (a * b * Omega) * np.sin(wave_number * horn_length))
         C = (
             1j * Omega
-            / (wave_number * wave_number * medium_impedance)
-            * ((1 + wave_number * wave_number * a * b)
+            / (wave_number ** 2 * medium_impedance)
+            * ((1 + wave_number ** 2 * a * b)
             * np.sin(wave_number * horn_length) - wave_number * horn_length
             * np.cos(wave_number * horn_length))
         )
