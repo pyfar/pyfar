@@ -31,6 +31,7 @@ Changed
 - Files accessed by the module `pyfar.signals.files` are now stored on https://github.com/pyfar/files (PR #807)
 - Remove command line cluttering print outs when loading `pf.signals.files.binaural_room_impulse_response` and `pf.signals.files.headphone_impulse_responses` (PR #718)
 - Improved internal documentation of the `_codec` module that handles reading and writing pyfar data from and to disk (PR #712)
+- Improved docstrings in `pyfar.constants` (PR #899)
 
 Deprecated
 ^^^^^^^^^^
