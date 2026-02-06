@@ -884,16 +884,16 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        area_narrow_end : float
+        area_narrow_end : Number
             Cross-sectional area at the narrow end of the horn.
-        area_wide_end : float
+        area_wide_end : Number
             Cross-sectional area at the wide end of the horn.
-        horn_length : float
+        horn_length : Number
             Length of the horn.
 
         Returns
         -------
-        Omega, a, b: tuple[float, float, float]
+        Omega, a, b: tuple[Number, Number, Number]
             A tuple containing the area constant Omega, the distance a from the
             narrow end to the virtual apex of the cone, and the distance b from
             the wide end to the same virtual apex.
@@ -939,7 +939,7 @@ class TransmissionMatrix(FrequencyData):
         wave_number: Number | FrequencyData,
         medium_impedance: Number | FrequencyData = reference_air_impedance,
         propagation_direction: str = "forwards",
-    ) -> TransmissionMatrix:
+    ) -> np.ndarray | TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
 
         The transmission matrix is determined based on the surface
@@ -961,11 +961,11 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        area_narrow_end : float
+        area_narrow_end : Number
             The surface area of the horn's narrow end.
-        area_wide_end : float
+        area_wide_end : Number
             The surface area of the horn's wide end.
-        horn_length : float
+        horn_length : Number
             The distance between the narrow and wide end of the horn,
             i.e. the horn's length.
         wave_number : FrequencyData, scalar
@@ -1008,21 +1008,18 @@ class TransmissionMatrix(FrequencyData):
             >>> pf.plot.freq(T.input_impedance(np.inf))
 
         """
-        if not (isinstance(wave_number, FrequencyData)
-                or isinstance(wave_number, Number)):
+        if isinstance(wave_number, FrequencyData):
+            frequencies = wave_number.frequencies
+            wave_number = wave_number.freq
+            singular_frequency = False
+        elif isinstance(wave_number, complex) or isinstance(wave_number, Number):
+            frequencies = []
+            singular_frequency = True
+        else:
             raise TypeError(
                 "The wavenumber k must be a float, complex, "
                 "or FrequencyData object.",
             )
-        elif isinstance(wave_number, FrequencyData):
-            frequencies = wave_number.frequencies
-            wave_number = wave_number.freq
-        else:
-            if isinstance(wave_number, complex):
-                k_re = wave_number.real
-            else:
-                k_re = wave_number
-            frequencies = (k_re * reference_speed_of_sound) / (2 * np.pi)
         if isinstance(medium_impedance, FrequencyData):
             if not np.allclose(
                 medium_impedance.frequencies,
@@ -1084,7 +1081,10 @@ class TransmissionMatrix(FrequencyData):
         D = (a / b * np.cos(wave_number * horn_length)
             + 1 / (wave_number * b) * np.sin(wave_number * horn_length))
 
-        return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+        if(singular_frequency == False):
+            return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+        else:
+            return TransmissionMatrix.create_frequency_independent_abcd(A, B, C, D)
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
