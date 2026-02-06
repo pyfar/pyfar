@@ -575,6 +575,13 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     nominal : numpy.ndarray of float
         The nominal center frequencies.
 
+    Notes
+    -----
+    The specified ``frequency_range`` is interpreted as frequencies lying
+    within (fractional) octave bands defined by their cutoff frequencies
+    (not their center frequencies). All bands that overlap with the
+    specified frequency range are returned.
+
     References
     ----------
     .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
@@ -594,6 +601,9 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     if f_lims[0] > f_lims[1]:
         raise ValueError(
             "The second frequency needs to be higher than the first.")
+
+    _, lower, upper = fractional_octave_frequencies_exact(num_fractions,
+        frequency_range)
 
     if num_fractions == 1:
         if (f_lims[0] < 15.8*G**(-1/2)) or (f_lims[1] >
@@ -619,7 +629,7 @@ def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
     else:
         raise ValueError('num_fractions must be 1 or 3')
 
-    mask = (nominal >= f_lims[0]) & (nominal <= f_lims[1])
+    mask = (nominal >= lower[0]) & (nominal <= upper[-1])
     nominal = nominal[mask]
     return nominal
 
@@ -685,6 +695,13 @@ def fractional_octave_frequencies_exact(
     .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
         Electroacoustics - Octave-band and fractional-octave-band filters -
         Part 1: Specifications", IEC, 2014.
+
+    Notes
+    -----
+    The specified ``frequency_range`` is interpreted as frequencies lying
+    within (fractional) octave bands defined by their cutoff frequencies
+    (not their center frequencies). All bands that overlap with the
+    specified frequency range are returned.
     """
     if not isinstance(frequency_range, (tuple, np.ndarray, list)):
         raise TypeError("The frequency range must be a tuple, list or"
@@ -711,21 +728,27 @@ def fractional_octave_frequencies_exact(
     # IEC 61260-1 Eq. (1)
     G = 10**(3/10)
     ref_freq = 1e3
-    Nmax = np.around(num_fractions*(np.log2(frequency_range[1]/ref_freq)))
-    Nmin = np.around(num_fractions*(np.log2(ref_freq/frequency_range[0])))
-
-    indices = np.arange(-Nmin, Nmax+1)
     if num_fractions % 2 != 0:
+        Nmax = np.rint((10/3)*np.log10(frequency_range[1]/ref_freq)*
+                                                    num_fractions)
+        Nmin = np.rint((10/3)*np.log10(frequency_range[0]/ref_freq)*
+                                                    num_fractions)
+        indices = np.arange(Nmin, Nmax+1)
         # IEC 61260-1 Eq. (2)
         center_frequencies = ref_freq * (G)**(indices / num_fractions)
     else:
+        Nmax = np.rint(((10/6)*np.log10(frequency_range[1]/ref_freq)*2*
+                                                    num_fractions - 1/2))
+        Nmin = np.rint(((10/6)*np.log10(frequency_range[0]/ref_freq)*2*
+                                                    num_fractions - 1/2))
+        indices = np.arange(Nmin, Nmax+1)
         # IEC 61260-1 Eq. (3)
         center_frequencies = ref_freq * (G)**((2*indices + 1)/
                                               (2*num_fractions))
-
     # IEC 61260-1 Eq. (5)
     upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
     # IEC 61260-1 Eq. (4)
     lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
+
     return (center_frequencies,
             lower_cutoff_frequencies, upper_cutoff_frequencies)
