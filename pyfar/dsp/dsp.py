@@ -2477,7 +2477,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
                 warnings.warn(
                     f"Averaging one dimensional caxis={caxis}.", stacklevel=2)
     if not isinstance(caxis, int):
-        axis = tuple([cax-1 if cax < 0 else cax for cax in caxis])
+        axis = tuple(cax-1 if cax < 0 else cax for cax in caxis)
     else:
         axis = caxis-1 if caxis < 0 else caxis
 
