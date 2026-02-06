@@ -936,19 +936,22 @@ class TransmissionMatrix(FrequencyData):
 
     @staticmethod
     def create_conical_horn(
-        S0: Number,
-        S1: Number,
-        L: Number,
-        k: Number | FrequencyData,
+        area_narrow_end: Number,
+        area_wide_end: Number,
+        horn_length: Number,
+        wave_number: Number | FrequencyData,
         medium_impedance: Number | FrequencyData = reference_air_impedance,
         propagation_direction: str = "forwards",
     ) -> TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
 
-        The transmission matrix is calculated based on the starting point
-        :math:`a`, end point :math:`b`, area constant :math:`\Omega`,
-        wave number :math:`k`, and medium impedance :math:`Z_0`
-        following Equation (5-18) of Reference [1]_:
+        The transmission matrix is determined based on the surface
+        area of the horn's narrow end, the surface area of the
+        horn's wide end, the horn's length, wave number, and
+        medium impedance.The surface areas are internally
+        transformed into starting point, end point, and area
+        constant of the horn to calculate the transmission
+        matrix following Equation (5-18) of Reference [1]_:
 
         .. math::
             T = \begin{bmatrix}
@@ -960,14 +963,14 @@ class TransmissionMatrix(FrequencyData):
 
         Parameters
         ----------
-        S0 : float
+        area_narrow_end : float
             The surface area of the horn's narrow end.
-        S1 : float
+        area_wide_end : float
             The surface area of the horn's wide end.
-        L : float
+        horn_length : float
             The distance between the narrow and wide end of the horn,
             i.e. the horn's length.
-        k : FrequencyData, scalar
+        wave_number : FrequencyData, scalar
             Wave number.
         medium_impedance : FrequencyData, scalar
             The impedance of the medium filling the horn. Default is
@@ -1007,19 +1010,19 @@ class TransmissionMatrix(FrequencyData):
             >>> pf.plot.freq(T.input_impedance(np.inf))
 
         """
-        if not (isinstance(k, FrequencyData) or isinstance(k, Number)):
+        if not (isinstance(wave_number, FrequencyData) or isinstance(wave_number, Number)):
             raise TypeError(
                 "The wave number k must be a float, complex, "
                 "or FrequencyData object.",
             )
-        elif isinstance(k, FrequencyData):
-            frequencies = k.frequencies
-            k = k.freq
+        elif isinstance(wave_number, FrequencyData):
+            frequencies = wave_number.frequencies
+            wave_number = wave_number.freq
         else:
-            if isinstance(k, complex):
-                k_re = k.real
+            if isinstance(wave_number, complex):
+                k_re = wave_number.real
             else:
-                k_re = k
+                k_re = wave_number
             frequencies = (k_re * reference_speed_of_sound) / (2 * np.pi)
         if isinstance(medium_impedance, FrequencyData):
             if not np.allclose(
@@ -1052,31 +1055,31 @@ class TransmissionMatrix(FrequencyData):
         if propagation_direction == "backwards":
             Omega, a, b = (
                 TransmissionMatrix._calculate_horn_geometry_parameters(
-                    S0,
-                    S1,
-                    L,
+                    area_narrow_end,
+                    area_wide_end,
+                    horn_length,
                 )
             )  # Error handling inside the helper function
         else:
             Omega, b, a = (
                 TransmissionMatrix._calculate_horn_geometry_parameters(
-                    S0,
-                    S1,
-                    L,
+                    area_narrow_end,
+                    area_wide_end,
+                    horn_length,
                 )
             )  # Error handling inside the helper function
-            L = -1 * L
+            horn_length = -1 * horn_length
 
         # Calculate T-matrix entries according to Equation (5-18) of [1]
-        A = b / a * np.cos(k * L) - 1 / (k * a) * np.sin(k * L)
-        B = 1j * medium_impedance / (a * b * Omega) * np.sin(k * L)
+        A = b / a * np.cos(wave_number * horn_length) - 1 / (wave_number * a) * np.sin(wave_number * horn_length)
+        B = 1j * medium_impedance / (a * b * Omega) * np.sin(wave_number * horn_length)
         C = (
             1j
             * Omega
-            / (k * k * medium_impedance)
-            * ((1 + k * k * a * b) * np.sin(k * L) - k * L * np.cos(k * L))
+            / (wave_number * wave_number * medium_impedance)
+            * ((1 + wave_number * wave_number * a * b) * np.sin(wave_number * horn_length) - wave_number * horn_length * np.cos(wave_number * horn_length))
         )
-        D = a / b * np.cos(k * L) + 1 / (k * b) * np.sin(k * L)
+        D = a / b * np.cos(wave_number * horn_length) + 1 / (wave_number * b) * np.sin(wave_number * horn_length)
 
         return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
 
