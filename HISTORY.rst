@@ -2,6 +2,14 @@
 History
 =======
 
+
+[Unreleased]
+------------
+
+Fixed
+^^^^^
+* Make `pyfar.dsp.normalize` use the signal's current domain to avoid floating point errors (PR #900)
+
 0.7.4 (2026-02-02)
 ------------------
 
