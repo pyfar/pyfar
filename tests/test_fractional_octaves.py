@@ -5,11 +5,13 @@ import pyfar
 
 from pyfar.dsp import filter
 from pyfar import FilterSOS, Signal
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def test_center_frequencies_iec():
     nominal_octs = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
-    actual_octs = filter.fractional_octave_frequencies(num_fractions=1)
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_octs = filter.fractional_octave_frequencies(num_fractions=1)
     actual_octs_nom = actual_octs[0]
     npt.assert_allclose(actual_octs_nom, nominal_octs)
 
@@ -17,24 +19,29 @@ def test_center_frequencies_iec():
         25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630,
         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000,
         12500, 16000, 20000]
-    actual_thirds = filter.fractional_octave_frequencies(
-        num_fractions=3)
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_thirds = filter.fractional_octave_frequencies(
+            num_fractions=3)
     actual_thirds_nom = actual_thirds[0]
     npt.assert_allclose(actual_thirds_nom, nominal_thirds)
 
     with pytest.raises(ValueError, match="lower and upper limit"):
-        filter.fractional_octave_frequencies(frequency_range=(1,))
+        with pytest.warns(PyfarDeprecationWarning):
+            filter.fractional_octave_frequencies(frequency_range=(1,))
 
     with pytest.raises(ValueError, match="lower and upper limit"):
-        filter.fractional_octave_frequencies(frequency_range=(3, 4, 5))
+        with pytest.warns(PyfarDeprecationWarning):
+            filter.fractional_octave_frequencies(frequency_range=(3, 4, 5))
 
     with pytest.raises(
             ValueError, match="second frequency needs to be higher"):
-        filter.fractional_octave_frequencies(
-            frequency_range=(8e3, 1e3))
+        with pytest.warns(PyfarDeprecationWarning):
+            filter.fractional_octave_frequencies(
+                frequency_range=(8e3, 1e3))
 
-    actual_octs = filter.fractional_octave_frequencies(
-        num_fractions=1, frequency_range=(100, 4e3))
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_octs = filter.fractional_octave_frequencies(
+            num_fractions=1, frequency_range=(100, 4e3))
     actual_octs_nom = actual_octs[0]
     nominal_octs_part = [125, 250, 500, 1000, 2000, 4000]
     npt.assert_allclose(actual_octs_nom, nominal_octs_part)
@@ -69,14 +76,15 @@ def test_fractional_coeff_oct_filter_iec():
         with pytest.warns(UserWarning, match="The upper frequency limit"):
             actual = filter.fractional_octaves. \
                         _coefficients_fractional_octave_bands(
-                            sr, 1, frequency_range=(5e3, 20e3), order=order)
+                            sr, 1, frequency_range=(8e3, 20e3), order=order)
 
     assert actual.shape == (1, order, 6)
 
 
 def test_fractional_frequencies_non_iec():
-    actual_nominal, actual_exact = filter.fractional_octave_frequencies(
-        num_fractions=1, frequency_range=(4e3, 64e3))
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_nominal, actual_exact = filter.fractional_octave_frequencies(
+            num_fractions=1, frequency_range=(4e3, 64e3))
     npt.assert_allclose(actual_exact, [4e3, 8e3, 16e3, 32e3, 64e3])
     assert actual_nominal is None
 
@@ -116,14 +124,15 @@ def test_fract_oct_bands_non_iec():
     expected = np.array([2e3, 4e3, 8e3, 16e3])
 
     np.testing.assert_allclose(exact, expected)
-
-    nominal, exact = filter.fractional_octave_frequencies(
-        5, (2e3, 20e3), return_cutoff=False)
+    with pytest.warns(PyfarDeprecationWarning):
+        nominal, exact = filter.fractional_octave_frequencies(
+            5, (2e3, 20e3), return_cutoff=False)
     assert nominal is None
 
     frac = 5
-    nominal, exact, f_crit = filter.fractional_octave_frequencies(
-        frac, (2e3, 20e3), return_cutoff=True)
+    with pytest.warns(PyfarDeprecationWarning):
+        nominal, exact, f_crit = filter.fractional_octave_frequencies(
+            frac, (2e3, 20e3), return_cutoff=True)
 
     octave_ratio = 10**(3/10)
     np.testing.assert_allclose(
@@ -186,7 +195,7 @@ def test_check_fractional_octance_band_filter_tolerance_n_samples():
 
     sampling_rate = 44100
     num_fractions = 1
-    frequency_range = (20, 20000)
+    frequency_range = (30, 20000)
 
     with pytest.warns(UserWarning, match='The upper frequency limit'):
         fractional_octave_bands = filter.fractional_octave_bands(
