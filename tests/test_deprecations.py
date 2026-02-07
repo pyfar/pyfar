@@ -12,6 +12,7 @@ Test deprecations. For each deprecation two things must be tested:
 """
 import numpy as np
 from packaging import version
+import re
 
 import pytest
 
@@ -180,6 +181,7 @@ def test_deprecations_freq_range_parameter_warnings():
                                                   freq_range=(20, 20e3))
 
 
+# deprecate in 0.9.0 ----------------------------------------------------------
 def test_deprecation_shelve_functions():
     # test high_shelve()
     with pytest.warns(
@@ -287,8 +289,18 @@ def test_deprecations_audio_io():
 def test_deprecations_reconstructing_fractional_octave_bands_frequencies():
     with pytest.warns(
         PyfarDeprecationWarning, match="Return parameter 'frequencies' will be"
-        " removed in pyfar 0.9.0. To get the fractional octave center "
-        "frequencies, use `pyfar.dsp.filter.fractional_octave_frequencies` "
-        "instead."):
+        " removed in pyfar 0.9.0."):
         pfilt.reconstructing_fractional_octave_bands(None,
                                                      sampling_rate=44.1e3)
+
+# deprecate in 0.10.0 ---------------------------------------------------------
+def test_deprecations_ractional_octave_frequencies():
+    message = re.escape("`pyfar.dsp.filter.fractional_octave_frequencies` "
+                        "will be deprecated in pyfar 0.10.0")
+    with pytest.warns(PyfarDeprecationWarning, match=message):
+        pfilt.fractional_octave_frequencies()
+
+    # remove statement from pyfar 0.10.0!
+    if version.parse(pf.__version__) >= version.parse('0.10.0'):
+        with pytest.raises(AttributeError):
+            pfilt.fractional_octave_frequencies()

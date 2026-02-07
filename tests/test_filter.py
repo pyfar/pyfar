@@ -6,6 +6,7 @@ import pyfar as pf
 from pyfar import Signal
 import pyfar.dsp.filter as pfilt
 import pyfar.classes.filter as pclass
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def test_butterworth(impulse):
@@ -322,8 +323,9 @@ def test_reconstructing_fractional_octave_bands():
     """Test the reconstructing fractional octave filter bank."""
 
     # test filter object
-    f_obj, f = pfilt.reconstructing_fractional_octave_bands(
-        None, sampling_rate=44100)
+    with pytest.warns(PyfarDeprecationWarning, match="'frequencies' will be"):
+        f_obj, f = pfilt.reconstructing_fractional_octave_bands(
+            None, sampling_rate=44100)
     assert isinstance(f_obj, pclass.FilterFIR)
     assert f_obj.comment == \
         ("Reconstructing linear phase fractional octave filter bank."
@@ -331,13 +333,14 @@ def test_reconstructing_fractional_octave_bands():
     assert f_obj.sampling_rate == 44100
 
     # test frequencies
-    _, f_test = pfilt.fractional_octave_frequencies(
-        frequency_range=(63, 16000))
+    f_test = pf.constants.fractional_octave_frequencies_exact(
+        frequency_range=(63, 16000))[0]
     npt.assert_allclose(f, f_test)
 
     # test filtering
     x = pf.signals.impulse(2**12)
-    y, f = pfilt.reconstructing_fractional_octave_bands(x)
+    with pytest.warns(PyfarDeprecationWarning, match="'frequencies' will be"):
+        y, f = pfilt.reconstructing_fractional_octave_bands(x)
     assert isinstance(y, Signal)
     assert y.cshape == (9, 1)
     assert y.fft_norm == 'none'
@@ -355,9 +358,11 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
     x = pf.signals.impulse(2**10)
 
     for overlap, slope in zip([1, 1, 0], [0, 3, 0]):
-        y, _ = pfilt.reconstructing_fractional_octave_bands(
-            x, frequency_range=(8e3, 16e3), overlap=overlap, slope=slope,
-            n_samples=2**10)
+        with pytest.warns(PyfarDeprecationWarning,
+                          match="'frequencies' will be"):
+            y, _ = pfilt.reconstructing_fractional_octave_bands(
+                x, frequency_range=(8e3, 16e3), overlap=overlap, slope=slope,
+                n_samples=2**10)
         reference = np.loadtxt(os.path.join(
             os.path.dirname(__file__), "references",
             f"filter.reconstructing_octaves_{overlap}_{slope}.csv"))
@@ -371,7 +376,9 @@ def test_reconstructing_fractional_octave_bands_warning():
     """Test warning for octave frequency exceeding half the sampling rate."""
     with pytest.warns(UserWarning):
         x = pf.signals.impulse(2**12, sampling_rate=16e3)
-        y, f = pfilt.reconstructing_fractional_octave_bands(x)
+        with pytest.warns(PyfarDeprecationWarning,
+                          match="'frequencies' will be"):
+            y, f = pfilt.reconstructing_fractional_octave_bands(x)
 
 
 def test_notch(impulse):
