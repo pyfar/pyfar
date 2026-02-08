@@ -453,7 +453,7 @@ def head_related_impulse_responses(
     return hrirs, sources
 
 
-def room_impulse_response(sampling_rate=48000):
+def room_impulse_response(sampling_rate=48000, noise_tail=False):
     """
     Get a room impulse response (RIR).
 
@@ -473,6 +473,12 @@ def room_impulse_response(sampling_rate=48000):
         The sampling rate of the RIR in Hz. The default of ``48000`` uses the
         RIR as it is, any other value uses :py:func:`~pyfar.dsp.resample`
         for resampling to the desired sampling rate.
+    noise_tail, bool, optional
+        If ``False``, the room impulse response is truncated at 1.75 s shortly
+        after its energy falls below that of the noise tail. If ``True``, the
+        2.5 s room impulse response including the noise tail is returned as
+        required for estimating room acoustic parameters.
+        The default is ``False``.
 
     Returns
     -------
@@ -490,7 +496,10 @@ def room_impulse_response(sampling_rate=48000):
     """
 
     # download files if requires
-    files = _load_files('room_impulse_response')
+    if noise_tail:
+        files = _load_files('room_impulse_response_with_noise')
+    else:
+        files = _load_files('room_impulse_response')
 
     # load rir
     rir = pf.io.read_audio(os.path.join(file_dir, files[0]))
@@ -519,7 +528,8 @@ def _load_files(data):
 
     # set the filenames
     if data in ['binaural_room_impulse_response', 'castanets', 'drums',
-                'guitar', 'room_impulse_response']:
+                'guitar', 'room_impulse_response',
+                'room_impulse_response_with_noise']:
         files = (f'{data}.wav', )
     elif data == 'headphone_impulse_responses':
         files = ('headphone_impulse_responses.sofa', )

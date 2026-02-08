@@ -23,6 +23,15 @@ def test_files(function, sampling_rate):
     assert signal.sampling_rate == sampling_rate
 
 
+@pytest.mark.parametrize(
+        ('noise_tail', 'n_samples'), [(False, 84176), (True, 120001)])
+def test_room_impulse_response_noise_tail(noise_tail, n_samples):
+    """Test noise tail parameter of of room impulse response."""
+
+    signal = pf.signals.files.room_impulse_response(noise_tail=noise_tail)
+    assert signal.n_samples == n_samples
+
+
 @pytest.mark.parametrize('sampling_rate', [44100, 48000])
 def test_speech(sampling_rate):
 
