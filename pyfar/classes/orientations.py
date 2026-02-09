@@ -598,8 +598,8 @@ class Orientations(Rotation):
             return np.swapaxes(vector_triple, 0, 1)
         return vector_triple
 
-    @staticmethod
-    def concatenate(orientations):
+    @classmethod
+    def concatenate(cls, orientations):
         """
         Concatenate a sequence of Orientations objects into a single object.
 
@@ -624,14 +624,14 @@ class Orientations(Rotation):
                      in orientations if isinstance(rotation, Orientations)]
 
         rot = Rotation.concatenate(orientations)
-        return Orientations(rot.as_quat())
+        return cls(rot.as_quat())
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
 
-    @staticmethod
-    def identity(num=None, *, shape=None):
+    @classmethod
+    def identity(cls, num=None, *, shape=None):
         """
         Get identity orientation(s).
 
@@ -652,7 +652,7 @@ class Orientations(Rotation):
             The identity rotation.
         """
         rot = Rotation.identity(num, shape=shape)
-        return Orientations(rot.as_quat())
+        return cls(rot.as_quat())
 
     def inv(self):
         """
@@ -715,8 +715,8 @@ class Orientations(Rotation):
         return Orientations(rot.as_quat())
 
 
-    @staticmethod
-    def random(num=None, rng=None, *, shape=None):
+    @classmethod
+    def random(cls, num=None, rng=None, *, shape=None):
         """
         Generate orientations that are uniformly distributed on a sphere.
 
@@ -750,7 +750,7 @@ class Orientations(Rotation):
         in higher dimensions, see `scipy.stats.special_ortho_group`.
         """
         rot = Rotation.random(num, rng, shape=shape)
-        return Orientations(rot.as_quat())
+        return cls(rot.as_quat())
 
     def reduce(self, left=None, right=None, return_indices=False):
         """Reduce this orientation with the provided orientation groups.
