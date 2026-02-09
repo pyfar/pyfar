@@ -938,7 +938,7 @@ class TransmissionMatrix(FrequencyData):
         horn_length: Number,
         wave_number: Number | FrequencyData,
         medium_impedance: Number | FrequencyData = reference_air_impedance,
-        propagation_direction: str = "forwards",
+        propagation_direction: str = "forward",
     ) -> np.ndarray | TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
 
@@ -973,11 +973,11 @@ class TransmissionMatrix(FrequencyData):
         medium_impedance : FrequencyData, scalar
             The impedance of the medium filling the horn. Default is
             ``pyfar.constants.reference_air_impedance``
-        propagation_direction : {'forwards', 'backwards'}
+        propagation_direction : {'forward', 'backwards'}, optional
             Defines the direction of sound propagation through the horn,
-            where ``'forwards'`` means from narrow to wide end
-            and ``'backwards'`` means from wide to narrow end.
-            Default is ``'forwards'``.
+            where ``'forward'`` means from narrow to wide end
+            and ``'backward'`` means from wide to narrow end.
+            Default is ``'forward'``.
 
         Returns
         -------
@@ -1041,15 +1041,15 @@ class TransmissionMatrix(FrequencyData):
         if not isinstance(propagation_direction, str):
             raise TypeError(
             "The input propagation_direction must be a string"
-            "with value 'forwards' or 'backwards'.",
+            "with value 'forward' or 'backward'.",
             )
-        if propagation_direction not in ("forwards", "backwards"):
+        if propagation_direction not in ("forward", "backward"):
             raise ValueError(
                 "The string propagation_direction must either be "
-                "'forwards' or 'backwards'.",
+                "'forward' or 'backward'.",
             )
 
-        if propagation_direction == "backwards":
+        if propagation_direction == "backward":
             Omega, a, b = (
                 TransmissionMatrix._calculate_horn_geometry_parameters(
                     area_narrow_end,
