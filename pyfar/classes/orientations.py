@@ -564,6 +564,9 @@ class Orientations(Rotation):
                 "Pointing in Real Euclidean Space", Journal of Guidance,
                 Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         if return_sensitivity:
             rot, rssd, sens = Rotation.align_vectors(a, b, weights,
                                                      return_sensitivity)
@@ -617,6 +620,9 @@ class Orientations(Rotation):
         concatenated : Orientations
             The concatenated orientations.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         if np.asarray(orientations).shape[0] == 1:
             return orientations[0].copy()
 
@@ -651,6 +657,9 @@ class Orientations(Rotation):
         identity : Orientations
             The identity rotation.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.identity(num, shape=shape)
         return cls(rot.as_quat())
 
@@ -667,6 +676,9 @@ class Orientations(Rotation):
             Object containing inverse of the orientations in the current
             instance.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_quat(self.as_quat())
         inv = rot.inv()
         return Orientations(inv.as_quat())
@@ -710,6 +722,9 @@ class Orientations(Rotation):
                 "Rotation Averaging", International Journal of Computer Vision
                 103, 2013, pp. 267-305.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.from_quat(self.as_quat())
         rot = rot.mean(weights, axis)
         return Orientations(rot.as_quat())
@@ -749,6 +764,9 @@ class Orientations(Rotation):
         matrices in three dimensions. For generating random rotation matrices
         in higher dimensions, see `scipy.stats.special_ortho_group`.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         rot = Rotation.random(num, rng, shape=shape)
         return cls(rot.as_quat())
 
@@ -783,6 +801,9 @@ class Orientations(Rotation):
         left_best, right_best: integer ndarray
             Indices of elements from `left` and `right` used for reduction.
         """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         if isinstance(left, Orientations):
             left = Rotation.from_quat(left.as_quat())
         if isinstance(right, Orientations):
