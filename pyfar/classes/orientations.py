@@ -913,6 +913,9 @@ class Orientations(Rotation):
 
     def __pow__(self, n):
         """Compose orientation with itself n times."""
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
         rot = super().__pow__(n)
         return Orientations(rot.as_quat())
 
