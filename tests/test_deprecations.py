@@ -294,7 +294,7 @@ def test_deprecations_reconstructing_fractional_octave_bands_frequencies():
                                                      sampling_rate=44.1e3)
 
 # deprecate in 0.10.0 ---------------------------------------------------------
-def test_deprecations_ractional_octave_frequencies():
+def test_deprecations_fractional_octave_frequencies():
     message = re.escape("`pyfar.dsp.filter.fractional_octave_frequencies` "
                         "will be deprecated in pyfar 0.10.0")
     with pytest.warns(PyfarDeprecationWarning, match=message):
