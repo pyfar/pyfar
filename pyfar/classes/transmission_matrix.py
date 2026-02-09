@@ -1014,6 +1014,7 @@ class TransmissionMatrix(FrequencyData):
             singular_frequency = False
         elif isinstance(wave_number, complex) \
             or isinstance(wave_number, Number):
+            k = wave_number
             frequencies = []
             singular_frequency = True
         else:
