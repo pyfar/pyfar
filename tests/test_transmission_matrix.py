@@ -829,7 +829,7 @@ def test_create_conical_horn_k_errors(k):
     horn_length = 0.25
 
     with pytest.raises(TypeError, match=\
-        "The wavenumber k"):
+        "wave_number must be"):
         TransmissionMatrix.create_conical_horn\
             (area_narrow_end, area_wide_end, horn_length, k, Z, "backward")
 

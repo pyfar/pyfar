@@ -1010,7 +1010,7 @@ class TransmissionMatrix(FrequencyData):
         """
         if isinstance(wave_number, FrequencyData):
             frequencies = wave_number.frequencies
-            wave_number = wave_number.freq
+            k = wave_number.freq
             singular_frequency = False
         elif isinstance(wave_number, complex) \
             or isinstance(wave_number, Number):
@@ -1018,7 +1018,7 @@ class TransmissionMatrix(FrequencyData):
             singular_frequency = True
         else:
             raise TypeError(
-                "The wavenumber k must be a float, complex, "
+                "wave_number must be a float, complex, "
                 "or FrequencyData object.",
             )
         if isinstance(medium_impedance, FrequencyData):
@@ -1028,16 +1028,18 @@ class TransmissionMatrix(FrequencyData):
                 atol=1e-15,
             ):
                 raise ValueError(
-                    "The frequencies of characteristic_impedance must "
-                    "match those of k.",
+                    "The frequencies of medium_impedance must "
+                    "match those of wave_number.",
                 )
             else:
-                medium_impedance = medium_impedance.freq
+                Z = medium_impedance.freq
         elif not isinstance(medium_impedance, Number):
             raise TypeError(
-                "The input medium_impedance must be a number"
+                "The input medium_impedance must be a number "
                 "or a FrequencyData object.",
             )
+        else:
+            Z = medium_impedance
         if not isinstance(propagation_direction, str):
             raise TypeError(
             "The input propagation_direction must be a string"
@@ -1068,19 +1070,19 @@ class TransmissionMatrix(FrequencyData):
             horn_length = -1 * horn_length
 
         # Calculate T-matrix entries according to Equation (5-18) of [1]
-        A = (b / a * np.cos(wave_number * horn_length)
-            - 1 / (wave_number * a) * np.sin(wave_number * horn_length))
-        B = (1j * medium_impedance
-            / (a * b * Omega) * np.sin(wave_number * horn_length))
+        A = (b / a * np.cos(k * horn_length)
+            - 1 / (k * a) * np.sin(k * horn_length))
+        B = (1j * Z
+            / (a * b * Omega) * np.sin(k * horn_length))
         C = (
             1j * Omega
-            / (wave_number ** 2 * medium_impedance)
-            * ((1 + wave_number ** 2 * a * b)
-            * np.sin(wave_number * horn_length) - wave_number * horn_length
-            * np.cos(wave_number * horn_length))
+            / (k ** 2 * Z)
+            * ((1 + k ** 2 * a * b)
+            * np.sin(k * horn_length) - k * horn_length
+            * np.cos(k * horn_length))
         )
-        D = (a / b * np.cos(wave_number * horn_length)
-            + 1 / (wave_number * b) * np.sin(wave_number * horn_length))
+        D = (a / b * np.cos(k * horn_length)
+            + 1 / (k * b) * np.sin(k * horn_length))
 
         if not singular_frequency:
             return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
