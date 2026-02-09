@@ -973,7 +973,7 @@ class TransmissionMatrix(FrequencyData):
         medium_impedance : FrequencyData, scalar
             The impedance of the medium filling the horn. Default is
             ``pyfar.constants.reference_air_impedance``
-        propagation_direction : {'forward', 'backwards'}, optional
+        propagation_direction : {'forward', 'backward'}, optional
             Defines the direction of sound propagation through the horn,
             where ``'forward'`` means from narrow to wide end
             and ``'backward'`` means from wide to narrow end.
@@ -1003,7 +1003,7 @@ class TransmissionMatrix(FrequencyData):
             >>> Z0 = pf.constants.reference_air_impedance
             >>> # Create the transmission matrix
             >>> T = pf.TransmissionMatrix.create_conical_horn(
-            >>>    S0, S1, L, k, Z0, 'backwards')
+            >>>    S0, S1, L, k, Z0, 'backward')
             >>> # Plot the transmission matrix
             >>> pf.plot.freq(T.input_impedance(np.inf))
 
