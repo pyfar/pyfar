@@ -25,8 +25,9 @@ class Rotation():
 
     def __repr__(self):
         """String representation of Rotation object."""
+        quat = self._rot.as_quat()
         num_orientations = \
-            1 if self._quat.ndim == 1 else self._quat.shape[0]
+            1 if quat.ndim == 1 else quat.shape[0]
 
         _repr = f"Pyfar Rotations object with {num_orientations} rotations."
         return _repr
@@ -36,8 +37,8 @@ class Rotation():
     def from_davenport(cls, axes, order, angles, degrees=False):
         """"""
         instance = cls.__new__(cls)
-        instance._store_rotation(scRotation.from_davenport(
-            axes, order, angles, degrees=False))
+        instance._rot = scRotation.from_davenport(
+            axes, order, angles, degrees=False)
 
         return instance
 
@@ -45,8 +46,8 @@ class Rotation():
     def from_euler(cls, seq, angles, degrees=False):
         """"""
         instance = cls.__new__(cls)
-        instance._store_rotation(scRotation.from_euler(
-            seq, angles, degrees=False))
+        instance._rot = scRotation.from_euler(
+            seq, angles, degrees=False)
 
         return instance
 
@@ -54,7 +55,7 @@ class Rotation():
     def from_matrix(cls, matrix):
         """"""
         instance = cls.__new__(cls)
-        instance._store_rotation(scRotation.from_matrix(matrix))
+        instance._rot = scRotation.from_matrix(matrix)
 
         return instance
 
@@ -62,7 +63,7 @@ class Rotation():
     def from_quat(cls, quat):
         """"""
         instance = cls.__new__(cls)
-        instance._store_rotation(scRotation.from_quat(quat))
+        instance._rot = scRotation.from_quat(quat)
         return instance
 
 
@@ -70,7 +71,7 @@ class Rotation():
     def _from_scipy_rotation(cls, sc_rotation):
         """"""
         instance = cls.__new__(cls)
-        instance._store_rotation(sc_rotation)
+        instance._rot = sc_rotation
         return instance
 
     # Instance methods
@@ -84,7 +85,7 @@ class Rotation():
 
     def as_quat(self):
         """"""
-        return self._quat
+        return self._rot.as_quat()
 
     def as_matrix(self):
         """"""
@@ -93,18 +94,3 @@ class Rotation():
     def mean(self, weights=None, axis=None):
         """"""
         return self._from_scipy_rotation(self._rot.mean(weights, axis))
-
-    # Private methods
-    def _store_rotation(self, sc_rotation: scRotation):
-        """
-        Stores scipy rotation and raw quaternion data.
-
-        This is an auxiliary private function to save some codelines.
-
-        Parameters
-        ----------
-        sc_rotatiton : scipy.Rotation
-            Scipy Rotation object
-        """
-        self._rot = sc_rotation
-        self._quat = sc_rotation.as_quat()
