@@ -3,7 +3,6 @@ from scipy.spatial.transform import Rotation as scRotation
 import numpy as np
 import warnings
 
-import pyfar as pf
 if np.__version__ < '2.0.0':
     from numpy import VisibleDeprecationWarning
 else:
@@ -19,6 +18,7 @@ class Rotation():
     """
     Pyfar Rotation class.
     """
+
     def __init__(self):
         raise RuntimeError("Rotation objects must be created using one of "
                            "the `from_...` methods")
@@ -38,7 +38,7 @@ class Rotation():
         """"""
         instance = cls.__new__(cls)
         instance._rot = scRotation.from_davenport(
-            axes, order, angles, degrees=False)
+            axes, order, angles, degrees=degrees)
 
         return instance
 
@@ -47,7 +47,7 @@ class Rotation():
         """"""
         instance = cls.__new__(cls)
         instance._rot = scRotation.from_euler(
-            seq, angles, degrees=False)
+            seq, angles, degrees=degrees)
 
         return instance
 
@@ -65,7 +65,6 @@ class Rotation():
         instance = cls.__new__(cls)
         instance._rot = scRotation.from_quat(quat)
         return instance
-
 
     @classmethod
     def _from_scipy_rotation(cls, sc_rotation):
