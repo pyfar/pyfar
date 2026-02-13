@@ -50,7 +50,7 @@ Fixed
 ^^^^^
 - Fix warnings and errors in tests (PR #859, #897)
 - Update the calculation of nominal and exact center frequencies in `pyfar.constants.fractional_octave_frequencies_exact` and `pyfar.constants.fractional_octave_frequencies_nominal` (PR #874)
-- Wrap methods from `scipy.spatial.transform.Rotation` in `pf.Orientations` to fix inheritance-breaking changes in scipy v1.17.0 (PR #890)
+- Wrap methods from `scipy.spatial.transform.Rotation` in `pf.Orientations` to fix inheritance-breaking changes in scipy v1.17.0 (PR #890, #893)
 
 0.7.4 (2026-02-02)
 ------------------
