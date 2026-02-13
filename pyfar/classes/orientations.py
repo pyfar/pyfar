@@ -66,6 +66,265 @@ class Orientations(Rotation):
         super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
+    def from_matrix(cls, matrix, assume_valid=False):
+        """
+        Initialize from rotation matrix.
+
+        Rotations in 3 dimensions can be represented with 3 x 3 orthogonal
+        matrices [#]_. If the input is not orthogonal, an approximation is
+        created by orthogonalizing the input matrix using the method described
+        in [#]_, and then converting the orthogonal rotation matrices to
+        quaternions using the algorithm described in [#]_. Matrices must be
+        right-handed.
+
+        Parameters
+        ----------
+        matrix : array_like, shape (..., 3, 3)
+            A single matrix or an ND array of matrices, where the last two
+            dimensions contain the rotation matrices.
+        assume_valid : bool, optional
+            Must be False unless users can guarantee the input is a valid
+            rotation matrix, i.e. it is orthogonal, rows and columns have unit
+            norm and the determinant is 1. Setting this to True without
+            ensuring these properties is unsafe and will silently lead to
+            incorrect results. If True, normalization steps are skipped, which
+            can improve runtime performance.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+        .. [#] https://en.wikipedia.org/wiki/Orthogonal_Procrustes_problem
+        .. [#] F. Landis Markley, "Unit Quaternion from Rotation Matrix",
+               Journal of guidance, control, and dynamics vol. 31.2, pp.
+               440-442, 2008.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_matrix(matrix=matrix, assume_valid=assume_valid)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_quat(cls, quat, scalar_first=False):
+        """
+        Initialize from quaternions.
+
+        Rotations in 3 dimensions can be represented using unit norm
+        quaternions [#]_.
+
+        The 4 components of a quaternion are divided into a scalar part ``w``
+        and a vector part ``(x, y, z)`` and can be expressed from the angle
+        ``theta`` and the axis ``n`` of a rotation as follows::
+
+            w = cos(theta / 2)
+            x = sin(theta / 2) * n_x
+            y = sin(theta / 2) * n_y
+            z = sin(theta / 2) * n_z
+
+        There are 2 conventions to order the components in a quaternion:
+
+        - scalar-first order -- ``(w, x, y, z)``
+        - scalar-last order -- ``(x, y, z, w)``
+
+        The choice is controlled by `scalar_first` argument.
+        By default, it is False and the scalar-last order is assumed.
+
+        Advanced users may be interested in the "double cover" of 3D space by
+        the quaternion representation [#]_. As of version 1.11.0, the
+        following subset (and only this subset) of operations on a `Rotation`
+        ``r`` corresponding to a quaternion ``q`` are guaranteed to preserve
+        the double cover property: ``r = Rotation.from_quat(q)``,
+        ``r.as_quat(canonical=False)``, ``r.inv()``, and composition using the
+        ``*`` operator such as ``r*r``.
+
+        Parameters
+        ----------
+        quat : array_like, shape (..., 4)
+            Each row is a (possibly non-unit norm) quaternion representing an
+            active rotation. Each quaternion will be normalized to unit norm.
+        scalar_first : bool, optional
+            Whether the scalar component goes first or last.
+            Default is False, i.e. the scalar-last order is assumed.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+        .. [#] Hanson, Andrew J. "Visualizing quaternions."
+            Morgan Kaufmann Publishers Inc., San Francisco, CA. 2006.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_quat(quat=quat, scalar_first=scalar_first)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_rotvec(cls, rotvec, degrees=False):
+        """Initialize from rotation vectors.
+
+        A rotation vector is a 3 dimensional vector which is co-directional to
+        the axis of rotation and whose norm gives the angle of rotation [#]_.
+
+        Parameters
+        ----------
+        rotvec : array_like, shape (..., 3)
+            A single vector or an ND array of vectors, where the last dimension
+            contains the rotation vectors.
+        degrees : bool, optional
+            If True, then the given magnitudes are assumed to be in degrees.
+            Default is False.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_rotvec(rotvec=rotvec, degrees=degrees)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_mrp(cls, mrp):
+        """
+        Initialize from Modified Rodrigues Parameters (MRPs).
+
+        MRPs are a 3 dimensional vector co-directional to the axis of rotation
+        and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
+        the angle of rotation (in radians) [#]_.
+
+        MRPs have a singularity at 360 degrees which can be avoided by ensuring
+        the angle of rotation does not exceed 180 degrees, i.e. switching the
+        direction of the rotation when it is past 180 degrees.
+
+        Parameters
+        ----------
+        mrp : array_like, shape (..., 3)
+            A single vector or an ND array of vectors, where the last dimension
+            contains the rotation parameters.
+
+        References
+        ----------
+        .. [#] Shuster, M. D. "A Survey of Attitude Representations",
+               The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
+               pp. 475-476
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_mrp(mrp)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_euler(cls, seq, angles, degrees=False):
+        """Initialize from Euler angles.
+
+        Rotations in 3-D can be represented by a sequence of 3
+        rotations around a sequence of axes. In theory, any three axes spanning
+        the 3-D Euclidean space are enough. In practice, the axes of rotation
+        are chosen to be the basis vectors.
+
+        The three rotations can either be in a global frame of reference
+        (extrinsic) or in a body centred frame of reference (intrinsic), which
+        is attached to, and moves with, the object under rotation [#]_.
+
+        Parameters
+        ----------
+        seq : string
+            Specifies sequence of axes for rotations. Up to 3 characters
+            belonging to the set {'X', 'Y', 'Z'} for intrinsic rotations, or
+            {'x', 'y', 'z'} for extrinsic rotations. Extrinsic and intrinsic
+            rotations cannot be mixed in one function call.
+        angles : float or array_like, shape (...,  [1 or 2 or 3])
+            Euler angles specified in radians (`degrees` is False) or degrees
+            (`degrees` is True).
+            Each character in `seq` defines one axis around which `angles`
+            turns. The resulting rotation has the shape
+            np.atleast_1d(angles).shape[:-1]. Dimensionless angles are thus
+            only valid for single character `seq`.
+
+        degrees : bool, optional
+            If True, then the given angles are assumed to be in degrees.
+            Default is False.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_euler(seq=seq, angles=angles, degrees=degrees)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
+    def from_davenport(cls, axes, order, angles, degrees=False):
+        """Initialize from Davenport angles.
+
+        Rotations in 3-D can be represented by a sequence of 3
+        rotations around a sequence of axes.
+
+        The three rotations can either be in a global frame of reference
+        (extrinsic) or in a body centred frame of reference (intrinsic), which
+        is attached to, and moves with, the object under rotation [#]_.
+
+        For both Euler angles and Davenport angles, consecutive axes must
+        be are orthogonal (``axis2`` is orthogonal to both ``axis1`` and
+        ``axis3``). For Euler angles, there is an additional relationship
+        between ``axis1`` or ``axis3``, with two possibilities:
+
+            - ``axis1`` and ``axis3`` are also orthogonal (asymmetric sequence)
+            - ``axis1 == axis3`` (symmetric sequence)
+
+        For Davenport angles, this last relationship is relaxed [#]_, and only
+        the consecutive orthogonal axes requirement is maintained.
+
+        Parameters
+        ----------
+        axes : array_like, shape (3,) or (..., [1 or 2 or 3], 3)
+            Axis of rotation, if one dimensional. If two or more dimensional,
+            describes the sequence of axes for rotations, where each
+            axes[..., i, :] is the ith axis. If more than one axis is given,
+            then the second axis must be orthogonal to both the first and third
+            axes.
+        order : string
+            If it is equal to 'e' or 'extrinsic', the sequence will be
+            extrinsic. If it is equal to 'i' or 'intrinsic', sequence
+            will be treated as intrinsic.
+        angles : float or array_like, shape (..., [1 or 2 or 3])
+            Angles specified in radians (`degrees` is False) or degrees
+            (`degrees` is True).
+            Each angle i in the last dimension of `angles` turns around the
+            corresponding axis axis[..., i, :]. The resulting rotation has the
+            shape np.broadcast_shapes(np.atleast_2d(axes).shape[:-2],
+            np.atleast_1d(angles).shape[:-1]) Dimensionless angles are thus
+            only valid for a single axis.
+
+        degrees : bool, optional
+            If True, then the given angles are assumed to be in degrees.
+            Default is False.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        .. [#] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
+               the Euler Angles. Journal of the Astronautical Sciences. 51.
+               123-132. 10.1007/BF03546304.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_davenport(axes=axes, order=order, angles=angles,
+                                      degrees=degrees)
+        quat = rot.as_quat()
+        return cls(quat)
+
+    @classmethod
     def from_view_up(cls, views, ups):
         """Initialize Orientations from a view an up vector.
 
@@ -130,7 +389,7 @@ class Orientations(Rotation):
         rotation_matrix = np.asarray([views, ups, rights])
         rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
 
-        return super().from_matrix(rotation_matrix)
+        return cls.from_matrix(rotation_matrix)
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
@@ -184,6 +443,139 @@ class Orientations(Rotation):
             ax = pf.plot.quiver(
                 positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
 
+    def align_vectors(a, b, weights=None, return_sensitivity=False):
+        r"""
+        Estimate an orientation to optimally align two sets of vectors.
+
+        Find a rotation between frames A and B which best aligns a set of
+        vectors `a` and `b` observed in these frames. The following loss
+        function is minimized to solve for the rotation matrix
+        :math:`C`:
+
+        .. math::
+
+            L(C) = \\frac{1}{2} \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{a}_i -
+            C \\mathbf{b}_i \\rVert^2 ,
+
+        where :math:`w_i`'s are the `weights` corresponding to each vector.
+
+        The rotation is estimated with Kabsch algorithm [#]_, and solves what
+        is known as the "pointing problem", or "Wahba's problem" [#]_.
+
+        Note that the length of each vector in this formulation acts as an
+        implicit weight. So for use cases where all vectors need to be
+        weighted equally, you should normalize them to unit length prior to
+        calling this method.
+
+        There are two special cases. The first is if a single vector is given
+        for `a` and `b`, in which the shortest distance rotation that aligns
+        `b` to `a` is returned.
+
+        The second is when one of the weights is infinity. In this case, the
+        shortest distance rotation between the primary infinite weight vectors
+        is calculated as above. Then, the rotation about the aligned primary
+        vectors is calculated such that the secondary vectors are optimally
+        aligned per the above loss function. The result is the composition
+        of these two rotations. The result via this process is the same as the
+        Kabsch algorithm as the corresponding weight approaches infinity in
+        the limit. For a single secondary vector this is known as the
+        "align-constrain" algorithm [#]_.
+
+        For both special cases (single vectors or an infinite weight), the
+        sensitivity matrix does not have physical meaning and an error will be
+        raised if it is requested. For an infinite weight, the primary vectors
+        act as a constraint with perfect alignment, so their contribution to
+        `rssd` will be forced to 0 even if they are of different lengths.
+
+        Parameters
+        ----------
+        a : array_like, shape (3,) or (N, 3)
+            Vector components observed in initial frame A. Each row of `a`
+            denotes a vector.
+        b : array_like, shape (3,) or (N, 3)
+            Vector components observed in another frame B. Each row of `b`
+            denotes a vector.
+        weights : array_like shape (N,), optional
+            Weights describing the relative importance of the vector
+            observations. If None (default), then all values in `weights` are
+            assumed to be 1. One and only one weight may be infinity, and
+            weights must be positive.
+        return_sensitivity : bool, optional
+            Whether to return the sensitivity matrix. See Notes for details.
+            Default is False.
+
+        Returns
+        -------
+        orientation : Orientations
+            Best estimate of the rotation that transforms `b` to `a`.
+        rssd : float
+            Stands for "root sum squared distance". Square root of the weighted
+            sum of the squared distances between the given sets of vectors
+            after alignment. It is equal to ``sqrt(2 * minimum_loss)``, where
+            ``minimum_loss`` is the loss function evaluated for the found
+            optimal rotation.
+            Note that the result will also be weighted by the vectors'
+            magnitudes, so perfectly aligned vector pairs will have nonzero
+            `rssd` if they are not of the same length. This can be avoided by
+            normalizing them to unit length prior to calling this method,
+            though note that doing this will change the resulting rotation.
+        sensitivity_matrix : ndarray, shape (3, 3)
+            Sensitivity matrix of the estimated rotation estimate as explained
+            in Notes. Returned only when `return_sensitivity` is True. Not
+            valid if aligning a single pair of vectors or if there is an
+            infinite weight, in which cases an error will be raised.
+
+        Notes
+        -----
+        The sensitivity matrix gives the sensitivity of the estimated rotation
+        to small perturbations of the vector measurements. Specifically we
+        consider the rotation estimate error as a small rotation vector of
+        frame A. The sensitivity matrix is proportional to the covariance of
+        this rotation vector assuming that the vectors in `a` was measured with
+        errors significantly less than their lengths. To get the true
+        covariance matrix, the returned sensitivity matrix must be multiplied
+        by harmonic mean [#]_ of variance in each observation. Note that
+        `weights` are supposed to be inversely proportional to the observation
+        variances to get consistent results. For example, if all vectors are
+        measured with the same accuracy of 0.01 (`weights` must be all equal),
+        then you should multiple the sensitivity matrix by 0.01**2 to get the
+        covariance.
+
+        Refer to [#]_ for more rigorous discussion of the covariance
+        estimation. See [#]_ for more discussion of the pointing problem and
+        minimal proper pointing.
+
+        This function does not support broadcasting or ND arrays with N > 2.
+
+        References
+        ----------
+        .. [#] https://en.wikipedia.org/wiki/Kabsch_algorithm
+        .. [#] https://en.wikipedia.org/wiki/Wahba%27s_problem
+        .. [#] Magner, Robert,
+                "Extending target tracking capabilities through trajectory and
+                momentum setpoint optimization." Small Satellite Conference,
+                2018.
+        .. [#] https://en.wikipedia.org/wiki/Harmonic_mean
+        .. [#] F. Landis Markley,
+                "Attitude determination using vector observations: a fast
+                optimal matrix algorithm", Journal of Astronautical Sciences,
+                Vol. 41, No.2, 1993, pp. 261-280.
+        .. [#] Bar-Itzhack, Itzhack Y., Daniel Hershkowitz, and Leiba Rodman,
+                "Pointing in Real Euclidean Space", Journal of Guidance,
+                Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        if return_sensitivity:
+            rot, rssd, sens = Rotation.align_vectors(a, b, weights,
+                                                     return_sensitivity)
+            return Orientations.from_quat(rot.as_quat()), rssd, sens
+
+        rot, rssd = Rotation.align_vectors(a, b, weights, return_sensitivity)
+        return Orientations.from_quat(rot.as_quat()), rssd
+
+
     def as_view_up_right(self):
         """Get Orientations as a view, up, and right vector.
 
@@ -209,9 +601,222 @@ class Orientations(Rotation):
             return np.swapaxes(vector_triple, 0, 1)
         return vector_triple
 
+    @classmethod
+    def concatenate(cls, orientations):
+        """
+        Concatenate a sequence of Orientations objects into a single object.
+
+        This is useful if you want to, for example, take the mean of a set of
+        orientations and need to pack them into a single object to do so.
+
+        Parameters
+        ----------
+        orientations : sequence of Orientations objects
+            The orientations to concatenate. If a single Orientations object is
+            passed in, a copy is returned.
+
+        Returns
+        -------
+        concatenated : Orientations
+            The concatenated orientations.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        if np.asarray(orientations).shape[0] == 1:
+            return orientations[0].copy()
+
+        orientations = [Rotation.from_quat(rotation.as_quat()) for rotation
+                     in orientations if isinstance(rotation, Orientations)]
+
+        rot = Rotation.concatenate(orientations)
+        return cls(rot.as_quat())
+
     def copy(self):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
+
+    @classmethod
+    def identity(cls, num=None, *, shape=None):
+        """
+        Get identity orientation(s).
+
+        Composition with the identity orientation has no effect.
+
+        Parameters
+        ----------
+        num : int or None, optional
+            Number of identity orientations to generate. If None (default),
+            then a single rotation is generated.
+        shape : int or tuple of ints, optional
+            Shape of identity orientations to generate. If specified, `num`
+            must be None.
+
+        Returns
+        -------
+        identity : Orientations
+            The identity rotation.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.identity(num, shape=shape)
+        return cls(rot.as_quat())
+
+    def inv(self):
+        """
+        Invert this orientation.
+
+        Composition of an orientation with its inverse results in an identity
+        transformation.
+
+        Returns
+        -------
+        inverse : Orientations
+            Object containing inverse of the orientations in the current
+            instance.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_quat(self.as_quat())
+        inv = rot.inv()
+        return Orientations(inv.as_quat())
+
+    def mean(self, weights=None, axis=None):
+        r"""
+        Get the mean of the orientations.
+
+        The mean used is the chordal L2 mean (also called the projected or
+        induced arithmetic mean) [#]_. If ``A`` is a set of rotation matrices,
+        then the mean ``M`` is the rotation matrix that minimizes the
+        following loss function:
+
+        .. math::
+
+            L(M) = \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{A}_i -
+            \\mathbf{M} \\rVert^2 ,
+
+        where :math:`w_i`'s are the `weights` corresponding to each matrix.
+
+        Parameters
+        ----------
+        weights : array_like shape (..., N), optional
+            Weights describing the relative importance of the orientations. If
+            None (default), then all values in `weights` are assumed to be
+            equal. If given, the shape of `weights` must be broadcastable to
+            the rotation shape. Weights must be non-negative.
+        axis : None, int, or tuple of ints, optional
+            Axis or axes along which the means are computed. The default is to
+            compute the mean of all orientations.
+
+        Returns
+        -------
+        mean : Orientations
+            Single orientation containing the mean of the orientations in the
+            current instance.
+
+        References
+        ----------
+        .. [#] Hartley, Richard, et al.,
+                "Rotation Averaging", International Journal of Computer Vision
+                103, 2013, pp. 267-305.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.from_quat(self.as_quat())
+        rot = rot.mean(weights, axis)
+        return Orientations(rot.as_quat())
+
+
+    @classmethod
+    def random(cls, num=None, rng=None, *, shape=None):
+        """
+        Generate orientations that are uniformly distributed on a sphere.
+
+        Formally, the orientations follow the Haar-uniform distribution over
+        the SO(3) group.
+
+        Parameters
+        ----------
+        num : int or None, optional
+            Number of random orientations to generate. If None (default), then
+            a single orientation is generated.
+        rng : `numpy.random.Generator`, optional
+            Pseudorandom number generator state. When `rng` is None, a new
+            `numpy.random.Generator` is created using entropy from the
+            operating system. Types other than `numpy.random.Generator` are
+            passed to `numpy.random.default_rng` to instantiate a `Generator`.
+        shape : tuple of ints, optional
+            Shape of random orientations to generate. If specified, `num` must
+            be None.
+
+        Returns
+        -------
+        random_orientation : Orientaions
+            Contains a single orientation if `num` is None. Otherwise contains
+            a stack of `num` orientations.
+
+        Notes
+        -----
+        This function is optimized for efficiently sampling random rotation
+        matrices in three dimensions. For generating random rotation matrices
+        in higher dimensions, see `scipy.stats.special_ortho_group`.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = Rotation.random(num, rng, shape=shape)
+        return cls(rot.as_quat())
+
+    def reduce(self, left=None, right=None, return_indices=False):
+        """Reduce this orientation with the provided orientation groups.
+
+        Reduction of a orientation ``p`` is a transformation of the form
+        ``q = l * p * r``, where ``l`` and ``r`` are chosen from `left` and
+        `right` respectively, such that orientation ``q`` has the smallest
+        magnitude.
+
+        If `left` and `right` are orientation groups representing symmetries of
+        two objects rotated by ``p``, then ``q`` is the orientation of the
+        smallest magnitude to align these objects considering their symmetries.
+
+        Parameters
+        ----------
+        left : Orientation, optional
+            Object containing the left orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        right : Orientation, optional
+            Object containing the right orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        return_indices : bool, optional
+            Whether to return the indices of the orientations from `left` and
+            `right` used for reduction.
+
+        Returns
+        -------
+        reduced : Orientations
+            Object containing reduced orientations.
+        left_best, right_best: integer ndarray
+            Indices of elements from `left` and `right` used for reduction.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        if isinstance(left, Orientations):
+            left = Rotation.from_quat(left.as_quat())
+        if isinstance(right, Orientations):
+            right = Rotation.from_quat(right.as_quat())
+
+        rot = Rotation.from_quat(self.as_quat())
+
+        if return_indices:
+            rot, left_idx, right_idx = rot.reduce(left, right, return_indices)
+            return Orientations(rot.as_quat()), left_idx, right_idx
+
+        rot = rot.reduce(left, right, return_indices)
+        return Orientations(rot.as_quat())
 
     def _encode(self):
         """Return object in a proper encoding format."""
@@ -235,16 +840,97 @@ class Orientations(Rotation):
         val : array_like
             quaternion(s), shape (N, 4) or (4,)
         """
-        if isinstance(val, Orientations):
-            val = val.as_quat()
-        quat = np.atleast_2d(val)
+        if isinstance(val, (Rotation, Orientations)):
+            quat = np.atleast_2d(val.as_quat())
+        else:
+            quat = np.atleast_2d(val)
+
         if quat.ndim > 2 or quat.shape[-1] != 4:
             raise ValueError(f"Expected assigned value to have shape"
                              f" or (1, 4), got {quat.shape}")
+
         quats = self.as_quat()
         quats[idx] = quat
-        self = super().from_quat(quats)
+        self = Orientations.from_quat(quats)
+
+    def __getitem__(self, idx):
+        """Get orientation(s) at given indices.
+
+        Parameters
+        ----------
+        idx : indexes
+            see NumPy Indexing
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        quat = self.as_quat()
+        return Orientations.from_quat(quat[idx])
+
+    def __mul__(self, other):
+        """
+        Multiply Orientations object with another Orientations or
+        Rotation object.
+
+        Parameters
+        ----------
+        other : Orientations or Rotation
+            The object to multiply with. If an Orientations object is provided,
+            it will be converted to a Rotation object for the multiplication.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        if isinstance(other, Orientations):
+            other = Rotation.from_quat(other.as_quat())
+        if isinstance(other, Rotation):
+            rot = Rotation.from_quat(self.as_quat()) * other
+            return Orientations(rot.as_quat())
+
+    def __rmul__(self, other):
+        """
+        Right multiplication of Orientations or Rotation with Orientations.
+
+        Parameters
+        ----------
+        other : Orientations or Rotation
+            The object to multiply with this Orientations object on the left
+            side. If an Orientations object is provided, it will be converted
+            to a Rotation object using quaternion representation.
+        """
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        if isinstance(other, Orientations):
+            other = Rotation.from_quat(other.as_quat())
+        if isinstance(other, Rotation):
+            rot = other * Rotation.from_quat(self.as_quat())
+            return Orientations(rot.as_quat())
 
     def __eq__(self, other):
         """Check for equality of two objects."""
         return np.array_equal(self.as_quat(), other.as_quat())
+
+    def __pow__(self, n):
+        """Compose orientation with itself n times."""
+        # Methods inherited from scipy.spatial.transforms.Rotation return an
+        # instance of the parent class for scipy >= 1.17 and are therefore
+        # wrapped to return an Orientations-object instead.
+        rot = super().__pow__(n)
+        return Orientations(rot.as_quat())
+
+    def __iter__(self):
+        """Iterate over orientations."""
+        if self.as_quat().ndim == 1:
+            raise TypeError("Single orientation is not iterable.")
+
+        for i in range(self.as_quat().shape[0]):
+            yield Orientations(self.as_quat()[i, ...])
+
+    def __repr__(self):
+        """String representation of Orientations object."""
+        quats = self.as_quat()
+        num_orientations = 1 if quats.ndim == 1 else quats.shape[0]
+
+        _repr = f"Orientations object with {num_orientations} orientations."
+        return _repr
