@@ -5,6 +5,7 @@ import sofar as sf
 import pyfar as pf
 
 from pyfar import Orientations
+from pyfar import Rotation
 from pyfar import Coordinates
 from pyfar import FrequencyData, TimeData
 import pyfar.classes.filter as fo
@@ -753,6 +754,14 @@ def orientations(views, ups):
     """Orientations object uses fixtures `views` and `ups`.
     """
     return Orientations.from_view_up(views, ups)
+
+
+@pytest.fixture()
+def rotation(views, ups):
+    """Rotation object uses fixtures `views` and `ups`.
+    """
+    return Rotation.from_view_up(views, ups)
+
 
 
 @pytest.fixture()
