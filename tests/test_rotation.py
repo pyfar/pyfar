@@ -1,4 +1,5 @@
 import pytest
+import re
 
 import numpy as np
 import numpy.testing as npt
@@ -177,6 +178,18 @@ def test_rotation_indexing(rotation):
         "Indexed rotation are not the same")
     assert np.array_equal(quats[1], rotation[1].as_quat()), (
         "Indexed rotation are not the same")
+
+def test_setitem_error(rotation):
+    """
+    Test if setting an item throws an error.
+    """
+    match = re.escape('Setting an item is disabled for pyfar Rotations. If you '
+                      'want to modify the Rotation, use an array '
+                      'representation like `as_quat()` or `as_matrix()` and '
+                      'create a new object.')
+    with pytest.raises(NotImplementedError, match=match):
+        rotation[0] = [[0.5, 1, 0]]
+
 
 def test_rotation_rotation(views, ups, positions, rotation):
     """Multiply a pyfar Roation with a scipy Rotation and visualize them."""
