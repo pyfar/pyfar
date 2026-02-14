@@ -39,9 +39,9 @@ class Rotation():
     def __iter__(self):
         raise NotImplementedError
 
-    def __setitem__(self):
-        raise NotImplementedError('Setting an item is disabled for pyfar'
-        'Rotations. If you want to modify the Rotation, use an array'
+    def __setitem__(self, *args):
+        raise NotImplementedError('Setting an item is disabled for pyfar '
+        'Rotations. If you want to modify the Rotation, use an array '
         'representation like `as_quat()` or `as_matrix()` and create a new '
         'object.')
 
