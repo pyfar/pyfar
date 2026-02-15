@@ -13,6 +13,7 @@ Changed
 Fixed
 ^^^^^
 * Make `pyfar.dsp.normalize` use the signal's current domain to avoid floating point errors (PR #900)
+* Fix bug where `pyfar.Orientations.from_view_up` and `pyfar.Orientations.as_view_up_right` did not use the standard Cartesian coordinate convention used in `scipy.spatial.transform.Rotation` and `pyfar.Coordiantes` (PR #848)
 
 
 0.7.4 (2026-02-02)

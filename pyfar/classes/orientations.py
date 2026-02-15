@@ -127,7 +127,10 @@ class Orientations(Rotation):
         # by the right-hand rule
         rights = np.cross(views, ups)
 
-        rotation_matrix = np.asarray([views, ups, rights])
+        # In a standard Cartesian right-handed coordinate system,
+        # these vectors are defined as [x, y, z] = [view, left, up], where
+        # left is the same vector as -rights
+        rotation_matrix = np.asarray([views, -rights, ups])
         rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
 
         return super().from_matrix(rotation_matrix)
@@ -205,6 +208,13 @@ class Orientations(Rotation):
         # Apply self as a Rotation (base class) on eye i.e. generate orientions
         # as rotations relative to standard basis in 3d
         vector_triple = super().as_matrix()
+        views, lefts, ups = np.split(vector_triple, 3, axis=-2)
+
+        # In a standard Cartesian right-handed coordinate system,
+        # standard basis is defined as [x, y, z] = [view, left, up], where
+        # left is the same vector as -rights
+        vector_triple = np.concatenate((views, ups, -lefts), axis=-2)
+
         if vector_triple.ndim == 3:
             return np.swapaxes(vector_triple, 0, 1)
         return vector_triple
