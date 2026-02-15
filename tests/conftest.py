@@ -738,7 +738,7 @@ def ups():
     """Used for the creation of Orientation objects with
     `Orientations.from_view_up`.
     """
-    return [[0, 1, 0], [0, -2, 0], [0, 1, 0]]
+    return [[0, 0, 1], [0, 0, 2], [0, 0, 1]]
 
 
 @pytest.fixture()

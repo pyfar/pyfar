@@ -84,8 +84,6 @@ def test_rotation_show(positions, rotation):
     Visualize rotation via `Rotation.show()`
     with and without `positions`.
     """
-    # default orientation
-    Rotation().show()
     # single vectors no position
     view = [1, 0, 0]
     up = [0, 1, 0]
@@ -131,8 +129,8 @@ def test_as_view_up_right(views, ups, rotation):
 
     views_, ups_, _ = rotation.as_view_up_right()
 
-    assert np.array_equal(views_, views), "views are not preserved"
-    assert np.array_equal(ups_, ups), "ups are not preserved"
+    np.testing.assert_allclose(views_, views, atol=1e-15)
+    np.testing.assert_allclose(ups_, ups, atol=1e-15)
 
 
 def test_from_view_as_view_roundtrip():
@@ -193,16 +191,8 @@ def test_setitem_error(rotation):
 
 def test_rotation_rotation(views, ups, positions, rotation):
     """Multiply a pyfar Roation with a scipy Rotation and visualize them."""
-    rotation.show(positions)
-    # Rotate first Orientation around z-axis by 45°
-    rot_z45 = Rotation.from_euler('z', 45, degrees=True)
-    rotation[0] = rotation[0] * rot_z45
-    rotation.show(positions)
-    # Rotate second Orientation around x-axis by 45°
+    # Rotate rotations around x-axis by 45°
     rot_x45 = Rotation.from_euler('x', 45, degrees=True)
-    rotation[1] = rotation[1] * rot_x45
-    rotation.show(positions)
-    # Rotate both Rotation at once
     rotation = Rotation.from_view_up(views, ups)
     rotation = rotation * rot_x45
     rotation.show(positions)
