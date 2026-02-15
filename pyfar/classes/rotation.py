@@ -3,6 +3,8 @@ from scipy.spatial.transform import Rotation as scRotation
 import numpy as np
 import warnings
 
+import pyfar as pf
+
 if np.__version__ < '2.0.0':
     from numpy import VisibleDeprecationWarning
 else:
@@ -17,6 +19,12 @@ warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 class Rotation():
     """
     Pyfar Rotation class.
+
+
+    .. note::
+        Class uses scipy.spatial.transform.Rotation for internal storage of
+        rotations. Methods from scipy.spatial.transform.Rotation are wrapped
+        in pyfar Rotation.
     """
 
     def __init__(self):
@@ -25,19 +33,21 @@ class Rotation():
 
     def __repr__(self):
         """String representation of Rotation object."""
-        quat = self._rot.as_quat()
-        num_orientations = \
-            1 if quat.ndim == 1 else quat.shape[0]
-
-        repr = f"Pyfar Rotations object with {num_orientations} rotations."
+        repr = f"Pyfar Rotations object with {self.n_rotations} rotations."
         return repr
 
-    def __getitem__(self, idx):
-        self._rot = self._rot[idx]
-        return self
-
     def __iter__(self):
-        raise NotImplementedError
+        """Iterate over rotations."""
+        if self.as_quat().ndim == 1:
+            raise TypeError("Single rotation is not iterable.")
+
+        for i in range(self.n_rotations):
+            rot = self._rot[i]
+            yield self._from_scipy_rotation(rot)
+
+    def __getitem__(self, idx):
+        """"""
+        return self._from_scipy_rotation(self._rot[idx])
 
     def __setitem__(self, *args):
         raise NotImplementedError('Setting an item is disabled for pyfar '
@@ -69,6 +79,14 @@ class Rotation():
     def __eq__(self, other):
         """Check for equality of two objects."""
         return np.array_equal(self.as_quat(), other.as_quat())
+
+    # properties (!!! WRITE TEST !!!)
+    @property
+    def n_rotations(self):
+        quat = self._rot.as_quat()
+        n_rotations = \
+            1 if quat.ndim == 1 else quat.shape[0]
+        return n_rotations
 
     # from-... methods
     @classmethod
@@ -233,25 +251,67 @@ class Rotation():
         return self._rot.as_matrix()
 
     def as_view_up_right(self):
-        raise NotImplementedError
+        """"""
+        vector_triple = self.as_matrix()
+
+        views, lefts, ups = np.split(vector_triple, 3, axis=-2)
+
+        # In a standard Cartesian right-handed coordinate system,
+        # standard basis is defined as [x, y, z] = [view, left, up], where
+        # left is the same vector as -rights
+        vector_triple = np.concatenate((views, ups, -lefts), axis=-2)
+
+        if vector_triple.ndim == 3:
+            return np.swapaxes(vector_triple, 0, 1)
+        return vector_triple
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
         return self.from_quat(self.as_quat())
 
     def inv(self):
-        raise NotImplementedError
+        """"""
+        self._rot = self._rot.inv()
+        return self
 
     def mean(self, weights=None, axis=None):
         """"""
         return self._from_scipy_rotation(self._rot.mean(weights, axis))
 
     def reduce(self, left=None, right=None, return_indices=False):
-        raise NotImplementedError
+        """"""
+        if return_indices:
+            rot, left_idx, right_idx = \
+                self._rot.reduce(left, right, return_indices)
+            return self._from_scipy_rotation(rot), left_idx, right_idx
+
+        rot = self._rot.reduce(left, right, return_indices)
+        return self._from_scipy_rotation(rot)
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
-        raise NotImplementedError
+        if positions is None:
+            positions = np.zeros((self.as_quat().shape[0], 3))
+        positions = np.atleast_2d(positions).astype(np.float64)
+        if positions.shape[0] != self.as_quat().shape[0]:
+            raise ValueError("If provided, there must be the same number"
+                             "of positions as orientations.")
+
+        # Create view, up and right vectors from Rotation object
+        views, ups, rights = self.as_view_up_right()
+
+        kwargs.pop('color', None)
+
+        ax = None
+        if show_views:
+            ax = pf.plot.quiver(
+                positions, views, color=pf.plot.color('r'), **kwargs)
+        if show_ups:
+            ax = pf.plot.quiver(
+                positions, ups, ax=ax, color=pf.plot.color('g'), **kwargs)
+        if show_rights:
+            ax = pf.plot.quiver(
+                positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
 
     # private instance methods
 
