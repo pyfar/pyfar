@@ -304,14 +304,17 @@ class Rotation():
     def as_view_up(self):
         """"""
         vector_triple = self.as_matrix()
+        views, lefts, ups = np.split(vector_triple, 3, axis=-2)
 
-        if vector_triple.ndim == 2:
-            view = vector_triple[0]
-            up = vector_triple[2]
-        else:
-            view, _, up = np.split(vector_triple, 3, axis=-2)
+        # In a standard Cartesian right-handed coordinate system,
+        # standard basis is defined as [x, y, z] = [view, left, up], where
+        # left is the same vector as -rights
+        vector_triple = np.concatenate((views, ups, -lefts), axis=-2)
 
-        return view, up
+        views = np.squeeze(views, axis=-2)
+        ups   = np.squeeze(ups, axis=-2)
+
+        return views, ups
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
