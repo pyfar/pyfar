@@ -120,7 +120,7 @@ def test_rotation_show(positions, rotation):
         rotation.show(positions)
 
 
-def test_as_view_up_right(views, ups, rotation):
+def test_as_view_up(views, ups, rotation):
     """
     Output of this method must be the normed input vectors.
     """
@@ -129,7 +129,7 @@ def test_as_view_up_right(views, ups, rotation):
     ups = np.atleast_2d(ups).astype(np.float64)
     ups /= np.linalg.norm(ups, axis=1)[:, np.newaxis]
 
-    views_, ups_, _ = rotation.as_view_up_right()
+    views_, ups_ = rotation.as_view_up()
 
     np.testing.assert_allclose(views_, views, atol=1e-15)
     np.testing.assert_allclose(ups_, ups, atol=1e-15)
@@ -153,9 +153,9 @@ def test_from_view_as_view_roundtrip():
             ups = np.atleast_2d(vec[v2])
 
             rotation = Rotation.from_view_up(views, ups)
-            views_, ups_, _ = rotation.as_view_up_right()
+            views_, ups_ = rotation.as_view_up()
             # indexed
-            views_0, ups_0, _ = rotation[0].as_view_up_right()
+            views_0, ups_0 = rotation[0].as_view_up()
 
             npt.assert_allclose(views, views_, atol=1e-15)
             npt.assert_allclose(ups, ups_, atol=1e-15)
