@@ -33,8 +33,9 @@ class Rotation():
 
     def __repr__(self):
         """String representation of Rotation object."""
-        repr = f"Pyfar Rotations object with {self.n_rotations} rotations."
-        return repr
+        repr_string = \
+              f"Pyfar Rotations object with {self.n_rotations} rotations."
+        return repr_string
 
     def __iter__(self):
         """Iterate over rotations."""
@@ -50,6 +51,7 @@ class Rotation():
         return self._from_scipy_rotation(self._rot[idx])
 
     def __setitem__(self, *args):
+        """"""
         raise NotImplementedError('Setting an item is disabled for pyfar '
         'Rotations. If you want to modify the Rotation, use an array '
         'representation like `as_quat()` or `as_matrix()` and create a new '
@@ -73,16 +75,17 @@ class Rotation():
 
     def __pow__(self, n):
         """Compose orientation with itself n times."""
-        self._rot = self._rot.__pow__(n)
-        return self
+        rot = self._rot.__pow__(n)
+        return self._from_scipy_rotation(rot)
 
     def __eq__(self, other):
         """Check for equality of two objects."""
         return np.array_equal(self.as_quat(), other.as_quat())
 
-    # properties (!!! WRITE TEST !!!)
+    # properties
     @property
     def n_rotations(self):
+        """"""
         quat = self._rot.as_quat()
         n_rotations = \
             1 if quat.ndim == 1 else quat.shape[0]
@@ -92,45 +95,40 @@ class Rotation():
     @classmethod
     def from_davenport(cls, axes, order, angles, degrees=False):
         """"""
-        instance = cls.__new__(cls)
-        instance._rot = scRotation.from_davenport(
+        rot = scRotation.from_davenport(
             axes, order, angles, degrees=degrees)
-        return instance
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_euler(cls, seq, angles, degrees=False):
         """"""
-        instance = cls.__new__(cls)
-        instance._rot = scRotation.from_euler(
+        rot = scRotation.from_euler(
             seq, angles, degrees=degrees)
-        return instance
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_matrix(cls, matrix):
         """"""
-        instance = cls.__new__(cls)
-        instance._rot = scRotation.from_matrix(matrix)
-        return instance
+        rot = scRotation.from_matrix(matrix)
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_mrp(cls, mrp):
-        instance = cls.__new__(cls)
-        instance._rot = scRotation.from_mrp(mrp)
-        return instance
+        """"""
+        rot = scRotation.from_mrp(mrp)
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_quat(cls, quat):
         """"""
-        instance = cls.__new__(cls)
-        instance._rot = scRotation.from_quat(quat)
-        return instance
+        rot = scRotation.from_quat(quat)
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_rotvec(cls, rotvec, degrees=False):
         """"""
-        instance = cls.__new__(cls)
-        instance._rot = scRotation.from_rotvec(rotvec, degrees)
-        return instance
+        rot = scRotation.from_rotvec(rotvec, degrees)
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_view_up(cls, views, ups):
@@ -160,8 +158,6 @@ class Rotation():
         orientations : Orientations
             Object containing the orientations represented by quaternions.
         """
-        instance = cls.__new__(cls)
-
         # init views and up
         try:
             views = np.atleast_2d(views).astype(np.float64)
@@ -201,24 +197,38 @@ class Rotation():
         rotation_matrix = np.asarray([views, -rights, ups])
         rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
 
-        return instance.from_matrix(rotation_matrix)
+        return cls.from_matrix(rotation_matrix)
 
     # other class methods
     @classmethod
-    def align_vectors(a, b, weights=None, return_sensitivity=False):
-        raise NotImplementedError
+    def align_vectors(cls, a, b, weights=None, return_sensitivity=False):
+        """"""
+        result = scRotation.align_vectors(a, b, weights, return_sensitivity)
+
+        return (cls._from_scipy_rotation(result[0]), *result[1:])
 
     @classmethod
-    def concatenate(cls, rotation):
-        raise NotImplementedError
+    def concatenate(cls, rotations):
+        """"""
+        if np.asarray(rotations).shape[0] == 1:
+            return rotations[0].copy()
+
+        rotations = [rotation._rot for rotation in rotations]
+
+        rot = scRotation.concatenate(rotations)
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def identity(cls, num=None, *, shape=None):
-        raise NotImplementedError
+        """"""
+        rot  = scRotation.identity(num, shape=shape)
+        return cls._from_scipy_rotation(rot)
 
     @classmethod
     def random(cls, num=None, rng=None, *, shape=None):
-        raise NotImplementedError
+        """"""
+        rot = scRotation.random(num, rng, shape=shape)
+        return cls._from_scipy_rotation(rot)
 
     # private class methods
     @classmethod
@@ -242,13 +252,21 @@ class Rotation():
         """"""
         return self._rot.as_euler()
 
+    def as_matrix(self):
+        """"""
+        return self._rot.as_matrix()
+
+    def as_mrp(self):
+        """"""
+        return self._rot.as_mrp()
+
     def as_quat(self):
         """"""
         return self._rot.as_quat()
 
-    def as_matrix(self):
+    def as_rotvec(self):
         """"""
-        return self._rot.as_matrix()
+        return self._rot.as_rotvec()
 
     def as_view_up_right(self):
         """"""
@@ -290,6 +308,7 @@ class Rotation():
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
+        """"""
         if positions is None:
             positions = np.zeros((self.as_quat().shape[0], 3))
         positions = np.atleast_2d(positions).astype(np.float64)
@@ -312,6 +331,3 @@ class Rotation():
         if show_rights:
             ax = pf.plot.quiver(
                 positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
-
-    # private instance methods
-

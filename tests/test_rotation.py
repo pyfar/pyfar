@@ -3,7 +3,6 @@ import re
 
 import numpy as np
 import numpy.testing as npt
-from scipy.spatial.transform import Rotation
 
 from pyfar import Rotation
 from pyfar import Coordinates
@@ -14,8 +13,11 @@ def test_rotation_init():
     match = \
         "Rotation objects must be created using one of the `from_...` methods"
     with pytest.raises(RuntimeError, match=match):
-        rotation = Rotation()
+        Rotation()
 
+def test_class_properties(rotation):
+    """Test Rotation.n_rotations parameter."""
+    assert rotation.n_rotations == 3
 
 def test_rotation_from_view_up():
     """Create `Rotation` from view and up vectors."""
@@ -181,8 +183,8 @@ def test_setitem_error(rotation):
     """
     Test if setting an item throws an error.
     """
-    match = re.escape('Setting an item is disabled for pyfar Rotations. If you '
-                      'want to modify the Rotation, use an array '
+    match = re.escape('Setting an item is disabled for pyfar Rotations. If '
+                      'you want to modify the Rotation, use an array '
                       'representation like `as_quat()` or `as_matrix()` and '
                       'create a new object.')
     with pytest.raises(NotImplementedError, match=match):
@@ -207,3 +209,98 @@ def test___eq___notEqual(rotation, views, ups):
     rot_z45 = Rotation.from_euler('z', 45, degrees=True)
     actual = rot_z45 * Rotation.from_view_up(views, ups)
     assert not rotation == actual
+
+
+@pytest.mark.parametrize(
+    ("method", "args"),
+    [
+        (
+            Rotation.from_davenport,
+            ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], "extrinsic", [90, 0, 0]),
+        ),
+        (
+            Rotation.from_euler,
+            ('zyx', [90, 45, 30]),
+        ),
+        (
+            Rotation.from_matrix,
+            ([[0, -1, 0], [1, 0, 0], [0, 0, 1]],),
+        ),
+        (
+            Rotation.from_mrp,
+            ([0, 0, 1],),
+        ),
+        (
+            Rotation.from_quat,
+            ([0, 0, 0, 1],),
+        ),
+        (
+            Rotation.from_rotvec,
+            (np.pi/2 * np.array([0, 0, 1]),),
+        ),
+        (
+            Rotation.from_view_up,
+            ([1, 0, 0], [0, 0, 1]),
+        ),
+        (
+            Rotation.align_vectors,
+            ([[0, 1, 0], [0, 1, 1], [0, 1, 1]],
+             [[1, 0, 0], [1, 1.1, 0], [1, 0.9, 0]]),
+        ),
+        (
+            Rotation.random,
+            (),
+        ),
+        (
+            Rotation.identity,
+            (),
+        ),
+        (
+            Rotation.concatenate,
+            ([[Rotation.from_rotvec([0, 0, 1]),
+             Rotation.from_rotvec([0, 0, 2])]]),
+        ),
+    ],
+)
+def test_methods_return_type(method, args):
+    """Test if class-methods return Rotation instance."""
+    obj = method(*args)
+
+    if method.__name__ in ["align_vectors"]:
+        assert isinstance(obj[0], Rotation)
+    else:
+        assert isinstance(obj, Rotation)
+
+
+def test__pow__():
+    """Test wrapped __pow__ method."""
+    rotation = Rotation.from_rotvec([1, 0, 0])
+
+    assert isinstance(rotation, Rotation)
+    npt.assert_allclose((rotation**2).as_rotvec(), [2, 0, 0])
+    npt.assert_allclose((rotation**0.5).as_rotvec(), [0.5, 0, 0])
+
+def tests_instance_methods():
+    """Test wrapped reduce method."""
+    rotation = Rotation.from_rotvec([1, 0, 0])
+
+    obj = rotation.reduce()
+    assert isinstance(obj, Rotation)
+
+    obj = obj.mean()
+    assert isinstance(obj, Rotation)
+
+    obj = obj.inv()
+    assert isinstance(obj, Rotation)
+
+def test__iter__():
+    """Test iteration over Rotation."""
+    rotations = Rotation.from_rotvec([[1, 0, 0], [2, 0, 0]])
+
+    for i, rotation in enumerate(rotations):
+        if i == 0:
+            npt.assert_equal(rotation.as_rotvec(), [1, 0, 0])
+        if i == 1:
+            npt.assert_equal(rotation.as_rotvec(), [2, 0, 0])
+
+        assert isinstance(rotation, Rotation)
