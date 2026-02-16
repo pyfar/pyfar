@@ -18,7 +18,40 @@ warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 class Rotation():
     """
-    Pyfar Rotation class.
+    This class for Rotation in the three-dimensional space,
+    is largely based on :py:class:`scipy:scipy.spatial.transform.Rotation` and
+    wraps all functionality that
+    :py:class:`scipy:scipy.spatial.transform.Rotation` provides.
+    In addition the pyfar Rotation class adds the creation from perpendicular
+    view and up vectors through :py:func:`~from_view_up`, the representation
+    as view / up in :py:func:`~as_view_up` and a convenient plot
+    function :py:func:`~show`.
+
+    An orientation can be visualized with the triple of view, up and right
+    vectors and it is tied to the object's local coordinate system.
+    Alternatively the object's orientation can be illustrated with help of the
+    right hand: Thumb (view), forefinger (up) and middle finger (right).
+
+    Examples
+    --------
+    >>> from pyfar import Orientations
+    >>> views = [[1, 0, 0], [2, 0, 0]]
+    >>> ups = [[0, 1, 0], [0, -2, 0]]
+    >>> orientations = Orientations.from_view_up(views, ups)
+
+    Visualize orientations at certain positions:
+
+    >>> positions = [[0, 0.5, 0], [0, -0.5, 0]]
+    >>> orientations.show(positions)
+
+    Rotate first element of orientations:
+
+    >>> from scipy.spatial.transform import Rotation
+    >>> rot_x45 = Rotation.from_euler('x', 45, degrees=True)
+    >>> orientations[1] = orientations[1] * rot_x45
+    >>> orientations.show(positions)
+
+    To create `Orientations` objects use ``from_...`` methods.
 
 
     .. note::
@@ -268,20 +301,17 @@ class Rotation():
         """"""
         return self._rot.as_rotvec()
 
-    def as_view_up_right(self):
+    def as_view_up(self):
         """"""
         vector_triple = self.as_matrix()
 
-        views, lefts, ups = np.split(vector_triple, 3, axis=-2)
+        if vector_triple.ndim == 2:
+            view = vector_triple[0]
+            up = vector_triple[2]
+        else:
+            view, _, up = np.split(vector_triple, 3, axis=-2)
 
-        # In a standard Cartesian right-handed coordinate system,
-        # standard basis is defined as [x, y, z] = [view, left, up], where
-        # left is the same vector as -rights
-        vector_triple = np.concatenate((views, ups, -lefts), axis=-2)
-
-        if vector_triple.ndim == 3:
-            return np.swapaxes(vector_triple, 0, 1)
-        return vector_triple
+        return view, up
 
     def copy(self):
         """Return a deep copy of the Orientations object."""
@@ -317,7 +347,8 @@ class Rotation():
                              "of positions as orientations.")
 
         # Create view, up and right vectors from Rotation object
-        views, ups, rights = self.as_view_up_right()
+        views, ups = self.as_view_up()
+        rights = np.cross(views, ups)
 
         kwargs.pop('color', None)
 
