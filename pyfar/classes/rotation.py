@@ -95,7 +95,15 @@ class Rotation():
         'object.')
 
     def __mul__(self, other):
-        """"""
+        """
+        Multiply Rotation object with another Rotation or a
+        scipy.spatial.transform.Rotation.
+
+        Parameters
+        ----------
+        other : Rotation or scipy.spatial.transform.Rotation
+            The object to multiply with.
+        """
         if isinstance(other, Rotation):
             other = scRotation.from_quat(other.as_quat())
         if isinstance(other, scRotation):
@@ -104,7 +112,7 @@ class Rotation():
 
     def __rmul__(self, other):
         """
-        Multiply Rotation object with another Rotation or a
+        Right multiplication of Rotation object with another Rotation or a
         scipy.spatial.transform.Rotation.
 
         Parameters
@@ -579,8 +587,8 @@ class Rotation():
                 optimal matrix algorithm", Journal of Astronautical Sciences,
                 Vol. 41, No.2, 1993, pp. 261-280.
         .. [#] Bar-Itzhack, Itzhack Y., Daniel Hershkowitz, and Leiba Rodman,
-                "Pointing in Real Euclidean Space", Journal of Guidance,
-                Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
+               "Pointing in Real Euclidean Space", Journal of Guidance,
+               Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
         """
         result = scRotation.align_vectors(a, b, weights, return_sensitivity)
 
@@ -598,7 +606,7 @@ class Rotation():
 
         Parameters
         ----------
-        orientations : sequence of Orientations objects
+        rotations : sequence of Orientations objects
             The orientations to concatenate. If a single Orientations object is
             passed in, a copy is returned.
 
@@ -731,10 +739,10 @@ class Rotation():
         Parameters
         ----------
         axes : array_like, shape (..., [1 or 2 or 3], 3) or (..., 3)
-            Axis of rotation, if one dimensional. If N dimensional, describes the
-            sequence of axes for rotations, where each axes[..., i, :] is the ith
-            axis. If more than one axis is given, then the second axis must be
-            orthogonal to both the first and third axes.
+            Axis of rotation, if one dimensional. If N dimensional, describes
+            the sequence of axes for rotations, where each axes[..., i, :] is
+            the ith axis. If more than one axis is given, then the second axis
+            must be orthogonal to both the first and third axes.
         order : string
             If it belongs to the set {'e', 'extrinsic'}, the sequence will be
             extrinsic. If it belongs to the set {'i', 'intrinsic'}, sequence
@@ -760,11 +768,11 @@ class Rotation():
         References
         ----------
         .. [#] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
-               the Euler Angles. Journal of the Astronautical Sciences. 51. 123-132.
-               10.1007/BF03546304.
+               the Euler Angles. Journal of the Astronautical Sciences. 51.
+               123-132. 10.1007/BF03546304.
         .. [#] Bernardes E, Viollet S (2022) Quaternion to Euler angles
-               conversion: A direct, general and computationally efficient method.
-               PLoS ONE 17(11): e0276302. 10.1371/journal.pone.0276302
+               conversion: A direct, general and computationally efficient
+               method. PLoS ONE 17(11): e0276302. 10.1371/journal.pone.0276302
         .. [#] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
         """
 
@@ -828,7 +836,8 @@ class Rotation():
         .. [#] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
         """
 
-        return self._rot.as_euler(seq, degrees, suppress_warnings)
+        return self._rot.as_euler(seq, degrees,
+                                  suppress_warnings=suppress_warnings)
 
     def as_matrix(self):
         """
@@ -932,7 +941,7 @@ class Rotation():
         ----------
         .. [#] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         """
-        return self._rot.as_quat(canonical, scalar_first)
+        return self._rot.as_quat(canonical, scalar_first=scalar_first)
 
     def as_rotvec(self, degrees=False):
         """
