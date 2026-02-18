@@ -74,7 +74,7 @@ class Rotation():
 
     def __getitem__(self, idx):
         """
-        Get orientation(s) at given indices.
+        Get rotation(s) at given indices.
 
         Parameters
         ----------
@@ -85,7 +85,7 @@ class Rotation():
 
     def __setitem__(self, *args):
         """
-        Assign orientations(s) at given index(es) from object.
+        Assign rotation(s) at given index(es) from object.
 
         This is disabled for `Rotation`.
         """
@@ -96,12 +96,12 @@ class Rotation():
 
     def __mul__(self, other):
         """
-        Multiply Rotation object with another Rotation or a
-        scipy.spatial.transform.Rotation.
+        Multiply Rotation object with another Rotation or
+        :py:class:`scipy:scipy.spatial.transform.Rotation`.
 
         Parameters
         ----------
-        other : Rotation or scipy.spatial.transform.Rotation
+        other : Rotation or :py:class:`scipy:scipy.spatial.transform.Rotation`
             The object to multiply with.
         """
         if isinstance(other, Rotation):
@@ -113,11 +113,11 @@ class Rotation():
     def __rmul__(self, other):
         """
         Right multiplication of Rotation object with another Rotation or a
-        scipy.spatial.transform.Rotation.
+        :py:class:`scipy:scipy.spatial.transform.Rotation`.
 
         Parameters
         ----------
-        other : Rotation or scipy.spatial.transform.Rotation
+        other : Rotation or :py:class:`scipy:scipy.spatial.transform.Rotation`.
             The object to multiply with.
         """
         if isinstance(other, Rotation):
@@ -127,7 +127,7 @@ class Rotation():
             return self
 
     def __pow__(self, n):
-        """Compose orientation with itself n times."""
+        """Compose rotation with itself n times."""
         rot = self._rot.__pow__(n)
         return self._from_scipy_rotation(rot)
 
@@ -195,6 +195,11 @@ class Rotation():
             If True, then the given angles are assumed to be in degrees.
             Default is False.
 
+        Returns
+        -------
+        rotations : Rotation
+            Object containing the rotations.
+
         References
         ----------
         .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
@@ -241,6 +246,11 @@ class Rotation():
             If True, then the given angles are assumed to be in degrees.
             Default is False.
 
+        Returns
+        -------
+        rotations : Rotation
+            Object containing the rotations.
+
         References
         ----------
         .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
@@ -276,6 +286,11 @@ class Rotation():
             incorrect results. If True, normalization steps are skipped, which
             can improve runtime performance.
 
+        Returns
+        -------
+        rotations : Rotation
+            Object containing the rotations.
+
         References
         ----------
         .. [#] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
@@ -307,6 +322,11 @@ class Rotation():
         mrp : array_like, shape (..., 3)
             A single vector or an ND array of vectors, where the last dimension
             contains the rotation parameters.
+
+        Returns
+        -------
+        rotations : Rotation
+            Object containing the rotations.
 
         References
         ----------
@@ -361,6 +381,11 @@ class Rotation():
             Whether the scalar component goes first or last.
             Default is False, i.e. the scalar-last order is assumed.
 
+        Returns
+        -------
+        rotations : Rotation
+            Object containing the rotations.
+
         References
         ----------
         .. [#] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
@@ -389,6 +414,11 @@ class Rotation():
             If True, then the given magnitudes are assumed to be in degrees.
             Default is False.
 
+        Returns
+        -------
+        rotations : Rotation
+            Object containing the rotations.
+
         References
         ----------
         .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
@@ -398,9 +428,10 @@ class Rotation():
 
     @classmethod
     def from_view_up(cls, views, ups):
-        """Initialize Orientations from a view an up vector.
+        """
+        Initialize Rotation from a view an up vector.
 
-        Orientations are internally stored as quaternions for better spherical
+        Rotations are internally stored as quaternions for better spherical
         linear interpolation (SLERP) and spherical harmonics operations.
         More intuitionally, they can be expressed as view and up vectors
         which cannot be collinear. In this case, they are restricted to be
@@ -421,8 +452,8 @@ class Rotation():
 
         Returns
         -------
-        orientations : Orientations
-            Object containing the orientations represented by quaternions.
+        rotations : Rotation
+            Object containing the rotations.
         """
         # init views and up
         try:
@@ -469,7 +500,7 @@ class Rotation():
     @classmethod
     def align_vectors(cls, a, b, weights=None, return_sensitivity=False):
         r"""
-        Estimate an orientation to optimally align two sets of vectors.
+        Estimate a rotation to optimally align two sets of vectors.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.align_vectors`.
 
@@ -532,7 +563,7 @@ class Rotation():
 
         Returns
         -------
-        orientation : Orientations
+        rotation : Rotation
             Best estimate of the rotation that transforms `b` to `a`.
         rssd : float
             Stands for "root sum squared distance". Square root of the weighted
@@ -597,23 +628,23 @@ class Rotation():
     @classmethod
     def concatenate(cls, rotations):
         """
-        Concatenate a sequence of Orientations objects into a single object.
+        Concatenate a sequence of Rotation objects into a single object.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.concatenate`.
 
         This is useful if you want to, for example, take the mean of a set of
-        orientations and need to pack them into a single object to do so.
+        rotations and need to pack them into a single object to do so.
 
         Parameters
         ----------
-        rotations : sequence of Orientations objects
-            The orientations to concatenate. If a single Orientations object is
+        rotations : sequence of Rotation objects
+            The rotation to concatenate. If a single Rotation object is
             passed in, a copy is returned.
 
         Returns
         -------
-        concatenated : Orientations
-            The concatenated orientations.
+        concatenated : Rotation
+            The concatenated rotations.
         """
         if np.asarray(rotations).shape[0] == 1:
             return rotations[0].copy()
@@ -626,24 +657,24 @@ class Rotation():
     @classmethod
     def identity(cls, num=None, *, shape=None):
         """
-        Get identity orientation(s).
+        Get identity rotation(s).
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.identity`.
 
-        Composition with the identity orientation has no effect.
+        Composition with the identity rotation has no effect.
 
         Parameters
         ----------
         num : int or None, optional
-            Number of identity orientations to generate. If None (default),
+            Number of identity rotations to generate. If None (default),
             then a single rotation is generated.
         shape : int or tuple of ints, optional
-            Shape of identity orientations to generate. If specified, `num`
+            Shape of identity rotations to generate. If specified, `num`
             must be None.
 
         Returns
         -------
-        identity : Orientations
+        identity : Rotation
             The identity rotation.
         """
         rot  = scRotation.identity(num, shape=shape)
@@ -652,32 +683,32 @@ class Rotation():
     @classmethod
     def random(cls, num=None, rng=None, *, shape=None):
         """
-        Generate orientations that are uniformly distributed on a sphere.
+        Generate rotations that are uniformly distributed on a sphere.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.random`.
 
-        Formally, the orientations follow the Haar-uniform distribution over
+        Formally, the rotations follow the Haar-uniform distribution over
         the SO(3) group.
 
         Parameters
         ----------
         num : int or None, optional
-            Number of random orientations to generate. If None (default), then
-            a single orientation is generated.
+            Number of random rotations to generate. If None (default), then
+            a single rotation is generated.
         rng : `numpy.random.Generator`, optional
             Pseudorandom number generator state. When `rng` is None, a new
             `numpy.random.Generator` is created using entropy from the
             operating system. Types other than `numpy.random.Generator` are
             passed to `numpy.random.default_rng` to instantiate a `Generator`.
         shape : tuple of ints, optional
-            Shape of random orientations to generate. If specified, `num` must
+            Shape of random rotations to generate. If specified, `num` must
             be None.
 
         Returns
         -------
-        random_orientation : Orientaions
-            Contains a single orientation if `num` is None. Otherwise contains
-            a stack of `num` orientations.
+        random_rotation : Rotation
+            Contains a single rotation if `num` is None. Otherwise contains
+            a stack of `num` rotation.
 
         Notes
         -----
@@ -710,7 +741,7 @@ class Rotation():
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_davenport`.
 
 
-        Any orientation can be expressed as a composition of 3 elementary
+        Any rotation can be expressed as a composition of 3 elementary
         rotations.
 
         For both Euler angles and Davenport angles, consecutive axes must
@@ -784,7 +815,7 @@ class Rotation():
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_euler`.
 
-        Any orientation can be expressed as a composition of 3 elementary
+        Any rotation can be expressed as a composition of 3 elementary
         rotations. Once the axis sequence has been chosen, Euler angles define
         the angle of rotation around each respective axis [#]_.
 
@@ -971,9 +1002,9 @@ class Rotation():
         return self._rot.as_rotvec(degrees)
 
     def as_view_up(self):
-        """Get Orientations as a view, up, and right vector.
+        """Get Rotation as a view, up, and right vector.
 
-        Orientations are internally stored as quaternions for better spherical
+        Rotation are internally stored as quaternions for better spherical
         linear interpolation (SLERP) and spherical harmonics operations.
         More intuitionally, they can be expressed as view and and up of vectors
         which cannot be collinear. In this case are restricted to be
@@ -982,9 +1013,9 @@ class Rotation():
         Returns
         -------
         vector_triple: ndarray, shape (N, 3), normalized vectors
-            - views, see :py:func:`Orientations.from_view_up`
-            - ups, see :py:func:`Orientations.from_view_up`
-            - rights, see :py:func:`Orientations.from_view_up`
+            - views, see :py:func:`Rotation.from_view_up`
+            - ups, see :py:func:`Rotation.from_view_up`
+            - rights, see :py:func:`Rotation.from_view_up`
                 A single vector or a stack of vectors, pointing to the right of
                 the object, constructed as a cross product of ups and rights.
         """
@@ -997,22 +1028,22 @@ class Rotation():
         return views, ups
 
     def copy(self):
-        """Return a deep copy of the Orientations object."""
+        """Return a deep copy of the Rotation object."""
         return self.from_quat(self.as_quat())
 
     def inv(self):
         """
-        Invert this orientation.
+        Invert this rotation.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.inv`.
 
-        Composition of an orientation with its inverse results in an identity
+        Composition of an rotation with its inverse results in an identity
         transformation.
 
         Returns
         -------
-        inverse : Orientations
-            Object containing inverse of the orientations in the current
+        inverse : Rotation
+            Object containing inverse of the rotations in the current
             instance.
         """
         self._rot = self._rot.inv()
@@ -1020,7 +1051,7 @@ class Rotation():
 
     def mean(self, weights=None, axis=None):
         r"""
-        Get the mean of the orientations.
+        Get the mean of the rotations.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.mean`.
 
@@ -1039,18 +1070,18 @@ class Rotation():
         Parameters
         ----------
         weights : array_like shape (..., N), optional
-            Weights describing the relative importance of the orientations. If
+            Weights describing the relative importance of the rotations. If
             None (default), then all values in `weights` are assumed to be
             equal. If given, the shape of `weights` must be broadcastable to
             the rotation shape. Weights must be non-negative.
         axis : None, int, or tuple of ints, optional
             Axis or axes along which the means are computed. The default is to
-            compute the mean of all orientations.
+            compute the mean of all rotations.
 
         Returns
         -------
-        mean : Orientations
-            Single orientation containing the mean of the orientations in the
+        mean : Rotation
+            Single rotation containing the mean of the rotations in the
             current instance.
 
         References
@@ -1062,35 +1093,35 @@ class Rotation():
         return self._from_scipy_rotation(self._rot.mean(weights, axis))
 
     def reduce(self, left=None, right=None, return_indices=False):
-        """Reduce this orientation with the provided orientation groups.
+        """Reduce this rotation with the provided rotation groups.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.reduce`.
 
-        Reduction of a orientation ``p`` is a transformation of the form
+        Reduction of a rotation ``p`` is a transformation of the form
         ``q = l * p * r``, where ``l`` and ``r`` are chosen from `left` and
-        `right` respectively, such that orientation ``q`` has the smallest
+        `right` respectively, such that rotation ``q`` has the smallest
         magnitude.
 
-        If `left` and `right` are orientation groups representing symmetries of
-        two objects rotated by ``p``, then ``q`` is the orientation of the
+        If `left` and `right` are rotation groups representing symmetries of
+        two objects rotated by ``p``, then ``q`` is the rotation of the
         smallest magnitude to align these objects considering their symmetries.
 
         Parameters
         ----------
-        left : Orientation, optional
-            Object containing the left orientation(s). Default value (None)
-            corresponds to the identity orientation.
-        right : Orientation, optional
-            Object containing the right orientation(s). Default value (None)
-            corresponds to the identity orientation.
+        left : Rotation, optional
+            Object containing the left rotation(s). Default value (None)
+            corresponds to the identity rotation.
+        right : Rotation, optional
+            Object containing the right rotation(s). Default value (None)
+            corresponds to the identity rotation.
         return_indices : bool, optional
-            Whether to return the indices of the orientations from `left` and
+            Whether to return the indices of the rotations from `left` and
             `right` used for reduction.
 
         Returns
         -------
-        reduced : Orientations
-            Object containing reduced orientations.
+        reduced : Rotation
+            Object containing reduced rotations.
         left_best, right_best: integer ndarray
             Indices of elements from `left` and `right` used for reduction.
         """
@@ -1105,7 +1136,7 @@ class Rotation():
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
         """
-        Visualize Orientations as triples of view (red), up (green) and
+        Visualize Rotation as triples of view (red), up (green) and
         right (blue) vectors in a quiver plot.
 
         Parameters
@@ -1136,7 +1167,7 @@ class Rotation():
         positions = np.atleast_2d(positions).astype(np.float64)
         if positions.shape[0] != self.as_quat().shape[0]:
             raise ValueError("If provided, there must be the same number"
-                             "of positions as orientations.")
+                             "of positions as rotations.")
 
         # Create view, up and right vectors from Rotation object
         views, ups = self.as_view_up()
