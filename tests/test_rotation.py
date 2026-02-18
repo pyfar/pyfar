@@ -89,11 +89,11 @@ def test_rotation_show(positions, rotation):
     # single vectors no position
     view = [1, 0, 0]
     up = [0, 1, 0]
-    orientation_single = Rotation.from_view_up(view, up)
-    orientation_single.show()
+    rotation_single = Rotation.from_view_up(view, up)
+    rotation_single.show()
     # with position
     position = Coordinates(0, 1, 0)
-    orientation_single.show(position)
+    rotation_single.show(position)
 
     # multiple vectors no position
     rotation.show()
