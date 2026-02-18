@@ -713,15 +713,15 @@ class Rotation():
             - ``axis1`` and ``axis3`` are also orthogonal (asymmetric sequence)
             - ``axis1 == axis3`` (symmetric sequence)
 
-        For Davenport angles, this last relationship is relaxed [1]_, and only
+        For Davenport angles, this last relationship is relaxed [#]_, and only
         the consecutive orthogonal axes requirement is maintained.
 
-        A slightly modified version of the algorithm from [2]_ has been used to
+        A slightly modified version of the algorithm from [#]_ has been used to
         calculate Davenport angles for the rotation about a given sequence of
         axes.
 
         Davenport angles, just like Euler angles, suffer from the problem of
-        gimbal lock [3]_, where the representation loses a degree of freedom
+        gimbal lock [#]_, where the representation loses a degree of freedom
         and it is not possible to determine the first and third angles
         uniquely. In this case, a warning is raised (unless the
         ``suppress_warnings`` option is used), and the third angle is set
@@ -759,13 +759,13 @@ class Rotation():
 
         References
         ----------
-        .. [1] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
+        .. [#] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
                the Euler Angles. Journal of the Astronautical Sciences. 51. 123-132.
                10.1007/BF03546304.
-        .. [2] Bernardes E, Viollet S (2022) Quaternion to Euler angles
+        .. [#] Bernardes E, Viollet S (2022) Quaternion to Euler angles
                conversion: A direct, general and computationally efficient method.
                PLoS ONE 17(11): e0276302. 10.1371/journal.pone.0276302
-        .. [3] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
+        .. [#] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
         """
 
         return self._rot.as_davenport(axes, order, degrees, suppress_warnings)
@@ -778,12 +778,12 @@ class Rotation():
 
         Any orientation can be expressed as a composition of 3 elementary
         rotations. Once the axis sequence has been chosen, Euler angles define
-        the angle of rotation around each respective axis [1]_.
+        the angle of rotation around each respective axis [#]_.
 
-        The algorithm from [2]_ has been used to calculate Euler angles for the
+        The algorithm from [#]_ has been used to calculate Euler angles for the
         rotation about a given sequence of axes.
 
-        Euler angles suffer from the problem of gimbal lock [3]_, where the
+        Euler angles suffer from the problem of gimbal lock [#]_, where the
         representation loses a degree of freedom and it is not possible to
         determine the first and third angles uniquely. In this case,
         a warning is raised (unless the ``suppress_warnings`` option is used),
@@ -794,7 +794,7 @@ class Rotation():
         ----------
         seq : string, length 3
             3 characters belonging to the set {'X', 'Y', 'Z'} for intrinsic
-            rotations, or {'x', 'y', 'z'} for extrinsic rotations [1]_.
+            rotations, or {'x', 'y', 'z'} for extrinsic rotations [#]_.
             Adjacent axes cannot be the same.
             Extrinsic and intrinsic rotations cannot be mixed in one function
             call.
@@ -820,12 +820,12 @@ class Rotation():
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
-        .. [2] Bernardes E, Viollet S (2022) Quaternion to Euler angles
+        .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        .. [#] Bernardes E, Viollet S (2022) Quaternion to Euler angles
                conversion: A direct, general and computationally efficient
                method. PLoS ONE 17(11): e0276302.
                https://doi.org/10.1371/journal.pone.0276302
-        .. [3] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
+        .. [#] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
         """
 
         return self._rot.as_euler(seq, degrees, suppress_warnings)
@@ -837,7 +837,7 @@ class Rotation():
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_matrix`.
 
         3D rotations can be represented using rotation matrices, which
-        are 3 x 3 real orthogonal matrices with determinant equal to +1 [1]_.
+        are 3 x 3 real orthogonal matrices with determinant equal to +1 [#]_.
 
         Returns
         -------
@@ -846,7 +846,7 @@ class Rotation():
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+        .. [#] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
         """
 
         return self._rot.as_matrix()
@@ -859,7 +859,7 @@ class Rotation():
 
         MRPs are a 3 dimensional vector co-directional to the axis of rotation
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
-        the angle of rotation (in radians) [1]_.
+        the angle of rotation (in radians) [#]_.
 
         MRPs have a singularity at 360 degrees which can be avoided by ensuring
         the angle of rotation does not exceed 180 degrees, i.e. switching the
@@ -874,7 +874,7 @@ class Rotation():
 
         References
         ----------
-        .. [1] Shuster, M. D. "A Survey of Attitude Representations",
+        .. [#] Shuster, M. D. "A Survey of Attitude Representations",
                The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
                pp. 475-476
         """
@@ -887,7 +887,7 @@ class Rotation():
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_quat`.
 
         Rotations in 3 dimensions can be represented using unit norm
-        quaternions [1]_.
+        quaternions [#]_.
 
         The 4 components of a quaternion are divided into a scalar part ``w``
         and a vector part ``(x, y, z)`` and can be expressed from the angle
@@ -930,7 +930,7 @@ class Rotation():
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+        .. [#] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         """
         return self._rot.as_quat(canonical, scalar_first)
 
@@ -941,7 +941,7 @@ class Rotation():
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_rotvec`.
 
         A rotation vector is a 3 dimensional vector which is co-directional to
-        the axis of rotation and whose norm gives the angle of rotation [1]_.
+        the axis of rotation and whose norm gives the angle of rotation [#]_.
 
         Parameters
         ----------
@@ -956,7 +956,7 @@ class Rotation():
 
         References
         ----------
-        .. [1] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
+        .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
         """
 
         return self._rot.as_rotvec(degrees)
