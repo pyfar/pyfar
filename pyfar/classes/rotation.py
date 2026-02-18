@@ -139,7 +139,10 @@ class Rotation():
     # from-... methods
     @classmethod
     def from_davenport(cls, axes, order, angles, degrees=False):
-        """Initialize from Davenport angles.
+        """
+        Initialize from Davenport angles.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_davenport`.
 
         Rotations in 3-D can be represented by a sequence of 3
         rotations around a sequence of axes.
@@ -200,6 +203,8 @@ class Rotation():
         """
         Initialize from Euler angles.
 
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_euler`.
+
         Rotations in 3-D can be represented by a sequence of 3
         rotations around a sequence of axes. In theory, any three axes spanning
         the 3-D Euclidean space are enough. In practice, the axes of rotation
@@ -241,6 +246,8 @@ class Rotation():
         """
         Initialize from rotation matrix.
 
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_matrix`.
+
         Rotations in 3 dimensions can be represented with 3 x 3 orthogonal
         matrices [#]_. If the input is not orthogonal, an approximation is
         created by orthogonalizing the input matrix using the method described
@@ -277,6 +284,8 @@ class Rotation():
         """
         Initialize from Modified Rodrigues Parameters (MRPs).
 
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_mrp`.
+
         MRPs are a 3 dimensional vector co-directional to the axis of rotation
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
         the angle of rotation (in radians) [#]_.
@@ -304,6 +313,8 @@ class Rotation():
     def from_quat(cls, quat):
         """
         Initialize from quaternions.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_quat`.
 
         Rotations in 3 dimensions can be represented using unit norm
         quaternions [#]_.
@@ -355,6 +366,8 @@ class Rotation():
     def from_rotvec(cls, rotvec, degrees=False):
         """
         Initialize from rotation vectors.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_rotvec`.
 
         A rotation vector is a 3 dimensional vector which is co-directional to
         the axis of rotation and whose norm gives the angle of rotation [#]_.
@@ -449,6 +462,8 @@ class Rotation():
     def align_vectors(cls, a, b, weights=None, return_sensitivity=False):
         r"""
         Estimate an orientation to optimally align two sets of vectors.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.align_vectors`.
 
         Find a rotation between frames A and B which best aligns a set of
         vectors `a` and `b` observed in these frames. The following loss
@@ -576,6 +591,8 @@ class Rotation():
         """
         Concatenate a sequence of Orientations objects into a single object.
 
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.concatenate`.
+
         This is useful if you want to, for example, take the mean of a set of
         orientations and need to pack them into a single object to do so.
 
@@ -603,6 +620,8 @@ class Rotation():
         """
         Get identity orientation(s).
 
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.identity`.
+
         Composition with the identity orientation has no effect.
 
         Parameters
@@ -626,6 +645,8 @@ class Rotation():
     def random(cls, num=None, rng=None, *, shape=None):
         """
         Generate orientations that are uniformly distributed on a sphere.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.random`.
 
         Formally, the orientations follow the Haar-uniform distribution over
         the SO(3) group.
@@ -667,45 +688,299 @@ class Rotation():
 
     @classmethod
     def _from_scipy_rotation(cls, sc_rotation):
-        """"""
+        """Internal helper to create instance from scipy Rotation."""
         instance = cls.__new__(cls)
         instance._rot = sc_rotation
         return instance
 
     # Instance methods
-    def as_davenport(self):
-        """"""
-        return self._rot.as_davenport()
+    def as_davenport(self, axes, order, degrees=False,
+                     suppress_warnings=False):
+        """
+        Represent as Davenport angles.
 
-    def as_euler(self):
-        """"""
-        return self._rot.as_euler()
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_davenport`.
+
+
+        Any orientation can be expressed as a composition of 3 elementary
+        rotations.
+
+        For both Euler angles and Davenport angles, consecutive axes must
+        be are orthogonal (``axis2`` is orthogonal to both ``axis1`` and
+        ``axis3``). For Euler angles, there is an additional relationship
+        between ``axis1`` or ``axis3``, with two possibilities:
+
+            - ``axis1`` and ``axis3`` are also orthogonal (asymmetric sequence)
+            - ``axis1 == axis3`` (symmetric sequence)
+
+        For Davenport angles, this last relationship is relaxed [1]_, and only
+        the consecutive orthogonal axes requirement is maintained.
+
+        A slightly modified version of the algorithm from [2]_ has been used to
+        calculate Davenport angles for the rotation about a given sequence of
+        axes.
+
+        Davenport angles, just like Euler angles, suffer from the problem of
+        gimbal lock [3]_, where the representation loses a degree of freedom
+        and it is not possible to determine the first and third angles
+        uniquely. In this case, a warning is raised (unless the
+        ``suppress_warnings`` option is used), and the third angle is set
+        to zero. Note however that the returned angles still represent the
+        correct rotation.
+
+        Parameters
+        ----------
+        axes : array_like, shape (..., [1 or 2 or 3], 3) or (..., 3)
+            Axis of rotation, if one dimensional. If N dimensional, describes the
+            sequence of axes for rotations, where each axes[..., i, :] is the ith
+            axis. If more than one axis is given, then the second axis must be
+            orthogonal to both the first and third axes.
+        order : string
+            If it belongs to the set {'e', 'extrinsic'}, the sequence will be
+            extrinsic. If it belongs to the set {'i', 'intrinsic'}, sequence
+            will be treated as intrinsic.
+        degrees : boolean, optional
+            Returned angles are in degrees if this flag is True, else they are
+            in radians. Default is False.
+        suppress_warnings : boolean, optional
+            Disable warnings about gimbal lock. Default is False.
+
+        Returns
+        -------
+        angles : ndarray, shape (..., 3)
+            Shape depends on shape of inputs used to initialize object.
+            The returned angles are in the range:
+
+            - First angle belongs to [-180, 180] degrees (both inclusive)
+            - Third angle belongs to [-180, 180] degrees (both inclusive)
+            - Second angle belongs to a set of size 180 degrees,
+              given by: ``[-abs(lambda), 180 - abs(lambda)]``, where ``lambda``
+              is the angle between the first and third axes.
+
+        References
+        ----------
+        .. [1] Shuster, Malcolm & Markley, Landis. (2003). Generalization of
+               the Euler Angles. Journal of the Astronautical Sciences. 51. 123-132.
+               10.1007/BF03546304.
+        .. [2] Bernardes E, Viollet S (2022) Quaternion to Euler angles
+               conversion: A direct, general and computationally efficient method.
+               PLoS ONE 17(11): e0276302. 10.1371/journal.pone.0276302
+        .. [3] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
+        """
+
+        return self._rot.as_davenport(axes, order, degrees, suppress_warnings)
+
+    def as_euler(self, seq, degrees=False, suppress_warnings=False):
+        """
+        Represent as Euler angles.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_euler`.
+
+        Any orientation can be expressed as a composition of 3 elementary
+        rotations. Once the axis sequence has been chosen, Euler angles define
+        the angle of rotation around each respective axis [1]_.
+
+        The algorithm from [2]_ has been used to calculate Euler angles for the
+        rotation about a given sequence of axes.
+
+        Euler angles suffer from the problem of gimbal lock [3]_, where the
+        representation loses a degree of freedom and it is not possible to
+        determine the first and third angles uniquely. In this case,
+        a warning is raised (unless the ``suppress_warnings`` option is used),
+        and the third angle is set to zero. Note however that the returned
+        angles still represent the correct rotation.
+
+        Parameters
+        ----------
+        seq : string, length 3
+            3 characters belonging to the set {'X', 'Y', 'Z'} for intrinsic
+            rotations, or {'x', 'y', 'z'} for extrinsic rotations [1]_.
+            Adjacent axes cannot be the same.
+            Extrinsic and intrinsic rotations cannot be mixed in one function
+            call.
+        degrees : boolean, optional
+            Returned angles are in degrees if this flag is True, else they are
+            in radians. Default is False.
+        suppress_warnings : boolean, optional
+            Disable warnings about gimbal lock. Default is False.
+
+        Returns
+        -------
+        angles : ndarray, shape (..., 3)
+            Shape depends on shape of inputs used to initialize object.
+            The returned angles are in the range:
+
+            - First angle belongs to [-180, 180] degrees (both inclusive)
+            - Third angle belongs to [-180, 180] degrees (both inclusive)
+            - Second angle belongs to:
+
+                - [-90, 90] degrees if all axes are different (like xyz)
+                - [0, 180] degrees if first and third axes are the same
+                  (like zxz)
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+        .. [2] Bernardes E, Viollet S (2022) Quaternion to Euler angles
+               conversion: A direct, general and computationally efficient
+               method. PLoS ONE 17(11): e0276302.
+               https://doi.org/10.1371/journal.pone.0276302
+        .. [3] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
+        """
+
+        return self._rot.as_euler(seq, degrees, suppress_warnings)
 
     def as_matrix(self):
-        """"""
+        """
+        Represent as rotation matrix.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_matrix`.
+
+        3D rotations can be represented using rotation matrices, which
+        are 3 x 3 real orthogonal matrices with determinant equal to +1 [1]_.
+
+        Returns
+        -------
+        matrix : ndarray, shape (..., 3)
+            Shape depends on shape of inputs used for initialization.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+        """
+
         return self._rot.as_matrix()
 
     def as_mrp(self):
-        """"""
+        """
+        Represent as Modified Rodrigues Parameters (MRPs).
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_mrp`.
+
+        MRPs are a 3 dimensional vector co-directional to the axis of rotation
+        and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
+        the angle of rotation (in radians) [1]_.
+
+        MRPs have a singularity at 360 degrees which can be avoided by ensuring
+        the angle of rotation does not exceed 180 degrees, i.e. switching the
+        direction of the rotation when it is past 180 degrees. This function
+        will always return MRPs corresponding to a rotation of less than or
+        equal to 180 degrees.
+
+        Returns
+        -------
+        mrps : ndarray, shape (..., 3)
+            Shape depends on shape of inputs used for initialization.
+
+        References
+        ----------
+        .. [1] Shuster, M. D. "A Survey of Attitude Representations",
+               The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
+               pp. 475-476
+        """
+
         return self._rot.as_mrp()
 
-    def as_quat(self):
-        """"""
-        return self._rot.as_quat()
+    def as_quat(self, canonical=False, *, scalar_first=False):
+        """Represent as quaternions.
 
-    def as_rotvec(self):
-        """"""
-        return self._rot.as_rotvec()
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_quat`.
+
+        Rotations in 3 dimensions can be represented using unit norm
+        quaternions [1]_.
+
+        The 4 components of a quaternion are divided into a scalar part ``w``
+        and a vector part ``(x, y, z)`` and can be expressed from the angle
+        ``theta`` and the axis ``n`` of a rotation as follows::
+
+            w = cos(theta / 2)
+            x = sin(theta / 2) * n_x
+            y = sin(theta / 2) * n_y
+            z = sin(theta / 2) * n_z
+
+        There are 2 conventions to order the components in a quaternion:
+
+        - scalar-first order -- ``(w, x, y, z)``
+        - scalar-last order -- ``(x, y, z, w)``
+
+        The choice is controlled by `scalar_first` argument.
+        By default, it is False and the scalar-last order is used.
+
+        The mapping from quaternions to rotations is
+        two-to-one, i.e. quaternions ``q`` and ``-q``, where ``-q`` simply
+        reverses the sign of each component, represent the same spatial
+        rotation.
+
+        Parameters
+        ----------
+        canonical : `bool`, default False
+            Whether to map the redundant double cover of rotation space to a
+            unique "canonical" single cover. If True, then the quaternion is
+            chosen from {q, -q} such that the w term is positive. If the w term
+            is 0, then the quaternion is chosen such that the first nonzero
+            term of the x, y, and z terms is positive.
+        scalar_first : bool, optional
+            Whether the scalar component goes first or last.
+            Default is False, i.e. the scalar-last order is used.
+
+        Returns
+        -------
+        quat : `numpy.ndarray`, shape (..., 4)
+            Shape depends on shape of inputs used for initialization.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+        """
+        return self._rot.as_quat(canonical, scalar_first)
+
+    def as_rotvec(self, degrees=False):
+        """
+        Represent as rotation vectors.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_rotvec`.
+
+        A rotation vector is a 3 dimensional vector which is co-directional to
+        the axis of rotation and whose norm gives the angle of rotation [1]_.
+
+        Parameters
+        ----------
+        degrees : boolean, optional
+            Returned magnitudes are in degrees if this flag is True, else they
+            are in radians. Default is False.
+
+        Returns
+        -------
+        rotvec : ndarray, shape (..., 3)
+            Shape depends on shape of inputs used for initialization.
+
+        References
+        ----------
+        .. [1] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
+        """
+
+        return self._rot.as_rotvec(degrees)
 
     def as_view_up(self):
-        """"""
-        vector_triple = self.as_matrix()
-        views, lefts, ups = np.split(vector_triple, 3, axis=-2)
+        """Get Orientations as a view, up, and right vector.
 
-        # In a standard Cartesian right-handed coordinate system,
-        # standard basis is defined as [x, y, z] = [view, left, up], where
-        # left is the same vector as -rights
-        vector_triple = np.concatenate((views, ups, -lefts), axis=-2)
+        Orientations are internally stored as quaternions for better spherical
+        linear interpolation (SLERP) and spherical harmonics operations.
+        More intuitionally, they can be expressed as view and and up of vectors
+        which cannot be collinear. In this case are restricted to be
+        perpendicular to minimize rounding errors.
+
+        Returns
+        -------
+        vector_triple: ndarray, shape (N, 3), normalized vectors
+            - views, see :py:func:`Orientations.from_view_up`
+            - ups, see :py:func:`Orientations.from_view_up`
+            - rights, see :py:func:`Orientations.from_view_up`
+                A single vector or a stack of vectors, pointing to the right of
+                the object, constructed as a cross product of ups and rights.
+        """
+        vector_triple = self.as_matrix()
+        views, _, ups = np.split(vector_triple, 3, axis=-2)
 
         views = np.squeeze(views, axis=-2)
         ups   = np.squeeze(ups, axis=-2)
@@ -717,16 +992,99 @@ class Rotation():
         return self.from_quat(self.as_quat())
 
     def inv(self):
-        """"""
+        """
+        Invert this orientation.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.inv`.
+
+        Composition of an orientation with its inverse results in an identity
+        transformation.
+
+        Returns
+        -------
+        inverse : Orientations
+            Object containing inverse of the orientations in the current
+            instance.
+        """
         self._rot = self._rot.inv()
         return self
 
     def mean(self, weights=None, axis=None):
-        """"""
+        r"""
+        Get the mean of the orientations.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.mean`.
+
+        The mean used is the chordal L2 mean (also called the projected or
+        induced arithmetic mean) [#]_. If ``A`` is a set of rotation matrices,
+        then the mean ``M`` is the rotation matrix that minimizes the
+        following loss function:
+
+        .. math::
+
+            L(M) = \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{A}_i -
+            \\mathbf{M} \\rVert^2 ,
+
+        where :math:`w_i`'s are the `weights` corresponding to each matrix.
+
+        Parameters
+        ----------
+        weights : array_like shape (..., N), optional
+            Weights describing the relative importance of the orientations. If
+            None (default), then all values in `weights` are assumed to be
+            equal. If given, the shape of `weights` must be broadcastable to
+            the rotation shape. Weights must be non-negative.
+        axis : None, int, or tuple of ints, optional
+            Axis or axes along which the means are computed. The default is to
+            compute the mean of all orientations.
+
+        Returns
+        -------
+        mean : Orientations
+            Single orientation containing the mean of the orientations in the
+            current instance.
+
+        References
+        ----------
+        .. [#] Hartley, Richard, et al.,
+                "Rotation Averaging", International Journal of Computer Vision
+                103, 2013, pp. 267-305.
+        """
         return self._from_scipy_rotation(self._rot.mean(weights, axis))
 
     def reduce(self, left=None, right=None, return_indices=False):
-        """"""
+        """Reduce this orientation with the provided orientation groups.
+
+        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.reduce`.
+
+        Reduction of a orientation ``p`` is a transformation of the form
+        ``q = l * p * r``, where ``l`` and ``r`` are chosen from `left` and
+        `right` respectively, such that orientation ``q`` has the smallest
+        magnitude.
+
+        If `left` and `right` are orientation groups representing symmetries of
+        two objects rotated by ``p``, then ``q`` is the orientation of the
+        smallest magnitude to align these objects considering their symmetries.
+
+        Parameters
+        ----------
+        left : Orientation, optional
+            Object containing the left orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        right : Orientation, optional
+            Object containing the right orientation(s). Default value (None)
+            corresponds to the identity orientation.
+        return_indices : bool, optional
+            Whether to return the indices of the orientations from `left` and
+            `right` used for reduction.
+
+        Returns
+        -------
+        reduced : Orientations
+            Object containing reduced orientations.
+        left_best, right_best: integer ndarray
+            Indices of elements from `left` and `right` used for reduction.
+        """
         if return_indices:
             rot, left_idx, right_idx = \
                 self._rot.reduce(left, right, return_indices)
@@ -737,7 +1095,33 @@ class Rotation():
 
     def show(self, positions=None,
              show_views=True, show_ups=True, show_rights=True, **kwargs):
-        """"""
+        """
+        Visualize Orientations as triples of view (red), up (green) and
+        right (blue) vectors in a quiver plot.
+
+        Parameters
+        ----------
+        positions : array_like, shape (O, 3), O is len(self)
+            These are the positions of each vector triple. If not provided,
+            all triples are positioned in the origin of the coordinate system.
+        show_views: bool
+            select wether to show the view vectors or not.
+            The default is True.
+        show_ups: bool
+            select wether to show the up vectors or not.
+            The default is True.
+        show_rights: bool
+            select wether to show the right vectors or not.
+            The default is True.
+        kwargs : dict
+            Additional arguments passed to :py:func:`pyfar.plot.quiver`.
+
+        Returns
+        -------
+        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
+            The axis used for the plot.
+
+        """
         if positions is None:
             positions = np.zeros((self.as_quat().shape[0], 3))
         positions = np.atleast_2d(positions).astype(np.float64)
