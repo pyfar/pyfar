@@ -941,6 +941,8 @@ class TransmissionMatrix(FrequencyData):
         propagation_direction: str = "expanding",
     ) -> np.ndarray | TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
+        It expresses sound pressure and volume velocity at one end of the horn
+        as a function of sound pressure and volume velocity at the other end.
 
         The transmission matrix is determined based on the surface
         area of the horn's narrow end, the surface area of the
@@ -953,19 +955,19 @@ class TransmissionMatrix(FrequencyData):
 
         .. math::
             \begin{bmatrix}
-                p_1\quad[Pa] \\
-                q_1\quad[m^3/s]
+            p_1\quad[Pa] \\
+            q_1\quad[m^3/s]
             \end{bmatrix}
             =
             \begin{bmatrix}
-                \frac{b}{a}\cos(kl) - \frac{1}{ka}\sin(kl) &
-                \frac{jZ_0}{ab\Omega}\sin(kl) \\[6pt]
-                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab)\sin(kl) - kl\cos(kl) \right) &
-                \frac{a}{b}\cos(kl) - \frac{1}{kb}\sin(kl)
+            \frac{b}{a}\cos(kl) - \frac{1}{ka}\sin(kl) &
+            \frac{jZ_0}{ab\Omega}\sin(kl) \\[6pt]
+            \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab)\sin(kl) - kl\cos(kl) \right) &
+            \frac{a}{b}\cos(kl) - \frac{1}{kb}\sin(kl)
             \end{bmatrix}
             \begin{bmatrix}
-                p_2\quad[Pa] \\
-                q_2\quad[m^3/s]
+            p_2\quad[Pa] \\
+            q_2\quad[m^3/s]
             \end{bmatrix}
 
         Parameters
