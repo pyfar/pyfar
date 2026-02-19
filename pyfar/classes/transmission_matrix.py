@@ -938,7 +938,7 @@ class TransmissionMatrix(FrequencyData):
         horn_length: Number,
         wave_number: Number | FrequencyData,
         medium_impedance: Number | FrequencyData = reference_air_impedance,
-        propagation_direction: str = "forward",
+        propagation_direction: str = "expanding",
     ) -> np.ndarray | TransmissionMatrix:
         r"""Create a transmission matrix representing a conical horn.
 
@@ -973,11 +973,11 @@ class TransmissionMatrix(FrequencyData):
         medium_impedance : FrequencyData, scalar
             The impedance of the medium filling the horn. Default is
             ``pyfar.constants.reference_air_impedance``
-        propagation_direction : {'forward', 'backward'}, optional
+        propagation_direction : {'expanding', 'tapering'}, optional
             Defines the direction of sound propagation through the horn,
-            where ``'forward'`` means from narrow to wide end
-            and ``'backward'`` means from wide to narrow end.
-            Default is ``'forward'``.
+            where ``'expanding'`` means from narrow to wide end
+            and ``'tapering'`` means from wide to narrow end.
+            Default is ``'expanding'``.
 
         Returns
         -------
@@ -1003,7 +1003,7 @@ class TransmissionMatrix(FrequencyData):
             >>> Z0 = pf.constants.reference_air_impedance
             >>> # Create the transmission matrix
             >>> T = pf.TransmissionMatrix.create_conical_horn(
-            >>>    S0, S1, L, k, Z0, 'backward')
+            >>>    S0, S1, L, k, Z0, 'tapering')
             >>> # Plot the transmission matrix
             >>> pf.plot.freq(T.input_impedance(np.inf))
 
@@ -1044,15 +1044,15 @@ class TransmissionMatrix(FrequencyData):
         if not isinstance(propagation_direction, str):
             raise TypeError(
             "The input propagation_direction must be a string"
-            "with value 'forward' or 'backward'.",
+            "with value 'expanding' or 'tapering'.",
             )
-        if propagation_direction not in ("forward", "backward"):
+        if propagation_direction not in ("expanding", "tapering"):
             raise ValueError(
                 "The string propagation_direction must either be "
-                "'forward' or 'backward'.",
+                "'expanding' or 'tapering'.",
             )
 
-        if propagation_direction == "backward":
+        if propagation_direction == "tapering":
             Omega, a, b = (
                 TransmissionMatrix._calculate_horn_geometry_parameters(
                     area_narrow_end,
