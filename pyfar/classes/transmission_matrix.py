@@ -912,10 +912,7 @@ class TransmissionMatrix(FrequencyData):
             or isinstance(horn_length, complex) or horn_length <= 0:
             raise ValueError("The input horn_length "
                              "must be a positive real number.")
-        if area_narrow_end > area_wide_end:
-            raise ValueError("area_narrow_end must be "
-                             "strictly smaller than area_wide_end.")
-        if area_narrow_end == area_wide_end:
+        if area_narrow_end >= area_wide_end:
             raise ValueError(
                 "For a conical horn area_narrow_end "
                 "must be strictly smaller than area_wide_end."
