@@ -893,10 +893,12 @@ class TransmissionMatrix(FrequencyData):
 
         Returns
         -------
-        Omega, a, b: tuple[Number, Number, Number]
-            A tuple containing the area constant Omega, the distance a from the
-            narrow end to the virtual apex of the cone, and the distance b from
-            the wide end to the same virtual apex.
+        Omega : Number
+            The area constant.
+        a : Number
+            The distance from the narrow end to the virtual apex of the cone.
+        b : Number
+            The distance from the wide end to the same virtual apex.
         """
         if not isinstance(area_narrow_end, Number) \
             or isinstance(area_narrow_end, complex) or area_narrow_end <= 0:
