@@ -491,31 +491,17 @@ def test_calculate_horn_geometry_parameters_value_error(param, invalid_value):
             parameters["horn_length"])
 
 
-
-def test_calculate_horn_geometry_parameters_S0_larger_S1_value_error():
+@pytest.mark.parametrize("value", [0.3, 0.35])
+def test_calculate_horn_geometry_parameters_S0_larger_S1_value_error(value):
     area_narrow_end = 0.35
-    area_wide_end = 0.3
+    area_wide_end = value
     horn_length = 0.35
-
     with pytest.raises(
         ValueError,
         match="area_narrow_end must be strictly smaller than area_wide_end.",
     ):
-        TransmissionMatrix.\
-            _calculate_horn_geometry_parameters\
-            (area_narrow_end, area_wide_end, horn_length)
-
-
-def test_calculate_horn_geometry_parameters_S0_equal_S1_value_error():
-    area_narrow_end = 0.35
-    area_wide_end = 0.35
-    horn_length = 0.2
-
-    with pytest.raises(ValueError, match=\
-        "For a conical horn area_narrow_end must be"):
-        TransmissionMatrix.\
-            _calculate_horn_geometry_parameters\
-            (area_narrow_end, area_wide_end, horn_length)
+        TransmissionMatrix._calculate_horn_geometry_parameters(
+            area_narrow_end, area_wide_end, horn_length)
 
 
 def test_calculate_horn_geometry_calculations():
