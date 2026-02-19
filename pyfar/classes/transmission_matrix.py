@@ -952,12 +952,21 @@ class TransmissionMatrix(FrequencyData):
         matrix following Equation (5-18) of Reference [1]_:
 
         .. math::
-            T = \begin{bmatrix}
-                \frac{b}{a}cos(kl)-\frac{1}{ka}sin(kl) &
-                \frac{jZ_0}{ab\Omega} \sin{kl} \\
-                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab) \sin{kl} -
-                kl \cos{kl} \right) & \frac{a}{b}cos(kl)-\frac{1}{kb}sin(kl)
-                \end{bmatrix}
+            \begin{bmatrix}
+                p_1\quad[Pa] \\
+                q_1\quad[m^3/s]
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                \frac{b}{a}\cos(kl) - \frac{1}{ka}\sin(kl) &
+                \frac{jZ_0}{ab\Omega}\sin(kl) \\[6pt]
+                \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab)\sin(kl) - kl\cos(kl) \right) &
+                \frac{a}{b}\cos(kl) - \frac{1}{kb}\sin(kl)
+            \end{bmatrix}
+            \begin{bmatrix}
+                p_2\quad[Pa] \\
+                q_2\quad[m^3/s]
+            \end{bmatrix}
 
         Parameters
         ----------
