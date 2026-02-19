@@ -946,7 +946,7 @@ class TransmissionMatrix(FrequencyData):
         The transmission matrix is determined based on the surface
         area of the horn's narrow end, the surface area of the
         horn's wide end, the horn's length, wavenumber, and
-        medium impedance.The surface areas are internally
+        medium impedance. The surface areas are internally
         transformed into starting point :math:`a`,
         end point :math:`b`, and area constant :math:`\Omega`
         of the horn to calculate the transmission
