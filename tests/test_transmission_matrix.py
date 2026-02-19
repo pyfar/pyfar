@@ -467,46 +467,29 @@ def test_create_transmission_line_frequency_matching():
         ValueError, match="The frequencies do not match"):
         TransmissionMatrix.create_transmission_line(kl, Z)
 
-@pytest.mark.parametrize(
+@pytest.mark.parametrize("param", [
     "area_narrow_end",
-    [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
-)
-def test_calculate_horn_geometry_parameters_S0_value_error(area_narrow_end):
-    area_wide_end = 0.2
-    horn_length = 0.35
-
-    with pytest.raises(ValueError, match="The input area_narrow_end"):
-        TransmissionMatrix.\
-            _calculate_horn_geometry_parameters\
-            (area_narrow_end, area_wide_end, horn_length)
-
-
-@pytest.mark.parametrize(
     "area_wide_end",
-    [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
-)
-def test_calculate_horn_geometry_parameters_S1_value_error(area_wide_end):
-    area_narrow_end = 0.2
-    horn_length = 0.35
-
-    with pytest.raises(ValueError, match="The input area_wide_end"):
-        TransmissionMatrix.\
-            _calculate_horn_geometry_parameters\
-            (area_narrow_end, area_wide_end, horn_length)
-
-
-@pytest.mark.parametrize(
     "horn_length",
+])
+@pytest.mark.parametrize(
+    "invalid_value",
     [{"a": 1, "b": 2}, np.array([1, 2, 3]), "term", 0, -5, 2j],
 )
-def test_calculate_horn_geometry_parameters_L_value_error(horn_length):
-    area_narrow_end = 0.2
-    area_wide_end = 0.3
+def test_calculate_horn_geometry_parameters_value_error(param, invalid_value):
+    parameters = {
+        "area_narrow_end": 0.2,
+        "area_wide_end": 0.3,
+        "horn_length": 0.35,
+    }
+    parameters[param] = invalid_value
+    with pytest.raises(ValueError, match=f"The input {param} must be"
+                                            " a positive real number."):
+        TransmissionMatrix._calculate_horn_geometry_parameters(
+            parameters["area_narrow_end"],
+            parameters["area_wide_end"],
+            parameters["horn_length"])
 
-    with pytest.raises(ValueError, match="The input horn_length"):
-        TransmissionMatrix.\
-            _calculate_horn_geometry_parameters\
-            (area_narrow_end, area_wide_end, horn_length)
 
 
 def test_calculate_horn_geometry_parameters_S0_larger_S1_value_error():
