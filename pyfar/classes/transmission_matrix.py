@@ -964,7 +964,8 @@ class TransmissionMatrix(FrequencyData):
             \begin{bmatrix}
             \frac{b}{a}\cos(kl) - \frac{1}{ka}\sin(kl) &
             \frac{jZ_0}{ab\Omega}\sin(kl) \\[6pt]
-            \frac{j\Omega}{k^2Z_0}\left( (1 + k^2ab)\sin(kl) - kl\cos(kl) \right) &
+            \frac{j\Omega}{k^2Z_0}\left(
+                (1 + k^2ab)\sin(kl) - kl\cos(kl) \right) &
             \frac{a}{b}\cos(kl) - \frac{1}{kb}\sin(kl)
             \end{bmatrix}
             \begin{bmatrix}
