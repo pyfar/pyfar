@@ -19,12 +19,12 @@ Added
 - `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals with the A and C-weighting curve standardised in IEC 61672-1 (PR #811, #852)
 - `pyfar.dsp.filter.check_fractional_octave_band_filter_tolerance` to check if a (fractional) octave filter bank meets the class I or II tolerances defined in IEC 61260-1 (PR #829)
 - All plots showing the magnitude response now have the `mode` parameter to specify if the absolute (default), real, or imaginary value of the spectrum is shown. This can also be toggled using the shortcut 'shift+m' in interactive plots (PR #817)
+- `pyfar.signals.files.binaural_room_impulse_response` can now return the room impulse response with noise tail (PR #906)
 - Abstract `_LTISystem` base class to better structure inheritance of the pyfar Filter classes (PR #798)
 
 Changed
 ^^^^^^^
 - The `pyfar.FIRFilter` class now uses `scipy.signal.oaconvolve`, instead of `scipy.signal.lfilter` for filtering to speed up the computation for long filters (PR #753)
-
 - Improve check of input data in `pyfar.constants.fractional_octave_frequencies_exact` and tests thereof (PR #876)
 - Improved testing for the parameter `side` used in 2D plots in the module `pyfar.plot` (PR #820)
 - Improved documentation to remove clutter from the secondary sidebar (PR #788)
