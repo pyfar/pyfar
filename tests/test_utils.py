@@ -36,7 +36,9 @@ def test_broadcast_cshapes(cshape, reference):
     cshapes = [signal.cshape for signal in signals]
 
     broadcasted = pf.utils.broadcast_cshapes(signals, cshape)
-    for signal, broadcast, cshape in zip(signals, broadcasted, cshapes):
+    for signal, broadcast, cshape in zip(
+        signals, broadcasted, cshapes, strict=False,
+    ):
         assert signal.cshape == cshape
         assert broadcast.cshape == reference
         assert isinstance(broadcast, type(signal))
@@ -87,7 +89,9 @@ def test_broadcast_cdims(cdim, reference):
     cdims = [len(signal.cshape) for signal in signals]
 
     broadcasted = pf.utils.broadcast_cdims(signals, cdim)
-    for signal, broadcast, cdim in zip(signals, broadcasted, cdims):
+    for signal, broadcast, cdim in zip(
+        signals, broadcasted, cdims, strict=False,
+    ):
         assert len(signal.cshape) == cdim
         assert len(broadcast.cshape) == reference
         assert isinstance(broadcast, type(signal))
@@ -115,7 +119,7 @@ def test_concatenate_channels(data_second, domains):
                pf.Signal(data_second, sr, fft_norm='rms'))
 
     # force signal domain
-    for signal, domain in zip(signals, domains):
+    for signal, domain in zip(signals, domains, strict=False):
         signal.domain = domain
 
     res = pf.utils.concatenate_channels(signals, caxis=0)

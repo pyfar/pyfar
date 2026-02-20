@@ -197,7 +197,7 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
         cshape_bc = np.broadcast_shapes(*np.delete(cshapes, caxis,
                                         axis=-1))
         broad_signals = []
-        for signal, cshape in zip(signals, cshapes):
+        for signal, cshape in zip(signals, cshapes, strict=False):
             # Appends the caxis to ignore back into cshape to broadcast to.
             if caxis in (-1, len(cshape_bc)):
                 # Use append if caxis is defined for last dimension

@@ -243,7 +243,7 @@ def test_shelf(impulse):
     shelves = [pfilt.low_shelf, pfilt.high_shelf]
     kinds = ['Low', 'High']
 
-    for shelf, kind in zip(shelves, kinds):
+    for shelf, kind in zip(shelves, kinds, strict=False):
         # Filter object
         f_obj = shelf(None, 1000, 10, 2, sampling_rate=44100)
         assert isinstance(f_obj, pclass.FilterIIR)
@@ -357,7 +357,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
     # test different filter slopes against reference
     x = pf.signals.impulse(2**10)
 
-    for overlap, slope in zip([1, 1, 0], [0, 3, 0]):
+    for overlap, slope in zip([1, 1, 0], [0, 3, 0], strict=False):
         with pytest.warns(PyfarDeprecationWarning,
                           match="'frequencies' will be"):
             y, _ = pfilt.reconstructing_fractional_octave_bands(
