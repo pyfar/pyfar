@@ -55,6 +55,11 @@ Fixed
 - Update the calculation of nominal and exact center frequencies in `pyfar.constants.fractional_octave_frequencies_exact` and `pyfar.constants.fractional_octave_frequencies_nominal` (PR #874)
 - Wrap methods from `scipy.spatial.transform.Rotation` in `pf.Orientations` to fix inheritance-breaking changes in scipy v1.17.0 (PR #890, #893)
 
+Maintenance
+^^^^^^^^^^^
+- Update CircleCI single python version job config to use Python 3.14 (PR #908)
+
+
 0.7.4 (2026-02-02)
 ------------------
 
