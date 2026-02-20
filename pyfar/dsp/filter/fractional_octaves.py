@@ -661,7 +661,7 @@ def reconstructing_fractional_octave_bands(
         f"overlap={overlap}, slope={slope})")
 
     warnings.warn(("Return parameter 'frequencies' will be removed in pyfar "
-                   "0.9.0. To get the fractional octave center frequencies, "
+                   "0.10.0. To get the fractional octave center frequencies, "
                    "use `pyfar.constants.fractional_octave_frequencies_exact` "
                    "or `fractional_octave_frequencies_nominal` instead."),
                    PyfarDeprecationWarning, stacklevel=2)
