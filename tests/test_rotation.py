@@ -15,9 +15,12 @@ def test_rotation_init():
     with pytest.raises(RuntimeError, match=match):
         Rotation()
 
-def test_class_properties(rotation):
+def test_class_properties():
     """Test Rotation.n_rotations parameter."""
-    assert rotation.n_rotations == 3
+    multidim_angles = np.zeros((3, 2, 3))
+    multidim_rot = Rotation.from_euler('XYZ', multidim_angles)
+    assert multidim_rot.cshape == (3, 2)
+    assert multidim_rot.csize == 6
 
 def test_rotation_from_view_up():
     """Create `Rotation` from view and up vectors."""
@@ -48,7 +51,7 @@ def test_rotation_from_view_up():
     # number of views to ups M:N
     views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
-    match = 'Expected 1:1, 1:N or N:1 `views` and `ups` not M:N, got '
+    match = 'shape missmatch: `views` '
     with pytest.raises(ValueError, match=match):
         Rotation.from_view_up(views, ups)
 
@@ -79,45 +82,6 @@ def test_rotation_from_view_up_invalid():
     match = 'View and Up vectors must be perpendicular'
     with pytest.raises(ValueError, match=match):
         Rotation.from_view_up(views, ups)
-
-
-def test_rotation_show(positions, rotation):
-    """
-    Visualize rotation via `Rotation.show()`
-    with and without `positions`.
-    """
-    # single vectors no position
-    view = [1, 0, 0]
-    up = [0, 1, 0]
-    rotation_single = Rotation.from_view_up(view, up)
-    rotation_single.show()
-    # with position
-    position = Coordinates(0, 1, 0)
-    rotation_single.show(position)
-
-    # multiple vectors no position
-    rotation.show()
-    # with matching number of positions
-    rotation.show(positions)
-
-    # select what to show
-    rotation.show(show_views=False)
-    rotation.show(show_ups=False)
-    rotation.show(show_rights=False)
-    rotation.show(show_views=False, show_ups=False)
-    rotation.show(show_views=False, show_rights=False)
-    rotation.show(show_ups=False, show_rights=False)
-    rotation.show(positions=positions, show_views=False, show_ups=False)
-
-    # with positions provided as Coordinates
-    positions = np.asarray(positions)
-    positions = Coordinates(positions[:, 0], positions[:, 1], positions[:, 2])
-    rotation.show(positions)
-    # with non-matching positions
-    positions = Coordinates(0, 1, 0)
-    match = 'If provided, there must be the same number'
-    with pytest.raises(ValueError, match=match):
-        rotation.show(positions)
 
 
 def test_as_view_up(views, ups, rotation):
@@ -197,7 +161,6 @@ def test_rotation_rotation(views, ups, positions, rotation):
     rot_x45 = Rotation.from_euler('x', 45, degrees=True)
     rotation = Rotation.from_view_up(views, ups)
     rotation = rotation * rot_x45
-    rotation.show(positions)
 
 
 def test___eq___equal(rotation, views, ups):
