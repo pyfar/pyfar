@@ -18,14 +18,13 @@ warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 class Rotation():
     """
-    This class for Rotation in the three-dimensional space,
-    is largely based on :py:class:`scipy:scipy.spatial.transform.Rotation` and
-    wraps all functionality that
-    scipy's Rotation class provides.
+    Rotation in the three-dimensional space.
+
+    This class is largely based on :py:class:`scipy:scipy.spatial.transform.Rotation`
+    and wraps all functionality that scipy's Rotation class provides.
     In addition the pyfar Rotation class adds the creation from perpendicular
-    view and up vectors through :py:func:`~from_view_up`, the representation
-    as view / up in :py:func:`~as_view_up` and a convenient plot
-    function :py:func:`~show`.
+    view and up vectors through :py:func:`~from_view_up`, and the
+    representation as view / up in :py:func:`~as_view_up`.
 
     A rotation can be visualized with the triple of view, up and right
     vectors and it is tied to the object's local coordinate system.
@@ -60,17 +59,16 @@ class Rotation():
     def __repr__(self):
         """String representation of Rotation object."""
         repr_string = \
-              f"Pyfar Rotations object with {self.n_rotations} rotations."
+              f"Pyfar.Rotation with {self.cshape} rotations."
         return repr_string
 
     def __iter__(self):
         """Iterate over rotations."""
         if self.as_quat().ndim == 1:
             raise TypeError("Single rotation is not iterable.")
-
-        for i in range(self.n_rotations):
-            rot = self._rot[i]
-            yield self._from_scipy_rotation(rot)
+        quat = self.as_quat().reshape((-1, 4))
+        for i in range(self.csize):
+            yield self.from_quat(quat[i])
 
     def __getitem__(self, idx):
         """
@@ -89,10 +87,11 @@ class Rotation():
 
         This is disabled for `Rotation`.
         """
-        raise NotImplementedError('Setting an item is disabled for pyfar '
-        'Rotations. If you want to modify the Rotation, use an array '
-        'representation like `as_quat()` or `as_matrix()` and create a new '
-        'object.')
+        raise NotImplementedError(
+            'Setting an item is disabled for pyfar '
+            'Rotations. If you want to modify the Rotation, use an array '
+            'representation like `as_quat()` or `as_matrix()` and create a new '
+            'object.')
 
     def __mul__(self, other):
         """
@@ -106,9 +105,8 @@ class Rotation():
         """
         if isinstance(other, Rotation):
             other = scRotation.from_quat(other.as_quat())
-        if isinstance(other, scRotation):
-            self._rot *= other
-            return self
+        self._rot *= other
+        return self
 
     def __rmul__(self, other):
         """
@@ -137,12 +135,18 @@ class Rotation():
 
     # properties
     @property
-    def n_rotations(self):
-        """Number of rotations."""
+    def cshape(self):
+        """Cshape of rotations."""
         quat = self._rot.as_quat()
-        n_rotations = \
-            1 if quat.ndim == 1 else quat.shape[0]
-        return n_rotations
+        if quat.ndim==1:
+            return (1,)
+        return quat.shape[:-1]
+
+    @property
+    def csize(self):
+        """Number of rotations."""
+        return np.prod(self.cshape)
+
 
     # from-... methods
     @classmethod
@@ -439,13 +443,13 @@ class Rotation():
 
         Parameters
         ----------
-        views : array_like, shape (N, 3) or (3,), Coordinates
+        views : array_like, shape (..., 3) or (3,), Coordinates
             A single vector or a stack of vectors, giving the look-direction of
             an object in three-dimensional space, e.g. from a listener, or the
             acoustic axis of a loudspeaker, or the direction of a main lobe.
             Views can also be passed as a Coordinates object.
 
-        ups : array_like, shape (N, 3) or (3,), Coordinates
+        ups : array_like, shape (..., 3) or (3,), Coordinates
             A single vector or a stack of vectors, giving the up-direction of
             an object, which is usually the up-direction in world-space. Views
             can also be passed as a Coordinates object.
@@ -456,44 +460,41 @@ class Rotation():
             Object containing the rotations.
         """
         # init views and up
+        views = np.atleast_2d(views)
+        ups = np.atleast_2d(ups)
+
+        # determine broadcasted shape
         try:
-            views = np.atleast_2d(views).astype(np.float64)
-            ups = np.atleast_2d(ups).astype(np.float64)
-        except VisibleDeprecationWarning as exc:
+            shape = np.broadcast_shapes(views.shape, ups.shape)
+        except ValueError as exc:
             raise ValueError(
-                "Expected `views` and `ups` to have shape (N, 3)") from exc
+                f"shape missmatch: `views` {views.shape} and `ups` {ups.shape}"
+                " cannot be broadcasted to a single shape"
+            )
 
-        # check views and ups
-        if (views.ndim > 2 or views.shape[-1] != 3 or
-                ups.ndim > 2 or ups.shape[-1] != 3):
-            raise ValueError(f"Expected `views` and `ups` to have shape (N, 3)"
-                             f" or (3,), got {views.shape}")
-        if views.shape == ups.shape:
-            pass
-        elif views.shape[0] > 1 and ups.shape[0] == 1:
-            ups = np.repeat(ups, views.shape[0], axis=0)
-        elif ups.shape[0] > 1 and views.shape[0] == 1:
-            views = np.repeat(views, ups.shape[0], axis=0)
-        else:
-            raise ValueError("Expected 1:1, 1:N or N:1 `views` and `ups` "
-                             f"not M:N, got {views.shape} and {ups.shape}")
+        # check shape
+        if shape[-1] != 3:
+            raise ValueError(f"Expected `views` and `ups` to have shape "
+                             f"(..., 3) or (3,), got {views.shape} and "
+                             f"{ups.shape}")
 
-        if not (np.all(np.linalg.norm(views, axis=1)) and
-                np.all(np.linalg.norm(ups, axis=1))):
+        views = np.broadcast_to(views, shape)
+        ups = np.broadcast_to(ups, shape)
+
+        if not (np.all(np.linalg.norm(views, axis=-1)) and
+                np.all(np.linalg.norm(ups, axis=-1))):
             raise ValueError("View and Up Vectors must have a length.")
-        if not np.allclose(0, np.einsum('ij,kj->k', views, ups)):
+        if not np.allclose(0, np.einsum('...j,...j->...', views, ups)):
             raise ValueError("View and Up vectors must be perpendicular.")
 
         # Assuming that the direction of the cross product is defined
         # by the right-hand rule
-        rights = np.cross(views, ups)
+        rights = np.cross(views, ups, axis=-1)
 
         # In a standard Cartesian right-handed coordinate system,
         # these vectors are defined as [x, y, z] = [view, left, up], where
         # left is the same vector as -rights
-        rotation_matrix = np.asarray([views, -rights, ups])
-        rotation_matrix = np.swapaxes(rotation_matrix, 0, 1)
-
+        rotation_matrix = np.stack((views, -rights, ups), axis=-1)
         return cls.from_matrix(rotation_matrix)
 
     # other class methods
@@ -1012,12 +1013,9 @@ class Rotation():
 
         Returns
         -------
-        vector_triple: ndarray, shape (N, 3), normalized vectors
+        vector_triple: ndarray, shape (..., 3), normalized vectors
             - views, see :py:func:`Rotation.from_view_up`
             - ups, see :py:func:`Rotation.from_view_up`
-            - rights, see :py:func:`Rotation.from_view_up`
-                A single vector or a stack of vectors, pointing to the right of
-                the object, constructed as a cross product of ups and rights.
         """
         vector_triple = self.as_matrix()
         views, _, ups = np.split(vector_triple, 3, axis=-2)
@@ -1133,55 +1131,3 @@ class Rotation():
         rot = self._rot.reduce(left, right, return_indices)
         return self._from_scipy_rotation(rot)
 
-    def show(self, positions=None,
-             show_views=True, show_ups=True, show_rights=True, **kwargs):
-        """
-        Visualize Rotation as triples of view (red), up (green) and
-        right (blue) vectors in a quiver plot.
-
-        Parameters
-        ----------
-        positions : array_like, shape (O, 3), O is len(self)
-            These are the positions of each vector triple. If not provided,
-            all triples are positioned in the origin of the coordinate system.
-        show_views: bool
-            select wether to show the view vectors or not.
-            The default is True.
-        show_ups: bool
-            select wether to show the up vectors or not.
-            The default is True.
-        show_rights: bool
-            select wether to show the right vectors or not.
-            The default is True.
-        kwargs : dict
-            Additional arguments passed to :py:func:`pyfar.plot.quiver`.
-
-        Returns
-        -------
-        ax : :py:class:`~mpl_toolkits.mplot3d.axes3d.Axes3D`
-            The axis used for the plot.
-
-        """
-        if positions is None:
-            positions = np.zeros((self.as_quat().shape[0], 3))
-        positions = np.atleast_2d(positions).astype(np.float64)
-        if positions.shape[0] != self.as_quat().shape[0]:
-            raise ValueError("If provided, there must be the same number"
-                             "of positions as rotations.")
-
-        # Create view, up and right vectors from Rotation object
-        views, ups = self.as_view_up()
-        rights = np.cross(views, ups)
-
-        kwargs.pop('color', None)
-
-        ax = None
-        if show_views:
-            ax = pf.plot.quiver(
-                positions, views, color=pf.plot.color('r'), **kwargs)
-        if show_ups:
-            ax = pf.plot.quiver(
-                positions, ups, ax=ax, color=pf.plot.color('g'), **kwargs)
-        if show_rights:
-            ax = pf.plot.quiver(
-                positions, rights, ax=ax, color=pf.plot.color('b'), **kwargs)
