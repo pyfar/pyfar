@@ -489,12 +489,12 @@ class Rotation():
 
         # Assuming that the direction of the cross product is defined
         # by the right-hand rule
-        rights = np.cross(views, ups, axis=-1)
+        rights = np.cross(views, ups)
 
         # In a standard Cartesian right-handed coordinate system,
         # these vectors are defined as [x, y, z] = [view, left, up], where
         # left is the same vector as -rights
-        rotation_matrix = np.stack((views, -rights, ups), axis=-1)
+        rotation_matrix = np.stack((views, -rights, ups), axis=-2)
         return cls.from_matrix(rotation_matrix)
 
     # other class methods
