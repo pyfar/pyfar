@@ -466,10 +466,11 @@ class Rotation():
         try:
             shape = np.broadcast_shapes(views.shape, ups.shape)
         except ValueError as exc:
-            raise ValueError from exc(
+            message = (
                 f"shape missmatch: `views` {views.shape} and `ups` {ups.shape}"
-                " cannot be broadcasted to a single shape",
+                " cannot be broadcasted to a single shape"
             )
+            raise ValueError(message) from exc
 
         # check shape
         if shape[-1] != 3:
