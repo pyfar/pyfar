@@ -32,21 +32,16 @@ class Rotation():
 
     Examples
     --------
-    >>> from pyfar import Rotation
+    >>> import pyfar as pf
     >>> views = [[1, 0, 0], [2, 0, 0]]
     >>> ups = [[0, 1, 0], [0, -2, 0]]
-    >>> rotations = Rotation.from_view_up(views, ups)
+    >>> rotations = pf.Rotation.from_view_up(views, ups)
 
-    Visualize rotations at certain positions:
-
-    >>> positions = [[0, 0.5, 0], [0, -0.5, 0]]
-    >>> rotations.show(positions)
 
     Rotate by 45 degree in x-direction:
 
-    >>> rot_x45 = Rotation.from_euler('x', 45, degrees=True)
-    >>> rotations = rotations * rot_x45
-    >>> rotations.show(positions)
+    >>> rot_x45 = pf.Rotation.from_euler('x', 45, degrees=True)
+    >>> rot_x45 = pf.Rotation.from_euler('x', 45, degrees=True)
 
     To create `Rotation` objects use ``from_...`` methods.
     """
@@ -656,7 +651,7 @@ class Rotation():
         return cls._from_scipy_rotation(rot)
 
     @classmethod
-    def identity(cls, num=None, *, shape=None):
+    def identity(cls, num=None, shape=None):
         """
         Get identity rotation(s).
 
@@ -682,7 +677,7 @@ class Rotation():
         return cls._from_scipy_rotation(rot)
 
     @classmethod
-    def random(cls, num=None, rng=None, *, shape=None):
+    def random(cls, num=None, rng=None, shape=None):
         """
         Generate rotations that are uniformly distributed on a sphere.
 
@@ -922,7 +917,7 @@ class Rotation():
 
         return self._rot.as_mrp()
 
-    def as_quat(self, canonical=False, *, scalar_first=False):
+    def as_quat(self, canonical=False, scalar_first=False):
         """Represent as quaternions.
 
         Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_quat`.
