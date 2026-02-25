@@ -834,7 +834,7 @@ class Rotation():
         ----------
         seq : string, length 3
             3 characters belonging to the set {'X', 'Y', 'Z'} for intrinsic
-            rotations, or {'x', 'y', 'z'} for extrinsic rotations [#]_.
+            rotations, or {'x', 'y', 'z'} for extrinsic rotations.
             Adjacent axes cannot be the same.
             Extrinsic and intrinsic rotations cannot be mixed in one function
             call.
