@@ -763,7 +763,6 @@ def rotation(views, ups):
     return Rotation.from_view_up(views, ups)
 
 
-
 @pytest.fixture()
 def coordinates():
     """Coordinates object.
