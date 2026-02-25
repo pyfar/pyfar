@@ -159,7 +159,9 @@ def test_as_view_up(views, ups, rotation):
 def test_from_view_as_view_roundtrip(v1, v2):
     """Test from_view_up / as_view_up."""
     if np.all(np.abs(v1) == np.abs(v2)):
-        pytest.skip()
+        # skip cases where v1 and v2 extend in the same dimension
+        # view and up must be perpendicular
+        return
 
     views = np.atleast_2d(v1)
     ups = np.atleast_2d(v2)
