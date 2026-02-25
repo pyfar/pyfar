@@ -20,6 +20,7 @@ Added
 - `pyfar.dsp.filter.check_fractional_octave_band_filter_tolerance` to check if a (fractional) octave filter bank meets the class I or II tolerances defined in IEC 61260-1 (PR #829)
 - All plots showing the magnitude response now have the `mode` parameter to specify if the absolute (default), real, or imaginary value of the spectrum is shown. This can also be toggled using the shortcut 'shift+m' in interactive plots (PR #817)
 - Abstract `_LTISystem` base class to better structure inheritance of the pyfar Filter classes (PR #798)
+- Added new `Rotation` class as a long term replacement for `Orientations` (PR #904)
 
 Changed
 ^^^^^^^
