@@ -3,8 +3,6 @@ from scipy.spatial.transform import Rotation as scRotation
 import numpy as np
 import warnings
 
-import pyfar as pf
-
 if np.__version__ < '2.0.0':
     from numpy import VisibleDeprecationWarning
 else:
@@ -20,8 +18,9 @@ class Rotation():
     """
     Rotation in the three-dimensional space.
 
-    This class is largely based on :py:class:`scipy:scipy.spatial.transform.Rotation`
-    and wraps all functionality that scipy's Rotation class provides.
+    This class is largely based on '
+    ':py:class:`scipy:scipy.spatial.transform.Rotation and wraps all '
+    'functionality that scipy's Rotation class provides.'
     In addition the pyfar Rotation class adds the creation from perpendicular
     view and up vectors through :py:func:`~from_view_up`, and the
     representation as view / up in :py:func:`~as_view_up`.
@@ -90,8 +89,8 @@ class Rotation():
         raise NotImplementedError(
             'Setting an item is disabled for pyfar '
             'Rotations. If you want to modify the Rotation, use an array '
-            'representation like `as_quat()` or `as_matrix()` and create a new '
-            'object.')
+            'representation like `as_quat()` or `as_matrix()` and create a '
+            'new object.')
 
     def __mul__(self, other):
         """
@@ -467,9 +466,9 @@ class Rotation():
         try:
             shape = np.broadcast_shapes(views.shape, ups.shape)
         except ValueError as exc:
-            raise ValueError(
+            raise ValueError from exc(
                 f"shape missmatch: `views` {views.shape} and `ups` {ups.shape}"
-                " cannot be broadcasted to a single shape"
+                " cannot be broadcasted to a single shape",
             )
 
         # check shape

@@ -16,7 +16,7 @@ def test_rotation_init():
         Rotation()
 
 def test_class_properties():
-    """Test Rotation.n_rotations parameter."""
+    """Test properties."""
     multidim_angles = np.zeros((3, 2, 3))
     multidim_rot = Rotation.from_euler('XYZ', multidim_angles)
     assert multidim_rot.cshape == (3, 2)
@@ -24,48 +24,56 @@ def test_class_properties():
 
 
 @pytest.mark.parametrize(
-    ("views", "ups"),
+    ("views", "ups", "expected_cshape"),
     [
         # Single view and up vectors
         (
             [1, 0, 0],
             [0, 1, 0],
+            (1,),
         ),
         # Multiple view and up vectors as lists
         (
             [[1, 0, 0], [0, 0, 1]],
             [[0, 1, 0], [0, 1, 0]],
+            (2,),
         ),
         # Provided as Coordinates
         (
             Coordinates([1, 0], [0, 0], [0, 1]),
             Coordinates([0, 0], [1, 1], [0, 0]),
+            (2,),
         ),
         # N:1 shape broadcasting
         (
             [[1, 0, 0], [0, 0, 1]],
             [[0, 1, 0]],
+            (2,),
         ),
         # 1:N shape broadcasting
         (
             [[1, 0, 0]],
             [[0, 1, 0], [0, 1, 0]],
+            (2,),
         ),
         # Multi-dimensional shape (..., 3) broadcasting (2, 3)
         (
             np.array([[[1, 0, 0], [0, 1, 0]], [[0, 0, 1], [1, 0, 0]]]),
             np.array([[[0, 1, 0], [0, 0, 1]], [[1, 0, 0], [0, 1, 0]]]),
+            (2, 2),
         ),
-        # Multi-dimensional shape (..., 3) broadcasting (2, 1, 3) with (1, 2, 3)
+        # Multi-dimensional shape (..., 3) broadcasting (2, 1, 3) & (1, 2, 3)
         (
             np.array([[[1, 0, 0]], [[0, 0, 1]]]),
             np.array([[[0, 1, 0], [0, 1, 0]]]),
+            (2, 2),
         ),
-    ]
+    ],
 )
-def test_rotation_from_view_up(views, ups):
+def test_rotation_from_view_up(views, ups, expected_cshape):
     """Create `Rotation` from view and up vectors."""
-    Rotation.from_view_up(views, ups)
+    rotation = Rotation.from_view_up(views, ups)
+    assert rotation.cshape == expected_cshape
 
 
 def test_rotation_from_view_up_shape_mismatch():
@@ -148,7 +156,7 @@ def test_as_view_up(views, ups, rotation):
     ],
 )
 def test_from_view_as_view_roundtrip(v1, v2):
-    "Test from_view_up / as_view_up."
+    """Test from_view_up / as_view_up."""
     if np.all(np.abs(v1) == np.abs(v2)):
         pytest.skip()
 
@@ -194,7 +202,7 @@ def test_setitem_error(rotation):
         rotation[0] = [[0.5, 1, 0]]
 
 
-def test_rotation_rotation(views, ups, positions, rotation):
+def test_rotation_rotation(views, ups, rotation):
     """Multiply a pyfar Roation with a scipy Rotation and visualize them."""
     # Rotate rotations around x-axis by 45°
     rot_x45 = Rotation.from_euler('x', 45, degrees=True)
