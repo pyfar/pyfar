@@ -58,7 +58,7 @@ class Rotation():
     def __repr__(self):
         """String representation of Rotation object."""
         repr_string = \
-              f"Pyfar.Rotation with {self.cshape} rotations."
+              f"pyfar.Rotation with {self.cshape} rotations."
         return repr_string
 
     def __iter__(self):
