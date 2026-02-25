@@ -512,8 +512,8 @@ class Rotation():
 
         .. math::
 
-            L(C) = \\frac{1}{2} \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{a}_i -
-            C \\mathbf{b}_i \\rVert^2 ,
+            L(C) = \frac{1}{2} \sum_{i = 1}^{n} w_i \lVert \mathbf{a}_i -
+            C \mathbf{b}_i \rVert^2 ,
 
         where :math:`w_i`'s are the `weights` corresponding to each vector.
 
@@ -1060,8 +1060,8 @@ class Rotation():
 
         .. math::
 
-            L(M) = \\sum_{i = 1}^{n} w_i \\lVert \\mathbf{A}_i -
-            \\mathbf{M} \\rVert^2 ,
+            L(M) = \sum_{i = 1}^{n} w_i \lVert \mathbf{A}_i -
+            \mathbf{M} \rVert^2 ,
 
         where :math:`w_i`'s are the `weights` corresponding to each matrix.
 
