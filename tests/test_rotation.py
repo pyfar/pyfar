@@ -22,33 +22,55 @@ def test_class_properties():
     assert multidim_rot.cshape == (3, 2)
     assert multidim_rot.csize == 6
 
-def test_rotation_from_view_up():
+
+@pytest.mark.parametrize(
+    ("views", "ups"),
+    [
+        # Single view and up vectors
+        (
+            [1, 0, 0],
+            [0, 1, 0],
+        ),
+        # Multiple view and up vectors as lists
+        (
+            [[1, 0, 0], [0, 0, 1]],
+            [[0, 1, 0], [0, 1, 0]],
+        ),
+        # Provided as Coordinates
+        (
+            Coordinates([1, 0], [0, 0], [0, 1]),
+            Coordinates([0, 0], [1, 1], [0, 0]),
+        ),
+        # N:1 shape broadcasting
+        (
+            [[1, 0, 0], [0, 0, 1]],
+            [[0, 1, 0]],
+        ),
+        # 1:N shape broadcasting
+        (
+            [[1, 0, 0]],
+            [[0, 1, 0], [0, 1, 0]],
+        ),
+        # Multi-dimensional shape (..., 3) broadcasting (2, 3)
+        (
+            np.array([[[1, 0, 0], [0, 1, 0]], [[0, 0, 1], [1, 0, 0]]]),
+            np.array([[[0, 1, 0], [0, 0, 1]], [[1, 0, 0], [0, 1, 0]]]),
+        ),
+        # Multi-dimensional shape (..., 3) broadcasting (2, 1, 3) with (1, 2, 3)
+        (
+            np.array([[[1, 0, 0]], [[0, 0, 1]]]),
+            np.array([[[0, 1, 0], [0, 1, 0]]]),
+        ),
+    ]
+)
+def test_rotation_from_view_up(views, ups):
     """Create `Rotation` from view and up vectors."""
-    # test with single view and up vectors
-    view = [1, 0, 0]
-    up = [0, 1, 0]
-    Rotation.from_view_up(view, up)
-    # test with multiple view and up vectors
-    views = [[1, 0, 0], [0, 0, 1]]
-    ups = [[0, 1, 0], [0, 1, 0]]
     Rotation.from_view_up(views, ups)
-    # provided as numpy ndarrays
-    views = np.atleast_2d(views).astype(np.float64)
-    ups = np.atleast_2d(ups).astype(np.float64)
-    Rotation.from_view_up(views, ups)
-    # provided as Coordinates
-    views = Coordinates(views[:, 0], views[:, 1], views[:, 2])
-    ups = Coordinates(ups[:, 0], ups[:, 1], ups[:, 2])
-    Rotation.from_view_up(views, ups)
-    # number of views to ups N:1
-    views = [[1, 0, 0], [0, 0, 1]]
-    ups = [[0, 1, 0]]
-    Rotation.from_view_up(views, ups)
-    # number of views to ups 1:N
-    views = [[1, 0, 0]]
-    ups = [[0, 1, 0], [0, 1, 0]]
-    Rotation.from_view_up(views, ups)
-    # number of views to ups M:N
+
+
+def test_rotation_from_view_up_shape_mismatch():
+    """Test that incompatible shapes raise ValueError."""
+    # M:N shape mismatch that cannot be broadcast
     views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
     match = 'shape missmatch: `views` '
@@ -88,44 +110,61 @@ def test_as_view_up(views, ups, rotation):
     """
     Output of this method must be the normed input vectors.
     """
-    views = np.atleast_2d(views).astype(np.float64)
+    views = np.atleast_2d(views).astype(float)
+    # normalize view vectors
     views /= np.linalg.norm(views, axis=1)[:, np.newaxis]
-    ups = np.atleast_2d(ups).astype(np.float64)
+
+    ups = np.atleast_2d(ups).astype(float)
+    # normalize up vectors
     ups /= np.linalg.norm(ups, axis=1)[:, np.newaxis]
 
+    # return view_, ups_ from Rotation (normalized in scipy Rotation).
     views_, ups_ = rotation.as_view_up()
 
     np.testing.assert_allclose(views_, views, atol=1e-15)
     np.testing.assert_allclose(ups_, ups, atol=1e-15)
 
 
-def test_from_view_as_view_roundtrip():
-    vec = np.array([
+@pytest.mark.parametrize(
+    "v1",
+    [
         [1, 0, 0],
         [-1, 0, 0],
         [0, 1, 0],
         [0, -1, 0],
         [0, 0, 1],
-        [0, 0, -1]])
+        [0, 0, -1],
+    ],
+)
+@pytest.mark.parametrize(
+    "v2",
+    [
+        [1, 0, 0],
+        [-1, 0, 0],
+        [0, 1, 0],
+        [0, -1, 0],
+        [0, 0, 1],
+        [0, 0, -1],
+    ],
+)
+def test_from_view_as_view_roundtrip(v1, v2):
+    "Test from_view_up / as_view_up."
+    if np.all(np.abs(v1) == np.abs(v2)):
+        pytest.skip()
 
-    for v1 in range(len(vec)):
-        for v2 in range(len(vec)):
-            if np.all(np.abs(vec[v1]) == np.abs(vec[v2])):
-                continue
-            print(f"Testing combination ({v1}, {v2})")
-            views = np.atleast_2d(vec[v1])
-            ups = np.atleast_2d(vec[v2])
+    views = np.atleast_2d(v1)
+    ups = np.atleast_2d(v2)
 
-            rotation = Rotation.from_view_up(views, ups)
-            views_, ups_ = rotation.as_view_up()
-            # indexed
-            views_0, ups_0 = rotation[0].as_view_up()
+    rotation = Rotation.from_view_up(views, ups)
+    views_, ups_ = rotation.as_view_up()
+    # indexed
+    views_0, ups_0 = rotation[0].as_view_up()
 
-            npt.assert_allclose(views, views_, atol=1e-15)
-            npt.assert_allclose(ups, ups_, atol=1e-15)
-            # indexed
-            npt.assert_allclose(views[0], views_0, atol=1e-15)
-            npt.assert_allclose(ups[0], ups_0, atol=1e-15)
+    npt.assert_allclose(views, views_, atol=1e-15)
+    npt.assert_allclose(ups, ups_, atol=1e-15)
+    # indexed
+    npt.assert_allclose(views[0], views_0, atol=1e-15)
+    npt.assert_allclose(ups[0], ups_0, atol=1e-15)
 
 
 def test_rotation_indexing(rotation):
