@@ -18,9 +18,9 @@ class Rotation():
     """
     Rotation in the three-dimensional space.
 
-    This class is largely based on '
-    ':py:class:`scipy:scipy.spatial.transform.Rotation and wraps all '
-    'functionality that scipy's Rotation class provides.'
+    This class is largely based on
+    :py:class:`scipy:scipy.spatial.transform.Rotation` and wraps all
+    functionality that scipy's Rotation class provides.
     In addition the pyfar Rotation class adds the creation from perpendicular
     view and up vectors through :py:func:`~from_view_up`, and the
     representation as view / up in :py:func:`~as_view_up`.
