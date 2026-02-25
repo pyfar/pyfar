@@ -6,6 +6,7 @@ import numpy.testing as npt
 
 from pyfar import Rotation
 from pyfar import Coordinates
+from scipy.spatial.transform import Rotation as R
 
 
 def test_rotation_init():
@@ -78,7 +79,7 @@ def test_rotation_from_view_up(views, ups, expected_cshape):
 
 def test_rotation_from_view_up_shape_mismatch():
     """Test that incompatible shapes raise ValueError."""
-    # M:N shape mismatch that cannot be broadcast
+    # M:N shape mismatch that cannot be broadcasted.
     views = [[1, 0, 0], [0, 0, 1], [0, 0, 1]]
     ups = [[0, 1, 0], [0, 1, 0]]
     match = 'shape missmatch: `views` '
@@ -100,7 +101,7 @@ def test_rotation_from_view_up_invalid():
     match = 'View and Up Vectors must have a length.'
     with pytest.raises(ValueError, match=match):
         Rotation.from_view_up(views, ups)
-    # views' and ups' shape must be (N, 3) or (3,)
+    # views' and ups' shape must be (..., 3) or (3,)
     views = [0, 1]
     ups = [0, 1]
     match = 'Expected `views` and `ups` to have shape'
@@ -203,9 +204,9 @@ def test_setitem_error(rotation):
 
 
 def test_rotation_rotation(views, ups, rotation):
-    """Multiply a pyfar Roation with a scipy Rotation and visualize them."""
+    """Multiply a pyfar Rotation with a scipy Rotation."""
     # Rotate rotations around x-axis by 45°
-    rot_x45 = Rotation.from_euler('x', 45, degrees=True)
+    rot_x45 = R.from_euler('x', 45, degrees=True)
     rotation = Rotation.from_view_up(views, ups)
     rotation = rotation * rot_x45
 
