@@ -37,7 +37,7 @@ def test_broadcast_cshapes(cshape, reference):
 
     broadcasted = pf.utils.broadcast_cshapes(signals, cshape)
     for signal, broadcast, cshape in zip(
-        signals, broadcasted, cshapes, strict=False,
+        signals, broadcasted, cshapes, strict=True,
     ):
         assert signal.cshape == cshape
         assert broadcast.cshape == reference

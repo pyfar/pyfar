@@ -300,7 +300,7 @@ class Filter(_LTISystem):
         if self.state is not None:
             new_state = np.zeros_like(self._state)
             for idx, (coeff, state) in enumerate(
-                    zip(self._coefficients, self._state, strict=False)):
+                    zip(self._coefficients, self._state, strict=True)):
                 filtered_signal_data[idx, ...], new_state[idx, ...] = \
                     self._process(coeff, signal.time, state)
             self._state = new_state

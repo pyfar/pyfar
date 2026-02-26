@@ -243,7 +243,7 @@ def test_shelf(impulse):
     shelves = [pfilt.low_shelf, pfilt.high_shelf]
     kinds = ['Low', 'High']
 
-    for shelf, kind in zip(shelves, kinds, strict=False):
+    for shelf, kind in zip(shelves, kinds, strict=True):
         # Filter object
         f_obj = shelf(None, 1000, 10, 2, sampling_rate=44100)
         assert isinstance(f_obj, pclass.FilterIIR)

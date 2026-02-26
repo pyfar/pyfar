@@ -457,7 +457,7 @@ class GammatoneBands():
 
         # apply phase shift, delay, and gain
         for bb, (phase_factor, delay, gain) in enumerate(
-            zip(self._phase_factors, self._delays, self._gains, strict=False),
+            zip(self._phase_factors, self._delays, self._gains, strict=True),
         ):
             time[bb] = \
                 np.real(np.roll(time[bb], delay, axis=-1) * phase_factor) * \
