@@ -4,6 +4,7 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 import scipy.fft as sfft
 from typing import Literal
@@ -950,6 +951,11 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
+
+    warnings.warn(("'regularized_spectrum_inversion' will be deprecated in "
+                   "pyfar 0.10.0 in favor 'RegularizedSpectrumInversion'"),
+                   PyfarDeprecationWarning, stacklevel=2)
+
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
