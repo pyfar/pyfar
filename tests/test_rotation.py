@@ -208,7 +208,7 @@ def test_setitem_error(rotation):
 def test_rotation_rotation(views, ups, rotation):
     """Multiply a pyfar Rotation with a scipy Rotation."""
     # Rotate rotations around x-axis by 45°
-    rot_x45 = R.from_euler('x', 45, degrees=True)
+    rot_x45 = R.from_euler('x', 45/180*np.pi)
     rotation = Rotation.from_view_up(views, ups)
     rotation = rotation * rot_x45
 
@@ -219,7 +219,7 @@ def test___eq___equal(rotation, views, ups):
 
 
 def test___eq___notEqual(rotation, views, ups):
-    rot_z45 = Rotation.from_euler('z', 45, degrees=True)
+    rot_z45 = Rotation.from_euler('z', 45/180*np.pi)
     actual = rot_z45 * Rotation.from_view_up(views, ups)
     assert not rotation == actual
 
