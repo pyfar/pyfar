@@ -316,7 +316,7 @@ def test_deprecations_fractional_octave_frequencies():
 def test_deprecations_regularized_spectrum_inversion():
     message = re.escape(
         ("'regularized_spectrum_inversion' will be deprecated in "
-         "pyfar 0.10.0 in favor 'RegularizedSpectrumInversion'"))
+         "pyfar 0.10.0 in favor of 'RegularizedSpectrumInversion'"))
     with pytest.warns(PyfarDeprecationWarning, match=message):
         pf.dsp.regularized_spectrum_inversion(
             pf.Signal([1, 2, 3], 4), (10, 100))
