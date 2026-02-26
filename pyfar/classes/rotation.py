@@ -40,8 +40,8 @@ class Rotation():
 
     Rotate by 45 degree in x-direction:
 
-    >>> rot_x45 = pf.Rotation.from_euler('x', 45, degrees=True)
-    >>> rot_x45 = pf.Rotation.from_euler('x', 45, degrees=True)
+    >>> rot_x45 = pf.Rotation.from_euler('x', 45/180*np.pi)
+    >>> rot_x45 = pf.Rotation.from_euler('x', 45/180*np.pi)
 
     To create `Rotation` objects use ``from_...`` methods.
     """
@@ -144,7 +144,7 @@ class Rotation():
 
     # from-... methods
     @classmethod
-    def from_davenport(cls, axes, order, angles, degrees=False):
+    def from_davenport(cls, axes, order, angles):
         """
         Initialize from Davenport angles.
 
@@ -181,17 +181,12 @@ class Rotation():
             extrinsic. If it is equal to 'i' or 'intrinsic', sequence
             will be treated as intrinsic.
         angles : float or array_like, shape (..., [1 or 2 or 3])
-            Angles specified in radians (`degrees` is False) or degrees
-            (`degrees` is True).
+            Angles specified in radians.
             Each angle i in the last dimension of `angles` turns around the
             corresponding axis axis[..., i, :]. The resulting rotation has the
             shape np.broadcast_shapes(np.atleast_2d(axes).shape[:-2],
             np.atleast_1d(angles).shape[:-1]) Dimensionless angles are thus
             only valid for a single axis.
-
-        degrees : bool, optional
-            If True, then the given angles are assumed to be in degrees.
-            Default is False.
 
         Returns
         -------
@@ -206,11 +201,11 @@ class Rotation():
                123-132. 10.1007/BF03546304.
         """
         rot = scRotation.from_davenport(
-            axes, order, angles, degrees=degrees)
+            axes, order, angles, degrees=False)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
-    def from_euler(cls, seq, angles, degrees=False):
+    def from_euler(cls, seq, angles):
         """
         Initialize from Euler angles.
 
@@ -233,17 +228,11 @@ class Rotation():
             {'x', 'y', 'z'} for extrinsic rotations. Extrinsic and intrinsic
             rotations cannot be mixed in one function call.
         angles : float or array_like, shape (...,  [1 or 2 or 3])
-            Euler angles specified in radians (`degrees` is False) or degrees
-            (`degrees` is True).
+            Euler angles specified in radians.
             Each character in `seq` defines one axis around which `angles`
             turns. The resulting rotation has the shape
             np.atleast_1d(angles).shape[:-1]. Dimensionless angles are thus
             only valid for single character `seq`.
-
-        degrees : bool, optional
-            If True, then the given angles are assumed to be in degrees.
-            Default is False.
-
         Returns
         -------
         rotations : Rotation
@@ -254,7 +243,7 @@ class Rotation():
         .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
         """
         rot = scRotation.from_euler(
-            seq, angles, degrees=degrees)
+            seq, angles, degrees=False)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
@@ -394,7 +383,7 @@ class Rotation():
         return cls._from_scipy_rotation(rot)
 
     @classmethod
-    def from_rotvec(cls, rotvec, degrees=False):
+    def from_rotvec(cls, rotvec):
         """
         Initialize from rotation vectors.
 
@@ -407,10 +396,7 @@ class Rotation():
         ----------
         rotvec : array_like, shape (..., 3)
             A single vector or an ND array of vectors, where the last dimension
-            contains the rotation vectors.
-        degrees : bool, optional
-            If True, then the given magnitudes are assumed to be in degrees.
-            Default is False.
+            contains the rotation vectors in radians.
 
         Returns
         -------
@@ -421,7 +407,7 @@ class Rotation():
         ----------
         .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
         """
-        rot = scRotation.from_rotvec(rotvec, degrees)
+        rot = scRotation.from_rotvec(rotvec, degrees=False)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
