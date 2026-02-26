@@ -41,6 +41,7 @@ Deprecated
 
 Removed
 ^^^^^^^
+- Support for Python 3.9 and 3.10 was removed (PR #907)
 - The following functionality is removed from pyfar v0.8.0 after being deprecated in pyfar v0.6.0 (see below)
 - The `pyfar.samplings` module was removed and move to `spharpy.samplings` (PR #740)
 - The `pyfar.Coordinates` class methods and properties `set_cart`, `get_cart`, `set_sph`, `get_sph`, `set_cyl`, `get_cyl`, `sh_order`, `systems`, `find_nearest_k`, `find_nearest_cart`, `find_nearest_sph`, and `find_slice` were removed in favor of the new API (PRs #741, #786)
