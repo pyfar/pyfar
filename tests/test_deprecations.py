@@ -311,3 +311,16 @@ def test_deprecations_fractional_octave_frequencies():
     if version.parse(pf.__version__) >= version.parse('0.10.0'):
         with pytest.raises(AttributeError):
             pfilt.fractional_octave_frequencies()
+
+
+def test_deprecations_deconvolve():
+    message = re.escape(
+        "`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0.")
+    with pytest.warns(PyfarDeprecationWarning, match=message):
+        pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
+
+    # function will stay in pyfar for documentation
+    message = re.escape("module 'pyfar.dsp' has no attribute 'deconvolver'")
+    if version.parse(pf.__version__) >= version.parse('0.10.0'):
+        with pytest.raises(AttributeError, match=message):
+            pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
