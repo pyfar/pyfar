@@ -320,7 +320,7 @@ def test_deprecations_deconvolve():
         pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
 
     # function will stay in pyfar for documentation
-    message = re.escape("module 'pyfar.dsp' has no attribute 'deconvolver'")
+    message = re.escape("module 'pyfar.dsp' has no attribute 'deconvolve'")
     if version.parse(pf.__version__) >= version.parse('0.10.0'):
         with pytest.raises(AttributeError, match=message):
             pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
