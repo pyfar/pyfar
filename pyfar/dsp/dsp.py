@@ -1698,7 +1698,7 @@ def deconvolve(system_output, system_input, fft_length=None,
     #       should be removed in pyfar 0.10.0.
     warnings.warn(
         ("`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0."
-         "It is recommended to use `pyfar.dsp.RegularizedSpectrum inversion` "
+         "It is recommended to use `pyfar.dsp.RegularizedSpectrumInversion` "
          "and `pyfar.dsp.convolve` for deconvolution."),
          PyfarDeprecationWarning, stacklevel=2)
 
