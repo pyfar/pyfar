@@ -8,10 +8,15 @@ from pyfar.signals import impulse
 import pyfar.signals as pfs
 
 from pyfar.dsp.dsp import deconvolve
+import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def test_input_type_error():
     """Test assertions by passing non Signal-Type."""
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     with pytest.raises(TypeError,
                        match='system_output has to be of type pyfar.Signal'):
         deconvolve('error', impulse(3))
@@ -22,6 +27,9 @@ def test_input_type_error():
 
 def test_input_sampling_freq_error():
     """Test assertions by passing signals with different sampling frequency."""
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     with pytest.raises(ValueError,
                        match='The two signals have different sampling rates!'):
         deconvolve(impulse(3, sampling_rate=44100),
@@ -32,6 +40,9 @@ def test_fft_length_error():
     """Test assertion by passing fft_length shorter than n_samples of
     given Signals.
     """
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     with pytest.raises(ValueError,
                        match="The fft_length can not be shorter than" +
                              "system_output.n_samples."):
@@ -48,6 +59,9 @@ def test_fft_length_error():
 
 def test_default():
     """Test the default parameters of deconvolution function."""
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     res = deconvolve(impulse(6, sampling_rate=44100),
                      impulse(5, sampling_rate=44100),
                      frequency_range=(1, 22050))
@@ -58,6 +72,9 @@ def test_default():
 
 def test_output_type():
     """Test Type of returned Signal and basic deconvolution with impulses."""
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     res = deconvolve(impulse(3), impulse(3), frequency_range=(1, 22050))
     assert isinstance(res, pf.Signal)
     npt.assert_allclose(impulse(3).time, res.time, rtol=1e-9)
@@ -65,6 +82,9 @@ def test_output_type():
 
 def test_output_length():
     """Test if output length is correct."""
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     res = deconvolve(impulse(3), impulse(3), frequency_range=(1, 22050))
     assert res.n_samples == 3
     res = deconvolve(impulse(5), impulse(3), frequency_range=(1, 22050))
@@ -82,6 +102,9 @@ def test_output_sweep(is_complex_sig1, is_complex_sig2):
     """Test of flat output frequency response resulting from deconvolving
     a sweep with the same sweep.
     """
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     fs = 44100
     sweep_1 = pfs.exponential_sweep_time(fs, (100, 10000))
     sweep_2 = pfs.exponential_sweep_time(fs, (100, 10000))
@@ -106,6 +129,9 @@ def test_fft_norm():
     """Test the correct call of _match_fft_norm with parameter division=True
     for two example inputs.
     """
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     sig1 = pf.Signal([1, 0, 0, 0], 44100, fft_norm='amplitude')
     res = pf.dsp.dsp.deconvolve(sig1, sig1, frequency_range=(1, 44100))
     assert res.fft_norm == 'none'
@@ -117,6 +143,9 @@ def test_fft_norm():
 
 def test_frequency_range():
     """Test if frequency_range default is correct."""
+
+    warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+
     res1 = deconvolve(impulse(3), impulse(3), frequency_range=None)
     res2 = deconvolve(impulse(3), impulse(3), frequency_range=(0, 22050))
     npt.assert_allclose(res1.time, res2.time, rtol=1e-14)

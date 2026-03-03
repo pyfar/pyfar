@@ -1628,6 +1628,12 @@ def deconvolve(system_output, system_input, fft_length=None,
                frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
+    .. note::
+
+        This function will be deprecated in pyfar v0.10.0 in favor of
+        :py:class:`pyfar.dsp.RegularizedSpectrumInversion` and
+        :py:func:`pyfar.dsp.convolve`.
+
     The transfer function :math:`H(\omega)` is calculated by spectral
     deconvolution (spectral division).
 
@@ -1688,6 +1694,19 @@ def deconvolve(system_output, system_input, fft_length=None,
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
     """
+
+    # NOTE: The pyfar developers decided that this function will raise an
+    #       attribute error vor pyfar >= 0.10.0 instead of completely removing
+    #       it. In pyfar 0.10.0 the parameters and returns of the docsring can
+    #       be removed and link to the example notebook for measuring RIRs
+    #       could be added. In addtion all tests for pyfar.dsp.deconvolve
+    #       should be removed in pyfar 0.10.0.
+    warnings.warn(
+        ("`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0."
+         "It is recommended to use `pyfar.dsp.RegularizedSpectrumInversion` "
+         "and `pyfar.dsp.convolve` for deconvolution."),
+         PyfarDeprecationWarning, stacklevel=2)
+
     # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
         raise TypeError('system_output has to be of type pyfar.Signal')

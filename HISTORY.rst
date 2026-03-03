@@ -35,7 +35,8 @@ Changed
 
 Deprecated
 ^^^^^^^^^^
-- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructing_fractional_octave_bands` is deprecated and will be removed in pyfar v0.9.0 (PR #725)
+- `pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0 in favor of `pyfar.dsp.RegularizedSpectrumInversion` and `pyfar.dsp.convolve` (PR #914)
+- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructing_fractional_octave_bands` is deprecated and will be removed in pyfar v0.10.0 (PR #725)
 - `pyfar.dsp.filter.fractional_octave_frequencies` is deprecated in favour of `pyfar.constants.fractional_octave_frequencies_exact` and `pyfar.constants.fractional_octave_frequencies_nominal` and will be removed in pyfar v0.10.0 (PR #902)
 - `pyfar.dsp.regularized_spectrum_inversion` is deprectated in favour of `pyfar.dsp.RegularizedSpectrumInversion` and will be removed in pyfar v0.10.0 (PR #911)
 
