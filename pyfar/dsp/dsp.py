@@ -951,6 +951,11 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
+
+    warnings.warn(("'regularized_spectrum_inversion' will be deprecated in "
+                   "pyfar 0.10.0 in favor of 'RegularizedSpectrumInversion'"),
+                   PyfarDeprecationWarning, stacklevel=2)
+
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 

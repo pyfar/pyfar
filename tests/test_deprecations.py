@@ -313,6 +313,21 @@ def test_deprecations_fractional_octave_frequencies():
             pfilt.fractional_octave_frequencies()
 
 
+def test_deprecations_regularized_spectrum_inversion():
+    message = re.escape(
+        ("'regularized_spectrum_inversion' will be deprecated in "
+         "pyfar 0.10.0 in favor of 'RegularizedSpectrumInversion'"))
+    with pytest.warns(PyfarDeprecationWarning, match=message):
+        pf.dsp.regularized_spectrum_inversion(
+            pf.Signal([1, 2, 3], 4), (10, 100))
+
+    # remove function from pyfar 0.10.0!
+    if version.parse(pf.__version__) >= version.parse('0.10.0'):
+        with pytest.raises(AttributeError):
+            pf.dsp.regularized_spectrum_inversion(
+                pf.Signal([1, 2, 3], 4), (10, 100))
+
+            
 def test_deprecations_deconvolve():
     message = re.escape(
         "`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0.")
@@ -324,3 +339,4 @@ def test_deprecations_deconvolve():
     if version.parse(pf.__version__) >= version.parse('0.10.0'):
         with pytest.raises(AttributeError, match=message):
             pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
+
