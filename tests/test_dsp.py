@@ -236,7 +236,12 @@ def test_zero_phase_assertion():
         dsp.zero_phase(pf.TimeData([1, 0, 0], [0, 1, 3]))
 
 
-def test_xfade():
+def test__cross_fade():
+    """
+    Test private cross_fade function used for regularized spectrum inversion.
+    """
+
+    # test that result before and after cross fade region does not change
     first = np.ones(5001)
     idx_1 = 500
     second = np.ones(5001)*2
@@ -251,6 +256,10 @@ def test_xfade():
     res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
     np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
     np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
+
+    # test that cross-fading onces yields ones, i.e., cross-fade sums to one
+    res = dsp.dsp._cross_fade(first, first, [idx_1, idx_2])
+    npt.assert_array_almost_equal(res, first)
 
 
 def test_regularized_spectrum_inversion(impulse):

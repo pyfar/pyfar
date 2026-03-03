@@ -888,9 +888,8 @@ def _cross_fade(first, second, indices):
         raise IndexError("Index is out of range.")
 
     len_xfade = np.squeeze(np.abs(np.diff(indices)))
-    window = sgn.windows.hann(len_xfade*2 + 1, sym=True)
-    window_rising = window[:len_xfade]
-    window_falling = window[len_xfade+1:]
+    window_rising = (np.sin(np.linspace(0, np.pi/2, len_xfade + 2))**2)[1:-1]
+    window_falling = (np.cos(np.linspace(0, np.pi/2, len_xfade + 2))**2)[1:-1]
 
     window_first = np.concatenate(
         (np.ones(indices[0]), window_falling, np.zeros(len_arrays-indices[1])))
