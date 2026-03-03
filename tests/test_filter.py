@@ -357,7 +357,7 @@ def test_reconstructing_fractional_octave_bands_filter_slopes():
     # test different filter slopes against reference
     x = pf.signals.impulse(2**10)
 
-    for overlap, slope in zip([1, 1, 0], [0, 3, 0], strict=False):
+    for overlap, slope in zip([1, 1, 0], [0, 3, 0], strict=True):
         with pytest.warns(PyfarDeprecationWarning,
                           match="'frequencies' will be"):
             y, _ = pfilt.reconstructing_fractional_octave_bands(

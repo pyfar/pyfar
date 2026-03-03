@@ -90,7 +90,7 @@ def test_broadcast_cdims(cdim, reference):
 
     broadcasted = pf.utils.broadcast_cdims(signals, cdim)
     for signal, broadcast, cdim in zip(
-        signals, broadcasted, cdims, strict=False,
+        signals, broadcasted, cdims, strict=True,
     ):
         assert len(signal.cshape) == cdim
         assert len(broadcast.cshape) == reference
@@ -119,7 +119,7 @@ def test_concatenate_channels(data_second, domains):
                pf.Signal(data_second, sr, fft_norm='rms'))
 
     # force signal domain
-    for signal, domain in zip(signals, domains, strict=False):
+    for signal, domain in zip(signals, domains, strict=True):
         signal.domain = domain
 
     res = pf.utils.concatenate_channels(signals, caxis=0)
