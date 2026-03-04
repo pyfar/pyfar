@@ -19,13 +19,13 @@ class Rotation():
     Rotation in the three-dimensional space.
 
     This class is largely based on
-    :py:class:`scipy:scipy.spatial.transform.Rotation` and wraps all
+    :py:class:`scipy.spatial.transform.Rotation` and wraps all
     functionality that scipy's Rotation class provides.
     In addition the pyfar Rotation class adds the creation from perpendicular
     view and up vectors through :py:func:`~from_view_up`, and the
     representation as view / up in :py:func:`~as_view_up`.
 
-    A rotation can be visualized with the triple of view, up and right
+    A rotation can be represented with the triple of view, up and right
     vectors and it is tied to the object's local coordinate system.
     Alternatively the object's rotation can be illustrated with help of the
     right hand: Thumb (view), forefinger (up) and middle finger (right).
@@ -90,11 +90,11 @@ class Rotation():
     def __mul__(self, other):
         """
         Multiply Rotation object with another Rotation or
-        :py:class:`scipy:scipy.spatial.transform.Rotation`.
+        :py:class:`scipy.spatial.transform.Rotation`.
 
         Parameters
         ----------
-        other : Rotation or :py:class:`scipy:scipy.spatial.transform.Rotation`
+        other : Rotation or :py:class:`scipy.spatial.transform.Rotation`
             The object to multiply with.
         """
         if isinstance(other, Rotation):
@@ -105,11 +105,11 @@ class Rotation():
     def __rmul__(self, other):
         """
         Right multiplication of Rotation object with another Rotation or a
-        :py:class:`scipy:scipy.spatial.transform.Rotation`.
+        :py:class:`scipy.spatial.transform.Rotation`.
 
         Parameters
         ----------
-        other : Rotation or :py:class:`scipy:scipy.spatial.transform.Rotation`.
+        other : Rotation or :py:class:`scipy.spatial.transform.Rotation`.
             The object to multiply with.
         """
         if isinstance(other, Rotation):
@@ -148,7 +148,7 @@ class Rotation():
         """
         Initialize from Davenport angles.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_davenport`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.from_davenport`.
 
         Rotations in 3-D can be represented by a sequence of 3
         rotations around a sequence of axes.
@@ -209,7 +209,7 @@ class Rotation():
         """
         Initialize from Euler angles.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_euler`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.from_euler`.
 
         Rotations in 3-D can be represented by a sequence of 3
         rotations around a sequence of axes. In theory, any three axes spanning
@@ -251,7 +251,7 @@ class Rotation():
         """
         Initialize from rotation matrix.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_matrix`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.from_matrix`.
 
         Rotations in 3 dimensions can be represented with 3 x 3 orthogonal
         matrices [#]_. If the input is not orthogonal, an approximation is
@@ -294,7 +294,7 @@ class Rotation():
         """
         Initialize from Modified Rodrigues Parameters (MRPs).
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_mrp`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.from_mrp`.
 
         MRPs are a 3 dimensional vector co-directional to the axis of rotation
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
@@ -329,7 +329,7 @@ class Rotation():
         """
         Initialize from quaternions.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_quat`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.from_quat`.
 
         Rotations in 3 dimensions can be represented using unit norm
         quaternions [#]_.
@@ -387,7 +387,7 @@ class Rotation():
         """
         Initialize from rotation vectors.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.from_rotvec`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.from_rotvec`.
 
         A rotation vector is a 3 dimensional vector which is co-directional to
         the axis of rotation and whose norm gives the angle of rotation [#]_.
@@ -484,7 +484,7 @@ class Rotation():
         r"""
         Estimate a rotation to optimally align two sets of vectors.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.align_vectors`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.align_vectors`.
 
         Find a rotation between frames A and B which best aligns a set of
         vectors `a` and `b` observed in these frames. The following loss
@@ -612,7 +612,7 @@ class Rotation():
         """
         Concatenate a sequence of Rotation objects into a single object.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.concatenate`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.concatenate`.
 
         This is useful if you want to, for example, take the mean of a set of
         rotations and need to pack them into a single object to do so.
@@ -641,7 +641,7 @@ class Rotation():
         """
         Get identity rotation(s).
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.identity`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.identity`.
 
         Composition with the identity rotation has no effect.
 
@@ -667,7 +667,7 @@ class Rotation():
         """
         Generate rotations that are uniformly distributed on a sphere.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.random`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.random`.
 
         Formally, the rotations follow the Haar-uniform distribution over
         the SO(3) group.
@@ -696,7 +696,7 @@ class Rotation():
         -----
         This function is optimized for efficiently sampling random rotation
         matrices in three dimensions. For generating random rotation matrices
-        in higher dimensions, see `scipy.stats.special_ortho_group`.
+        in higher dimensions, see :py:data:`scipy.stats.special_ortho_group`.
         """
         rot = scRotation.random(num, rng, shape=shape)
         return cls._from_scipy_rotation(rot)
@@ -720,7 +720,7 @@ class Rotation():
         """
         Represent as Davenport angles.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_davenport`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.as_davenport`.
 
 
         Any rotation can be expressed as a composition of 3 elementary
@@ -795,7 +795,7 @@ class Rotation():
         """
         Represent as Euler angles.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_euler`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.as_euler`.
 
         Any rotation can be expressed as a composition of 3 elementary
         rotations. Once the axis sequence has been chosen, Euler angles define
@@ -856,7 +856,7 @@ class Rotation():
         """
         Represent as rotation matrix.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_matrix`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.as_matrix`.
 
         3D rotations can be represented using rotation matrices, which
         are 3 x 3 real orthogonal matrices with determinant equal to +1 [#]_.
@@ -877,7 +877,7 @@ class Rotation():
         """
         Represent as Modified Rodrigues Parameters (MRPs).
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_mrp`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.as_mrp`.
 
         MRPs are a 3 dimensional vector co-directional to the axis of rotation
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
@@ -906,7 +906,7 @@ class Rotation():
     def as_quat(self, canonical=False, scalar_first=False):
         """Represent as quaternions.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_quat`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.as_quat`.
 
         Rotations in 3 dimensions can be represented using unit norm
         quaternions [#]_.
@@ -960,7 +960,7 @@ class Rotation():
         """
         Represent as rotation vectors.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.as_rotvec`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.as_rotvec`.
 
         A rotation vector is a 3 dimensional vector which is co-directional to
         the axis of rotation and whose norm gives the angle of rotation [#]_.
@@ -1014,7 +1014,7 @@ class Rotation():
         """
         Invert this rotation.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.inv`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.inv`.
 
         Composition of an rotation with its inverse results in an identity
         transformation.
@@ -1032,7 +1032,7 @@ class Rotation():
         r"""
         Get the mean of the rotations.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.mean`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.mean`.
 
         The mean used is the chordal L2 mean (also called the projected or
         induced arithmetic mean) [#]_. If ``A`` is a set of rotation matrices,
@@ -1074,7 +1074,7 @@ class Rotation():
     def reduce(self, left=None, right=None, return_indices=False):
         """Reduce this rotation with the provided rotation groups.
 
-        Wraps :py:meth:`scipy:scipy.spatial.transform.Rotation.reduce`.
+        Wraps :py:meth:`scipy.spatial.transform.Rotation.reduce`.
 
         Reduction of a rotation ``p`` is a transformation of the form
         ``q = l * p * r``, where ``l`` and ``r`` are chosen from `left` and
