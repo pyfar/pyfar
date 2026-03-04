@@ -206,6 +206,18 @@ def test_rotation_rotation(views, ups, rotation):
     rotation = Rotation.from_view_up(views, ups)
     rotation = rotation * rot_x45
 
+def test_multiplication():
+    """Test multiplication results."""
+    rot_angle_z = np.pi/2
+    rot_vec = [0, 0, rot_angle_z]
+
+    rot = Rotation.from_rotvec(rot_vec)
+    result = rot * rot
+
+    ref = rot.as_matrix() @ rot.as_matrix()
+
+    np.testing.assert_allclose(ref, result.as_matrix(), atol=1e-10)
+
 
 def test___eq___equal(rotation, views, ups):
     actual = Rotation.from_view_up(views, ups)

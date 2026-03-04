@@ -99,8 +99,8 @@ class Rotation():
         """
         if isinstance(other, Rotation):
             other = scRotation.from_quat(other.as_quat())
-        self._rot *= other
-        return self
+        result = self._rot * other
+        return self._from_scipy_rotation(result)
 
     def __rmul__(self, other):
         """
@@ -113,10 +113,9 @@ class Rotation():
             The object to multiply with.
         """
         if isinstance(other, Rotation):
-            other = scRotation.from_quat(other.as_quat())
-        if isinstance(other, scRotation):
-            self._rot *= other
-            return self
+            other = other._rot
+        result = other * self._rot
+        return self._from_scipy_rotation(result)
 
     def __pow__(self, n):
         """Compose rotation with itself n times."""
