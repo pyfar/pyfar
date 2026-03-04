@@ -327,7 +327,7 @@ def test_deprecations_regularized_spectrum_inversion():
             pf.dsp.regularized_spectrum_inversion(
                 pf.Signal([1, 2, 3], 4), (10, 100))
 
-            
+
 def test_deprecations_deconvolve():
     message = re.escape(
         "`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0.")
