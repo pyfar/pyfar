@@ -41,7 +41,7 @@ class Rotation():
     Rotate by 45 degree in x-direction:
 
     >>> rot_x45 = pf.Rotation.from_euler('x', 45/180*np.pi)
-    >>> rot_x45 = pf.Rotation.from_euler('x', 45/180*np.pi)
+    >>> rotations = rotations * rot_x45
 
     To create `Rotation` objects use ``from_...`` methods.
     """
@@ -233,6 +233,7 @@ class Rotation():
             turns. The resulting rotation has the shape
             np.atleast_1d(angles).shape[:-1]. Dimensionless angles are thus
             only valid for single character `seq`.
+
         Returns
         -------
         rotations : Rotation
@@ -291,7 +292,7 @@ class Rotation():
 
     @classmethod
     def from_mrp(cls, mrp):
-        """
+        r"""
         Initialize from Modified Rodrigues Parameters (MRPs).
 
         Wraps :py:meth:`scipy.spatial.transform.Rotation.from_mrp`.
@@ -300,9 +301,10 @@ class Rotation():
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
         the angle of rotation (in radians) [#]_.
 
-        MRPs have a singularity at 360 degrees which can be avoided by ensuring
-        the angle of rotation does not exceed 180 degrees, i.e. switching the
-        direction of the rotation when it is past 180 degrees.
+        MRPs have a singularity at :math:`2\pi` radians which can be avoided by
+        ensuring the angle of rotation does not exceed :math:`\pi`,
+        i.e. switching the direction of the rotation when it is past
+        :math:`\pi` radians.
 
         Parameters
         ----------
@@ -715,9 +717,8 @@ class Rotation():
         return instance
 
     # Instance methods
-    def as_davenport(self, axes, order, degrees=False,
-                     suppress_warnings=False):
-        """
+    def as_davenport(self, axes, order, suppress_warnings=False):
+        r"""
         Represent as Davenport angles.
 
         Wraps :py:meth:`scipy.spatial.transform.Rotation.as_davenport`.
@@ -760,9 +761,6 @@ class Rotation():
             If it belongs to the set {'e', 'extrinsic'}, the sequence will be
             extrinsic. If it belongs to the set {'i', 'intrinsic'}, sequence
             will be treated as intrinsic.
-        degrees : boolean, optional
-            Returned angles are in degrees if this flag is True, else they are
-            in radians. Default is False.
         suppress_warnings : boolean, optional
             Disable warnings about gimbal lock. Default is False.
 
@@ -772,11 +770,13 @@ class Rotation():
             Shape depends on shape of inputs used to initialize object.
             The returned angles are in the range:
 
-            - First angle belongs to [-180, 180] degrees (both inclusive)
-            - Third angle belongs to [-180, 180] degrees (both inclusive)
-            - Second angle belongs to a set of size 180 degrees,
-              given by: ``[-abs(lambda), 180 - abs(lambda)]``, where ``lambda``
-              is the angle between the first and third axes.
+            - First angle belongs to [:math:`-\pi`, :math:`\pi`] radians (both
+              inclusive)
+            - Third angle belongs to [:math:`-\pi`, :math:`\pi`] radians (both
+              inclusive)
+            - Second angle belongs to a set of size :math:`\pi` radians,
+              given by: ``[-abs(lambda), np.pi - abs(lambda)]``, where
+              ``lambda`` is the angle between the first and third axes.
 
         References
         ----------
@@ -789,10 +789,11 @@ class Rotation():
         .. [#] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
         """
 
-        return self._rot.as_davenport(axes, order, degrees, suppress_warnings)
+        return self._rot.as_davenport(axes, order, degrees=False,
+                                      suppress_warnings=suppress_warnings)
 
-    def as_euler(self, seq, degrees=False, suppress_warnings=False):
-        """
+    def as_euler(self, seq, suppress_warnings=False):
+        r"""
         Represent as Euler angles.
 
         Wraps :py:meth:`scipy.spatial.transform.Rotation.as_euler`.
@@ -819,9 +820,6 @@ class Rotation():
             Adjacent axes cannot be the same.
             Extrinsic and intrinsic rotations cannot be mixed in one function
             call.
-        degrees : boolean, optional
-            Returned angles are in degrees if this flag is True, else they are
-            in radians. Default is False.
         suppress_warnings : boolean, optional
             Disable warnings about gimbal lock. Default is False.
 
@@ -831,12 +829,15 @@ class Rotation():
             Shape depends on shape of inputs used to initialize object.
             The returned angles are in the range:
 
-            - First angle belongs to [-180, 180] degrees (both inclusive)
-            - Third angle belongs to [-180, 180] degrees (both inclusive)
+            - First angle belongs to [:math:`-\pi`, :math:`\pi`] radians (both
+              inclusive)
+            - Third angle belongs to [:math:`-\pi`, :math:`\pi`] radians (both
+              inclusive)
             - Second angle belongs to:
 
-                - [-90, 90] degrees if all axes are different (like xyz)
-                - [0, 180] degrees if first and third axes are the same
+                - [:math:`-\pi/2`, :math:`\pi/2`] radians if all axes are
+                  different (like xyz)
+                - [0, :math:`\pi`] radians if first and third axes are the same
                   (like zxz)
 
         References
@@ -849,7 +850,7 @@ class Rotation():
         .. [#] https://en.wikipedia.org/wiki/Gimbal_lock#In_applied_mathematics
         """
 
-        return self._rot.as_euler(seq, degrees,
+        return self._rot.as_euler(seq, degrees=False,
                                   suppress_warnings=suppress_warnings)
 
     def as_matrix(self):
@@ -874,7 +875,7 @@ class Rotation():
         return self._rot.as_matrix()
 
     def as_mrp(self):
-        """
+        r"""
         Represent as Modified Rodrigues Parameters (MRPs).
 
         Wraps :py:meth:`scipy.spatial.transform.Rotation.as_mrp`.
@@ -883,11 +884,12 @@ class Rotation():
         and whose magnitude is equal to ``tan(theta / 4)``, where ``theta`` is
         the angle of rotation (in radians) [#]_.
 
-        MRPs have a singularity at 360 degrees which can be avoided by ensuring
-        the angle of rotation does not exceed 180 degrees, i.e. switching the
-        direction of the rotation when it is past 180 degrees. This function
-        will always return MRPs corresponding to a rotation of less than or
-        equal to 180 degrees.
+        MRPs have a singularity at :math:`2\pi` radians which can be avoided by
+        ensuring the angle of rotation does not exceed :math:`\pi` radians,
+        i.e. switching the direction of the rotation when it is past
+        :math:`\pi` radians. This function will always return MRPs
+        corresponding to a rotation of less than or equal to :math:`\pi`
+        radians.
 
         Returns
         -------
@@ -956,20 +958,15 @@ class Rotation():
         """
         return self._rot.as_quat(canonical, scalar_first=scalar_first)
 
-    def as_rotvec(self, degrees=False):
+    def as_rotvec(self):
         """
-        Represent as rotation vectors.
+        Represent as rotation vectors in radians.
 
         Wraps :py:meth:`scipy.spatial.transform.Rotation.as_rotvec`.
 
         A rotation vector is a 3 dimensional vector which is co-directional to
         the axis of rotation and whose norm gives the angle of rotation [#]_.
 
-        Parameters
-        ----------
-        degrees : boolean, optional
-            Returned magnitudes are in degrees if this flag is True, else they
-            are in radians. Default is False.
 
         Returns
         -------
@@ -981,7 +978,7 @@ class Rotation():
         .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
         """
 
-        return self._rot.as_rotvec(degrees)
+        return self._rot.as_rotvec(degrees=False)
 
     def as_view_up(self):
         """Get Rotation as a view, up, and right vector.
