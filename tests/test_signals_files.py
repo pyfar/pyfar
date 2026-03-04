@@ -24,11 +24,12 @@ def test_files(function, sampling_rate):
 
 
 @pytest.mark.parametrize(
-        ('noise_tail', 'n_samples'), [(False, 84176), (True, 120001)])
-def test_room_impulse_response_noise_tail(noise_tail, n_samples):
+        ('crop_noise_tail', 'n_samples'), [(True, 84176), (False, 120001)])
+def test_room_impulse_response_noise_tail(crop_noise_tail, n_samples):
     """Test noise tail parameter of of room impulse response."""
 
-    signal = pf.signals.files.room_impulse_response(noise_tail=noise_tail)
+    signal = pf.signals.files.room_impulse_response(
+        crop_noise_tail=crop_noise_tail)
     assert signal.n_samples == n_samples
 
 
