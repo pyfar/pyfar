@@ -2,7 +2,7 @@
 from . import audio
 from . import coordinates
 from . import orientations
-from . import filter
+from . import filter  # noqa: A004
 from . import transmission_matrix
 from . import warnings
 
