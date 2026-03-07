@@ -1,5 +1,5 @@
 """This module contains the Rotation class."""
-from scipy.spatial.transform import Rotation as scRotation
+from scipy.spatial.transform import Rotation as ScipyRotation
 import numpy as np
 import warnings
 
@@ -16,7 +16,7 @@ warnings.filterwarnings("error", category=VisibleDeprecationWarning)
 
 class Rotation():
     """
-    Rotation in the three-dimensional space.
+    Rotation in three-dimensional space.
 
     This class is largely based on
     :py:class:`scipy.spatial.transform.Rotation` and wraps all
@@ -28,7 +28,7 @@ class Rotation():
     A rotation can be represented with the triple of view, up and right
     vectors and it is tied to the object's local coordinate system.
     Alternatively the object's rotation can be illustrated with help of the
-    right hand: Thumb (view), forefinger (up) and middle finger (right).
+    right hand: Thumb (view), index-finger (up) and middle finger (right).
 
     Examples
     --------
@@ -52,9 +52,7 @@ class Rotation():
 
     def __repr__(self):
         """String representation of Rotation object."""
-        repr_string = \
-              f"pyfar.Rotation with {self.cshape} rotations."
-        return repr_string
+        return f"pyfar.Rotation with {self.cshape} rotations."
 
     def __iter__(self):
         """Iterate over rotations."""
@@ -98,7 +96,7 @@ class Rotation():
             The object to multiply with.
         """
         if isinstance(other, Rotation):
-            other = scRotation.from_quat(other.as_quat())
+            other = ScipyRotation.from_quat(other.as_quat())
         result = self._rot * other
         return self._from_scipy_rotation(result)
 
@@ -139,7 +137,6 @@ class Rotation():
     def csize(self):
         """Number of rotations."""
         return np.prod(self.cshape)
-
 
     # from-... methods
     @classmethod
@@ -199,7 +196,7 @@ class Rotation():
                the Euler Angles. Journal of the Astronautical Sciences. 51.
                123-132. 10.1007/BF03546304.
         """
-        rot = scRotation.from_davenport(
+        rot = ScipyRotation.from_davenport(
             axes, order, angles, degrees=False)
         return cls._from_scipy_rotation(rot)
 
@@ -242,7 +239,7 @@ class Rotation():
         ----------
         .. [#] https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
         """
-        rot = scRotation.from_euler(
+        rot = ScipyRotation.from_euler(
             seq, angles, degrees=False)
         return cls._from_scipy_rotation(rot)
 
@@ -286,7 +283,7 @@ class Rotation():
                Journal of guidance, control, and dynamics vol. 31.2, pp.
                440-442, 2008.
         """
-        rot = scRotation.from_matrix(matrix)
+        rot = ScipyRotation.from_matrix(matrix)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
@@ -322,7 +319,7 @@ class Rotation():
                The Journal of Astronautical Sciences, Vol. 41, No.4, 1993,
                pp. 475-476
         """
-        rot = scRotation.from_mrp(mrp)
+        rot = ScipyRotation.from_mrp(mrp)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
@@ -380,7 +377,7 @@ class Rotation():
         .. [#] Hanson, Andrew J. "Visualizing quaternions."
             Morgan Kaufmann Publishers Inc., San Francisco, CA. 2006.
         """
-        rot = scRotation.from_quat(quat)
+        rot = ScipyRotation.from_quat(quat)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
@@ -408,19 +405,23 @@ class Rotation():
         ----------
         .. [#] https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Rotation_vector
         """
-        rot = scRotation.from_rotvec(rotvec, degrees=False)
+        rot = ScipyRotation.from_rotvec(rotvec, degrees=False)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
     def from_view_up(cls, views, ups):
         """
-        Initialize Rotation from a view an up vector.
+        Initialize Rotation from view and up vectors.
 
-        Rotations are internally stored as quaternions for better spherical
-        linear interpolation (SLERP) and spherical harmonics operations.
-        More intuitionally, they can be expressed as view and up vectors
-        which cannot be collinear. In this case, they are restricted to be
-        perpendicular to minimize rounding errors.
+        The view vector defines the forward-looking direction, while the up
+        vector defines what direction is "up". These two vectors must be
+        perpendicular to each other.
+
+        The rotation is constructed using a right-handed coordinate system
+        where the right vector is computed as the cross product of view and up:
+        ``right = view × up``. The resulting rotation matrix has columns
+        ``[view, -right, up]``, corresponding to the x, y, and z axes
+        respectively.
 
         Parameters
         ----------
@@ -604,7 +605,7 @@ class Rotation():
                "Pointing in Real Euclidean Space", Journal of Guidance,
                Control, and Dynamics, Vol. 20, No. 5, 1997, pp. 916-922.
         """
-        result = scRotation.align_vectors(a, b, weights, return_sensitivity)
+        result = ScipyRotation.align_vectors(a, b, weights, return_sensitivity)
 
         return (cls._from_scipy_rotation(result[0]), *result[1:])
 
@@ -634,7 +635,7 @@ class Rotation():
 
         rotations = [rotation._rot for rotation in rotations]
 
-        rot = scRotation.concatenate(rotations)
+        rot = ScipyRotation.concatenate(rotations)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
@@ -660,7 +661,7 @@ class Rotation():
         identity : Rotation
             The identity rotation.
         """
-        rot  = scRotation.identity(num, shape=shape)
+        rot  = ScipyRotation.identity(num, shape=shape)
         return cls._from_scipy_rotation(rot)
 
     @classmethod
@@ -699,7 +700,7 @@ class Rotation():
         matrices in three dimensions. For generating random rotation matrices
         in higher dimensions, see :py:data:`scipy.stats.special_ortho_group`.
         """
-        rot = scRotation.random(num, rng, shape=shape)
+        rot = ScipyRotation.random(num, rng, shape=shape)
         return cls._from_scipy_rotation(rot)
 
     # private class methods
@@ -980,19 +981,23 @@ class Rotation():
         return self._rot.as_rotvec(degrees=False)
 
     def as_view_up(self):
-        """Get Rotation as a view, up, and right vector.
+        """
+        Get Rotation as view and up vectors.
 
-        Rotation are internally stored as quaternions for better spherical
-        linear interpolation (SLERP) and spherical harmonics operations.
-        More intuitionally, they can be expressed as view and and up of vectors
-        which cannot be collinear. In this case are restricted to be
-        perpendicular to minimize rounding errors.
+        The view vector defines the forward-looking direction, while the up
+        vector defines what direction is "up". These two vectors are
+        perpendicular to each other.
+
+        The rotation matrix uses a right-handed coordinate system with columns
+        ``[view, -right, up]``, where ``right = view × up``. This method
+        extracts the view and up vectors from that representation.
 
         Returns
         -------
-        vector_triple: ndarray, shape (..., 3), normalized vectors
-            - views, see :py:func:`Rotation.from_view_up`
-            - ups, see :py:func:`Rotation.from_view_up`
+        views : ndarray, shape (..., 3)
+            Normalized view vectors, see :py:func:`Rotation.from_view_up`
+        ups : ndarray, shape (..., 3)
+            Normalized up vectors, see :py:func:`Rotation.from_view_up`
         """
         vector_triple = self.as_matrix()
         views, _, ups = np.split(vector_triple, 3, axis=-2)
