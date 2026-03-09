@@ -19,13 +19,13 @@ Added
 - `pyfar.dsp.filter.frequency_weighting_filter` for filtering signals with the A and C-weighting curve standardised in IEC 61672-1 (PR #811, #852)
 - `pyfar.dsp.filter.check_fractional_octave_band_filter_tolerance` to check if a (fractional) octave filter bank meets the class I or II tolerances defined in IEC 61260-1 (PR #829)
 - All plots showing the magnitude response now have the `mode` parameter to specify if the absolute (default), real, or imaginary value of the spectrum is shown. This can also be toggled using the shortcut 'shift+m' in interactive plots (PR #817)
+- `pyfar.signals.files.room_impulse_response` can now return the room impulse response with noise tail (PR #906)
 - Abstract `_LTISystem` base class to better structure inheritance of the pyfar Filter classes (PR #798)
 - Added new `Rotation` class as a long term replacement for `Orientations` (PR #904)
 
 Changed
 ^^^^^^^
 - The `pyfar.FIRFilter` class now uses `scipy.signal.oaconvolve`, instead of `scipy.signal.lfilter` for filtering to speed up the computation for long filters (PR #753)
-
 - Improve check of input data in `pyfar.constants.fractional_octave_frequencies_exact` and tests thereof (PR #876)
 - Improved testing for the parameter `side` used in 2D plots in the module `pyfar.plot` (PR #820)
 - Improved documentation to remove clutter from the secondary sidebar (PR #788)
@@ -36,10 +36,14 @@ Changed
 
 Deprecated
 ^^^^^^^^^^
-- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructing_fractional_octave_bands` is deprecated and will be removed in pyfar v0.9.0 (PR #725)
+- `pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0 in favor of `pyfar.dsp.RegularizedSpectrumInversion` and `pyfar.dsp.convolve` (PR #914)
+- The return parameter `frequencies` from `pyfar.dsp.filter.reconstructing_fractional_octave_bands` is deprecated and will be removed in pyfar v0.10.0 (PR #725)
+- `pyfar.dsp.filter.fractional_octave_frequencies` is deprecated in favour of `pyfar.constants.fractional_octave_frequencies_exact` and `pyfar.constants.fractional_octave_frequencies_nominal` and will be removed in pyfar v0.10.0 (PR #902)
+- `pyfar.dsp.regularized_spectrum_inversion` is deprectated in favour of `pyfar.dsp.RegularizedSpectrumInversion` and will be removed in pyfar v0.10.0 (PR #911)
 
 Removed
 ^^^^^^^
+- Support for Python 3.9 and 3.10 was removed (PR #907)
 - The following functionality is removed from pyfar v0.8.0 after being deprecated in pyfar v0.6.0 (see below)
 - The `pyfar.samplings` module was removed and move to `spharpy.samplings` (PR #740)
 - The `pyfar.Coordinates` class methods and properties `set_cart`, `get_cart`, `set_sph`, `get_sph`, `set_cyl`, `get_cyl`, `sh_order`, `systems`, `find_nearest_k`, `find_nearest_cart`, `find_nearest_sph`, and `find_slice` were removed in favor of the new API (PRs #741, #786)
@@ -52,6 +56,11 @@ Fixed
 - Fix warnings and errors in tests (PR #859, #897)
 - Update the calculation of nominal and exact center frequencies in `pyfar.constants.fractional_octave_frequencies_exact` and `pyfar.constants.fractional_octave_frequencies_nominal` (PR #874)
 - Wrap methods from `scipy.spatial.transform.Rotation` in `pf.Orientations` to fix inheritance-breaking changes in scipy v1.17.0 (PR #890, #893)
+
+Maintenance
+^^^^^^^^^^^
+- Update CircleCI single python version job config to use Python 3.14 (PR #908)
+
 
 0.7.4 (2026-02-02)
 ------------------
