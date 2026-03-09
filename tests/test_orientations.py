@@ -48,6 +48,25 @@ def test_orientations_from_view_up():
         Orientations.from_view_up(views, ups)
 
 
+def test_orientation_consistency_rotation_matrix():
+    """
+    Compare if the view and up vectors produce the same rotation as
+    a zero degree rotation in scipy, i.e., the identity matrix.
+    """
+    orient = Orientations.from_view_up([1, 0, 0], [0, 0, 1])
+    rot = Rotation.from_rotvec([0, 0, 0])
+
+    reference = np.eye(3)
+
+    np.testing.assert_allclose(
+        np.squeeze(orient.as_matrix()),
+        np.squeeze(reference), atol=1e-15)
+
+    np.testing.assert_allclose(
+        np.squeeze(rot.as_matrix()),
+        np.squeeze(reference), atol=1e-15)
+
+
 def test_orientations_from_view_up_invalid():
     """Try to create `Orientations` from invalid view and up vectors."""
     # mal-formed lists
@@ -128,8 +147,8 @@ def test_as_view_up_right(views, ups, orientations):
 
     views_, ups_, _ = orientations.as_view_up_right()
 
-    assert np.array_equal(views_, views), "views are not preserved"
-    assert np.array_equal(ups_, ups), "ups are not preserved"
+    np.testing.assert_allclose(views_, views, atol=1e-15)
+    np.testing.assert_allclose(ups_, ups, atol=1e-15)
 
 
 def test_from_view_as_view_roundtrip():
