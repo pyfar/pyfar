@@ -2,6 +2,7 @@
 from scipy.spatial.transform import Rotation
 import numpy as np
 import warnings
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 import pyfar as pf
 if np.__version__ < '2.0.0':
@@ -64,6 +65,9 @@ class Orientations(Rotation):
         if quat is None:
             quat = np.array([0., 0., 0., 1.])
         super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
+        warnings.warn(("`Orientations` will be deprecated in pyfar v0.10.0 in "
+                       "favor of `Rotation`."),
+            PyfarDeprecationWarning, stacklevel=2)
 
     @classmethod
     def from_matrix(cls, matrix, assume_valid=False):

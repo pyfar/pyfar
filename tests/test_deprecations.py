@@ -340,3 +340,15 @@ def test_deprecations_deconvolve():
         with pytest.raises(AttributeError, match=message):
             pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
 
+
+def test_deprecations_Orientations():
+    message = re.escape(
+        "`Orientations` will be deprecated in pyfar v0.10.0 in favor of " \
+        "`Rotation`.")
+    with pytest.warns(PyfarDeprecationWarning, match=message):
+        pf.Orientations([1, 0, 0, 0])
+
+    # remove class from pyfar 0.10.0!
+    if version.parse(pf.__version__) >= version.parse('0.10.0'):
+        with pytest.raises(AttributeError):
+            pf.Orientations([1, 0, 0, 0])
