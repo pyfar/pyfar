@@ -62,12 +62,12 @@ class Orientations(Rotation):
     """
 
     def __init__(self, quat=None, normalize=True, copy=True, **kwargs):
-        if quat is None:
-            quat = np.array([0., 0., 0., 1.])
-        super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
         warnings.warn(("`Orientations` will be deprecated in pyfar v0.10.0 in "
                        "favor of `Rotation`."),
             PyfarDeprecationWarning, stacklevel=2)
+        if quat is None:
+            quat = np.array([0., 0., 0., 1.])
+        super().__init__(quat, copy=copy, normalize=normalize, **kwargs)
 
     @classmethod
     def from_matrix(cls, matrix, assume_valid=False):
