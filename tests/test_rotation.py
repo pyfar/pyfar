@@ -299,7 +299,7 @@ def test__pow__():
     npt.assert_allclose((rotation**2).as_rotvec(), [2, 0, 0])
     npt.assert_allclose((rotation**0.5).as_rotvec(), [0.5, 0, 0])
 
-def tests_instance_methods():
+def test_instance_methods():
     """Test wrapped reduce method."""
     rotation = Rotation.from_rotvec([1, 0, 0])
 

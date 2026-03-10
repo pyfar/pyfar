@@ -1,4 +1,5 @@
 import pytest
+import warnings
 
 import numpy as np
 import numpy.testing as npt
@@ -6,6 +7,11 @@ from scipy.spatial.transform import Rotation
 
 from pyfar import Orientations
 from pyfar import Coordinates
+from pyfar.classes.warnings import PyfarDeprecationWarning
+
+warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+pytestmark = pytest.mark.filterwarnings(
+    'ignore::pyfar.classes.warnings.PyfarDeprecationWarning')
 
 
 def test_orientations_init():
@@ -310,7 +316,7 @@ def test__pow__():
     npt.assert_allclose((orientation**2).as_rotvec(), [2, 0, 0])
     npt.assert_allclose((orientation**0.5).as_rotvec(), [0.5, 0, 0])
 
-def tests_instance_methods():
+def test_instance_methods():
     """Test wrapped reduce method."""
     orientation = Orientations.from_rotvec([1, 0, 0])
 
