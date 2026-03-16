@@ -63,6 +63,20 @@ Maintenance
 - Update CircleCI single python version job config to use Python 3.14 (PR #908)
 
 
+0.7.5 (2026-03-12)
+------------------
+
+Changed
+^^^^^^^
+* Docs: General improvements to the documentation (PR #901)
+
+Fixed
+^^^^^
+* Make `pyfar.dsp.normalize` use the signal's current domain to avoid floating point errors (PR #900)
+* Fix bug where `pyfar.Orientations.from_view_up` and `pyfar.Orientations.as_view_up_right` did not use the standard Cartesian coordinate convention used in `scipy.spatial.transform.Rotation` and `pyfar.Coordiantes` (PR #848)
+* Make sure the fade in and out of the private `pyfar.dsp._cross_fade` function sum exactly to one (PR #915)
+
+
 0.7.4 (2026-02-02)
 ------------------
 

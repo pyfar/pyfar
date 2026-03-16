@@ -1025,9 +1025,8 @@ def _cross_fade(first, second, indices):
         raise IndexError("Index is out of range.")
 
     len_xfade = np.squeeze(np.abs(np.diff(indices)))
-    window = sgn.windows.hann(len_xfade*2 + 1, sym=True)
-    window_rising = window[:len_xfade]
-    window_falling = window[len_xfade+1:]
+    window_rising = (np.sin(np.linspace(0, np.pi/2, len_xfade + 2))**2)[1:-1]
+    window_falling = (np.cos(np.linspace(0, np.pi/2, len_xfade + 2))**2)[1:-1]
 
     window_first = np.concatenate(
         (np.ones(indices[0]), window_falling, np.zeros(len_arrays-indices[1])))
@@ -1066,7 +1065,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         response is truncated to a length of
         ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
         aliasing described above in any case but might distort the magnitude
-        response if ``signal.n_samples`` is to low. If truncate is ``False``
+        response if ``signal.n_samples`` is too low. If truncate is ``False``
         the output signal has the same length as the input signal. The default
         is ``True``.
 
@@ -2730,6 +2729,9 @@ def normalize(signal, reference_method='max', domain='auto',
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
 
+    # Store signal domain for later.
+    signal_domain = signal.domain
+
     if domain not in ('time', 'freq', 'auto'):
         raise ValueError("domain must be 'time', 'freq' or 'auto' but is"
                          f" '{domain}'.")
@@ -2825,8 +2827,18 @@ def normalize(signal, reference_method='max', domain='auto',
         reference_norm = np.sqrt(reference_norm)
         target = np.sqrt(target)
 
-    # apply normalization
-    normalized_signal = signal.copy() * target / reference_norm
+    # Apply normalization in the current domain of the signal. This avoids
+    # unnecessary conversions between the time and frequency domain which
+    # introduce numerical errors.
+    normalized_signal = pyfar.divide(
+        (pyfar.multiply((signal.copy(), target), domain=signal.domain),
+         reference_norm), domain=signal.domain)
+
+    # Restore original domain of Signals. This only affects edge cases where
+    # normalization is not applied in the signal's native domain.
+    if isinstance(normalized_signal, pyfar.Signal):
+        normalized_signal.domain = signal_domain
+
     if return_reference:
         return normalized_signal, reference_norm
     else:
