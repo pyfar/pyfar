@@ -9,13 +9,24 @@ import numpy.testing as npt
     pf.TimeData([1, 2, 3], [1, 2, 4]),
     pf.FrequencyData([1, 2, 3], [1, 2, 4])])
 def test_broadcast_cshape(signal):
-    """Test broadcasting for all audio classes."""
+    """Test broadcasting for pf.Signal, pf.TimeData and pf.FrequencyData
+    audio classes.
+    """
 
     broadcasted = pf.utils.broadcast_cshape(signal, (2, 3))
     assert signal.cshape == (1, )
     assert broadcasted.cshape == (2, 3)
     assert isinstance(broadcasted, type(signal))
 
+
+def test_broadcast_cshape_coordinates():
+    """Test broadcasting for the pf.Coordinates class."""
+
+    signal = pf.Coordinates([1, 2, 3, 1], [4, 5, 6, 1], [7, 8, 9, 1])
+    broadcasted = pf.utils.broadcast_cshape(signal, (2, 4))
+    assert signal.cshape == (4, )
+    assert broadcasted.cshape == (2, 4)
+    assert isinstance(broadcasted, type(signal))
 
 def test_broadcast_cshape_assertions():
     """Test assertions."""
