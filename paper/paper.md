@@ -49,10 +49,35 @@ On top of that `pyfar` provides functionality for
 
 Several tools exist (most of them are historically based on MATLAB)
 
-- `ITA-Toolbox` (https://git.rwth-aachen.de/ita/toolbox) for MATLAB [@Berzborn_2017_ITAToolboxOpenSource]
-- `AKTools` (https://github.com/f-brinkmann/AKtools) [@Brinkman_2017_AKtoolsOpenSoftware]
-- `pytta` (https://github.com/PyTTaMaster/PyTTa) [@Fonseca_2019_PyTTaOpenSource]
-- `python-acoustics` (https://github.com/python-acoustics/python-acoustics)
+1. `ITA-Toolbox` (https://git.rwth-aachen.de/ita/toolbox) for MATLAB [@Berzborn_2017_ITAToolboxOpenSource]
+    - Very comprehensive, but not easy to navigate and use even though most functionality is separated into modules
+    - lacks good documentation and only has minimal examples
+    - Extensively used and therefore tested
+    - Quality assurance not guaranteed due to lacking unit tests
+    - Requires a MATLAB license, which can be a barrier for some researchers and institutions
+    - Developed at single institution
+2. `AKTools` (https://github.com/f-brinkmann/AKtools) [@Brinkman_2017_AKtoolsOpenSoftware]
+    - Not as comprehensive as ITA-Toolbox, but easier to navigate
+    - Lacks good online documentation
+    - Small user-base
+    - Developed at single institution
+3. `pytta` (https://github.com/PyTTaMaster/PyTTa) [@Fonseca_2019_PyTTaOpenSource]
+    - Development has slowed down and maintenance is not guaranteed
+    - Developed at single institution
+4. `python-acoustics` (https://github.com/python-acoustics/python-acoustics)
+    - Comprehensive, modular structure
+    - Archived and no longer maintained
+
+Development of `Pyfar` was started with the primary idea to combine the efforts
+of multiple working groups and institutions into a shared codebase and
+ecosystem. The initiative was jointly started by some of the developers and
+maintainers of the above mentioned `ITA-Toolbox` and `AKTools`.
+`Pyfar` was completely redesigned from the code to allow a more modular
+structure and to be more user-friendly and intuitive to use.
+Integration into or extension of existing packages was not considered a
+viable option as existing packages were built at single institutions and
+therefore not designed to be sufficiently modular and flexible.
+
 
 # Additional information and future developments
 
