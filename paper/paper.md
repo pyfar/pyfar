@@ -13,7 +13,7 @@ affiliations:
  - name: Department of the Built Environment, Technical University of Eindhoven, The Netherlands
    index: 1
 date: 17 May 2024
-bibliography: paper.bib
+bibliography: references.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
 # https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
