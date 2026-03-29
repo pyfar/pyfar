@@ -96,6 +96,31 @@ From a maintainers perspective, this design also has the benefit of well defined
 [^3]: https://pyfar.readthedocs.org
 [^4]: https://mybinder.org
 
+# Research impact statement
+
+The `pyfar` base package and ecosystem is currently developed by a core team of `xx` developers. The base package has seen contributions by 21 developers (including the core team). As of spring 2026, the group of developers spans a total of 10 institutions.
+Accordingly, it can be concluded that the core idea of developing `pyfar` as a cross-institutional community effort is successfully implemented.
+
+Since its initial release in 2021 a total of `xx` versions were released. The latest version is `0.8.0`, which was released on March 16, 2026.
+In addition to an active developer community, users actively contribute to `pyfar` by reporting issues and suggesting features via the GitHub issue tracker.
+
+`Pyfar` has been downloaded from PyPI over 170,000 times in total, out of which of which 91,000 downloads were in the past year, i.e. 2025. These numbers were obtained using the clickpy platform [^5]. Note that these numbers also include downloads by automated tools such as continuous integration pipelines, which may inflate the numbers. However, they still indicate a significant and active user base.
+
+Due to a lack of an official citation for `pyfar` until this paper, it is difficult to estimate the total number of projects and research using `pyfar`.
+Google Scholar lists at least `xx` manuscripts referencing the usage of `pyfar`.
+To the authors knowledge, the following software packages rely on `pyfar` as a dependency:
+
+- `misuka`
+- `mesh2hrtf`
+- `sparrowpy`
+- `choras`
+
+Note that we omit other packages that are actively developed within the `pyfar` ecosystem, such as `spharpy` and `pyrato`, which also rely on the `pyfar` base package.
+
+Beyond the usage in research, `pyfar` is also used in university teaching.  Since 2025, the developers of the `pyfar` ecosystem have create a collection of open educational reosurces, which was introduced in @Brinkmann_2025_OpenEducationalResources. As of spring 2026, the collection includes coding assignments in the form of Jupyter notebooks for 3 different courses at M.Sc. level.
+
+[^5]: https://clickpy.clickhouse.com/dashboard/pyfar
+
 # Additional information and future developments
 
 - Example gallery with tutorials and use cases
