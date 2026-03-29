@@ -78,6 +78,23 @@ Integration into or extension of existing packages was not considered a
 viable option as existing packages were built at single institutions and
 therefore not designed to be sufficiently modular and flexible.
 
+# Software design
+
+The `pyfar` ecosystem and base package are designed with the following core concepts in mind:
+
+1. **Encapsulation**: `Pyfar` provides encapsulated data structures for audio data, filters, and coordinates, as well as modifications such as rotations. This allows to store relevant meta-data (e.g. the sampling rate of an audio signal, the normalization of the Fourier spectrum, or user- defined comments) alongside the data itself. Further, relevant operators are implemented, allowing for intuitive modifications of the data such as summing two audio signals in the time domain by simply using the `+` operator. Additionally, most objects provide methods to convert between different representations of the data such as conversions between the time and frequency domain for audio signals, or conversion between Cartesian, cylindrical, and spherical coordinates for coordinate objects.
+Functionality for digital signal processing and other data manipulations are primarily immplemented as functions that operate on the respective data objects.
+This design allows for more intuitive and readable code but also reduces the chance of errors as relevant meta-data is stored and handled together with the data itself.
+From a maintainers perspective, this design also has the benefit of well defined and consistent interfaces between functions and data structures.
+
+2. **Modularity**: All packages and sub-packages are designed to be as modular and independent as possible. This avoids tight coupling between different parts of the codebase. This allows users to install and use packages relevant to their research and therefore makes the ecosystem more accessible. A significant benefit of this modular approach is improved maintainability and extensibility. The `pyfar` base package implements core data structures and functionality shared across the entire ecosystem. Very specialized functionality is implemented in separate packages, which rely on the base package as dependency. Examples are the packages `spharpy`[^1] and `pyrato`[^2], which implement functionality for spherical array signal processing and room acoustics analysis, respectively.
+
+3. **Usability**: In addition to the user-friendly encapsulation of data structures and easy to navigate modular design, `pyfar` strives to provide extensive documentation of all functionality via the Sphinx documentation framework. The documentation is available online via the platform `readthedocs.org` [^3]. Examples are included as part of the API-documentation and additionally a growing number of application examples in the form of interactive Jupyter notebooks are provided. The Jupyter notebooks are organized in a gallery which further supports interactive execution via the online computation platform mybinder.org [^4].
+
+[^1]: https://github.com/pyfar/spharpy
+[^2]: https://github.com/pyfar/pyrato
+[^3]: https://pyfar.readthedocs.org
+[^4]: https://mybinder.org
 
 # Additional information and future developments
 
