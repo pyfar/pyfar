@@ -45,6 +45,15 @@ On top of that `pyfar` provides functionality for
 - `Pyfar` is designed to be user-friendly and intuitive, making it easier for researchers to implement their ideas and share their work with others.
 - Encapsulated data structures and relevant operators facilitate readable and easy-to-use code which reduces the chance of errors.
 
+# State of the field
+
+Several tools exist (most of them are historically based on MATLAB)
+
+- `ITA-Toolbox` (https://git.rwth-aachen.de/ita/toolbox) for MATLAB [@Berzborn_2017_ITAToolboxOpenSource]
+- `AKTools` (https://github.com/f-brinkmann/AKtools) [@Brinkman_2017_AKtoolsOpenSoftware]
+- `pytta` (https://github.com/PyTTaMaster/PyTTa) [@Fonseca_2019_PyTTaOpenSource]
+- `python-acoustics` (https://github.com/python-acoustics/python-acoustics)
+
 # Additional information and future developments
 
 - Example gallery with tutorials and use cases

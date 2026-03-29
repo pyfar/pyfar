@@ -4,6 +4,9 @@ on:
     types:
       - opened
       - synchronize
+  push:
+    branches:
+      - paper-joss
 
 jobs:
   paper:
