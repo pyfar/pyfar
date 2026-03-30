@@ -1323,7 +1323,7 @@ class StateSpaceModel(_LTISystem):
     def _process(self, u):
         u = np.asfortranarray(u)
         y = np.zeros((self.n_outputs, u.shape[1]), self.dtype, order='F')
-        gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)[0]
+        gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)
         for i in range(u.shape[1]):
             y[:, i] = gemv(
                 1.,
