@@ -8,6 +8,7 @@ Unreleased
 Added
 ^^^^^
 - Added an `endpoint` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to numpy's `linspace` function (PR #963)
+- The new class `pyfar.classes.filter.StateSpaceModel` for state-space representation of LTI systems.
 
 0.8.1 (2026-08-14)
 ------------------
