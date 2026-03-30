@@ -2,6 +2,14 @@
 History
 =======
 
+0.8.2 (2026-XX-XX)
+------------------
+
+Added
+^^^^^
+- The new class `pyfar.classes.filter.StateSpaceModel` for state-space representation of LTI systems.
+
+
 0.8.1 (2026-08-14)
 ------------------
 
