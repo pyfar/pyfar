@@ -770,8 +770,9 @@ class Signal(FrequencyData, TimeData):
         """
         Create audio Signal with time or frequency data and sampling rate.
         """
-        # unpack array
+        # unpack iterable
         if hasattr(sampling_rate, '__iter__'):
+            sampling_rate = np.atleast_1d(np.asarray(sampling_rate))  # fix #922
             assert len(sampling_rate) != 0
             if len(sampling_rate) != 1:
                 raise ValueError("Multirate signals are not supported.")
