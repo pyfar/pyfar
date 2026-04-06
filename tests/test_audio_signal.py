@@ -295,6 +295,12 @@ def test_setter_sampling_rate():
     assert signal._sampling_rate == 1000
 
 
+def test_sampling_rate_multirate():
+    match="Multirate signals are not supported."
+    with pytest.raises(ValueError, match=match):
+        Signal(1, [1,2])
+
+
 def test_getter_signal_type():
     """Test if attribute signal type is accessed correctly."""
     signal = Signal([1, 2, 3], 44100, fft_norm='none')
