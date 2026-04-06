@@ -288,7 +288,7 @@ def test_getter_sampling_rate():
     assert signal.sampling_rate == 1000
 
 
-def test_setter_sampligrate():
+def test_setter_sampling_rate():
     """Test if attribute sampling rate is set correctly."""
     signal = Signal([1, 2, 3], 44100)
     signal.sampling_rate = 1000
