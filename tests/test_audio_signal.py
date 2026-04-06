@@ -295,6 +295,12 @@ def test_setter_sampling_rate():
     assert signal._sampling_rate == 1000
 
 
+@pytest.mark.parametrize('fs', [1, [1], [[1]], [[[1]]]])
+def test_sampling_rate_parsing(fs):
+    Signal([0], fs)
+    Signal([0], np.array(fs))
+
+
 def test_sampling_rate_multirate():
     match="Multirate signals are not supported."
     with pytest.raises(ValueError, match=match):
