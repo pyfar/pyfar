@@ -7,23 +7,28 @@ import pyfar as pf
 def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     r"""
     Calculates sound pressure with exponential time weighting
-    according to IEC / DIN EN 61672-1, returning as a Signal of sound pressure
+    according to IEC 61672-1 [#]_, returning as a Signal of sound pressure
     instead of levels.
 
     The standard defines the time weighting F as:
-    .. math:: L_\text{F}(t) = 10 \lg \left[ \frac{(1/\tau_F) \int_{-\infty}^{t}
+    
+    .. math::
+        L_\text{F}(t) = 10 \log_{10} \left[ \frac{(1 / \tau_{\text{F}}) \int_{-\infty}^{t}
         p^2(\xi) e^{-(t-\xi)/\tau_\text{F}} d\xi} {p_0^2}\right] \text{ dB}
 
     This function works on finite, discrete signals and only calculates the
     weighted pressure:
-    .. math:: p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{0}^{n} p^2(n)
+    
+    .. math::
+        p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{0}^{n} p^2(n)
         e^{-(t-n)/\tau_\text{F}} }
 
-    .. note:: While this function appears similar to functions in
-    pyfar.dsp.filter, it is not a linear system like actual filters, since
-    the time data is squared in this algorithm, removing the sign of each
-    sample. This function therefore exists mainly as a helper function for
-    other functions in pyfar.level as well as for plotting purposes.
+    .. note:: 
+        While this function appears similar to functions in
+        `pyfar.dsp.filter`, it is not a linear system like actual filters, since
+        the time data is squared in this algorithm, removing the sign of each
+        sample. This function therefore exists mainly as a helper function for
+        other functions in `pyfar.level` as well as for plotting purposes.
 
     Parameters
     ----------
@@ -31,7 +36,7 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
         The signal object to apply the weighting to
 
     time_weighting: "F" or "S"
-        The time weighting type. Options are "F" (="fast") and "S" (="slow"),
+        The time weighting type. Options are "F" (fast) and "S" (slow),
         which correspond to level decays of -34.7 dB and -4.3 dB per second,
         respectively.
 
@@ -86,6 +91,7 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     # this is effectively the same as looping over all samples and doing
     # > weighted[i] = exp_func_decay * weighted[i-1] + energies[i]
     # but it's faster to use an lfilter call to make use of scipy's speed
+    # and channel handling
     weighted = scipy.signal.lfilter([1, 0], [1, -exp_func_decay], energies)
 
     # normalize the integral
