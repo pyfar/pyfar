@@ -34,6 +34,7 @@ Modules
    modules/pyfar.dsp.fft
    modules/pyfar.dsp.filter
    modules/pyfar.io
+   modules/pyfar.level
    modules/pyfar.plot
    modules/pyfar.signals
    modules/pyfar.signals.files
