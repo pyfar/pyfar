@@ -5,11 +5,13 @@ import pyfar
 
 from pyfar.dsp import filter
 from pyfar import FilterSOS, Signal
+from pyfar.classes.warnings import PyfarDeprecationWarning
 
 
 def test_center_frequencies_iec():
     nominal_octs = [31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
-    actual_octs = filter.fractional_octave_frequencies(num_fractions=1)
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_octs = filter.fractional_octave_frequencies(num_fractions=1)
     actual_octs_nom = actual_octs[0]
     npt.assert_allclose(actual_octs_nom, nominal_octs)
 
@@ -17,24 +19,29 @@ def test_center_frequencies_iec():
         25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630,
         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000,
         12500, 16000, 20000]
-    actual_thirds = filter.fractional_octave_frequencies(
-        num_fractions=3)
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_thirds = filter.fractional_octave_frequencies(
+            num_fractions=3)
     actual_thirds_nom = actual_thirds[0]
     npt.assert_allclose(actual_thirds_nom, nominal_thirds)
 
     with pytest.raises(ValueError, match="lower and upper limit"):
-        filter.fractional_octave_frequencies(frequency_range=(1,))
+        with pytest.warns(PyfarDeprecationWarning):
+            filter.fractional_octave_frequencies(frequency_range=(1,))
 
     with pytest.raises(ValueError, match="lower and upper limit"):
-        filter.fractional_octave_frequencies(frequency_range=(3, 4, 5))
+        with pytest.warns(PyfarDeprecationWarning):
+            filter.fractional_octave_frequencies(frequency_range=(3, 4, 5))
 
     with pytest.raises(
             ValueError, match="second frequency needs to be higher"):
-        filter.fractional_octave_frequencies(
-            frequency_range=(8e3, 1e3))
+        with pytest.warns(PyfarDeprecationWarning):
+            filter.fractional_octave_frequencies(
+                frequency_range=(8e3, 1e3))
 
-    actual_octs = filter.fractional_octave_frequencies(
-        num_fractions=1, frequency_range=(100, 4e3))
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_octs = filter.fractional_octave_frequencies(
+            num_fractions=1, frequency_range=(100, 4e3))
     actual_octs_nom = actual_octs[0]
     nominal_octs_part = [125, 250, 500, 1000, 2000, 4000]
     npt.assert_allclose(actual_octs_nom, nominal_octs_part)
@@ -66,16 +73,18 @@ def test_fractional_coeff_oct_filter_iec():
     order = 6
 
     with pytest.warns(UserWarning, match="Skipping bands"):
-        actual = filter.fractional_octaves. \
-                    _coefficients_fractional_octave_bands(
-                        sr, 1, frequency_range=(5e3, 20e3), order=order)
+        with pytest.warns(UserWarning, match="The upper frequency limit"):
+            actual = filter.fractional_octaves. \
+                        _coefficients_fractional_octave_bands(
+                            sr, 1, frequency_range=(8e3, 20e3), order=order)
 
     assert actual.shape == (1, order, 6)
 
 
 def test_fractional_frequencies_non_iec():
-    actual_nominal, actual_exact = filter.fractional_octave_frequencies(
-        num_fractions=1, frequency_range=(4e3, 64e3))
+    with pytest.warns(PyfarDeprecationWarning):
+        actual_nominal, actual_exact = filter.fractional_octave_frequencies(
+            num_fractions=1, frequency_range=(4e3, 64e3))
     npt.assert_allclose(actual_exact, [4e3, 8e3, 16e3, 32e3, 64e3])
     assert actual_nominal is None
 
@@ -84,21 +93,29 @@ def test_fract_oct_filter_iec():
     # Test only Filter object related stuff here, testing of coefficients is
     # done in separate test.
     sr = 48e3
-    order = 2
     n_samples = 2**10
     impulse = pyfar.signals.impulse(n_samples, sampling_rate=sr)
 
     f_obj = filter.fractional_octave_bands(
-        None, 3, sampling_rate=sr, order=order)
+        None, 3, sampling_rate=sr)
     assert isinstance(f_obj, FilterSOS)
 
-    sig = filter.fractional_octave_bands(impulse, 3, order=order)
+    sig = filter.fractional_octave_bands(impulse, 3)
     assert isinstance(sig, Signal)
 
     ir_actual = filter.fractional_octave_bands(
-        impulse, 1, frequency_range=(1e3, 4e3), order=order)
+        impulse, 1, frequency_range=(1e3, 4e3))
 
     assert ir_actual.time.shape[0] == 3
+
+
+def test_fractional_octave_bands_errors():
+    """Test if all errors are raised as expected."""
+
+    message = 'Either signal or sampling_rate must be None.'
+    with pytest.raises(ValueError, match=message):
+        filter.fractional_octave_bands(
+            Signal(1, 1), 1, 44100, (1e3, 8e3))
 
 
 def test_fract_oct_bands_non_iec():
@@ -107,14 +124,15 @@ def test_fract_oct_bands_non_iec():
     expected = np.array([2e3, 4e3, 8e3, 16e3])
 
     np.testing.assert_allclose(exact, expected)
-
-    nominal, exact = filter.fractional_octave_frequencies(
-        5, (2e3, 20e3), return_cutoff=False)
+    with pytest.warns(PyfarDeprecationWarning):
+        nominal, exact = filter.fractional_octave_frequencies(
+            5, (2e3, 20e3), return_cutoff=False)
     assert nominal is None
 
     frac = 5
-    nominal, exact, f_crit = filter.fractional_octave_frequencies(
-        frac, (2e3, 20e3), return_cutoff=True)
+    with pytest.warns(PyfarDeprecationWarning):
+        nominal, exact, f_crit = filter.fractional_octave_frequencies(
+            frac, (2e3, 20e3), return_cutoff=True)
 
     octave_ratio = 10**(3/10)
     np.testing.assert_allclose(
@@ -144,3 +162,72 @@ def test_sum_bands_din():
 
     assert not np.any(diff[:, mask] > 10**(1/10))
     assert not np.any(diff[:, mask] < 10**(-1/10))
+
+
+@pytest.mark.parametrize(
+        ('filter_order', 'num_fractions', 'tolerance_class', 'tolerance_met'),
+        [(1, 1, 1, False), (1, 3, 1, False),  # Failing class 1
+         (1, 1, 2, False), (1, 3, 2, False),  # Failing class 2
+         (5, 1, 1, True), (4, 1, 2, True),    # Minimum order that passes for
+                                              # octave bands
+         (6, 3, 1, True), (5, 3, 2, True),    # Minimum order that passes
+                                              # one-third octave bands
+         (14, 1, 1, True), (14, 3, 1, True),  # Default order
+         (14, 1, 2, True), (14, 3, 2, True)])
+def test_check_fractional_octave_band_filter_tolerance(
+    filter_order, num_fractions, tolerance_class, tolerance_met):
+    """Test checking the tolerance of fractional octave band filters."""
+
+    sampling_rate = 44100
+    frequency_range = (20, 20000)
+
+    with pytest.warns(UserWarning, match='The upper frequency limit'):
+        fractional_octave_bands = filter.fractional_octave_bands(
+            None, num_fractions, sampling_rate, frequency_range, filter_order)
+
+    assert filter.check_fractional_octave_band_filter_tolerance(
+        fractional_octave_bands, num_fractions,
+        frequency_range, tolerance_class) == tolerance_met
+
+
+def test_check_fractional_octance_band_filter_tolerance_n_samples():
+    """Test the n_samples parameter with non-default value."""
+
+    sampling_rate = 44100
+    num_fractions = 1
+    frequency_range = (30, 20000)
+
+    with pytest.warns(UserWarning, match='The upper frequency limit'):
+        fractional_octave_bands = filter.fractional_octave_bands(
+            None, num_fractions, sampling_rate, frequency_range, order=6)
+
+    assert filter.check_fractional_octave_band_filter_tolerance(
+        fractional_octave_bands, num_fractions,
+        frequency_range, tolerance_class=1, n_samples=36_000)
+
+
+def test_errors_check_fractional_octave_band_filter_tolerance():
+    """Check if errors are raised as expected."""
+
+    fractional_octave_band_filter = filter.fractional_octave_bands(
+            None, 1, 44100, (100, 1000))
+
+    # wrong type for fractional octave band filters
+    with pytest.raises(TypeError, match='FilterSOS object'):
+        filter.check_fractional_octave_band_filter_tolerance(
+            None, 1, (100, 1000), 1)
+
+    # wrong value for num_fractions
+    with pytest.raises(ValueError, match='must be 1 or 3'):
+        filter.check_fractional_octave_band_filter_tolerance(
+            fractional_octave_band_filter, 2, (100, 1000), 1)
+
+    # wrong value for tolerance_class
+    with pytest.raises(ValueError, match='must be 1 or 2'):
+        filter.check_fractional_octave_band_filter_tolerance(
+            fractional_octave_band_filter, 1, (100, 1000), 3)
+
+    # frequency range not matching filters
+    with pytest.raises(ValueError, match='num_fractions and frequency_range'):
+        filter.check_fractional_octave_band_filter_tolerance(
+            fractional_octave_band_filter, 1, (100, 4000), 2)

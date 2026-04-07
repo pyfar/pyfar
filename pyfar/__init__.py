@@ -4,7 +4,7 @@
 
 __author__ = """The pyfar developers"""
 __email__ = ''
-__version__ = '0.7.3'
+__version__ = '0.8.0'
 
 
 from .classes.audio import Signal, TimeData, FrequencyData
@@ -13,6 +13,7 @@ from .classes.audio import (add, subtract, multiply, divide, power,
 from .classes.coordinates import Coordinates
 from .classes.coordinates import (deg2rad, rad2deg, dot, cross)
 from .classes.orientations import Orientations
+from .classes.rotation import Rotation
 from .classes.filter import FilterFIR, FilterIIR, FilterSOS
 from .classes.transmission_matrix import TransmissionMatrix
 
@@ -38,6 +39,7 @@ __all__ = [
     'deg2rad',
     'rad2deg',
     'Orientations',
+    'Rotation',
     'FilterFIR',
     'FilterIIR',
     'FilterSOS',

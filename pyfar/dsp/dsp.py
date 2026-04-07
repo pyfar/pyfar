@@ -4,8 +4,11 @@ import numpy as np
 from scipy import signal as sgn
 import pyfar
 from pyfar.dsp import fft
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 import scipy.fft as sfft
+from typing import Literal
+from typing import Union
 
 
 def phase(signal, deg=False, unwrap=False):
@@ -561,6 +564,145 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         return signal_win
 
 
+def time_crop(signal, interval: Union[list[float], tuple[float, float],
+                                       np.ndarray],
+              unit: Literal["samples", "s"]='samples'):
+    r"""Crop a :py:class:`Signal <pyfar.Signal>` or a
+    :py:class:`TimeData <pyfar.TimeData>` object in time.
+
+    Returns the signal :math:`x(t)` defined for all :math:`t` within the
+    interval :math:`interval[0] \le t \le interval[1]`, where :math:`t`
+    can be time or samples.
+
+    Parameters
+    ----------
+    signal : pyfar.Signal, pyfar.TimeData
+        :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object to be cropped.
+
+    interval : list, tuple, or numpy.ndarray
+        Must contain exactly two entries, these specify the beginning and
+        the end of the section to be cropped. The unit of `interval`
+        is specified by the parameter `unit`.
+
+    unit : string, optional
+        Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
+        Values in seconds are rounded to the nearest sample within the
+        specified `interval` range. The default is ``'samples'``.
+
+    Returns
+    -------
+    cropped_signal : pyfar.Signal, pyfar.TimeData
+        Cropped :py:class:`Signal <pyfar.Signal>` or
+        :py:class:`TimeData <pyfar.TimeData>` object.
+
+    Notes
+    -----
+    For :py:class:`Signal <pyfar.Signal>`, the starting point of
+    the cropped signal is always set to zero, while for
+    :py:class:`TimeData <pyfar.TimeData>`, the starting point is set to the
+    point where cropping begins in the original signal.
+
+
+    Examples
+    --------
+    Create a sine wave signal and extract an interval from it. The starting
+    point of the cropped signal is reset to zero.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax1, ax2) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
+        >>> signal = pf.signals.sine(100, 4410)
+        >>> signal_cropped = pf.dsp.time_crop(signal, interval=[565, 1220])
+        >>> pf.plot.time(signal, label='original',
+        ...                             unit = 'samples', ax=ax1)
+        >>> ax1.axvline(565, color='k', linestyle='-.', label='interval')
+        >>> ax1.axvline(1220, color='k',  linestyle='-.')
+        >>> pf.plot.time(signal_cropped, color='y',
+        ...     label='cropped', unit='samples', ax=ax2)
+        >>> for ax in [ax1, ax2]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a Signal object')
+
+    Create a TimeData object and extract an interval from it. The starting
+    point in time is NOT reset; the cropped signal starts from the time
+    instance closest to the first point in the `interval`.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fig, (ax3, ax4) = plt.subplots(2, 1)
+        >>> plt.subplots_adjust(hspace=0.33)
+        >>> time_signal = pf.TimeData((1, 2, 2.5, 2, 1, -1 ),
+        ...                             (0, 0.1, 0.2, 0.3, 0.4, 0.5))
+        >>> time_signal_cropped = pf.dsp.time_crop(time_signal,
+        ...                             interval=[0.1, 0.38], unit='s')
+        >>> pf.plot.time(time_signal, label='original',
+        ...                                             unit = 's', ax=ax3)
+        >>> ax3.axvline(0.1, color='k', linestyle='-.', label='interval')
+        >>> ax3.axvline(0.38, color='k',  linestyle='-.')
+        >>> pf.plot.time(time_signal_cropped, color='y',
+        ...     label='cropped', unit = 's', ax=ax4)
+        >>> for ax in [ax3, ax4]:
+        >>>     ax.legend()
+        >>> fig.suptitle('Crop a TimeData object')
+
+    """
+    # Check the input
+    if not isinstance(signal, (pyfar.Signal, pyfar.TimeData)):
+        raise TypeError("The parameter signal has to be of type " \
+        "pyfar.Signal or pyfar.TimeData.")
+
+    if not isinstance(interval, (list, tuple, np.ndarray)):
+        raise TypeError(
+            "The parameter interval has to be of type" \
+            " list, tuple or numpy.ndarray.")
+    if len(interval) != 2:
+        raise ValueError(
+            "The parameter interval must consist of 2 entries.")
+
+    interval = np.array(interval)
+
+    if np.diff(interval) <= 0:
+        raise ValueError("The interval start point must be smaller " \
+        "than the end point.")
+    if np.any(interval < 0):
+        raise ValueError("The interval boundaries must be non-negative.")
+
+    if unit == 's':
+        indices = signal.times
+    elif unit == 'samples':
+        interval = interval.astype(int)
+        indices = np.arange(len(signal.times))
+    else:
+        raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
+
+    mask = ((indices >= interval[0]) & (
+            indices <= interval[1]))
+
+    # If there are no True values in the mask, the interval lies
+    # outside the boundaries of signal.times.
+    if not mask.any():
+         raise ValueError("Interval is out of the boundaries" \
+                " of signal.times")
+
+    time_data = signal.time[:, mask]
+
+    if isinstance(signal, pyfar.Signal):
+        cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
+    else:
+        times = signal.times[mask]
+        cropped_signal = pyfar.TimeData(time_data, times)
+
+    return cropped_signal
+
+
 def kaiser_window_beta(A):
     """Return a shape parameter beta to create kaiser window based on desired
     side lobe suppression in dB.
@@ -809,6 +951,11 @@ def regularized_spectrum_inversion(
             numerical aspects of linear inversion. Philadelphia: SIAM, 1998.
 
     """
+
+    warnings.warn(("'regularized_spectrum_inversion' will be deprecated in "
+                   "pyfar 0.10.0 in favor of 'RegularizedSpectrumInversion'"),
+                   PyfarDeprecationWarning, stacklevel=2)
+
     if not isinstance(signal, pyfar.Signal):
         raise ValueError("The input signal needs to be of type pyfar.Signal.")
 
@@ -878,9 +1025,8 @@ def _cross_fade(first, second, indices):
         raise IndexError("Index is out of range.")
 
     len_xfade = np.squeeze(np.abs(np.diff(indices)))
-    window = sgn.windows.hann(len_xfade*2 + 1, sym=True)
-    window_rising = window[:len_xfade]
-    window_falling = window[len_xfade+1:]
+    window_rising = (np.sin(np.linspace(0, np.pi/2, len_xfade + 2))**2)[1:-1]
+    window_falling = (np.cos(np.linspace(0, np.pi/2, len_xfade + 2))**2)[1:-1]
 
     window_first = np.concatenate(
         (np.ones(indices[0]), window_falling, np.zeros(len_arrays-indices[1])))
@@ -919,7 +1065,7 @@ def minimum_phase(signal, n_fft=None, truncate=True):
         response is truncated to a length of
         ``signal.n_samples//2 + signal.n_samples % 2``. This avoids
         aliasing described above in any case but might distort the magnitude
-        response if ``signal.n_samples`` is to low. If truncate is ``False``
+        response if ``signal.n_samples`` is too low. If truncate is ``False``
         the output signal has the same length as the input signal. The default
         is ``True``.
 
@@ -1481,6 +1627,12 @@ def deconvolve(system_output, system_input, fft_length=None,
                frequency_range=None, **kwargs):
     r"""Calculate transfer functions by spectral deconvolution of two signals.
 
+    .. note::
+
+        This function will be deprecated in pyfar v0.10.0 in favor of
+        :py:class:`pyfar.dsp.RegularizedSpectrumInversion` and
+        :py:func:`pyfar.dsp.convolve`.
+
     The transfer function :math:`H(\omega)` is calculated by spectral
     deconvolution (spectral division).
 
@@ -1541,6 +1693,19 @@ def deconvolve(system_output, system_input, fft_length=None,
            sweeps. Directors cut." J. Audio Eng. Soc. 49(6):443-471,
            (2001, June).
     """
+
+    # NOTE: The pyfar developers decided that this function will raise an
+    #       attribute error vor pyfar >= 0.10.0 instead of completely removing
+    #       it. In pyfar 0.10.0 the parameters and returns of the docsring can
+    #       be removed and link to the example notebook for measuring RIRs
+    #       could be added. In addtion all tests for pyfar.dsp.deconvolve
+    #       should be removed in pyfar 0.10.0.
+    warnings.warn(
+        ("`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0."
+         "It is recommended to use `pyfar.dsp.RegularizedSpectrumInversion` "
+         "and `pyfar.dsp.convolve` for deconvolution."),
+         PyfarDeprecationWarning, stacklevel=2)
+
     # Check if system_output and system_input are both type Signal
     if not isinstance(system_output, pyfar.Signal):
         raise TypeError('system_output has to be of type pyfar.Signal')
@@ -2331,7 +2496,7 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
 
     # check if averaging over one dimensional caxis
     if 1 in signal.cshape:
-        for ax in caxis:
+        for ax in np.atleast_1d(caxis):
             if signal.cshape[ax] == 1:
                 warnings.warn(
                     f"Averaging one dimensional caxis={caxis}.", stacklevel=2)
@@ -2564,6 +2729,9 @@ def normalize(signal, reference_method='max', domain='auto',
         raise TypeError(("Input data has to be of type 'Signal', 'TimeData' "
                          "or 'FrequencyData'."))
 
+    # Store signal domain for later.
+    signal_domain = signal.domain
+
     if domain not in ('time', 'freq', 'auto'):
         raise ValueError("domain must be 'time', 'freq' or 'auto' but is"
                          f" '{domain}'.")
@@ -2659,8 +2827,18 @@ def normalize(signal, reference_method='max', domain='auto',
         reference_norm = np.sqrt(reference_norm)
         target = np.sqrt(target)
 
-    # apply normalization
-    normalized_signal = signal.copy() * target / reference_norm
+    # Apply normalization in the current domain of the signal. This avoids
+    # unnecessary conversions between the time and frequency domain which
+    # introduce numerical errors.
+    normalized_signal = pyfar.divide(
+        (pyfar.multiply((signal.copy(), target), domain=signal.domain),
+         reference_norm), domain=signal.domain)
+
+    # Restore original domain of Signals. This only affects edge cases where
+    # normalization is not applied in the signal's native domain.
+    if isinstance(normalized_signal, pyfar.Signal):
+        normalized_signal.domain = signal_domain
+
     if return_reference:
         return normalized_signal, reference_norm
     else:

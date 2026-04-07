@@ -264,7 +264,8 @@ class Coordinates():
         >>> coordinates = pf.Coordinates.from_spherical_elevation(0, 0, 1)
         """
 
-        x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
+        x, y, z = sph2cart(
+            azimuth, np.pi / 2 - np.asarray(elevation), radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
     @classmethod
@@ -343,7 +344,7 @@ class Coordinates():
         >>> coordinates = pf.Coordinates.from_spherical_side(0, 0, 1)
         """
 
-        x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
+        x, z, y = sph2cart(polar, np.pi / 2 - np.asarray(lateral), radius)
         return cls(x, y, z, weights=weights, comment=comment)
 
     @classmethod

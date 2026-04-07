@@ -33,6 +33,7 @@ from .fractional_octaves import (
     fractional_octave_bands,
     reconstructing_fractional_octave_bands,
     fractional_octave_frequencies,
+    check_fractional_octave_band_filter_tolerance,
 )
 
 from .gammatone import (
@@ -40,6 +41,9 @@ from .gammatone import (
     erb_frequencies,
 )
 
+from .frequency_weighting import (
+    frequency_weighting_filter,
+)
 
 __all__ = [
     'allpass',
@@ -62,6 +66,8 @@ __all__ = [
     'fractional_octave_bands',
     'reconstructing_fractional_octave_bands',
     'fractional_octave_frequencies',
+    'check_fractional_octave_band_filter_tolerance',
     'GammatoneBands',
     'erb_frequencies',
+    'frequency_weighting_filter',
 ]

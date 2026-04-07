@@ -1,4 +1,5 @@
 import pytest
+import warnings
 
 import numpy as np
 import numpy.testing as npt
@@ -6,6 +7,11 @@ from scipy.spatial.transform import Rotation
 
 from pyfar import Orientations
 from pyfar import Coordinates
+from pyfar.classes.warnings import PyfarDeprecationWarning
+
+warnings.filterwarnings('ignore', category=PyfarDeprecationWarning)
+pytestmark = pytest.mark.filterwarnings(
+    'ignore::pyfar.classes.warnings.PyfarDeprecationWarning')
 
 
 def test_orientations_init():
@@ -46,6 +52,25 @@ def test_orientations_from_view_up():
     match = 'Expected 1:1, 1:N or N:1 `views` and `ups` not M:N, got '
     with pytest.raises(ValueError, match=match):
         Orientations.from_view_up(views, ups)
+
+
+def test_orientation_consistency_rotation_matrix():
+    """
+    Compare if the view and up vectors produce the same rotation as
+    a zero degree rotation in scipy, i.e., the identity matrix.
+    """
+    orient = Orientations.from_view_up([1, 0, 0], [0, 0, 1])
+    rot = Rotation.from_rotvec([0, 0, 0])
+
+    reference = np.eye(3)
+
+    np.testing.assert_allclose(
+        np.squeeze(orient.as_matrix()),
+        np.squeeze(reference), atol=1e-15)
+
+    np.testing.assert_allclose(
+        np.squeeze(rot.as_matrix()),
+        np.squeeze(reference), atol=1e-15)
 
 
 def test_orientations_from_view_up_invalid():
@@ -128,8 +153,8 @@ def test_as_view_up_right(views, ups, orientations):
 
     views_, ups_, _ = orientations.as_view_up_right()
 
-    assert np.array_equal(views_, views), "views are not preserved"
-    assert np.array_equal(ups_, ups), "ups are not preserved"
+    np.testing.assert_allclose(views_, views, atol=1e-15)
+    np.testing.assert_allclose(ups_, ups, atol=1e-15)
 
 
 def test_from_view_as_view_roundtrip():
@@ -220,3 +245,98 @@ def test___eq___notEqual(orientations, views, ups):
     rot_z45 = Rotation.from_euler('z', 45, degrees=True)
     actual = Orientations.from_view_up(views, ups) * rot_z45
     assert not orientations == actual
+
+
+@pytest.mark.parametrize(
+    ("method", "args"),
+    [
+        (
+            Orientations.from_davenport,
+            ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], "extrinsic", [90, 0, 0]),
+        ),
+        (
+            Orientations.from_euler,
+            ('zyx', [90, 45, 30]),
+        ),
+        (
+            Orientations.from_matrix,
+            ([[0, -1, 0], [1, 0, 0], [0, 0, 1]],),
+        ),
+        (
+            Orientations.from_mrp,
+            ([0, 0, 1],),
+        ),
+        (
+            Orientations.from_quat,
+            ([0, 0, 0, 1],),
+        ),
+        (
+            Orientations.from_rotvec,
+            (np.pi/2 * np.array([0, 0, 1]),),
+        ),
+        (
+            Orientations.from_view_up,
+            ([1, 0, 0], [0, 0, 1]),
+        ),
+        (
+            Orientations.align_vectors,
+            ([[0, 1, 0], [0, 1, 1], [0, 1, 1]],
+             [[1, 0, 0], [1, 1.1, 0], [1, 0.9, 0]]),
+        ),
+        (
+            Orientations.random,
+            (),
+        ),
+        (
+            Orientations.identity,
+            (),
+        ),
+        (
+            Orientations.concatenate,
+            ([[Orientations.from_rotvec([0, 0, 1]),
+             Orientations.from_rotvec([0, 0, 2])]]),
+        ),
+    ],
+)
+def test_methods_return_type(method, args):
+    """Test if class-methods return Orientations instance."""
+    obj = method(*args)
+
+    if method.__name__ in ["align_vectors"]:
+        assert isinstance(obj[0], Orientations)
+    else:
+        assert isinstance(obj, Orientations)
+
+
+def test__pow__():
+    """Test wrapped __pow__ method."""
+    orientation = Orientations.from_rotvec([1, 0, 0])
+
+    assert isinstance(orientation, Orientations)
+    npt.assert_allclose((orientation**2).as_rotvec(), [2, 0, 0])
+    npt.assert_allclose((orientation**0.5).as_rotvec(), [0.5, 0, 0])
+
+def test_instance_methods():
+    """Test wrapped reduce method."""
+    orientation = Orientations.from_rotvec([1, 0, 0])
+
+    obj = orientation.reduce()
+    assert isinstance(obj, Orientations)
+
+    obj = obj.mean()
+    assert isinstance(obj, Orientations)
+
+    obj = obj.inv()
+    assert isinstance(obj, Orientations)
+
+def test__iter__():
+    """Test iteration over Orientations."""
+    orientations = Orientations.from_rotvec([[1, 0, 0], [2, 0, 0]])
+
+    for i, orientation in enumerate(orientations):
+        if i == 0:
+            npt.assert_equal(orientation.as_rotvec(), [1, 0, 0])
+        if i == 1:
+            npt.assert_equal(orientation.as_rotvec(), [2, 0, 0])
+
+        assert isinstance(orientation, Orientations)

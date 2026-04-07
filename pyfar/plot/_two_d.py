@@ -194,6 +194,7 @@ def _group_delay_2d(signal, unit, freq_scale, indices, orientation, method,
                     colorbar, ax, side='right', **kwargs):
 
     # check input and prepare the figure, axis, and common parameters
+    _utils._check_time_unit(unit)
     fig, ax, indices, kwargs = _utils._prepare_2d_plot(
         signal, (Signal, ), 2, indices, method, ax, colorbar, **kwargs)
     _utils._check_axis_scale(freq_scale)
@@ -302,7 +303,8 @@ def _freq_group_delay_2d(
     """
     Plot the magnitude and group delay spectrum in a 2 by 1 subplot layout.
     """
-
+    # check unit and prepare plot
+    _utils._check_time_unit(unit)
     fig, ax = _utils._prepare_plot(ax, (2, 1))
 
     _, qm_0, cb_0 = _freq_2d(signal, dB, log_prefix, log_reference, freq_scale,

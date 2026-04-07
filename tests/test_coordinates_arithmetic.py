@@ -69,19 +69,18 @@ def test_arithmetic_coordinates(other, operator, order):
     ],
 )
 def test_arithmetic_coordinates_mul_div(other, operator, order):
-    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+    coords = pf.Coordinates([2, 1], [5, 1], [10, 1])
     part1 = coords if order else other
     part2 = other if order else coords
     if operator == "*":
         new = part1 * part2
-        desired = pf.Coordinates([0, 5], [0, 5], [0, 5])
+        desired = pf.Coordinates([10, 5], [25, 5], [50, 5])
     elif operator == "/":
         new = part1 / part2
         if order:
-            desired = pf.Coordinates([0, .2], [0, .2], [0, .2])
+            desired = pf.Coordinates([2/5, .2], [1, .2], [2, .2])
         else:
-            desired = pf.Coordinates(
-                [np.inf, 5], [np.inf, 5], [np.inf, 5])
+            desired = pf.Coordinates([2.5, 5], [1, 5], [.5, 5])
     assert isinstance(new, pf.Coordinates)
     npt.assert_array_equal(new.cartesian, desired.cartesian)
 

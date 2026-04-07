@@ -2,6 +2,7 @@
 import numpy as np
 import pyfar as pf
 from typing import Literal
+import warnings
 
 
 def air_attenuation(
@@ -18,9 +19,9 @@ def air_attenuation(
     Parameters
     ----------
     temperature : float, array_like
-        Temperature in degree Celsius.
-        Must be in the range of -20°C to 50°C for accuracy of +/-10% or
-        must be greater than -70°C for accuracy of +/-50%.
+        Temperature in °C.
+        Must be in the range of -20 °C to 50 °C for accuracy of +/-10% or
+        must be greater than -70 °C for accuracy of +/-50%.
     frequencies : float, array_like
         Frequency in Hz. Must be greater than 50 Hz.
         Just one dimensional array is allowed.
@@ -33,25 +34,25 @@ def air_attenuation(
     Returns
     -------
     alpha : np.ndarray[float]
-        Pure tone air attenuation coefficient in decibels per meter for
-        atmospheric absorption.
+        Pure tone air attenuation coefficient in dB/m for atmospheric
+        absorption.
     m : :py:class:`~pyfar.FrequencyData`
-        Pure tone air attenuation coefficient per meter for
-        atmospheric absorption. The parameter ``m`` is calculated as
-        :math:`m = \alpha / (10 \cdot \log_{10}(e))`.
+        Pure tone energy attenuation coefficient in 1/m for atmospheric
+        absorption. The parameter ``m`` is calculated as
+        :math:`m = \alpha / (10 \log_{10}(e))`.
     accuracy : :py:class:`~pyfar.FrequencyData`
         accuracy of the results according to the standard:
 
         ``10``, +/- 10% accuracy
-            - molar concentration of water vapour: 0.05% to 5 %.
-            - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+            - molar concentration of water vapour: 0.05% to 5%.
+            - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
         ``20``, +/- 20% accuracy
-            - molar concentration of water vapour: 0.005 % to 0.05 %,
+            - molar concentration of water vapour: 0.005% to 0.05%,
               and greater than 5%
-            - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+            - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
             - atmospheric pressure: less than 200 000 Pa (2 atm)
             - frequency-to-pressure ratio: 0.0004 Hz/Pa to 10 Hz/Pa.
 
@@ -192,15 +193,15 @@ def _air_attenuation_accuracy(
         accuracy of the results according to the standard:
 
             ``10``, +/- 10% accuracy
-                - molar concentration of water vapour: 0.05% to 5 %.
-                - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+                - molar concentration of water vapour: 0.05% to 5%.
+                - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
                 - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
             ``20``, +/- 20% accuracy
-                - molar concentration of water vapour: 0.005 % to 0.05 %,
+                - molar concentration of water vapour: 0.005% to 0.05%,
                   and greater than 5%
-                - air temperature: 253.15 K to 323.15 (-20 °C to +50°C)
+                - air temperature: 253.15 K to 323.15 K (-20 °C to +50 °C)
                 - atmospheric pressure: less than 200 000 Pa (2 atm)
                 - frequency-to-pressure ratio: 4 x 10-4 Hz/Pa to 10 Hz/Pa.
 
@@ -246,9 +247,9 @@ def _air_attenuation_accuracy(
         frequency_pressure_ratio <= 10)
     common_mask = atm_mask & frequency_pressure_ratio_mask
 
-    # molar concentration of water vapour: 0.05% to 5 %
+    # molar concentration of water vapour: 0.05% to 5%
     vapor_10_mask = (0.05 <= h_water_vapor) & (h_water_vapor <= 5)
-    # molar concentration of water vapour: 0.005% to 0.05 % and greater than 5%
+    # molar concentration of water vapour: 0.005% to 0.05% and greater than 5%
     vapor_20_mask = (5 < h_water_vapor) | (
         (0.005 <= h_water_vapor) & (h_water_vapor < 0.05))
     # molar concentration of water vapour: less than 0.005%
@@ -548,3 +549,206 @@ def fractional_octave_filter_tolerance(
     frequencies = exact_center_frequency * G**relative_frequencies
 
     return lower_tolerance, upper_tolerance, frequencies
+
+def fractional_octave_frequencies_nominal(num_fractions:Literal[1,3]=1,
+                        frequency_range:tuple[float, float]=(20, 20e3)):
+    """Return the nominal center frequencies for octave-band and
+    one-third-octave-band filters.
+
+    Nominal center frequencies, as specified in the IEC 61260-1:2014 standard
+    [#]_ (Section 5.5 and Annex E), are standardized values that approximate
+    the exact center frequencies. They are defined from 10 Hz to 20 kHz.
+
+    Parameters
+    ----------
+    num_fractions : {1, 3}
+        The number of octave fractions. ``1`` returns octave center
+        frequencies, ``3`` returns third-octave center frequencies.
+        The default is ``1``.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``(20, 20e3)`` following IEC 61260-1.
+        E.g. ``(10, 20e3)`` would follow IEC 61672-1 [#]_.
+
+    Returns
+    -------
+    nominal : numpy.ndarray of float
+        The nominal center frequencies.
+
+    Notes
+    -----
+    The specified ``frequency_range`` is interpreted as frequencies lying
+    within (fractional) octave bands defined by their cutoff frequencies
+    (not their center frequencies). All bands that overlap with the
+    specified frequency range are returned.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
+        Electroacoustics - Octave-band and fractional-octave-band filters -
+        Part 1: Specifications", IEC, 2014.
+
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+    """
+    # IEC 61260-1 Eq. (1)
+    G = 10**(3/10)
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "You need to specify a lower and upper limit frequency.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The second frequency needs to be higher than the first.")
+
+    _, lower, upper = fractional_octave_frequencies_exact(num_fractions,
+        frequency_range)
+
+    if num_fractions == 1:
+        if (f_lims[0] < 15.8*G**(-1/2)) or (f_lims[1] >
+                                             15848.93192*G**(1/2)):
+            warnings.warn(
+                "The nominal center frequencies for octave-band " \
+                "are defined only from 11.2 Hz to 22387.2 Hz.", UserWarning,
+                stacklevel=2)
+        nominal = np.array([
+                16, 31.5, 63, 125, 250, 500, 1e3,
+                2e3, 4e3, 8e3, 16e3], dtype=float)
+    elif num_fractions == 3:
+        if (f_lims[0] < 10*G**(-1/6)) or (f_lims[1] > 19952.62315*G**(1/6)):
+            warnings.warn(
+                "The nominal center frequencies for one-third-octave-band " \
+                "are defined only from 8.91 Hz to 22387.2 Hz.", UserWarning,
+                stacklevel=2)
+        nominal = np.array([
+                10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80,
+                100, 125, 160, 200, 250, 315, 400, 500, 630,
+                800, 1000, 1250, 1600, 2000, 2500, 3150, 4000,
+                5000, 6300, 8000, 10000, 12500, 16000, 20000], dtype=float)
+    else:
+        raise ValueError('num_fractions must be 1 or 3')
+
+    mask = (nominal >= lower[0]) & (nominal <= upper[-1])
+    nominal = nominal[mask]
+    return nominal
+
+def fractional_octave_frequencies_exact(
+        num_fractions:int=1, frequency_range: tuple[float, float]=(20, 20e3)):
+    r"""Return the exact center and cutoff frequencies for
+    fractional-octave-band filters.
+
+    The frequencies are calculated in accordance with the IEC 61260-1:2014
+    standard [#]_ (Sections 5.2, 5.3, 5.4 and 5.6).
+
+    The octave frequency ratio, :math:`G`, is given by the following
+    expression.
+
+    .. math::
+
+        G = 10^{\tfrac{3}{10}}
+
+    The center frequencies :math:`f_m` are calculated using formula
+    :eq:`eq_center_odd` for odd values of :math:`b` and formula
+    :eq:`eq_center_even` for even values of :math:`b`.
+
+    .. math::
+        :label: eq_center_odd
+
+        f_m = f_r \cdot G^{ \tfrac{x}{b}}
+
+    .. math::
+        :label: eq_center_even
+
+        f_m = f_r \cdot G^{ \tfrac{2x+1}{2b}}
+
+    where:
+
+    - :math:`b` is the number of octave fractions.
+    - :math:`f_r` is the reference frequency, set to 1000 Hz.
+    - :math:`x` is the index of the frequency band.
+
+    Parameters
+    ----------
+    num_fractions : int, optional
+        The number of bands an octave is divided into. E.g., ``1`` refers to
+        octave bands and ``3`` to third octave bands. The default is ``1``.
+        All positive integers are allowed.
+    frequency_range : array, tuple
+        The lower and upper frequency limits, the default is
+        ``(20, 20e3)``.
+
+    Returns
+    -------
+    center_frequencies : numpy.ndarray
+        The exact center frequencies in Hz of the bandpass filters
+        for each fractional octave band.
+    lower_cutoff_frequencies : numpy.ndarray
+        The lower cutoff frequencies in Hz of the bandpass filters
+        for each fractional octave band.
+    upper_cutoff_frequencies : numpy.ndarray
+        The upper cutoff frequencies in Hz of the bandpass filters
+        for each fractional octave band.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission, "IEC 61260-1:2014 -
+        Electroacoustics - Octave-band and fractional-octave-band filters -
+        Part 1: Specifications", IEC, 2014.
+
+    Notes
+    -----
+    The specified ``frequency_range`` is interpreted as frequencies lying
+    within (fractional) octave bands defined by their cutoff frequencies
+    (not their center frequencies). All bands that overlap with the
+    specified frequency range are returned.
+    """
+    if not isinstance(frequency_range, (tuple, np.ndarray, list)):
+        raise TypeError("The frequency range must be a tuple, list or"
+        " np.ndarray of float or integer values.")
+    if not isinstance(num_fractions, (int)):
+        raise TypeError("Number of fractions must be an integer.")
+    if not all(isinstance(f, (int, float)) for f in frequency_range):
+        raise TypeError("The frequency range must contain only integer"
+        " or float values.")
+    f_lims = np.asarray(frequency_range)
+    if f_lims.size != 2:
+        raise ValueError(
+            "The frequency range must contain exactly two values.")
+    if f_lims[0] > f_lims[1]:
+        raise ValueError(
+            "The upper frequency must be greater than the lower frequency.")
+    if f_lims[0] <=0 or f_lims[1]<=0:
+        raise ValueError(
+            "The frequencies must be positive numbers.")
+    if num_fractions <= 0:
+        raise ValueError(
+            "Number of fractions must be a positive number.")
+
+    # IEC 61260-1 Eq. (1)
+    G = 10**(3/10)
+    ref_freq = 1e3
+    if num_fractions % 2 != 0:
+        Nmax = np.rint((10/3)*np.log10(frequency_range[1]/ref_freq)*
+                                                    num_fractions)
+        Nmin = np.rint((10/3)*np.log10(frequency_range[0]/ref_freq)*
+                                                    num_fractions)
+        indices = np.arange(Nmin, Nmax+1)
+        # IEC 61260-1 Eq. (2)
+        center_frequencies = ref_freq * (G)**(indices / num_fractions)
+    else:
+        Nmax = np.rint(((10/6)*np.log10(frequency_range[1]/ref_freq)*2*
+                                                    num_fractions - 1/2))
+        Nmin = np.rint(((10/6)*np.log10(frequency_range[0]/ref_freq)*2*
+                                                    num_fractions - 1/2))
+        indices = np.arange(Nmin, Nmax+1)
+        # IEC 61260-1 Eq. (3)
+        center_frequencies = ref_freq * (G)**((2*indices + 1)/
+                                              (2*num_fractions))
+    # IEC 61260-1 Eq. (5)
+    upper_cutoff_frequencies = center_frequencies * G**(1/2/num_fractions)
+    # IEC 61260-1 Eq. (4)
+    lower_cutoff_frequencies = center_frequencies * G**(-1/2/num_fractions)
+
+    return (center_frequencies,
+            lower_cutoff_frequencies, upper_cutoff_frequencies)

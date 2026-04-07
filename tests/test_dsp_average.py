@@ -106,10 +106,7 @@ def test_error_raises():
     with pytest.raises(ValueError,
                 match="mode must be 'linear', 'magnitude_zerophase',"):
         pf.dsp.average(signal, mode='invalid_mode')
-    with pytest.warns(UserWarning,
-                      match="Averaging one dimensional caxis"):
-        pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=(1, 2))
-
+    # invalid nan-policy
     with pytest.raises(
             ValueError, match=("nan_policy has to be 'propagate',")):
         pf.dsp.average(pf.Signal(np.zeros((5, 2)), 44100),
@@ -122,3 +119,14 @@ def test_error_raises():
     with pytest.raises(ValueError,
                 match="'power' is not implemented for complex time signals."):
         pf.dsp.average(signal, 'power')
+
+
+@pytest.mark.parametrize('caxis', [2, (1, 2)])
+def test_warnings(caxis):
+    """
+    Test warning for averaging across a channel axis containing a single
+    channel.
+    """
+
+    with pytest.warns(UserWarning, match="Averaging one dimensional caxis"):
+        pf.dsp.average(pf.Signal(np.zeros((5, 2, 1, 1)), 44100), caxis=caxis)

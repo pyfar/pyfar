@@ -236,7 +236,12 @@ def test_zero_phase_assertion():
         dsp.zero_phase(pf.TimeData([1, 0, 0], [0, 1, 3]))
 
 
-def test_xfade():
+def test__cross_fade():
+    """
+    Test private cross_fade function used for regularized spectrum inversion.
+    """
+
+    # test that result before and after cross fade region does not change
     first = np.ones(5001)
     idx_1 = 500
     second = np.ones(5001)*2
@@ -251,6 +256,10 @@ def test_xfade():
     res = dsp.dsp._cross_fade(first, second, [idx_1, idx_2])
     np.testing.assert_array_almost_equal(first[:idx_1], res[:idx_1])
     np.testing.assert_array_almost_equal(second[idx_2:], res[idx_2:])
+
+    # test that cross-fading onces yields ones, i.e., cross-fade sums to one
+    res = dsp.dsp._cross_fade(first, first, [idx_1, idx_2])
+    npt.assert_array_almost_equal(res, first)
 
 
 def test_regularized_spectrum_inversion(impulse):
@@ -681,6 +690,107 @@ def test_time_window_return_window_error():
     sig = pyfar.Signal(np.ones(10), 44100)
     with pytest.raises(TypeError, match="boolean"):
         dsp.time_window(sig, interval=(4, 8), return_window='a')
+
+
+def test_time_crop_signal_types():
+    """
+    Raise TypeError if `signal` is not a pyfar.Signal or pyfar.TimeData
+    instance.
+    """
+    signal = "signal"
+    with pytest.raises(TypeError, match='has to be of type'):
+        dsp.time_crop(signal, interval=(1, 2))
+
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+@pytest.mark.parametrize("interval", [(1, 2), [1, 2], np.array([1, 2])])
+def test_time_crop_interval_types(signal, interval):
+    """Accept list, tuple or np.array for `interval`."""
+    dsp.time_crop(signal, interval)
+
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_type_error(signal):
+    """Raise ValueError if the `interval` is of the wrong data type."""
+    with pytest.raises(TypeError, match='has to be of type'):
+        dsp.time_crop(signal, interval=5)
+
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_order_error(signal):
+    """Raise ValueError if `interval` start value >= end value."""
+    with pytest.raises(ValueError, match='smaller than the end point'):
+        dsp.time_crop(signal, interval=[2, 1])
+
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_entries_error(signal):
+    """Raise ValueError if `interval` does not contain exactly two entries."""
+    with pytest.raises(ValueError, match = '2 entries'):
+        dsp.time_crop(signal, interval=[1, 2, 3])
+
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_interval_boundaries_errors(signal):
+    """Raise ValueError if `interval` has negative values."""
+    with pytest.raises(ValueError, match='boundaries must be non-negative'):
+        dsp.time_crop(signal, interval=[-1, 0])
+    with pytest.raises(ValueError, match='boundaries must be non-negative'):
+        dsp.time_crop(signal, interval=[-2, -1])
+
+
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones(10), 2),
+                                     pf.TimeData([1, 2], [1, 2])])
+def test_time_crop_unit_error(signal):
+    """Raise ValueError for invalid `unit` argument."""
+    with pytest.raises(ValueError, match="but has to be 'samples' or 's'"):
+        dsp.time_crop(signal, interval = [0, 6], unit='seconds')
+    with pytest.raises(ValueError, match= "but has to be 'samples' or 's'"):
+        dsp.time_crop(signal, interval = [0, 6], unit=2)
+
+
+@pytest.mark.parametrize(("interval", "unit"), [([1.7, 3.8], 's'),
+                                                ([1, 3], 'samples')])
+def test_time_crop_time_data(interval, unit):
+    """
+    Test the `time_crop` function with a signal of type pf.TimeData
+    and different units.
+    """
+    signal = pf.TimeData([10, 20, 30, 40], [1.5, 2.1, 3.2, 3.7])
+    cropped = dsp.time_crop(signal, interval, unit)
+    assert (cropped.time == np.array((20, 30, 40))).all()
+    assert (cropped.times == np.array((2.1, 3.2, 3.7))).all()
+
+
+@pytest.mark.parametrize(("interval", "unit"), [([0.0209, 0.021], 's'),
+                                                ([922, 926], 'samples')])
+def test_time_crop_signal(interval, unit):
+    """
+    Test the `time_crop` function with a signal of type pf.Signal
+    and different units.
+    """
+    signal = pf.signals.sine(100, 44100)
+    cropped = dsp.time_crop(signal, interval, unit)
+    right_time = (np.array((0.5395507432, 0.5514913743, 0.5633200581,
+                             0.5750343933, 0.5866320022)))
+    assert np.allclose(right_time, cropped.time)
+
+
+@pytest.mark.parametrize("signal", [pf.signals.sine(100, 44100),
+                                     pf.TimeData([1, 2], [4, 5])])
+def test_time_crop_unit_seconds_error(signal):
+    """
+    Raise ValueError if the unit is 's' and if the interval
+    is out of the limits of signal.times.
+    """
+    with pytest.raises(ValueError, match='Interval is out of' \
+    ' the boundaries'):
+        dsp.time_crop(signal, interval=[2, 3], unit='s')
 
 
 def test_kaiser_window_beta():

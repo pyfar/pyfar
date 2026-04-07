@@ -1,10 +1,10 @@
 [project]
 name = "pyfar"
-version = "0.7.3"
-description = "Project for data formats in acoustics."
+version = "0.8.0"
+description = "Python package for acoustics research."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [
     { name = "The pyfar developers", email = "info@pyfar.org" },
 ]
@@ -24,10 +24,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "numpy>=1.23.0",
@@ -131,7 +131,7 @@ lint.select = [
 convention = "numpy"
 
 [tool.bumpversion]
-current_version = "0.7.3"
+current_version = "0.8.0"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"

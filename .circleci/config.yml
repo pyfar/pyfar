@@ -165,16 +165,15 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
-                - "3.10"
                 - "3.11"
                 - "3.12"
                 - "3.13"
+                - "3.14"
       - ruff:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.14"
           requires:
             - build_and_test
 
@@ -182,7 +181,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.14"
           requires:
             - build_and_test
 
@@ -190,7 +189,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.13"
+                - "3.14"
           requires:
             - build_and_test
 
@@ -198,7 +197,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.14"
           requires:
             - build_and_test
 
@@ -212,11 +211,10 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.9"
-                - "3.10"
                 - "3.11"
                 - "3.12"
                 - "3.13"
+                - "3.14"
           filters:
             branches:
               ignore: /.*/
@@ -228,7 +226,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.14"
           requires:
             - build_and_test
           filters:
@@ -242,7 +240,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.14"
           requires:
             - build_and_test
           filters:
@@ -256,7 +254,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.13"
+                - "3.14"
           requires:
             - build_and_test
           filters:
@@ -270,7 +268,7 @@ workflows:
           matrix:
             parameters:
               version:
-                - "3.12"
+                - "3.14"
           requires:
             - build_and_test
             - ruff
