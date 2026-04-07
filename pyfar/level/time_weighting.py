@@ -65,9 +65,9 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
         >>> plt.show()
     """
     weighting = time_weighting.upper()
-    if weighting in ["F", "FAST"]:
+    if weighting in ["F"]:
         time_constant = 0.125
-    elif weighting in ["S", "SLOW"]:
+    elif weighting in ["S"]:
         time_constant = 1
     else:
         raise ValueError(f"Unknown 'time_weighting' value: {time_weighting}")
