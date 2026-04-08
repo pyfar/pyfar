@@ -11,24 +11,26 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     instead of levels.
 
     The standard defines the time weighting F as:
-    
+
     .. math::
-        L_\text{F}(t) = 10 \log_{10} \left[ \frac{(1 / \tau_{\text{F}}) \int_{-\infty}^{t}
-        p^2(\xi) e^{-(t-\xi)/\tau_\text{F}} d\xi} {p_0^2}\right] \text{ dB}
+        L_\text{F}(t) = 10 \log_{10} \left[ \frac{(1 / \tau_{\text{F}})
+        \int_{-\infty}^{t} p^2(\xi) e^{-(t-\xi)/\tau_\text{F}} d\xi}
+        {p_0^2}\right] \text{ dB}
 
     This function works on finite, discrete signals and only calculates the
     weighted pressure:
-    
+
     .. math::
         p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{0}^{n} p^2(n)
         e^{-(t-n)/\tau_\text{F}} }
 
-    .. note:: 
+    .. note::
         While this function appears similar to functions in
-        `pyfar.dsp.filter`, it is not a linear system like actual filters, since
-        the time data is squared in this algorithm, removing the sign of each
-        sample. This function therefore exists mainly as a helper function for
-        other functions in `pyfar.level` as well as for plotting purposes.
+        `pyfar.dsp.filter`, it is not a linear system like actual filters,
+        since the time data is squared in this algorithm, removing the
+        sign of each sample. This function therefore exists mainly as a
+        helper function for other functions in `pyfar.level` as well as
+        for plotting purposes.
 
     Parameters
     ----------
