@@ -216,7 +216,7 @@ def time_weighted_level(signal,
         >>> plt.xlabel("Time in seconds")
         >>> plt.grid()
         >>> plt.legend()
-        >>> plt.show() 
+        >>> plt.show()
     """
     if not isinstance(signal, pf.Signal):
         raise TypeError("'signal' parameter must be a pyfar.Signal")

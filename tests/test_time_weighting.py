@@ -15,12 +15,14 @@ def test_time_weighting_pressure_shape(weighting, amplitude):
 
 
 @pytest.mark.parametrize("fs", [44100, 48000, 192000])
-@pytest.mark.parametrize("weighting,expected_decay", [("F", -34.7),
-                                                      ("S", -4.3)])
+@pytest.mark.parametrize(("weighting", "expected_decay"),
+                         [("F", -34.7), ("S", -4.3)])
 def test_time_weighting_pressure_decay(weighting, expected_decay, fs):
-    """According to DIN EN 61672-1 §5.8.2, after an impulse the level
+    """
+    According to DIN EN 61672-1 §5.8.2, after an impulse the level
     should fall of at a rate of 34.7 dB/s for FAST and 4.3 dB/s for the
-    SLOW time weighting."""
+    SLOW time weighting.
+    """
     impulse = pf.signals.impulse(2 * fs, sampling_rate=fs)
 
     weighted = pf.level.time_weighted_sound_pressure(impulse, weighting)
@@ -34,7 +36,8 @@ def test_time_weighting_pressure_decay(weighting, expected_decay, fs):
 @pytest.mark.parametrize("weighting", ["F", "S"])
 def test_time_weighting_pressure_same_level(weighting):
     """The energy of a long 1kHz signal must be identical
-    across F, S and eq levels. (DIN EN 61672-1 §5.8.3)"""
+    across F, S and eq levels (DIN EN 61672-1 §5.8.3).
+    """
     fs = 48000
     duration = 60
     x = pf.signals.sine(1000, fs * duration, sampling_rate=48000)
@@ -50,9 +53,11 @@ def test_time_weighting_pressure_same_level(weighting):
 @pytest.mark.parametrize("time_weighting", ["F", "S"])
 @pytest.mark.parametrize("freq_weighting", ["A", "C", "Z"])
 @pytest.mark.parametrize("num_octave_band_fractions", [1, 2, 3, 6, None])
-def test_time_weighted_level(time_weighting, freq_weighting, num_octave_band_fractions):
+def test_time_weighted_level(time_weighting, freq_weighting,
+                             num_octave_band_fractions):
     """Test that the time weighting convenience function produces
-    the same result as applying every step manually."""
+    the same result as applying every step manually.
+    """
     s = pf.signals.sine([1000, 2000], 4800, sampling_rate=48000)
 
     expected = s
@@ -99,22 +104,24 @@ def test_time_weighted_level_errors():
             pf.signals.sine(1000, 48000), "A", "F", -1)
 
     # invalid signal type
+    td = pf.TimeData(np.array([1, 2, 3]), np.array([0, 1, 2]))
     match = "'signal' parameter must be a pyfar.Signal"
     with pytest.raises(TypeError, match=match):
         pf.level.time_weighted_level(np.array([1, 2, 3]), "A", "F")
     with pytest.raises(TypeError, match=match):
-        td = pf.TimeData(np.array([1, 2, 3]), np.array([0, 1, 2]))
         pf.level.time_weighted_level(td, "A", "F")
 
 
 def test_time_weighted_level_replace_zeros():
     """Test that the replace_zeros parameter correctly replaces zero values
-    with the smallest positive number representable in the data."""
+    with the smallest positive number representable in the data.
+    """
     s = pf.Signal(np.zeros(1000), sampling_rate=48000)
 
     levels_replace = pf.level.time_weighted_level(
         s, "Z", "F", replace_zeros=True)
-    with pytest.warns(RuntimeWarning, match="divide by zero encountered in log10"):
+    with pytest.warns(RuntimeWarning,
+                      match="divide by zero encountered in log10"):
         levels_no_replace = pf.level.time_weighted_level(
             s, "Z", "F", replace_zeros=False)
 
