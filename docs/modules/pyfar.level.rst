@@ -1,5 +1,5 @@
 pyfar.level
-==========
+===========
 
 .. automodule:: pyfar.level
    :members:
