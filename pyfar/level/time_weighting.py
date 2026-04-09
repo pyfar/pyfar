@@ -37,8 +37,8 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     signal: Signal
         The signal object to apply the weighting to
 
-    time_weighting: "F" or "S"
-        The time weighting type. Options are "F" (fast) and "S" (slow),
+    time_weighting: ``"F"`` or ``"S"``
+        The time weighting type. Options are ``"F"`` (fast) and ``"S"`` (slow),
         which correspond to level decays of -34.7 dB and -4.3 dB per second,
         respectively.
 
