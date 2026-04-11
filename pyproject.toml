@@ -10,8 +10,8 @@ authors = [
     { name = "The pyfar developers", email = "info@pyfar.org" }
 ]
 keywords = [
-    "acoustics",
     "pyfar",
+    "acoustics",
     "Fourier transforms",
     "audio signal processing",
     "filterbanks",

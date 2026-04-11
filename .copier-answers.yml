@@ -6,8 +6,8 @@ author: The pyfar developers
 copyright_statement: 2020, The pyfar developers
 dependencies: numpy>=1.23.0,scipy>=1.5.0,matplotlib,sofar>=0.1.2,urllib3,deepdiff,soundfile>=0.11.0
 git_username: pyfar
-gitignore_custom: pyfar/samplings/external/samplings_extremal*,pyfar/samplings/external/samplings_t_design*,tests/test_plot_data/output/*.png,pyfar/signals/files/*,
-keywords: acoustics,pyfar,Fourier transforms,audio signal processing,filterbanks,parametric
+gitignore_custom: tests/test_plot_data/output/*.png,pyfar/signals/files/*,
+keywords: pyfar,acoustics,Fourier transforms,audio signal processing,filterbanks,parametric
     filters,audio signal visualization,read and write audio signals
 license: MIT
 logo_path_gallery: resources/logos/pyfar_logos_fixed_size_pyfar.png
