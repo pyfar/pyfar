@@ -111,12 +111,6 @@ venv.bak/
 # macOS
 .DS_Store
 
-# saved plots from testing
-tests/test_plot_data/output/*.png
-
-# downloaded data in pyfar/signals/files
-pyfar/signals/files/*
-
 # workaround for failing test discovery in vscode
 tests/*/__init__.py
 tests/private/
@@ -126,4 +120,13 @@ docs/header.rst
 docs/_static/favicon.ico
 docs/_static/header.rst
 docs/_static/css/custom.css
+docs/_static/js/custom.js
 docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
+docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
+
+# custom
+pyfar/samplings/external/samplings_extremal*
+pyfar/samplings/external/samplings_t_design*
+tests/test_plot_data/output/*.png
+pyfar/signals/files/*
+

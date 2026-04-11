@@ -1,3 +1,4 @@
+
 .. highlight:: shell
 
 ============
@@ -21,7 +22,7 @@ The best place for this is https://github.com/pyfar/pyfar/issues.
 Fix Bugs or Implement Features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Look through https://github.com/pyfar/pyfar/issues for bugs or feature request
+Look through https://github.com/pyfar/pyfar/issues for bugs or feature requests
 and contact us or comment if you are interested in implementing.
 
 Write Documentation
@@ -34,7 +35,9 @@ articles, and such.
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `pyfar` for local development using the command-line interface. Note that several alternative user interfaces exist, e.g., the Git GUI, `GitHub Desktop <https://desktop.github.com/>`_, extensions in `Visual Studio Code <https://code.visualstudio.com/>`_ ...
+Ready to contribute? Here's how to set up `pyfar` for local development using the command-line interface.
+Note that several alternative user interfaces exist, e.g., the Git GUI, `GitHub Desktop <https://desktop.github.com/>`_,
+extensions in `Visual Studio Code <https://code.visualstudio.com/>`_ ...
 
 1. `Fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo/>`_ the `pyfar` repo on GitHub.
 2. Clone your fork locally and cd into the pyfar directory::
@@ -60,7 +63,8 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
     $ ruff check
     $ pytest
 
-   ruff must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter configuration. Ruff ignores a couple of PEP Errors (see `./pyproject.toml`). If necessary, adjust your linting configuration in your IDE accordingly.
+   ruff must pass without any warnings for `./pyfar` and `./tests` using the default or a stricter
+   configuration. Ruff ignores a couple of PEP Errors (see `./pyproject.toml`). If necessary, adjust your linting configuration in your IDE accordingly.
 
 6. Commit your changes and push your branch to GitHub::
 
