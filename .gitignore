@@ -125,8 +125,6 @@ docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
 docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
 
 # custom
-pyfar/samplings/external/samplings_extremal*
-pyfar/samplings/external/samplings_t_design*
 tests/test_plot_data/output/*.png
 pyfar/signals/files/*
 
