@@ -4,8 +4,8 @@ on:
   pull_request:
     types:
       - opened
-      - labeled
-      - unlabeled
+      - milestoned
+      - demilestoned
       - synchronize
 
 jobs:
