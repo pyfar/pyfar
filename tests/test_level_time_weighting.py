@@ -87,16 +87,16 @@ def test_time_weighted_level_errors():
         pf.level.time_weighted_level(pf.signals.sine(1000, 48000), "A", "X")
 
     # invalid frequency weighting
-    match = "Unknown 'frequency_weighting' value: X"
+    match = "Frequency weighting must be 'A', 'C', or 'Z'"
     with pytest.raises(ValueError, match=match):
         pf.level.time_weighted_level(pf.signals.sine(1000, 48000), "X", "F")
 
     # invalid num_octave_band_fractions
-    match = "Number of fractions must be an integer."
+    match = "Number of octave band fractions must be a " \
+            "positive integer or None"
     with pytest.raises(TypeError, match=match):
         pf.level.time_weighted_level(
             pf.signals.sine(1000, 48000), "A", "F", 2.5)
-    match = "Number of fractions must be a positive number."
     with pytest.raises(ValueError, match=match):
         pf.level.time_weighted_level(pf.signals.sine(1000, 48000), "A", "F", 0)
     with pytest.raises(ValueError, match=match):
