@@ -11,6 +11,10 @@ from .standard_levels import (
     peak_level,
     maximum_time_weighted_level,
 )
+from .utils import (
+    average_levels,
+    sum_levels,
+)
 
 __all__ = [
     'time_weighted_sound_pressure',
@@ -20,4 +24,6 @@ __all__ = [
     'exposure_level',
     'peak_level',
     'maximum_time_weighted_level',
+    'average_levels',
+    'sum_levels',
 ]
