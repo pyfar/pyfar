@@ -10,7 +10,7 @@ def test_time_weighting_pressure_shape(weighting, amplitude):
     impulse = pf.signals.impulse(fs + 1, 0, amplitude, fs)
     weighted = pf.level.time_weighted_sound_pressure(impulse, weighting)
 
-    assert isinstance(weighted, pf.Signal)
+    assert isinstance(weighted, pf.TimeData)
     assert impulse.time.shape == weighted.time.shape
 
 

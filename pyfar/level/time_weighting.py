@@ -46,8 +46,9 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
 
     Returns
     -------
-    weighted: Signal
-        A pressure signal to which the weighting was applied
+    weighted: TimeData
+        A series of positive sound pressure values to which the
+        weighting was applied
 
     References
     ----------
@@ -101,5 +102,5 @@ def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
 
     # turn energy to back to pressure
     time_weighted_pressure = np.sqrt(normalized)
-    return pf.Signal(time_weighted_pressure, signal.sampling_rate)
+    return pf.TimeData(time_weighted_pressure, signal.times)
 

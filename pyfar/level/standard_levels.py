@@ -132,8 +132,8 @@ def time_weighted_level(signal,
     signal = _check_signal_type(signal)
     signal = _apply_frequency_weighting(signal, frequency_weighting)
     signal = _apply_multi_band(signal, num_octave_band_fractions)
-    signal = time_weighted_sound_pressure(signal, time_weighting)
-    energies = signal.time**2
+    weighted = time_weighted_sound_pressure(signal, time_weighting)
+    energies = weighted.time**2
     if replace_zeros:
         energies = np.where(
             energies == 0, np.finfo(energies.dtype).eps, energies)
