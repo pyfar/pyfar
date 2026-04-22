@@ -8,9 +8,9 @@ from ._utils import _check_signal_type
 
 def time_weighted_sound_pressure(signal, time_weighting: Literal["F", "S"]):
     r"""
-    Calculates sound pressure with exponential time weighting
-    according to IEC 61672-1 [#]_, returning as a Signal of sound pressure
-    instead of levels.
+    Calculates sound pressure with exponential time weighting.
+    This uses the method defined in IEC 61672-1 [#]_, but returns
+    sound pressure values instead of levels.
 
     The standard defines the time weighting F as:
 
