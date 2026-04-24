@@ -119,16 +119,16 @@ class _PyfarMultichannel(_PyfarBase):
 
         Parameters
         ----------
-        cshape : tuple, list, np.ndarray
+        cshape : tuple or list of ints, int
             The channel shape to which the object is broadcasted.
+            A single integer ``i`` is interpreted as ``(i,)``.
 
         Returns
         -------
         object : _PyfarMultichannel
             Broadcasted copy of the object.
         """
-        if not isinstance(cshape, (tuple, np.ndarray, list)):
-            raise TypeError("The cshape must be a tuple, list or np.ndarray.")
+        cshape = tuple(cshape) if np.iterable(cshape) else (cshape,)
         if not all(isinstance(a, int) for a in cshape):
             raise TypeError("The cshape must contain only integer values.")
 
@@ -152,6 +152,8 @@ class _PyfarMultichannel(_PyfarBase):
         object : _PyfarMultichannel
             Broadcasted copy of the object.
         """
+        if not isinstance(cdim, int):
+            raise TypeError("The cdim must be an integer.")
         if self.cdim > cdim:
             raise ValueError(
             "Can not broadcast: Current channel dimensions exceeds `cdim`.")
