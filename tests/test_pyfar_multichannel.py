@@ -19,7 +19,7 @@ def test_cdim():
     data = np.ones((2, 3))
     instance = _PyfarMultichannel()
     instance._data = data
-    assert instance.cdim == (1)
+    assert instance.cdim == 1
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
@@ -64,18 +64,20 @@ def test_flatten():
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
-@pytest.mark.parametrize('cshape', [(3, 3), (6, 3), (7, 5, 3)])
+@pytest.mark.parametrize('cshape', [(3, 3), [6, 3], 3])
 def test_broadcast_cshape(cshape):
     """Test the broadcast_cshape method."""
-    data = np.ones((1, 3, 3))
+    data = np.ones((1, 3))
     instance = _PyfarMultichannel()
     instance._data = data
     broadcasted = instance.broadcast_cshape(cshape)
+    cshape = tuple(cshape) if np.iterable(cshape) else (cshape,)
     assert broadcasted.cshape == cshape
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
-def test_broadcast_cshape_data_type_error():
+@pytest.mark.parametrize('cshape', [(3.0, 3), '3', np.array((7, 3)), ("6, 3")])
+def test_broadcast_cshape_data_type_error(cshape):
     """
     Test whether TypeError is raised when cshape has an incorrect
     data type.
@@ -85,20 +87,7 @@ def test_broadcast_cshape_data_type_error():
     instance._data = data
     with pytest.raises(TypeError, match='The cshape must contain only'
                                                             ' integer'):
-        instance.broadcast_cshape((3.0, 3))
-
-
-@patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
-def test_broadcast_cshape_structure_error():
-    """
-    Test whether TypeError is raised when cshape has an incorrect
-    structure.
-    """
-    data = np.ones((1, 3, 3))
-    instance = _PyfarMultichannel()
-    instance._data = data
-    with pytest.raises(TypeError, match='The cshape must be a tuple, list or'):
-        instance.broadcast_cshape(("6, 3"))
+        instance.broadcast_cshape((cshape))
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
@@ -120,6 +109,17 @@ def test_broadcast_cdim_value_error():
     instance._data = data
     with pytest.raises(ValueError, match='channel dimensions exceeds'):
         instance.broadcast_cdim(2)
+
+
+@patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
+@pytest.mark.parametrize(('cdim'), [3.0, '3'])
+def test_broadcast_cdim_type_error(cdim):
+    """Test whether TypeError is raised for the broadcast_csize method."""
+    data = np.array([[[[1, 2, 3]]]])
+    instance = _PyfarMultichannel()
+    instance._data = data
+    with pytest.raises(TypeError, match="must be an integer"):
+        instance.broadcast_cdim(cdim)
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
