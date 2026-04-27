@@ -305,7 +305,10 @@ def test_sampling_rate_multirate():
     match="Multirate signals are not supported."
     with pytest.raises(ValueError, match=match):
         Signal(1, [1,2])
-
+def test sampling_rate_no_a_number():
+    match="Sampling rate needs to be number."
+    with pytest.raises(ValueError, match=match):
+        Signal(1, 'string')
 
 def test_getter_signal_type():
     """Test if attribute signal type is accessed correctly."""

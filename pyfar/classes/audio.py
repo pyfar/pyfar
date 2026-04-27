@@ -969,6 +969,8 @@ class Signal(FrequencyData, TimeData):
             if len(value) != 1:
                 raise ValueError("Multirate signals are not supported.")
             value = value[0]
+            elif not isinstance(value, (int, float)):
+                raise ValueError("Sampling rate needs to be number.")
         self._sampling_rate = value
 
     @property
