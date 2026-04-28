@@ -11,6 +11,8 @@ import sys
 import urllib3
 import shutil
 import numpy as np
+import json
+import requests
 sys.path.insert(0, os.path.abspath('..'))
 
 import pyfar  # noqa
@@ -117,9 +119,18 @@ html_sidebars = {
   "pyfar": []
 }
 
+# -- setup version switcher if not on main branch
+if os.environ.get('CIRCLE_JOB') and os.environ['CIRCLE_BRANCH'] != 'main':
+    # For PR, name is set to its ref
+    switcher_version = os.environ['CIRCLE_BRANCH']
+elif ".dev" in version:
+    switcher_version = "develop"
+else:
+    switcher_version = f"{version}"
+
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
-    "navbar_end": ["navbar-icon-links", "theme-switcher"],
+    "navbar_end": ["navbar-icon-links", "version-switcher", "theme-switcher"],
     "navbar_align": "content",
     "header_links_before_dropdown": None,  # will be automatically set later based on headers.rst
     "header_dropdown_text": "Packages",  # Change dropdown name from "More" to "Packages"
@@ -137,6 +148,10 @@ html_theme_options = {
     "navigation_with_keys": True,
     # Configure navigation depth for section navigation
     "navigation_depth": 2,
+    "switcher": {
+        "version_match": switcher_version,
+        "json_url": f"https://{project}.readthedocs.io/en/{switcher_version}/_static/versions.json",
+    }
 }
 
 html_context = {
@@ -188,11 +203,10 @@ with open("_static/header.rst", "rt") as fin:
         # add project to the list of projects if not in header
         if not contains_project:
             fout.write(f'   {project} <{project}>\n')
-        
+
         # count the number of gallery headings
         count_gallery_headings = np.sum(
             ['https://pyfar-gallery.readthedocs.io' in line for line in lines])
-
 
 # set dropdown header after gallery headings
 html_theme_options['header_links_before_dropdown'] = count_gallery_headings+1
@@ -204,3 +218,41 @@ _, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
 shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
 with open(shortcuts_path, "w") as f_id:
     f_id.writelines(shortcuts)
+
+
+# -- get versions for version switcher and write to docs/_static/versions.json
+base_url = f"https://{project}.readthedocs.io/en"
+
+url = f"https://pypi.org/pypi/{project}/json"
+response = requests.get(url)
+data = response.json()
+
+versions = list(data["releases"].keys())
+
+output = []
+
+for v in versions[0:-2]:
+    output.append({
+        "name": str(v),
+        "version": str(v),
+        "url": f"{base_url}/v{v}/"
+    })
+
+# Add stable entry
+output.append({
+    "name": f"{versions[-1]} (stable)",
+    "version": str(versions[-1]),
+    "url": f"{base_url}/stable/",
+    "preferred": True
+})
+
+# Add latest entry
+output.append({
+    "name": "latest",
+    "version": "develop",
+    "url": f"{base_url}/latest/",
+})
+
+# Save to JSON file
+with open("_static/versions.json", "w") as f:
+    json.dump(output, f, indent=2)
