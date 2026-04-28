@@ -5,8 +5,9 @@ description = "Python package for acoustics research."
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.11"
+
 authors = [
-    { name = "The pyfar developers", email = "info@pyfar.org" },
+    { name = "The pyfar developers", email = "info@pyfar.org" }
 ]
 keywords = [
     "pyfar",
@@ -18,6 +19,7 @@ keywords = [
     "audio signal visualization",
     "read and write audio signals",
 ]
+
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
@@ -29,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
+
 dependencies = [
     "numpy>=1.23.0",
     "scipy>=1.5.0",
@@ -51,7 +54,7 @@ tests = [
     "pytest",
     "pytest-cov",
     "watchdog",
-    "ruff==0.4.1",
+    "ruff==0.8.3",
     "coverage",
 ]
 docs = [
@@ -62,6 +65,7 @@ docs = [
     "sphinx-design",
     "sphinx-favicon",
     "sphinx-reredirects",
+    "sphinx-copybutton",
 ]
 dev = ["pyfar[deploy,tests,docs]"]
 
@@ -79,6 +83,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages]
 find = {}  # Scan the project directory with the default parameters
+
 
 [tool.ruff]
 exclude = [
@@ -119,6 +124,7 @@ lint.select = [
     "TID252", # Use absolute over relative imports
     "FIX",    # Code should not contain FIXME, TODO, etc
 ]
+
 # Ignore missing docstrings in tests
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
@@ -127,8 +133,10 @@ lint.select = [
     "D103",
     "D104",
 ]
+
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
 
 [tool.bumpversion]
 current_version = "0.8.0"

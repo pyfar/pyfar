@@ -2,20 +2,18 @@
 <img src="https://github.com/pyfar/gallery/raw/main/docs/resources/logos/pyfar_logos_fixed_size_pyfar.png" width="300">
 </h1><br>
 
-
 [![PyPI version](https://badge.fury.io/py/pyfar.svg)](https://badge.fury.io/py/pyfar)
-[![Documentation Status](https://readthedocs.org/projects/pyfar/badge/?version=latest)](https://pyfar.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pyfar/badge/?version=stable)](https://pyfar.readthedocs.io/en/stable/?badge=stable)
 [![CircleCI](https://circleci.com/gh/pyfar/pyfar.svg?style=shield)](https://circleci.com/gh/pyfar/pyfar)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyfar/gallery/main?labpath=docs/gallery/interactive/pyfar_introduction.ipynb)
-
 
 The python package for acoustics research (pyfar) offers classes to store
 audio data, filters, coordinates, and orientations. It also contains functions
 for reading and writing audio data, as well as functions for processing,
 generating, and plotting audio signals.
 
-Getting Started
-===============
+## Getting Started
+
 
 The [pyfar workshop](https://mybinder.org/v2/gh/pyfar/gallery/main?labpath=docs/gallery/interactive/pyfar_introduction.ipynb)
 gives an overview of the most important pyfar functionality and is a good
@@ -26,19 +24,22 @@ clicking the mybinder.org button on the respective example. The
 [pyfar documentation](https://pyfar.readthedocs.io) gives a detailed and complete overview of pyfar. All
 these information are available from [pyfar.org](https://pyfar.org).
 
-Installation
-============
+## Installation
 
 Use pip to install pyfar
 
     pip install pyfar
 
+(Requires Python 3.11 or higher)
+
+If the installation fails, please check out the [help section](https://pyfar-gallery.readthedocs.io/en/latest/help).
+
 Audio file reading/writing is supported through [SoundFile](https://python-soundfile.readthedocs.io), which is based on
 [libsndfile](http://www.mega-nerd.com/libsndfile/). On Windows and OS X, it will be installed automatically.
 On Linux, you need to install libsndfile using your distribution’s package manager, for example ``sudo apt-get install libsndfile1``.
-If the installation fails, please check out the [help section](https://pyfar-gallery.readthedocs.io/en/latest/help).
 
-Contributing
-============
+## Contributing
 
 Check out the [contributing guidelines](https://pyfar.readthedocs.io/en/stable/contributing.html) if you want to become part of pyfar.
+
+
