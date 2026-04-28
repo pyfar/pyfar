@@ -1,4 +1,3 @@
-
 .. highlight:: shell
 
 ============
@@ -73,6 +72,5 @@ extensions in `Visual Studio Code <https://code.visualstudio.com/>`_ ...
     $ git push origin name-of-your-bugfix-or-feature
 
 7. Submit a pull request on the develop branch through the GitHub website.
-
 
 .. _general contributing guidelines: https://pyfar-gallery.readthedocs.io/en/latest/contribute/index.html

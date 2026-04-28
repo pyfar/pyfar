@@ -1,16 +1,29 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 010229d
+_commit: 15078cd
 _src_path: https://github.com/pyfar/template-pyfar-package
+add_submodules: false
+additional_section_readme: ''
 apt_packages: libsndfile1,
 author: The pyfar developers
 copyright_statement: 2020, The pyfar developers
 dependencies: numpy>=1.23.0,scipy>=1.5.0,matplotlib,sofar>=0.1.2,urllib3,deepdiff,soundfile>=0.11.0
+docs_custom_import: ''
 git_username: pyfar
 gitignore_custom: tests/test_plot_data/output/*.png,pyfar/signals/files/*,
+intersphinx_mapping:
+- numpy
+- scipy
+- matplotlib
+- gallery
+- spharpy
+- soundfile
+introduction_path: docs/gallery/interactive/pyfar_introduction.ipynb
 keywords: pyfar,acoustics,Fourier transforms,audio signal processing,filterbanks,parametric
     filters,audio signal visualization,read and write audio signals
 license: MIT
 logo_path_gallery: resources/logos/pyfar_logos_fixed_size_pyfar.png
+manifest_custom: recursive-include pyfar/plot/plotstyles *.mplstyle,recursive-include
+    pyfar/plot/shortcuts *.json
 minimum_python_version: '3.11'
 project_getting_started: '
 
@@ -30,6 +43,14 @@ project_getting_started: '
     overview of pyfar. All
 
     these information are available from [pyfar.org](https://pyfar.org).'
+project_installation_instructions: 'Audio file reading/writing is supported through
+    [SoundFile](https://python-soundfile.readthedocs.io), which is based on
+
+    [libsndfile](http://www.mega-nerd.com/libsndfile/). On Windows and OS X, it will
+    be installed automatically.
+
+    On Linux, you need to install libsndfile using your distribution’s package manager,
+    for example ``sudo apt-get install libsndfile1``.'
 project_long_description: 'The python package for acoustics research (pyfar) offers
     classes to store
 
