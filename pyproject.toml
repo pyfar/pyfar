@@ -103,6 +103,7 @@ lint.ignore = [
     "B008",   # Do not perform calls in argument defaults
     "PT018",  # Assertion should be broken down into multiple parts
     "PT019",  # Fixture `_` without value is injected as parameter
+
 ]
 lint.select = [
     "B",      # bugbear extension
