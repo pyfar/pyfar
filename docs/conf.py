@@ -262,6 +262,8 @@ output.append({
     "url": f"{base_url}/latest/",
 })
 
+ouput = output.reverse()
+
 # Save to JSON file
 with open("_static/versions.json", "w") as f:
     json.dump(output, f, indent=2)
