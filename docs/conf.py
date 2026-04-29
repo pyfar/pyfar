@@ -128,6 +128,15 @@ elif ".dev" in version:
 else:
     switcher_version = f"{version}"
 
+rtd_version = os.environ.get("READTHEDOCS_VERSION", switcher_version)
+rtd_url = os.environ.get("READTHEDOCS_CANONICAL_URL")
+
+if rtd_url:
+    json_url = f"{rtd_url}/_static/versions.json"
+else:
+    json_url = \
+        f"https://{project}.readthedocs.io/en/{rtd_version}/_static/versions.json"
+
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
     "navbar_end": ["navbar-icon-links", "version-switcher", "theme-switcher"],
@@ -149,8 +158,8 @@ html_theme_options = {
     # Configure navigation depth for section navigation
     "navigation_depth": 2,
     "switcher": {
-        "version_match": switcher_version,
-        "json_url": f"https://{project}.readthedocs.io/en/{switcher_version}/_static/versions.json",
+        "version_match": rtd_version,
+        "json_url": json_url,
     }
 }
 
