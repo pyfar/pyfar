@@ -123,8 +123,6 @@ html_sidebars = {
 if os.environ.get('CIRCLE_JOB') and os.environ['CIRCLE_BRANCH'] != 'main':
     # For PR, name is set to its ref
     switcher_version = os.environ['CIRCLE_BRANCH']
-elif ".dev" in version:
-    switcher_version = "develop"
 else:
     switcher_version = f"{version}"
 

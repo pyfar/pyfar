@@ -2,6 +2,13 @@
 History
 =======
 
+unreleased
+----------
+
+Added
+^^^^^
+- Added sphinx version switcher to top navbar (PR #931)
+
 
 0.8.0 (2026-03-16)
 ------------------
