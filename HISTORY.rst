@@ -5,7 +5,7 @@ History
 Fixed
 ^^^^^
 
-- exclude Sphinx versions 9.0.x and 9.1.0 as it lead to Warnings during the documentation build (PR #933)
+- exclude Sphinx versions 9.0.x and 9.1.0 as it led to Warnings during the documentation build (PR #933)
 
 
 0.8.0 (2026-03-16)
