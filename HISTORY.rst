@@ -2,6 +2,14 @@
 History
 =======
 
+Unreleased (XXXX-XX-XX)
+-----------------------
+
+Fixed
+^^^^^
+- The orphan page in the documentation was removed (PR #932)
+
+
 
 0.8.0 (2026-03-16)
 ------------------
