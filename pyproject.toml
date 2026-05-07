@@ -55,7 +55,7 @@ tests = [
     "coverage",
 ]
 docs = [
-    "sphinx",
+    "sphinx!=9.1.0",
     "autodocsumm>=0.2.14",
     "pydata-sphinx-theme",
     "sphinx_mdinclude",
