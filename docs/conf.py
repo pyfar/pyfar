@@ -175,7 +175,7 @@ redirects = {
 branch = 'main'
 link = f'https://github.com/pyfar/gallery/raw/{branch}/docs/'
 folders_in = [
-    '_static/css/custom.css',
+    # '_static/css/custom.css',
     '_static/favicon.ico',
     '_static/header.rst',
     'resources/logos/pyfar_logos_fixed_size_pyfar.png',
