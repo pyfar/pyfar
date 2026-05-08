@@ -1,10 +1,8 @@
 """Custom tick locators and formatters for matplotlib."""
 import numpy as np
-from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
     FixedFormatter,
     FixedLocator,
-    LogFormatter,
     LogLocator,
     MultipleLocator,
     Formatter)
@@ -63,54 +61,6 @@ class LogLocatorITAToolbox(LogLocator):
             base=base,
             subs=subs,
             numticks=numticks)
-
-
-class LogFormatterITAToolbox(LogFormatter):
-    """
-    Log-formatter inspired by the tick labels used in the ITA-Toolbox
-    for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
-    """
-
-    def __init__(
-        self,
-        base=10.0,
-        labelOnlyBase=False,
-        minor_thresholds=None,
-        linthresh=None,
-    ):
-        super().__init__(
-            base=base,
-            labelOnlyBase=labelOnlyBase,
-            minor_thresholds=minor_thresholds,
-            linthresh=linthresh)
-
-    def _num_to_string(self, x, vmin, vmax):
-        if x >= 1000 and x < 1e6:
-            s = '{:g}k'.format(x/1e3)
-        elif x >= 1e6 and x < 1e9:
-            s = '{:g}M'.format(x/1e6)
-        elif x >= 1e9:
-            s = '{:g}G'.format(x/1e9)
-        else:
-            try:
-                s = self._pprint_val(x, vmax - vmin)
-            except AttributeError:
-                s = self.pprint_val(x, vmax - vmin)
-        return s
-
-    def __call__(self, x, pos=None):  # noqa: ARG002
-        """
-        Return the format for tick val *x*.
-        """
-        if x == 0.0:  # Symlog
-            return '0'
-
-        x = x
-
-        vmin, vmax = self.axis.get_view_interval()
-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
-        s = self._num_to_string(x, vmin, vmax)
-        return self.fix_minus(s)
 
 
 class MultipleFractionLocator(MultipleLocator):
