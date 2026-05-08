@@ -131,10 +131,10 @@ rtd_version = os.environ.get("READTHEDOCS_VERSION", switcher_version)
 rtd_url = os.environ.get("READTHEDOCS_CANONICAL_URL")
 
 if rtd_url:
-    json_url = f"{rtd_url}/resources/versions.json"
+    json_url = f"{rtd_url}/versions.json"
 else:
     json_url = \
-        f"https://{project}.readthedocs.io/en/{rtd_version}/resources/versions.json"
+        f"https://{project}.readthedocs.io/en/{rtd_version}/versions.json"
 
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
