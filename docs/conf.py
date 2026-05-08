@@ -107,6 +107,7 @@ intersphinx_mapping = {
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+html_extra_path = ['resources']
 html_css_files = ['css/custom.css']
 html_js_files = ["custom.js"]
 html_logo = 'resources/logos/pyfar_logos_fixed_size_pyfar.png'
@@ -130,10 +131,10 @@ rtd_version = os.environ.get("READTHEDOCS_VERSION", switcher_version)
 rtd_url = os.environ.get("READTHEDOCS_CANONICAL_URL")
 
 if rtd_url:
-    json_url = f"{rtd_url}/_static/versions.json"
+    json_url = f"{rtd_url}/resources/versions.json"
 else:
     json_url = \
-        f"https://{project}.readthedocs.io/en/{rtd_version}/_static/versions.json"
+        f"https://{project}.readthedocs.io/en/{rtd_version}/resources/versions.json"
 
 html_theme_options = {
     "navbar_start": ["navbar-logo"],
@@ -227,7 +228,7 @@ with open(shortcuts_path, "w") as f_id:
     f_id.writelines(shortcuts)
 
 
-# -- get versions for version switcher and write to docs/_static/versions.json
+# -- get versions for version switcher and write to docs/resources/versions.json
 base_url = f"https://{project}.readthedocs.io/en"
 
 url = f"https://pypi.org/pypi/{project}/json"
@@ -260,8 +261,8 @@ output.append({
     "url": f"{base_url}/latest/",
 })
 
-ouput = output.reverse()
+output.reverse()
 
 # Save to JSON file
-with open("_static/versions.json", "w") as f:
+with open("resources/versions.json", "w") as f:
     json.dump(output, f, indent=2)
