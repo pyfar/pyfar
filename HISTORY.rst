@@ -22,6 +22,7 @@ Added
 - `pyfar.signals.files.room_impulse_response` can now return the room impulse response with noise tail (PR #906)
 - Abstract `_LTISystem` base class to better structure inheritance of the pyfar Filter classes (PR #798)
 - Added new `Rotation` class as a long term replacement for `Orientations` (PR #904)
+- Internal abstract base class `_PyfarMultichannel` for multichannel pyfar classes (PR #837)
 
 Changed
 ^^^^^^^
