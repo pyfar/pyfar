@@ -7,10 +7,10 @@ import numpy.testing as npt
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_cshape():
     """Test the cshape property."""
-    data = np.ones((2, 2, 2))
+    data = np.ones((2, 3, 4))
     instance = _PyfarMultichannel()
     instance._data = data
-    assert instance.cshape == (2,2)
+    assert instance.cshape == (2, 3)
 
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
@@ -103,7 +103,7 @@ def test_broadcast_cdim(cdim):
 
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 def test_broadcast_cdim_value_error():
-    """Test whether ValueError is raised for the broadcast_csize method."""
+    """Test whether ValueError is raised for the broadcast_cdim method."""
     data = np.array([[[[1, 2, 3]]]])
     instance = _PyfarMultichannel()
     instance._data = data
@@ -114,7 +114,7 @@ def test_broadcast_cdim_value_error():
 @patch.multiple(_PyfarMultichannel, __abstractmethods__=set())
 @pytest.mark.parametrize(('cdim'), [3.0, '3'])
 def test_broadcast_cdim_type_error(cdim):
-    """Test whether TypeError is raised for the broadcast_csize method."""
+    """Test whether TypeError is raised for the broadcast_cdim method."""
     data = np.array([[[[1, 2, 3]]]])
     instance = _PyfarMultichannel()
     instance._data = data
