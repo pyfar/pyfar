@@ -1,0 +1,42 @@
+
+html[data-theme="light"] {
+    --pst-color-primary: #126CB0; /* pyfar blue as primary color */
+    --pst-color-secondary: #6fa8d3; /* lighter blue as secondary color */
+}
+
+html[data-theme="dark"] {
+    --pst-color-primary: #126CB0; /* pyfar blue as primary color */
+    --pst-color-secondary: #6fa8d3; /* lighter blue as secondary color */
+}
+html {
+    --pst-icon-external-link: "";
+}
+
+/* css style for icons on package index pages */
+.icon-style {
+    color: #126CB0;
+    font-size: 5.2rem;
+    margin: 1rem;
+}
+
+img {
+    background-color: transparent !important;
+}
+
+/* Custom background class - copy of sd-bg-light pattern from sphinx-design */
+.bg-logo-card {
+    background-color: var(--bg-color-logo-card) !important;
+}
+
+html[data-theme="light"] {
+    --bg-color-logo-card: #ffffff; /* Toned down gray-white at 80% brightness */
+}
+
+html[data-theme="dark"] {
+    --bg-color-logo-card: #d9d9d9; /* 85% brightness white (255 * 0.85 = 217 = D9) */
+}
+
+.bd-header .dropdown-menu {
+    max-height: 75vh;
+    overflow-y: auto;
+}
