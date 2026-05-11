@@ -1346,7 +1346,7 @@ class StateSpaceModel(_LTISystem):
 
         Parameters
         ----------
-        n_samples : int, None
+        n_samples : int
             The number of samples up to which to compute the impulse response.
 
         Returns
