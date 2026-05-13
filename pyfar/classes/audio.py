@@ -965,12 +965,13 @@ class Signal(FrequencyData, TimeData):
         # unpack iterable
         if hasattr(value, '__iter__'):
             value = np.atleast_1d(np.asarray(value)) # fix #922
-            assert len(value) != 0
-            if len(value) != 1:
+            if len(value) == 0:
+                raise ValueError("Sampling rate cannot be empty!")
+            elif len(value) != 1:
                 raise ValueError("Multirate signals are not supported.")
             value = value[0]
-            elif not isinstance(value, (int, float)):
-                raise ValueError("Sampling rate needs to be number.")
+            if not isinstance(value, (int, float)):
+                raise ValueError("Sampling rate needs to be a number.")
         self._sampling_rate = value
 
     @property
