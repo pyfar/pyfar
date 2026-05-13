@@ -65,35 +65,8 @@ class LogLocatorITAToolbox(LogLocator):
 
 class MultipleFractionLocator(MultipleLocator):
     r"""
-    Tick locator for rational fraction multiples of a specified base,
-    e.g. :math:`\pi / 2`.
-
-    The locator is used per default for phase plots in pyfar.
-
-    Parameters
-    ----------
-    nominator : int
-        Nominator of the fraction.
-    denominator : int
-        Denominator of the fraction.
-    base : float
-        Base value to multiply the fraction with.
-
-    Examples
-    --------
-    Use the locator to customize a phase plot:
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>> signal = pf.signals.impulse(1e3, 10)
-        >>> ax = pf.plot.phase(signal)
-        >>> # Minor ticks at multiples of pi/8 on y-axis
-        >>> ax.yaxis.set_minor_locator(
-        ...     pf.plot.ticker.MultipleFractionLocator(
-        ...         nominator=1, denominator=8, base=np.pi))
-
+    Tick locator for rational fraction multiples of a specified base, ie.
+    :math:`\pi / 2`.
     """
 
     def __init__(self, nominator=1, denominator=2, base=1):
@@ -104,41 +77,8 @@ class MultipleFractionLocator(MultipleLocator):
 
 class MultipleFractionFormatter(Formatter):
     r"""
-    Tick formatter for rational fraction multiples of a specified base,
-    e.g. :math:`\pi / 2`.
-
-    The formatter is used per default for phase plots in pyfar.
-
-    Parameters
-    ----------
-    nominator : int
-        Nominator of the fraction.
-    denominator : int
-        Denominator of the fraction.
-    base : float
-        Base value to multiply the fraction with.
-    base_str : str, optional
-        String representation of the base to be used in the tick labels.
-
-    Examples
-    --------
-    Use the formatter to customize a phase plot together with
-    :py:func:`MultipleFractionLocator`:
-
-    .. plot::
-
-        >>> import pyfar as pf
-        >>> import numpy as np
-        >>> signal = pf.signals.impulse(1e3, 10)
-        >>> ax = pf.plot.phase(signal)
-        >>> # Major ticks at multiples of pi/4 on y-axis
-        >>> ax.yaxis.set_major_locator(
-        ...     pf.plot.ticker.MultipleFractionLocator(
-        ...         nominator=1, denominator=4, base=np.pi))
-        >>> ax.yaxis.set_major_formatter(
-        ...     pf.plot.ticker.MultipleFractionFormatter(
-        ...         nominator=1, denominator=4, base=np.pi, base_str=r'\pi'))
-
+    Tick formatter for rational fraction multiples of a specified base, ie.
+    :math:`\pi / 2`.
     """
 
     def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
