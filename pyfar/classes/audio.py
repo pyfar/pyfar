@@ -964,7 +964,7 @@ class Signal(FrequencyData, TimeData):
     def sampling_rate(self, value):
         # unpack iterable
         if hasattr(value, '__iter__'):
-            value = np.atleast_1d(np.asarray(value)) # fix #922
+            value = np.atleast_1d(np.asarray(value)).flatten()  # fix #922
             if len(value) == 0:
                 raise ValueError("Sampling rate cannot be empty!")
             elif len(value) != 1:
