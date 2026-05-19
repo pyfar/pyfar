@@ -308,7 +308,7 @@ def test_sampling_rate_multirate():
 
 
 def test_sampling_rate_is_a_number():
-    match="Sampling rate needs to be number."
+    match="Sampling rate needs to be a number."
     with pytest.raises(ValueError, match=match):
         Signal(1, 'string')
 
