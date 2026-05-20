@@ -3,7 +3,7 @@ from pyfar import Signal, TimeData, FrequencyData
 import pyfar.dsp as dsp
 from . import _utils
 from .ticker import (
-    LogLocatorITAToolbox,
+    LogFrequencyLocator,
     MultipleFractionLocator,
     MultipleFractionFormatter)
 from matplotlib.ticker import NullFormatter, EngFormatter
@@ -96,7 +96,7 @@ def _freq(signal, dB=True, log_prefix=None, log_reference=1, freq_scale='log',
 
     # set and format ticks
     if freq_scale == 'log':
-        ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_major_locator(LogFrequencyLocator())
         ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(EngFormatter(sep=""))
 
@@ -190,7 +190,7 @@ def _phase(signal, deg=False, unwrap=False, freq_scale='log', ax=None,
 
     # set and format ticks
     if freq_scale == 'log':
-        ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_major_locator(LogFrequencyLocator())
         ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(EngFormatter(sep=""))
 
@@ -241,7 +241,7 @@ def _group_delay(signal, unit="s", freq_scale='log', ax=None, side='right',
 
     # set and format ticks
     if freq_scale == 'log':
-        ax.xaxis.set_major_locator(LogLocatorITAToolbox())
+        ax.xaxis.set_major_locator(LogFrequencyLocator())
         ax.xaxis.set_minor_formatter(NullFormatter())
     ax.xaxis.set_major_formatter(EngFormatter(sep=""))
 
