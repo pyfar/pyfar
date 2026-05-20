@@ -1,10 +1,8 @@
 """Custom tick locators and formatters for matplotlib."""
 import numpy as np
-from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
     FixedFormatter,
     FixedLocator,
-    LogFormatter,
     LogLocator,
     MultipleLocator,
     Formatter)
@@ -50,8 +48,48 @@ class FractionalOctaveLocator(FixedLocator):
         super().__init__(ticks)
 
 
-class LogLocatorITAToolbox(LogLocator):
-    """Log-locator inspired by the tick labels used in the ITA-Toolbox."""
+class LogFrequencyLocator(LogLocator):
+    """
+    Log-locator particularly suited for frequency axes.
+
+    This locator is a wrapper of :class:`matplotlib.ticker.LogLocator`
+    with default subdivisions optimized for frequency axes.
+    The locator is used per default for frequency axes in pyfar plots.
+
+
+    Parameters
+    ----------
+    base : float, default: 10.0
+        The base of the log used, so major ticks are placed at ``base**n``,
+        where ``n`` is an integer.
+    subs : None, string, or sequence of float, default: (0.2, 0.4, 0.6, 1)
+        Gives the multiples of integer powers of the base at which to place
+        ticks.
+        The default ``(0.2, 0.4, 0.6, 1)`` places ticks at 20 Hz, 40 Hz,
+        60 Hz, 100 Hz, 200 Hz, etc. for a base of 10.
+        See :class:`matplotlib.ticker.LogLocator` for other options than
+        sequence of float.
+    numticks : None or int, default: None
+        The maximum number of ticks to allow on a given axis. The default of
+        None will try to choose intelligently as long as this Locator has
+        already been assigned to an axis using
+        :py:meth:`matplotlib.axis.Axis.get_tick_space`,
+        but otherwise falls back to 9.
+
+
+    Examples
+    --------
+    Use the locator to customize frequency axes in pyfar plots:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> signal = pf.signals.noise(1e3)
+        >>> ax = pf.plot.freq(signal)
+        >>> ax.xaxis.set_major_locator(
+        ...     pf.plot.ticker.LogFrequencyLocator(subs=(0.2, 0.5, 1)))
+
+    """
 
     def __init__(
         self,
@@ -65,58 +103,37 @@ class LogLocatorITAToolbox(LogLocator):
             numticks=numticks)
 
 
-class LogFormatterITAToolbox(LogFormatter):
-    """
-    Log-formatter inspired by the tick labels used in the ITA-Toolbox
-    for MATLAB. Uses unit inspired labels e.g. `1e3 = 1k`, `1e6 = 1M`.
-    """
-
-    def __init__(
-        self,
-        base=10.0,
-        labelOnlyBase=False,
-        minor_thresholds=None,
-        linthresh=None,
-    ):
-        super().__init__(
-            base=base,
-            labelOnlyBase=labelOnlyBase,
-            minor_thresholds=minor_thresholds,
-            linthresh=linthresh)
-
-    def _num_to_string(self, x, vmin, vmax):
-        if x >= 1000 and x < 1e6:
-            s = '{:g}k'.format(x/1e3)
-        elif x >= 1e6 and x < 1e9:
-            s = '{:g}M'.format(x/1e6)
-        elif x >= 1e9:
-            s = '{:g}G'.format(x/1e9)
-        else:
-            try:
-                s = self._pprint_val(x, vmax - vmin)
-            except AttributeError:
-                s = self.pprint_val(x, vmax - vmin)
-        return s
-
-    def __call__(self, x, pos=None):  # noqa: ARG002
-        """
-        Return the format for tick val *x*.
-        """
-        if x == 0.0:  # Symlog
-            return '0'
-
-        x = x
-
-        vmin, vmax = self.axis.get_view_interval()
-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
-        s = self._num_to_string(x, vmin, vmax)
-        return self.fix_minus(s)
-
-
 class MultipleFractionLocator(MultipleLocator):
     r"""
-    Tick locator for rational fraction multiples of a specified base, ie.
-    :math:`\pi / 2`.
+    Tick locator for rational fraction multiples of a specified base,
+    e.g. :math:`\pi / 2`.
+
+    The locator is used per default for phase plots in pyfar.
+
+    Parameters
+    ----------
+    nominator : int
+        Nominator of the fraction.
+    denominator : int
+        Denominator of the fraction.
+    base : float
+        Base value to multiply the fraction with.
+
+    Examples
+    --------
+    Use the locator to customize a phase plot:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> signal = pf.signals.impulse(1e3, 10)
+        >>> ax = pf.plot.phase(signal)
+        >>> # Minor ticks at multiples of pi/8 on y-axis
+        >>> ax.yaxis.set_minor_locator(
+        ...     pf.plot.ticker.MultipleFractionLocator(
+        ...         nominator=1, denominator=8, base=np.pi))
+
     """
 
     def __init__(self, nominator=1, denominator=2, base=1):
@@ -127,8 +144,41 @@ class MultipleFractionLocator(MultipleLocator):
 
 class MultipleFractionFormatter(Formatter):
     r"""
-    Tick formatter for rational fraction multiples of a specified base, ie.
-    :math:`\pi / 2`.
+    Tick formatter for rational fraction multiples of a specified base,
+    e.g. :math:`\pi / 2`.
+
+    The formatter is used per default for phase plots in pyfar.
+
+    Parameters
+    ----------
+    nominator : int
+        Nominator of the fraction.
+    denominator : int
+        Denominator of the fraction.
+    base : float
+        Base value to multiply the fraction with.
+    base_str : str, optional
+        String representation of the base to be used in the tick labels.
+
+    Examples
+    --------
+    Use the formatter to customize a phase plot together with
+    :py:func:`MultipleFractionLocator`:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> signal = pf.signals.impulse(1e3, 10)
+        >>> ax = pf.plot.phase(signal)
+        >>> # Major ticks at multiples of pi/4 on y-axis
+        >>> ax.yaxis.set_major_locator(
+        ...     pf.plot.ticker.MultipleFractionLocator(
+        ...         nominator=1, denominator=4, base=np.pi))
+        >>> ax.yaxis.set_major_formatter(
+        ...     pf.plot.ticker.MultipleFractionFormatter(
+        ...         nominator=1, denominator=4, base=np.pi, base_str=r'\pi'))
+
     """
 
     def __init__(self, nominator=1, denominator=2, base=1, base_str=None):
