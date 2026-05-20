@@ -72,7 +72,6 @@ class LogFrequencyLocator(LogLocator):
         See :class:`matplotlib.ticker.LogLocator` for other options than
         sequence of float.
     numticks : None or int, default: None
-
         The maximum number of ticks to allow on a given axis. The default of
         None will try to choose intelligently as long as this Locator has
         already been assigned to an axis using
