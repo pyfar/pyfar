@@ -970,7 +970,7 @@ class Signal(FrequencyData, TimeData):
             elif len(value) != 1:
                 raise ValueError("Multirate signals are not supported.")
             value = value[0]
-        if not np.issubdtype((int, float), type(value)):
+        if not isinstance(value, (int, float, np.integer, np.floating)):
             raise ValueError("Sampling rate needs to be a number.")
         self._sampling_rate = value
 
