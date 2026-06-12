@@ -420,7 +420,7 @@ def test_2d_colorbar_options(function, colorbar, handsome_signal_2d):
     elif colorbar == "axes":
         # test plotting colorbar to specified axis
         fig.clear()
-        _, ax = plt.subplots(1, 2, num=fig.number)
+        _, ax = plt.subplots(1, 2, num=fig.number, clear=True)
         if function == plot.spectrogram:
             function(signal[0], ax=ax)
         else:
