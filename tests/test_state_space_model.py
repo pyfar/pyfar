@@ -5,10 +5,7 @@ from pyfar.classes.filter import StateSpaceModel
 
 
 def _fir_state_space(b):
-    """Construct a state-space realization (A,B,C,D) of an FIR filter b.
-    SISO, causal, order = len(b)-1.
-    State x_t = [u_{t-1}, u_{t-2}, ..., u_{t-order}]^T
-    """
+    """Construct a state-space realization (A,B,C,D) of an FIR filter b."""
     b = np.asarray(b).ravel()
     L = b.size
     if L == 1:
