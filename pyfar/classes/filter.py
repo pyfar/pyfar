@@ -1332,13 +1332,14 @@ class StateSpaceModel(_LTISystem):
             "The sampling rates of the signal and the state-space model"
             "need to match."
         )
-        if signal.n_samples == 1:
-            u = np.squeeze(signal.time)[:, np.newaxis]
-        else:
-            u = np.atleast_2d(signal.time.squeeze())
-        assert u.shape[0] == self.n_inputs, (
-            f"The input signal ({u.shape}) needs to be compatible with the"
-            f" number of inputs to the state-space system ({self.n_inputs})."
+        u = np.ascontiguousarray(
+            np.reshape(np.squeeze(signal.time), (-1, signal.n_samples)).T,
+            dtype=self.dtype,
+        )
+        assert u.shape[1] == self.n_inputs, (
+            f"The input signal ({u.shape[::-1]}) needs to be compatible with"
+            f" the number of inputs to the state-space system"
+            f" ({self.n_inputs})."
         )
         if self.state is None or reset:
             self.init_state()
@@ -1346,25 +1347,24 @@ class StateSpaceModel(_LTISystem):
         return pf.Signal(self._process(u), self.sampling_rate)
 
     def _process(self, u):
-        u = np.asfortranarray(u)
-        y = np.zeros((self.n_outputs, u.shape[1]), self.dtype, order='F')
+        y = np.empty((u.shape[0], self.n_outputs), self.dtype)
         gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)
-        for i in range(u.shape[1]):
-            y[:, i] = gemv(
+        for i, ui in enumerate(u):
+            y[i] = gemv(
                 1.,
                 self._C,
                 self._state,
                 beta=1,
-                y=gemv(1., self._D, u[:, i], beta=0, y=y[:, i]),
+                y=gemv(1., self._D, ui, beta=0, y=y[i]),
             )
             self._state = gemv(
                 1.,
                 self._B,
-                u[:, i],
+                ui,
                 beta=1,
                 y=gemv(1., self._A, self._state, beta=0, y=self._state),
             )
-        return y
+        return np.ascontiguousarray(y.T)
 
     def impulse_response(self, n_samples):
         """Compute the impulse response of the system.
