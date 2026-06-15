@@ -1,5 +1,5 @@
-Filter (FilterIIR, FilterFIR, FilterSOS)
-----------------------------------------
+Filter (FilterIIR, FilterFIR, FilterSOS, StateSpaceModel)
+---------------------------------------------------------
 
 .. automodule:: pyfar.classes.filter
 
@@ -10,6 +10,7 @@ Filter (FilterIIR, FilterFIR, FilterSOS)
    FilterFIR
    FilterIIR
    FilterSOS
+   StateSpaceModel
 
 .. autoclass:: FilterFIR
    :members:
@@ -25,3 +26,9 @@ Filter (FilterIIR, FilterFIR, FilterSOS)
    :members:
    :undoc-members:
    :inherited-members:
+
+.. autoclass:: StateSpaceModel
+   :members:
+   :undoc-members:
+   :inherited-members:
+
