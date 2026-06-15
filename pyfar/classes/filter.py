@@ -1204,16 +1204,20 @@ class StateSpaceModel(_LTISystem):
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> butter = pf.dsp.filter.butterworth(None, 2, 1000, 'lowpass', 48000)
+        >>> fs = 48000
+        >>> butter = pf.dsp.filter.butterworth(None, 2, 1000, 'lowpass', fs)
         >>> sos = butter.coefficients.squeeze()
-        >>> b, a = sos[:3] / sos[3], sos[3:] / sos[3]  # convert sos coefficients to (b,a)
+        >>> b, a = sos[:3] / sos[3], sos[3:] / sos[3]  # convert sos  to (b,a)
         >>> A = np.array([[-a[1], -a[2]], [1., 0.]])
         >>> B = np.array([[1.], [0.]])
         >>> C = np.array([[b[1] - a[1] * b[0], b[2] - a[2] * b[0]]])
         >>> D = np.array([[b[0]]])
-        >>> ssm = pf.classes.filter.StateSpaceModel(A, B, C, D, sampling_rate=48000)
-        >>> ax = pf.plot.time(butter.impulse_response(100), label='Butter FilterSOS', marker='x')
-        >>> ax = pf.plot.time(ssm.impulse_response(100), label='Butter StateSpaceModel', ax=ax)
+        >>> ssm = pf.classes.filter.StateSpaceModel(A, B, C, D,
+        ...     sampling_rate=fs)
+        >>> ax = pf.plot.time(butter.impulse_response(100),
+        ...     label='Butter FilterSOS', marker='x')
+        >>> ax = pf.plot.time(ssm.impulse_response(100),
+        ...     label='Butter StateSpaceModel', ax=ax)
         >>> ax.legend(loc='right')
 
     """
