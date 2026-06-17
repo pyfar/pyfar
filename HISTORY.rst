@@ -2,6 +2,11 @@
 History
 =======
 
+0.8.1 (2026-XX-XX)
+------------------
+Fixed
+^^^^^
+- A bug in `pyfar.dsp.dsp.find_impulse_response_delay` that lead to failed delay searches for certain signals (Issue #940).
 
 0.8.0 (2026-03-16)
 ------------------
