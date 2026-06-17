@@ -1368,7 +1368,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     impulse_response : Signal
         The impulse response.
     N : int, optional
-        The order of the polynom used for root finding, by default 1.
+        The order of the polynomial used for root finding, by default 1.
 
     Returns
     -------
@@ -1414,14 +1414,14 @@ def find_impulse_response_delay(impulse_response, N=1):
     for ch in np.ndindex(impulse_response.cshape):
         # Calculate the correlation between the impulse response and its
         # minimum phase equivalent. This requires a minimum phase equivalent
-        # in the strict sense, instead of the appriximation implemented in
+        # in the strict sense, instead of the approximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
         for idx, mode in enumerate(modes):
             ir = impulse_response.time[ch]
             ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
-            #Check absolute amximum, because peaks can be positive or negative.
+            #Check absolute maximum, because peaks can be positive or negative.
             if np.max(np.abs(ir)) > 1e-16:
                 # minimum phase warns if the input signal is not symmetric,
                 # which is not critical for this application
@@ -1461,7 +1461,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 # mask values with a negative gradient
                 mask = np.gradient(search_region, search_region_range) > 0
 
-                # fit a polygon and estimate its roots
+                # fit a polynomial and estimate its roots
                 search_region_poly = np.polyfit(
                     search_region_range[mask]-argmax, search_region[mask], N)
                 roots = np.roots(search_region_poly)
