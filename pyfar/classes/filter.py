@@ -1179,13 +1179,13 @@ class StateSpaceModel(_LTISystem):
 
     Parameters
     ----------
-    A : array
+    A : array_like
         The state matrix :math:`A` with dimensions ``(order, order)``.
-    B : array
+    B : array_like
         The input matrix :math:`B` with dimensions ``(order, n_inputs)``.
-    C : array
+    C : array_like
         The output matrix :math:`C` with dimensions ``(n_outputs, order)``.
-    D : array, optional
+    D : array_like, optional
         The feedthrough matrix :math:`D` with dimensions ``(n_outputs,
         n_inputs)``. The default is ``None``, which initializes an all-zero
         matrix.
@@ -1196,7 +1196,8 @@ class StateSpaceModel(_LTISystem):
         the state is initialized to zero on first processing.
     dtype : np.dtype, optional
         The data type of the system matrices. Can be used to set the precision
-        of the response calculation. If ``None``, ``np.promote_types`` is used.
+        of the response calculation. If ``None``, ``np.result_type`` is used
+        to infer a common dtype from ``A``, ``B``, ``C``, and ``D``.
     comment : str, optional
         A comment. The default is ``''``.
 
@@ -1228,10 +1229,11 @@ class StateSpaceModel(_LTISystem):
 
     def __init__(self, A, B, C, D=None, sampling_rate=None, state=None,
             dtype=None, comment=""):
-        D = np.zeros((C.shape[0], B.shape[1])) if D is None else D
-        assert all(
-            isinstance(M, np.ndarray) and (M.ndim == 2) for M in (A, B, C, D)
-        )
+        A = np.asarray(A)
+        B = np.asarray(B)
+        C = np.asarray(C)
+        D = np.zeros((C.shape[0], B.shape[1])) if D is None else np.asarray(D)
+        assert all(M.ndim == 2 for M in (A, B, C, D))
         assert A.shape[1] == A.shape[0], "A needs to be square."
         assert B.shape[0] == A.shape[0], (
             f"B needs to be of shape ({A.shape[0]}, m)."
@@ -1405,7 +1407,8 @@ class StateSpaceModel(_LTISystem):
     @classmethod
     def _decode(cls, obj_dict):
         """Decode object based on its respective object dictionary."""
-        obj = cls(*np.zeros((3, 1, 1)), None, None, "")
+        obj = cls(*np.zeros((3, 1, 1)), D=None, sampling_rate=None,
+                  state=None, comment="")
         obj.__dict__.update(obj_dict)
         return obj
 
