@@ -1162,7 +1162,7 @@ class StateSpaceModel(_LTISystem):
 
     The matrix :math:`A` is the state matrix, defining the internal dynamics of
     the system, i.e. how the internal state evolves on its own; :math:`B` is
-    the input matrix, defining the action of the input :math: `u` on the state;
+    the input matrix, defining the action of the input :math:`u` on the state;
     :math:`C` is the output matrix, defining the action of the state :math:`x`
     on the output :math:`y`; and :math:`D` is the feedthrough matrix, defining
     the direct action of the input :math:`u` on the output :math:`y`.
