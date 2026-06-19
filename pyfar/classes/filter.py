@@ -1191,8 +1191,9 @@ class StateSpaceModel(_LTISystem):
         matrix.
     sampling_rate : number, optional
         The sampling rate of the system in Hz. The default is ``None``.
-    state : array, double, optional
-        The initial state of the system.
+    state : array_like, optional
+        The initial state vector with dimensions ``(order,)``. If ``None``,
+        the state is initialized to zero on first processing.
     dtype : np.dtype, optional
         The data type of the system matrices. Can be used to set the precision
         of the response calculation. If ``None``, ``np.promote_types`` is used.
@@ -1247,9 +1248,10 @@ class StateSpaceModel(_LTISystem):
         C = C.astype(dtype, order='F')
         D = D.astype(dtype, order='F')
         super().__init__(
-            sampling_rate=sampling_rate, state=state, comment=comment,
+            sampling_rate=sampling_rate, state=None, comment=comment,
         )
         self._A, self._B, self._C, self._D, self._dtype = A, B, C, D, dtype
+        self.state = state
 
     @property
     def A(self):
@@ -1300,15 +1302,22 @@ class StateSpaceModel(_LTISystem):
 
         Parameters
         ----------
-        state : array, self.dtype
+        state : array_like, optional
             The internal state of the system with dimensions ``(order,)``.
         """
         return self._state
 
     @state.setter
     def state(self, state):
-        assert state.shape == (self.order,)
-        assert state.dtype == self.dtype
+        if state is None:
+            self._state = None
+            return
+
+        state = np.asarray(state, dtype=self.dtype)
+        if state.shape != (self.order,):
+            raise ValueError(
+                f"state must have shape ({self.order},), got {state.shape}."
+            )
         self._state = state
 
     def init_state(self):
