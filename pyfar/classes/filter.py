@@ -1318,7 +1318,7 @@ class StateSpaceModel(_LTISystem):
         state = np.asarray(state, dtype=self.dtype)
         if state.shape != (self.order,):
             raise ValueError(
-                f"state must have shape ({self.order},), got {state.shape}."
+                f"state must have shape ({self.order},), got {state.shape}.",
             )
         self._state = state
 
@@ -1414,8 +1414,5 @@ class StateSpaceModel(_LTISystem):
 
     def __repr__(self):
         """Representation of the state-space model."""
-        return (
-            f"Order {self.order} state-space model with {self.n_inputs} inputs"
-            f" and {self.n_outputs} outputs"
-            f" @ {self.sampling_rate} Hz sampling rate ({self.dtype})."
-        )
+        return (f'StateSpaceModel (n={self.order}, '
+                'I/O={self.n_inputs}/{self.n_outputs})')

@@ -63,7 +63,7 @@ def test_state_space_accepts_array_like_matrices_and_state():
 
     ss = StateSpaceModel(
         A.tolist(), B.tolist(), C.tolist(), D.tolist(),
-        sampling_rate=44100, state=[1, 2]
+        sampling_rate=44100, state=[1, 2],
     )
 
     npt.assert_allclose(ss.A, A)
