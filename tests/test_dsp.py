@@ -894,6 +894,15 @@ def test_impulse_response_delay_sinc(sign):
     npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
 
 
+def test_impulse_response_delay_issue_940():
+    """Test a signal that previously failed the delay search."""
+    ir = pf.Signal([2, 0, -2, 0, -1], 44100)
+
+    start_sample = pf.dsp.find_impulse_response_delay(ir)
+
+    npt.assert_allclose(start_sample, [1], atol=1e-6)
+
+
 def test_impulse_response_delay_multidim():
     """Ideal multi-dimensional Signal of ideal impulses."""
     n_samples = 2**10
