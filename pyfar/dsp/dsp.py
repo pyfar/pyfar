@@ -1411,7 +1411,7 @@ def find_impulse_response_delay(impulse_response, N=1):
         The impulse response.
     N : int, optional
         The order of the polynomial used for root finding, by default 1
-        (original Tanim et al. method).
+        (original Tamim et al. method).
 
     Returns
     -------
