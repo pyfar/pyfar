@@ -57,12 +57,19 @@ def test_state_space_process_matches_convolution():
     npt.assert_allclose(y_ss, expected, atol=1e-12)
 
 
-def test_state_space_accepts_array_like_state():
+def test_state_space_accepts_array_like_matrices_and_state():
     b = np.array([0.2, 0.3, 0.5])
     A, B, C, D = _fir_state_space(b)
 
-    ss = StateSpaceModel(A, B, C, D, sampling_rate=44100, state=[1, 2])
+    ss = StateSpaceModel(
+        A.tolist(), B.tolist(), C.tolist(), D.tolist(),
+        sampling_rate=44100, state=[1, 2]
+    )
 
+    npt.assert_allclose(ss.A, A)
+    npt.assert_allclose(ss.B, B)
+    npt.assert_allclose(ss.C, C)
+    npt.assert_allclose(ss.D, D)
     npt.assert_allclose(ss.state, np.array([1, 2], dtype=ss.dtype))
     assert ss.state.dtype == ss.dtype
 
