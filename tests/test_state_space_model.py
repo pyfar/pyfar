@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.testing as npt
+import pytest
 import pyfar as pf
 from pyfar.classes.filter import StateSpaceModel
 
@@ -54,3 +55,41 @@ def test_state_space_process_matches_convolution():
     expected = np.convolve(x, b)[: x.size]
 
     npt.assert_allclose(y_ss, expected, atol=1e-12)
+
+
+def test_state_space_accepts_array_like_state():
+    b = np.array([0.2, 0.3, 0.5])
+    A, B, C, D = _fir_state_space(b)
+
+    ss = StateSpaceModel(A, B, C, D, sampling_rate=44100, state=[1, 2])
+
+    npt.assert_allclose(ss.state, np.array([1, 2], dtype=ss.dtype))
+    assert ss.state.dtype == ss.dtype
+
+
+def test_state_space_rejects_invalid_state_shape_in_init():
+    b = np.array([0.2, 0.3, 0.5])
+    A, B, C, D = _fir_state_space(b)
+
+    with pytest.raises(ValueError, match=r"state must have shape \(2,\)"):
+        StateSpaceModel(A, B, C, D, sampling_rate=44100, state=0.)
+
+
+def test_state_space_casts_state_dtype_in_setter():
+    b = np.array([0.2, 0.3, 0.5])
+    A, B, C, D = _fir_state_space(b)
+    ss = StateSpaceModel(A, B, C, D, sampling_rate=44100)
+
+    ss.state = np.array([1, 2], dtype=np.float32)
+
+    npt.assert_allclose(ss.state, np.array([1, 2], dtype=ss.dtype))
+    assert ss.state.dtype == ss.dtype
+
+
+def test_state_space_rejects_invalid_state_shape_in_setter():
+    b = np.array([0.2, 0.3, 0.5])
+    A, B, C, D = _fir_state_space(b)
+    ss = StateSpaceModel(A, B, C, D, sampling_rate=44100)
+
+    with pytest.raises(ValueError, match=r"state must have shape \(2,\)"):
+        ss.state = np.array([1])
