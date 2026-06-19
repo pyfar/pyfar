@@ -1144,7 +1144,7 @@ class FilterSOS(Filter):
 
 
 class StateSpaceModel(_LTISystem):
-    """
+    r"""
     Class for discrete-time state-space models.
 
     A state-space model is defined by the matrices :math:`A`, :math:`B`,
@@ -1153,11 +1153,14 @@ class StateSpaceModel(_LTISystem):
     time-invariant (LTI) systems in a numerically stable and efficient way. The
     system is described by the following equations (discrete-time):
 
-    .. math:
-        x_{t+1} = A x_t + B u_t
-        y_t   = C x_t + D u_t,
+    .. math::
 
-    where :math:`x_t` is the state, :math:`u` the input, and :math:`y` the
+        \begin{aligned}
+        x_{t+1} &= A x_t + B u_t,\\
+        y_t   &= C x_t + D u_t,
+        \end{aligned}
+
+    where :math:`x_t` is the state, :math:`u_t` the input, and :math:`y_t` the
     output at time step :math:`t`.
 
     The matrix :math:`A` is the state matrix, defining the internal dynamics of
