@@ -1352,6 +1352,7 @@ def _estimate_zero_crossing(lags, values, argmax, order):
         return lags[argmax]
 
     for offset in range(values.size - 1):
+        # iteratively increase window length for searching zero corssings
         for left, right in ((argmax - offset - 1, argmax - offset),
                             (argmax + offset, argmax + offset + 1)):
             if left < 0 or right >= values.size:
