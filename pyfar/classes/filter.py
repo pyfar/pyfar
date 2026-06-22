@@ -1332,7 +1332,8 @@ class StateSpaceModel(_LTISystem):
         Parameters
         ----------
         signal : Signal
-            The input signal to be processed.
+            The input signal to be processed. `signal.cshape` must be
+            broadcastable to `(self.n_inputs,)`.
         reset : bool, optional
             If ``True``, the internal state of the system is reset before
             processing the signal. The default is ``False``.
@@ -1340,7 +1341,7 @@ class StateSpaceModel(_LTISystem):
         Returns
         -------
         out : Signal
-            The processed output signal.
+            The processed output signal with `out.cshape = (self.n_ouputs,)`.
         """
         assert signal.sampling_rate == self.sampling_rate, (
             "The sampling rates of the signal and the state-space model"
