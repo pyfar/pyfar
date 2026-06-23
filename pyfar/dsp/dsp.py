@@ -1351,39 +1351,32 @@ def _estimate_zero_crossing(lags, values, argmax, order):
     if values[argmax] == 0:
         return lags[argmax]
 
-    for offset in range(values.size - 1):
-        # iteratively increase window length for searching zero crossings
-        for left, right in ((argmax - offset - 1, argmax - offset),
-                            (argmax + offset, argmax + offset + 1)):
-            if left < 0 or right >= values.size:
-                continue
+    left = np.flatnonzero(
+        (values[:-1] * values[1:] < 0) & (values[1:] > values[:-1]))
+    if not left.size:
+        return None
 
-            y_1, y_2 = values[left], values[right]
-            if y_1 == 0:
-                return lags[left]
-            if y_2 == 0:
-                return lags[right]
-            if np.sign(y_1) == np.sign(y_2) or y_2 < y_1:
-                continue
+    right = left + 1
+    x_1, x_2 = lags[left], lags[right]
+    y_1, y_2 = values[left], values[right]
+    linear_roots = x_1 - y_1 * (x_2 - x_1) / (y_2 - y_1)
+    idx = np.argmin(np.abs(linear_roots - lags[argmax]))
 
-            x_1, x_2 = lags[left], lags[right]
+    if order == 1:
+        return linear_roots[idx]
 
-            # handle linear case explicitly for speed
-            if order == 1:
-                return x_1 - y_1 * (x_2 - x_1) / (y_2 - y_1)
-            else:
-                degree = min(order, values.size - 1)
-                start = min(max(0, left - (degree - 1) // 2),
-                            left + 1, values.size - (degree + 1))
-                roots = Polynomial.fit(
-                    lags[start:start + degree + 1],
-                    values[start:start + degree + 1],
-                    degree,
-                ).convert().roots()
-                roots = np.real(roots[np.isreal(roots)])
-                roots = roots[(roots >= x_1) & (roots <= x_2)]
-                if roots.size:
-                    return roots[np.argmin(np.abs(roots - (x_1 + x_2) / 2))]
+    degree = min(order, values.size - 1)
+    start = min(max(0, left[idx] - (degree - 1) // 2),
+                left[idx] + 1, values.size - (degree + 1))
+    roots = Polynomial.fit(
+        lags[start:start + degree + 1],
+        values[start:start + degree + 1],
+        degree,
+    ).convert().roots()
+    roots = np.real(roots[np.isreal(roots)])
+    roots = roots[(roots >= x_1[idx]) & (roots <= x_2[idx])]
+    if roots.size:
+        return roots[np.argmin(np.abs(roots - linear_roots[idx]))]
 
     return None
 
