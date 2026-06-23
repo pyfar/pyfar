@@ -1347,7 +1347,27 @@ def time_shift(
 
 
 def _estimate_zero_crossing(lags, values, argmax, order):
-    """Estimate the nearest positive-gradient zero crossing."""
+    """Estimate the nearest positive-gradient zero crossing.
+
+    Parameters
+    ----------
+    lags : numpy.ndarray
+        Lag values corresponding to ``values``.
+    values : numpy.ndarray
+        Values in which to search for zero crossings.
+    argmax : int
+        Index of the correlation maximum. The closest zero crossing to this
+        lag is returned.
+    order : int
+        Polynomial order used for root finding. ``order=1`` uses linear
+        interpolation between the adjacent samples around the zero crossing.
+
+    Returns
+    -------
+    root : float or None
+        Estimated zero-crossing lag, or ``None`` if no positive-gradient zero
+        crossing is found.
+    """
     if values[argmax] == 0:
         return lags[argmax]
 
