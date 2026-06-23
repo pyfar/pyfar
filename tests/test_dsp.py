@@ -903,6 +903,18 @@ def test_impulse_response_delay_issue_940():
     npt.assert_allclose(start_sample, [1], atol=1e-6)
 
 
+def test_impulse_response_delay_ignores_negative_gradient_crossing():
+    """Zero crossing search uses the nearest positive-gradient crossing."""
+    from pyfar.dsp.dsp import _estimate_zero_crossing
+
+    lags = np.arange(5)
+    values = np.array([1, -1, -0.5, 0.5, 1])
+
+    root = _estimate_zero_crossing(lags, values, argmax=1, order=1)
+
+    npt.assert_allclose(root, 2.5)
+
+
 def test_impulse_response_delay_multidim():
     """Ideal multi-dimensional Signal of ideal impulses."""
     n_samples = 2**10

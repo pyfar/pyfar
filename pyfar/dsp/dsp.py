@@ -1347,12 +1347,12 @@ def time_shift(
 
 
 def _estimate_zero_crossing(lags, values, argmax, order):
-    """Estimate the nearest zero crossing around ``argmax``."""
+    """Estimate the nearest positive-gradient zero crossing."""
     if values[argmax] == 0:
         return lags[argmax]
 
     for offset in range(values.size - 1):
-        # iteratively increase window length for searching zero corssings
+        # iteratively increase window length for searching zero crossings
         for left, right in ((argmax - offset - 1, argmax - offset),
                             (argmax + offset, argmax + offset + 1)):
             if left < 0 or right >= values.size:
@@ -1363,7 +1363,7 @@ def _estimate_zero_crossing(lags, values, argmax, order):
                 return lags[left]
             if y_2 == 0:
                 return lags[right]
-            if np.sign(y_1) == np.sign(y_2):
+            if np.sign(y_1) == np.sign(y_2) or y_2 < y_1:
                 continue
 
             x_1, x_2 = lags[left], lags[right]
@@ -1488,17 +1488,16 @@ def find_impulse_response_delay(impulse_response, N=1):
                 argmax = np.argmax(np.abs(correlation_analytic))
                 search_region = np.imag(correlation_analytic)
 
-                # If this is true, it indicates that `correlation_analytic` has
-                # a negative peak, which can happen if the absolute maximum of
-                # `impulse_response` is negative. Changing the sign of the
-                # search region makes sure that the zero crossing search works
-                # as intended. Fixing it this way is safer because it is
-                # theoretically possible that the absolute maximum of
-                # `impulse_response` is negative but
-                # `correlation_analytic[argmax].real` is positive.
-                search_region *= np.sign(correlation_analytic[argmax].real)
-
-                root = _estimate_zero_crossing(lags, search_region, argmax, N)
+                # If the correlation has a negative peak, flip the search
+                # region so the valid zero crossing has a positive gradient.
+                # A zero real part means the maximum itself is the delay.
+                sign = np.sign(correlation_analytic[argmax].real)
+                if sign == 0:
+                    root = lags[argmax]
+                else:
+                    search_region *= sign
+                    root = _estimate_zero_crossing(
+                        lags, search_region, argmax, N)
 
                 if root is not None:
                     start_sample[idx] = root
