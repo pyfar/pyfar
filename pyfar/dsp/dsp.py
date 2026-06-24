@@ -1371,6 +1371,7 @@ def _estimate_zero_crossing(lags, values, argmax, order):
     if values[argmax] == 0:
         return lags[argmax]
 
+    # integer indices after which a zero crossing with positive gradient occurs
     left = np.flatnonzero(
         (values[:-1] * values[1:] < 0) & (values[1:] > values[:-1]))
     if not left.size:
@@ -1386,14 +1387,19 @@ def _estimate_zero_crossing(lags, values, argmax, order):
         return linear_roots[idx]
 
     degree = min(order, values.size - 1)
+    # set starting point for higher order fit and make sure that
+    # the fitting region is cenetered around the expected root and
+    # the end point does not exceed array size
     start = min(max(0, left[idx] - (degree - 1) // 2),
-                left[idx] + 1, values.size - (degree + 1))
+                values.size - (degree + 1))
     roots = Polynomial.fit(
         lags[start:start + degree + 1],
         values[start:start + degree + 1],
         degree,
     ).convert().roots()
     roots = np.real(roots[np.isreal(roots)])
+    # root must within the samples at which the zero crossing
+    # with positive gradient occurs
     roots = roots[(roots >= x_1[idx]) & (roots <= x_2[idx])]
     if roots.size:
         return roots[np.argmin(np.abs(roots - linear_roots[idx]))]
