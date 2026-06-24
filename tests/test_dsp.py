@@ -3,6 +3,7 @@ import numpy.testing as npt
 import scipy.signal as sgn
 import pytest
 import pyfar
+import warnings
 
 from pyfar.signals import impulse
 from pyfar import dsp
@@ -894,13 +895,30 @@ def test_impulse_response_delay_sinc(sign):
     npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
 
 
-def test_impulse_response_delay_issue_940():
-    """Test a signal that previously failed the delay search."""
-    ir = pf.Signal([2, 0, -2, 0, -1], 44100)
+def test_impulse_response_delay_issue_940() -> None:
+    """Tests for RankWarning in find_impulse_response_delay."""
 
-    start_sample = pf.dsp.find_impulse_response_delay(ir)
+    # Excerpt of FABIAN data: hato=0, impulse_response[6062,1], samples 27:34
+    FABIAN_RANKWARNING_EXCERPT = [
+        0.3407039517121523,
+        1.1500420942968828,
+        0.585657128821697,
+        0.6286972629823807,
+        0.49017625565202205,
+        -1.0273296093527513,
+        -0.4464563950932513,
+    ]
 
-    npt.assert_allclose(start_sample, [1], atol=1e-6)
+    ir = pf.Signal(FABIAN_RANKWARNING_EXCERPT, 44100)
+
+    with warnings.catch_warnings(record=True) as utils_warnings:
+        warnings.simplefilter("always")
+        delay = pf.dsp.find_impulse_response_delay(ir)
+
+    assert not any(
+        type(w.message).__name__ == "RankWarning" for w in utils_warnings
+    ), "RankWarning should not be emitted for this data!"
+    assert delay.shape == (1,)
 
 
 def test_impulse_response_delay_ignores_negative_gradient_crossing():
