@@ -2,6 +2,13 @@
 History
 =======
 
+unreleased
+----------
+
+Fixed
+^^^^^
+- Fixed failing tests due to a Matplotlib update (PR #942)
+
 
 0.8.0 (2026-03-16)
 ------------------
