@@ -2,6 +2,12 @@
 History
 =======
 
+unreleased
+----------
+
+Fixed
+^^^^^
+- `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
 
 0.8.0 (2026-03-16)
 ------------------
