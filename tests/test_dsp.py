@@ -792,6 +792,15 @@ def test_time_crop_unit_seconds_error(signal):
     ' the boundaries'):
         dsp.time_crop(signal, interval=[2, 3], unit='s')
 
+@pytest.mark.parametrize("signal", [pyfar.Signal(np.ones((1,1,10)), 2),
+                                     pf.TimeData(np.ones((1,1,3)), [1, 2, 3])])
+def test_time_crop_multidim(signal):
+    """
+    Test the `time_crop` function with a multi-dimensional signal.
+    """
+    cropped = dsp.time_crop(signal, interval=[1, 2], unit='samples')
+    assert cropped.n_samples == 2
+    assert cropped.cshape == signal.cshape
 
 def test_kaiser_window_beta():
     """Test function call."""

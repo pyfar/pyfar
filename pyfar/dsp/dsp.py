@@ -692,7 +692,7 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
          raise ValueError("Interval is out of the boundaries" \
                 " of signal.times")
 
-    time_data = signal.time[:, mask]
+    time_data = signal.time[..., mask]
 
     if isinstance(signal, pyfar.Signal):
         cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
