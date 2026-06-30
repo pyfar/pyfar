@@ -7,6 +7,7 @@ unreleased
 
 Fixed
 ^^^^^
+- A bug in `pyfar.dsp.dsp.find_impulse_response_delay` that lead to failed delay searches for certain signals (Issue #940).
 - Fixed deprecated Matplotlib subplot behavior (PR #942)
 - `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.

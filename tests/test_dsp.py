@@ -3,6 +3,7 @@ import numpy.testing as npt
 import scipy.signal as sgn
 import pytest
 import pyfar
+import warnings
 
 from pyfar.signals import impulse
 from pyfar import dsp
@@ -901,6 +902,44 @@ def test_impulse_response_delay_sinc(sign):
     ir = pf.Signal(sinc*win, sr)
     start_samples = pf.dsp.find_impulse_response_delay(ir)
     npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
+
+
+def test_impulse_response_delay_issue_940() -> None:
+    """Tests for RankWarning in find_impulse_response_delay."""
+
+    # Excerpt of FABIAN data: hato=0, impulse_response[6062,1], samples 27:34
+    FABIAN_RANKWARNING_EXCERPT = [
+        0.3407039517121523,
+        1.1500420942968828,
+        0.585657128821697,
+        0.6286972629823807,
+        0.49017625565202205,
+        -1.0273296093527513,
+        -0.4464563950932513,
+    ]
+
+    ir = pf.Signal(FABIAN_RANKWARNING_EXCERPT, 44100)
+
+    with warnings.catch_warnings(record=True) as utils_warnings:
+        warnings.simplefilter("always")
+        delay = pf.dsp.find_impulse_response_delay(ir)
+
+    assert not any(
+        type(w.message).__name__ == "RankWarning" for w in utils_warnings
+    ), "RankWarning should not be emitted for this data!"
+    assert delay.shape == (1,)
+
+
+def test_impulse_response_delay_ignores_negative_gradient_crossing():
+    """Zero crossing search uses the nearest positive-gradient crossing."""
+    from pyfar.dsp.dsp import _estimate_zero_crossing
+
+    lags = np.arange(5)
+    values = np.array([1, -1, -0.5, 0.5, 1])
+
+    root = _estimate_zero_crossing(lags, values, argmax=1, order=1)
+
+    npt.assert_allclose(root, 2.5)
 
 
 def test_impulse_response_delay_multidim():
