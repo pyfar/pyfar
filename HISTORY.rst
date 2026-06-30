@@ -2,6 +2,13 @@
 History
 =======
 
+0.8.1
+-----
+
+Fixed
+^^^^^
+- A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
+
 
 0.8.0 (2026-03-16)
 ------------------

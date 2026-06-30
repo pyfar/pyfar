@@ -770,15 +770,8 @@ class Signal(FrequencyData, TimeData):
         """
         Create audio Signal with time or frequency data and sampling rate.
         """
-        # unpack array
-        if hasattr(sampling_rate, '__iter__'):
-            assert len(sampling_rate) != 0
-            if len(sampling_rate) != 1:
-                raise ValueError("Multirate signals are not supported.")
-            sampling_rate = sampling_rate[0]
-
         # initialize signal specific parameters
-        self._sampling_rate = sampling_rate
+        self.sampling_rate = sampling_rate
 
         if not isinstance(is_complex, bool):
             raise TypeError("``is_complex`` flag is "
@@ -969,6 +962,16 @@ class Signal(FrequencyData, TimeData):
 
     @sampling_rate.setter
     def sampling_rate(self, value):
+        # unpack iterable
+        if hasattr(value, '__iter__'):
+            value = np.atleast_1d(np.asarray(value)).flatten()  # fix #922
+            if len(value) == 0:
+                raise ValueError("Sampling rate cannot be empty!")
+            elif len(value) != 1:
+                raise ValueError("Multirate signals are not supported.")
+            value = value[0]
+        if not isinstance(value, (int, float, np.integer, np.floating)):
+            raise ValueError("Sampling rate needs to be a number.")
         self._sampling_rate = value
 
     @property
