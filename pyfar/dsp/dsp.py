@@ -3018,7 +3018,9 @@ def correlate(signal_1, signal_2, mode='full', normalize=False):
 
     # apply normalization
     if normalize:
-        correlation /= normalization
+        # add an axis to normalization to allow broadcasting
+        # for multi-channel signals
+        correlation /= normalization[..., None]
 
     # compute lags, i.e., times that the second signal was shifted
     # with respect to the first
