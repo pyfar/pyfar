@@ -124,7 +124,8 @@ def test_cyclic_mode_1d(length, delay_1, delay_2):
         correlation.time[0, correlation.times!=lag], 0., 10)
 
 
-def test_full_mode_nd():
+@pytest.mark.parametrize('normalize', [False, True])
+def test_full_mode_nd(normalize):
     """Test broadcasting and n-dimensional signals in full mode."""
 
     # compute correlation
@@ -132,7 +133,7 @@ def test_full_mode_nd():
     signal_1 = pf.signals.impulse(5, 0, sampling_rate=1)
     signal_2 = pf.signals.impulse(5, delays, sampling_rate=1)
 
-    correlation = correlate(signal_1, signal_2)
+    correlation = correlate(signal_1, signal_2, normalize=normalize)
 
     # test output shapes
     assert type(correlation) == pf.TimeData
