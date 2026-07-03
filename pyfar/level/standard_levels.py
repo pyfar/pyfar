@@ -179,10 +179,11 @@ def sliding_equivalent_continuous_level(
 def exposure_level(signal,
                    frequency_weighting: Literal["A", "C", "Z"],
                    reference_energy: float = 400e-12):
+    signal = _check_signal_type(signal)
     eq_level = equivalent_continuous_level(
         signal, frequency_weighting,
         reference_pressure=np.sqrt(reference_energy))
-    duration_term = 10 * np.log10(signal.duration)
+    duration_term = 10 * np.log10(signal.signal_length)
     return eq_level + duration_term
 
 
