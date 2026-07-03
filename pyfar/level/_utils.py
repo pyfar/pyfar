@@ -47,6 +47,8 @@ def _apply_oversampling(signal, oversampling: int | None):
 
 
 def _energies_to_levels(energies: np.ndarray, reference_pressure: float):
+    if reference_pressure == 0:
+        raise ValueError("Reference pressure must not be zero.")
     return 10 * np.log10(energies / reference_pressure**2)
 
 
