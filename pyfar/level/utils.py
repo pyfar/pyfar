@@ -5,7 +5,8 @@ from typing import Literal
 import numpy as np
 
 
-def _combine_levels(levels, axis: int | None, operation: Literal["average", "sum"]):
+def _combine_levels(levels, axis: int | None,
+                    operation: Literal["average", "sum"]):
     levels = np.asarray(levels)
     if np.issubdtype(levels.dtype, np.complexfloating):
         raise ValueError("Levels must be real-valued.")
