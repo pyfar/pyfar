@@ -13,6 +13,9 @@ Fixed
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
 - Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
 
+Added
+^^^^^
+- Added example to `find_impulse_response_delay` plotting the inter-sample delay estimation accuracy. (PR #950)
 
 0.8.0 (2026-03-16)
 ------------------

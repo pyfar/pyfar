@@ -1403,7 +1403,37 @@ def find_impulse_response_delay(impulse_response, N=1):
         ...     start_samples/ir.sampling_rate*1e3,
         ...     color='k', linestyle='-.', label='start sample')
         >>> ax.legend()
+        >>> plt.show()
 
+    Plot the inter-sample delay estimation error for a sinc function shifted
+    by a fractional number of samples.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import scipy.signal as sgn
+        >>> import matplotlib.pyplot as plt
+        >>> n_samples = 2**10
+        >>> frac_delays = np.linspace(0, 1, 100, endpoint=True)
+        >>> err = []
+        >>> for frac_delay in frac_delays:
+        ...     samples = np.arange(n_samples)
+        ...     # center the sinc peak
+        ...     true_delay = n_samples // 2 + frac_delay
+        ...     sinc = np.sinc(samples - true_delay)
+        ...     win = sgn.get_window('hann', n_samples, fftbins=False)
+        ...     ir = pf.Signal(sinc * win, 44.1e3)
+        ...     est_delay = pf.dsp.find_impulse_response_delay(ir)
+        ...     err.append(true_delay - est_delay[0])
+        >>> # Plot the estimation error
+        >>> plt.figure(figsize=(7, 4))
+        >>> plt.plot(frac_delays, err)
+        >>> plt.ylabel('Error in Samples')
+        >>> plt.xlabel('Fractional Delay in Samples')
+        >>> plt.axhline(0, color='k', linewidth=0.8)
+        >>> plt.title('Delay estimation error for a shifted sinc')
+        >>> plt.show()
     """
     n = int(np.ceil((N+2)/2))
 
