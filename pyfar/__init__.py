@@ -23,6 +23,7 @@ from . import dsp
 from . import signals
 from . import utils
 from . import constants
+from . import level
 
 
 __all__ = [
@@ -52,4 +53,5 @@ __all__ = [
     'constants',
     'dot',
     'cross',
+    'level',
     ]
