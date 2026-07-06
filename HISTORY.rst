@@ -29,6 +29,12 @@ Added
 Maintenance
 ^^^^^^^^^^^
 - Replaced strict CircleCI deprecation warning workflow with manual approval for release workflow. (PR #959)
+0.9.0 (2026-XX-XX)
+------------------
+
+Added
+^^^^^
+- The methods `find_nearest_frequency()` and `find_nearest_time()` were extended with a new parameter `method`." (PR #947)
 
 0.8.0 (2026-03-16)
 ------------------

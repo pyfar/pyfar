@@ -409,24 +409,51 @@ class TimeData(_Audio):
         """Time in seconds at which the signal is sampled."""
         return self._times
 
-    def find_nearest_time(self, value):
-        """Return the index that is closest to the query time.
+    def find_nearest_time(self, value, method="nearest"):
+        """Return the indices of time samples matching the
+        specified query times.
 
         Parameters
         ----------
         value : float, array-like
             The times for which the indices are to be returned
+        method : {'nearest', 'floor', 'ceil'}, optional
+            Specifies how query times that do not exactly match a sample
+            are handled:
+
+            - ``'nearest'``: Return the index of the nearest time.
+            - ``'floor'``:  Return the index of the largest time smaller
+            than or equal to the query time.
+            - ``'ceil'``: Return the index of the smallest time larger
+            than or equal to the query time.
 
         Returns
         -------
         indices : int, array-like
             The index for the given time instance. If the input was an array
             like, a numpy array of indices is returned.
+            Query times outside the range of self.times are mapped to the first
+            or last valid index.
         """
         times = np.atleast_1d(value)
         indices = np.zeros_like(times).astype(int)
-        for idx, time in enumerate(times):
-            indices[idx] = np.argmin(np.abs(self.times - time))
+
+        if method == "nearest":
+            for idx, time in enumerate(times):
+                indices[idx] = np.argmin(np.abs(self.times - time))
+        elif method == "floor":
+            # find the insertion positions and select the previous indices
+            indices = np.searchsorted(self.times, times, side="right") -1
+            # clip to ensure the index is not out of range of time indices
+            indices = np.clip(indices, 0, len(self.times) - 1)
+        elif method == "ceil":
+            # find the insertion positions
+            indices = np.searchsorted(self.times, times, side="left")
+            # clip to ensure the index is not out of range of time indices
+            indices = np.clip(indices, 0, len(self.times) - 1)
+        else:
+            raise ValueError("Invalid value for the parameter 'method'."
+                    " Has to be 'nearest', 'floor', or 'ceil'.")
         return np.squeeze(indices)
 
     def _assert_matching_meta_data(self, other):
@@ -601,24 +628,51 @@ class FrequencyData(_Audio):
         """Number of frequency bins."""
         return self._data.shape[-1]
 
-    def find_nearest_frequency(self, value):
-        """Return the index that is closest to the query frequency.
+    def find_nearest_frequency(self, value, method="nearest"):
+        """Return the indices of frequency bins matching the
+        specified query frequencies.
 
         Parameters
         ----------
         value : float, array-like
             The frequencies for which the indices are to be returned
+        method : {'nearest', 'floor', 'ceil'}, optional
+            Specifies how query frequencies that do not exactly match a bin
+            are handled:
+
+            - ``'nearest'`` Return the index of the nearest frequency.
+            - ``'floor'``  Return the index of the largest frequency smaller
+            than or equal to the query frequency.
+            - ``'ceil'`` Return the index of the smallest frequency larger
+            than or equal to the query frequency.
 
         Returns
         -------
         indices : int, array-like
             The index for the given frequency. If the input was an array like,
             a numpy array of indices is returned.
+            Query frequencies outside the range of self.frequencies are mapped
+            to the first or last valid index.
         """
         freqs = np.atleast_1d(value)
         indices = np.zeros_like(freqs).astype(int)
-        for idx, freq in enumerate(freqs):
-            indices[idx] = np.argmin(np.abs(self.frequencies - freq))
+
+        if method == "nearest":
+            for idx, freq in enumerate(freqs):
+                indices[idx] = np.argmin(np.abs(self.frequencies - freq))
+        elif method == "floor":
+            # find the insertion positions and select the previous indices
+            indices = np.searchsorted(self.frequencies, freqs, side="right") -1
+            # clip to ensure the index is not out of range of frequency indices
+            indices = np.clip(indices, 0, len(self.frequencies) - 1)
+        elif method == "ceil":
+            # find the insertion positions
+            indices = np.searchsorted(self.frequencies, freqs, side="left")
+            # clip to ensure the index is not out of range of frequency indices
+            indices = np.clip(indices, 0, len(self.frequencies) - 1)
+        else:
+            raise ValueError("Invalid value for the parameter 'method'."
+                    " Has to be 'nearest', 'floor', or 'ceil'.")
         return np.squeeze(indices)
 
     def _assert_matching_meta_data(self, other):
