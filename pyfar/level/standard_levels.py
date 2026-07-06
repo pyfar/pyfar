@@ -2,6 +2,7 @@
 
 from typing import Literal
 import numpy as np
+import pyfar as pf
 
 from ._utils import (
     _check_signal_type,
@@ -11,11 +12,12 @@ from ._utils import (
 )
 
 
-def equivalent_continuous_level(signal,
-                                frequency_weighting: Literal["A", "C", "Z"],
-                                num_octave_band_fractions: int | None = None,
-                                reference_pressure: float = 20e-6,
-                                ):
+def equivalent_continuous_level(
+        signal,
+        frequency_weighting: Literal["A", "C", "Z"],
+        num_octave_band_fractions: int | None = None,
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+):
     r"""Calculate the frequency-weighted equivalent continuous sound pressure
     level (Leq).
 
