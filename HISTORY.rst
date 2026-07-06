@@ -2,8 +2,6 @@
 History
 =======
 
-
-
 unreleased
 ----------
 
