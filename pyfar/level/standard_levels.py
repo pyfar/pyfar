@@ -16,18 +16,19 @@ def equivalent_continuous_level(signal,
                                 num_octave_band_fractions: int | None = None,
                                 reference_pressure: float = 20e-6,
                                 ):
-    r"""Calculates the frequency-weighted equivalent continuous sound pressure
-    level (Leq) for each channel of a signal.
+    r"""Calculate the frequency-weighted equivalent continuous sound pressure
+    level (Leq).
 
-    The levels are calculated according to IEC 61672-1 [#]_.
+    The levels are calculated per channel and according to IEC 61672-1 [#]_.
     For instance, the A-weighted equivalent continuous level is calculated as:
 
     .. math::
         L_\text{Aeq} = 10 \log_{10} \left[ \frac{(1/N) \sum_{n=0}^{N-1}
         p_{\text{A}}^2[n]} {p_0^2} \right] \text{ dB}
 
-    where :math:`N` is the number of samples in the signal and
-    :math:`p_0` is the `reference_pressure`.
+    where :math:`N` is the number of samples in the signal,
+    :math:`p_\mathrm{A}` the A-weighted sound pressure at index :math:`n`,
+    and :math:`p_0` is the `reference_pressure`.
 
     Parameters
     ----------
@@ -39,24 +40,22 @@ def equivalent_continuous_level(signal,
         frequency weighting filter is applied before level
         calculation. If ``"Z"``, no frequency weighting is applied.
 
-        .. note::
-            The frequency weighting is applied using
-            `pyfar.dsp.filter.frequency_weighting_filter` with its
-            (standard-compliant) default parameters. If you need more control,
-            you can set this parameter to ``"Z"`` and apply the frequency
-            weighting filter yourself before calling this function.
+        The frequency weighting is applied using
+        :py:func:`~pyfar.dsp.filter.frequency_weighting_filter` with its
+        (standard-compliant) default parameters. If you need more control,
+        you can set this parameter to ``"Z"`` and apply the frequency
+        weighting filter yourself before calling this function.
 
     num_octave_band_fractions: int or ``None``
         Can be used to calculate the level in octave (``1``), third-octave
         (``3``), or other positive integer fractional octave bands.
         If ``None``, levels are calculated for the full-band signal.
 
-        .. note::
-            The fraction octave band filtering is applied using
-            `pyfar.dsp.filter.fractional_octave_bands` with its
-            (standard-compliant) default parameters. If you need more control,
-            you can set this parameter to ``None`` and apply the filter bank
-            yourself before calling this function.
+        The fraction octave band filtering is applied using
+        :py:func:`~pyfar.dsp.filter.fractional_octave_bands` with its
+        (standard-compliant) default parameters. If you need more control,
+        you can set this parameter to ``None`` and apply the filter bank
+        yourself before calling this function.
 
     reference_pressure: float
         The reference pressure to calculate levels relative to. The default
@@ -72,9 +71,9 @@ def equivalent_continuous_level(signal,
         The calculated levels of each channel in dB relative to the
         `reference_pressure`.
 
-        .. note::
-            If `num_octave_band_fractions` is not ``None``, the returned array
-            will have an additional first dimension for the individual bands.
+        `levels` has shape ``signal.cshape`` if `num_octave_band_fractions`
+        is ``None`` and ``(n_bands, signal.cshape)`` otherwise, where
+        `n_bands` denotes the number of (fractional) octave bands.
 
     References
     ----------
