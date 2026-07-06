@@ -7,6 +7,7 @@ unreleased
 
 Fixed
 ^^^^^
+- Removed orphaned page in the documentation (PR #932)
 - Fixed deprecated Matplotlib subplot behavior (PR #942)
 - `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
