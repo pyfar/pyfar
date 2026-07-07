@@ -30,20 +30,13 @@ def _apply_frequency_weighting(signal, frequency_weighting):
 
 
 def _apply_multi_band(signal, num_octave_band_fractions: int | None):
-    """Applies fractional octave band filtering to the signal or throws if the
-    number of bands is invalid.
+    """Applies fractional octave band filtering to the signal or does
+    nothing if `num_octave_band_fractions` is None.
     """
-    error_message = "Number of octave band fractions must be " \
-                    "a positive integer or None"
     if num_octave_band_fractions is None:
         return signal
-    elif not isinstance(num_octave_band_fractions, int):
-        raise TypeError(error_message)
-    elif num_octave_band_fractions <= 0:
-        raise ValueError(error_message)
-    else:
-        return pf.dsp.filter.fractional_octave_bands(
-            signal, num_octave_band_fractions)
+    return pf.dsp.filter.fractional_octave_bands(
+        signal, num_octave_band_fractions)
 
 
 def _energies_to_levels(energies: np.ndarray, reference_pressure: float):
