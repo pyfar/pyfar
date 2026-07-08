@@ -421,7 +421,8 @@ class TimeData(_Audio):
             Specifies how query times that do not exactly match a sample
             are handled:
 
-            - ``'nearest'``: Return the index of the nearest time.
+            - ``'nearest'``: Return the index of the nearest
+            time (default).
             - ``'floor'``:  Return the index of the largest time smaller
             than or equal to the query time.
             - ``'ceil'``: Return the index of the smallest time larger
@@ -640,7 +641,8 @@ class FrequencyData(_Audio):
             Specifies how query frequencies that do not exactly match a bin
             are handled:
 
-            - ``'nearest'`` Return the index of the nearest frequency.
+            - ``'nearest'`` Return the index of the nearest
+            frequency (default).
             - ``'floor'``  Return the index of the largest frequency smaller
             than or equal to the query frequency.
             - ``'ceil'`` Return the index of the smallest frequency larger
