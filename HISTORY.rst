@@ -8,9 +8,12 @@ unreleased
 Fixed
 ^^^^^
 - A bug in `pyfar.dsp.dsp.find_impulse_response_delay` that lead to failed delay searches for certain signals (Issue #940).
+- Removed orphaned page in the documentation (PR #932)
 - Fixed deprecated Matplotlib subplot behavior (PR #942)
 - `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
+- Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
+- Limit Sphinx versions to < 0.9.0 to avoid invalid references for type annotations (PR #929)
 
 
 0.8.0 (2026-03-16)
