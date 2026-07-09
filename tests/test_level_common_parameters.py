@@ -49,9 +49,9 @@ FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
 
 
 @pytest.mark.parametrize(("frequency", "weightings_max_to_min"), [
-    (63, ["Z", "C", "A"]),
-    (4000, ["A", "Z", "C"]),
-    (16000, ["Z", "A", "C"]),
+    (63, ["Z", "C", "A"]), # low: C dampens a little, A dampens a lot
+    (4000, ["A", "Z", "C"]), # mid: A boosts a little, C dampens a little
+    (16000, ["Z", "A", "C"]), # high: A dampens a little, C dampens a bit more
 ])
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_FREQ_WEIGHTING)
 def test_level_common_freq_weighting_relative_level(
@@ -60,7 +60,8 @@ def test_level_common_freq_weighting_relative_level(
     by making sure the magnitudes are in the expected order relative
     to each other. This intentionally avoids checking absolute values,
     since the weighting uses approximated filters which should be tested
-    in the weighting filter function's tests.
+    in the weighting filter function's tests (and would be difficult
+    to do across different level functions).
     """
     # start with small phase to avoid the first sample being zero,
     # which would lead to -inf dB values and division by zero warnings
