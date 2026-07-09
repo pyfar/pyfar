@@ -7,8 +7,8 @@ import pyfar as pf
 
 
 def _check_signal_type(signal):
-    """Throws if not a pyfar.Signal, otherwise returns the signal with
-    type hinting.
+    """Raises a TypeError if not a pyfar.Signal, otherwise returns
+    the signal with type hinting.
     """
     if not isinstance(signal, pf.Signal):
         raise TypeError("'signal' parameter must be a pyfar.Signal")
@@ -18,7 +18,7 @@ def _check_signal_type(signal):
 
 def _apply_frequency_weighting(signal, frequency_weighting):
     """Applies frequency weighting to the signal
-    or throws if the weighting name is invalid.
+    or raises a ValueError if the weighting name is invalid.
     """
     if frequency_weighting == "Z":
         return signal
