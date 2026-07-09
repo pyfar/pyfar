@@ -1414,7 +1414,6 @@ def find_impulse_response_delay(impulse_response, N=1):
 
         >>> import pyfar as pf
         >>> import numpy as np
-        >>> import scipy.signal as sgn
         >>> import matplotlib.pyplot as plt
         >>> n_samples = 2**10
         >>> frac_delays = np.linspace(0, 1, 100, endpoint=True)
