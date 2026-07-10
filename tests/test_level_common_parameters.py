@@ -16,28 +16,22 @@ import pytest
 
 ### signal parameter tests ###
 
-
+@pytest.mark.parametrize("signal", [
+    "not a signal",
+    123,
+    None,  
+    np.array([1, 2, 3]),
+    pf.TimeData(np.array([1, 2, 3]), [1, 2, 3]),
+    pf.FrequencyData(np.array([1, 2, 3]), [1, 2, 3]),
+])
 @pytest.mark.parametrize("function", [
     lambda s: pf.level.equivalent_continuous_level(s, "Z"),
     # other level functions go here once implemented
 ])
-def test_level_common_signal_parameter(function):
-    # should not raise an error
-    function(pf.signals.sine(1000, 22050))
-
-    # all these should raise errors
+def test_level_common_signal_parameter(signal, function):
+    """Test that the signal parameter type is a Signal object"""
     with pytest.raises(TypeError):
-        function("not a signal")
-    with pytest.raises(TypeError):
-        function(123)
-    with pytest.raises(TypeError):
-        function(None)
-    with pytest.raises(TypeError):
-        function(np.array([1, 2, 3]))
-    with pytest.raises(TypeError):
-        function(pf.TimeData(np.array([1, 2, 3]), [1, 2, 3]))
-    with pytest.raises(TypeError):
-        function(pf.FrequencyData(np.array([1, 2, 3]), [1, 2, 3]))
+        function(signal)
 
 
 ### frequency_weighting parameter tests ###
@@ -75,14 +69,13 @@ def test_level_common_freq_weighting_relative_level(
     assert mags[weightings_max_to_min[1]] > mags[weightings_max_to_min[2]]
 
 
+@pytest.mark.parametrize("weighting", ["X", None])
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_FREQ_WEIGHTING)
-def test_level_common_freq_weighting_errors(function):
+def test_level_common_freq_weighting_errors(weighting, function):
     """Test that an invalid frequency weighting raises an error."""
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(ValueError, match="Frequency weighting"):
-        function(s, "X")
-    with pytest.raises(ValueError, match="Frequency weighting"):
-        function(s, None)
+        function(s, weighting)
 
 
 ### num_octave_band_fractions parameter tests ###
@@ -116,18 +109,19 @@ def test_level_common_num_octave_band_fractions_dimensions(
     assert band_filtered.shape == (num_bands, *full_band.shape)
 
 
+@pytest.mark.parametrize(("num_fractions", "error_type", "match"), [
+    ("3", TypeError, "integer"),
+    (2.5, TypeError, "integer"),
+    (-1, ValueError, "positive"),
+    (0, ValueError, "positive")
+])
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_BAND_FRACTIONS)
-def test_level_common_num_octave_band_fractions_errors(function):
+def test_level_common_num_octave_band_fractions_errors(
+    function, num_fractions, error_type, match):
     """Test that an invalid number of octave band fractions raises an error."""
     s = pf.signals.sine(1000, 22050)
-    with pytest.raises(TypeError, match="integer"):
-        function(s, "3")
-    with pytest.raises(TypeError, match="integer"):
-        function(s, 2.5)
-    with pytest.raises(ValueError, match="positive"):
-        function(s, -1)
-    with pytest.raises(ValueError, match="positive"):
-        function(s, 0)
+    with pytest.raises(error_type, match=match):
+        function(s, num_fractions)
 
 
 ### reference_pressure parameter tests ###
