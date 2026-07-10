@@ -19,7 +19,7 @@ import pytest
 @pytest.mark.parametrize("signal", [
     "not a signal",
     123,
-    None,  
+    None,
     np.array([1, 2, 3]),
     pf.TimeData(np.array([1, 2, 3]), [1, 2, 3]),
     pf.FrequencyData(np.array([1, 2, 3]), [1, 2, 3]),
@@ -29,7 +29,7 @@ import pytest
     # other level functions go here once implemented
 ])
 def test_level_common_signal_parameter(signal, function):
-    """Test that the signal parameter type is a Signal object"""
+    """Test that the signal parameter type is a Signal object."""
     with pytest.raises(TypeError):
         function(signal)
 
@@ -113,7 +113,7 @@ def test_level_common_num_octave_band_fractions_dimensions(
     ("3", TypeError, "integer"),
     (2.5, TypeError, "integer"),
     (-1, ValueError, "positive"),
-    (0, ValueError, "positive")
+    (0, ValueError, "positive"),
 ])
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_BAND_FRACTIONS)
 def test_level_common_num_octave_band_fractions_errors(
