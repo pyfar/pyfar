@@ -1405,9 +1405,9 @@ def find_impulse_response_delay(impulse_response, N=1):
         ...     color='k', linestyle='-.', label='start sample')
         >>> ax.legend()
 
-    Plot the inter-sample delay estimation error for a sinc function shifted
+    Plot the estimation error for a sinc function shifted
     by a fractional number of samples. The plot illustrates the expected
-    inter-sample precision of the underlying delay estimation method.
+    sub-sample precision of the delay estimation method for this example.
 
     .. plot::
         :context: close-figs
