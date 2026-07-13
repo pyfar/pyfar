@@ -5,6 +5,11 @@ History
 unreleased
 ----------
 
+Added
+^^^^^
+- A new submodule `pyfar.level` with various functions to compute and work with levels (PR #949), consisting of:
+    - `level.equivalent_continuous_level` for the Leq (PR #948)
+
 Fixed
 ^^^^^
 - Fixed deprecated Matplotlib subplot behavior (PR #942)
