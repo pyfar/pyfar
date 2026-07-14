@@ -1942,7 +1942,7 @@ def _find_nearest_helper(self_values, desired_value, method):
                 indices[idx] = np.argmin(np.abs(self_values - value))
         elif method == "floor":
             # find the insertion positions and select the previous indices
-            indices = np.searchsorted(self_values, values, side="right") -1
+            indices = np.searchsorted(self_values, values, side="right") - 1
             # clip to ensure the index is not out of range of value indices
             indices = np.clip(indices, 0, len(self_values) - 1)
         elif method == "ceil":
