@@ -176,6 +176,17 @@ def test_data_frequency_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
+def test_data_frequency_find_nearest_empty_frequency_data():
+    """
+    Test whether the function correctly raises an error when the FrequencyData
+     object is empty.
+    """
+    freq = FrequencyData([], [])
+
+    with pytest.raises(ValueError, match='must not be empty'):
+        freq.find_nearest_frequency([.1])
+
+
 @pytest.mark.parametrize(("method", "expected"),
                          [("nearest", 2), ("floor", 1), ("ceil", 2)])
 def test_data_frequency_find_nearest_argument_method(method, expected):

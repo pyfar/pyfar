@@ -199,6 +199,17 @@ def test_data_time_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
+def test_data_time_find_nearest_empty_time_data():
+    """
+    Test whether the function correctly raises an error when the TimeData
+     object is empty.
+    """
+    time = TimeData([], [])
+
+    with pytest.raises(ValueError, match='must not be empty'):
+        time.find_nearest_time([.1])
+
+
 @pytest.mark.parametrize(("method", "expected"),
                          [("nearest", 2), ("floor", 1), ("ceil", 2)])
 def test_data_time_find_nearest_argument_method(method, expected):
