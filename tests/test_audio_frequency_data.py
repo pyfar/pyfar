@@ -224,7 +224,8 @@ def test_data_frequency_find_nearest_argument_method_out_of_range(method):
 
 @pytest.mark.parametrize(("method", "expected"), [("nearest", [1, 2]),
                                 ("floor", [1, 2]), ("ceil", [1, 2])])
-def test_data_frequency_find_nearest_argument_method_equal_frequencies(method, expected):
+def test_data_frequency_find_nearest_argument_method_equal_frequencies(method,
+                                                                    expected):
     """Test the function with values exactly equal to frequency instances."""
     data = [1, 0, -1]
     freqs = [0, .1, .3]
