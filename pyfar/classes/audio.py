@@ -33,6 +33,7 @@ from copy import deepcopy
 import warnings
 import deepdiff
 import numpy as np
+from tomlkit import value
 import pyfar.dsp.fft as fft
 from typing import Callable
 
@@ -436,26 +437,12 @@ class TimeData(_Audio):
             Query times outside the range of self.times are mapped to the first
             or last valid index.
         """
-        times = np.atleast_1d(value)
-        indices = np.zeros_like(times).astype(int)
+        if len(self.times) == 0:
+            raise ValueError("The TimeData object must not be empty.")
 
-        if method == "nearest":
-            for idx, time in enumerate(times):
-                indices[idx] = np.argmin(np.abs(self.times - time))
-        elif method == "floor":
-            # find the insertion positions and select the previous indices
-            indices = np.searchsorted(self.times, times, side="right") -1
-            # clip to ensure the index is not out of range of time indices
-            indices = np.clip(indices, 0, len(self.times) - 1)
-        elif method == "ceil":
-            # find the insertion positions
-            indices = np.searchsorted(self.times, times, side="left")
-            # clip to ensure the index is not out of range of time indices
-            indices = np.clip(indices, 0, len(self.times) - 1)
-        else:
-            raise ValueError("Invalid value for the parameter 'method'."
-                    " Has to be 'nearest', 'floor', or 'ceil'.")
-        return np.squeeze(indices)
+        result = _find_nearest_helper(self.times, value, method)
+
+        return result
 
     def _assert_matching_meta_data(self, other):
         """
@@ -656,26 +643,12 @@ class FrequencyData(_Audio):
             Query frequencies outside the range of self.frequencies are mapped
             to the first or last valid index.
         """
-        freqs = np.atleast_1d(value)
-        indices = np.zeros_like(freqs).astype(int)
+        if len(self.frequencies) == 0:
+            raise ValueError("The FrequencyData object must not be empty.")
 
-        if method == "nearest":
-            for idx, freq in enumerate(freqs):
-                indices[idx] = np.argmin(np.abs(self.frequencies - freq))
-        elif method == "floor":
-            # find the insertion positions and select the previous indices
-            indices = np.searchsorted(self.frequencies, freqs, side="right") -1
-            # clip to ensure the index is not out of range of frequency indices
-            indices = np.clip(indices, 0, len(self.frequencies) - 1)
-        elif method == "ceil":
-            # find the insertion positions
-            indices = np.searchsorted(self.frequencies, freqs, side="left")
-            # clip to ensure the index is not out of range of frequency indices
-            indices = np.clip(indices, 0, len(self.frequencies) - 1)
-        else:
-            raise ValueError("Invalid value for the parameter 'method'."
-                    " Has to be 'nearest', 'floor', or 'ceil'.")
-        return np.squeeze(indices)
+        result = _find_nearest_helper(self.frequencies, value, method)
+
+        return result
 
     def _assert_matching_meta_data(self, other):
         """Check if the meta data matches across two FrequencyData objects."""
@@ -1958,3 +1931,27 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
                               f"they are {fft_norm_1} and {fft_norm_2}."))
 
     return fft_norm_result
+
+
+def _find_nearest_helper(self_values, desired_value, method):
+
+        values = np.atleast_1d(desired_value)
+        indices = np.zeros_like(values).astype(int)
+
+        if method == "nearest":
+            for idx, value in enumerate(values):
+                indices[idx] = np.argmin(np.abs(self_values - value))
+        elif method == "floor":
+            # find the insertion positions and select the previous indices
+            indices = np.searchsorted(self_values, values, side="right") -1
+            # clip to ensure the index is not out of range of value indices
+            indices = np.clip(indices, 0, len(self_values) - 1)
+        elif method == "ceil":
+            # find the insertion positions
+            indices = np.searchsorted(self_values, values, side="left")
+            # clip to ensure the index is not out of range of value indices
+            indices = np.clip(indices, 0, len(self_values) - 1)
+        else:
+            raise ValueError("Invalid value for the parameter 'method'."
+                    " Has to be 'nearest', 'floor', or 'ceil'.")
+        return np.squeeze(indices)
