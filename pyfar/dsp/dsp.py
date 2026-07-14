@@ -692,7 +692,7 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
          raise ValueError("Interval is out of the boundaries" \
                 " of signal.times")
 
-    time_data = signal.time[:, mask]
+    time_data = signal.time[..., mask]
 
     if isinstance(signal, pyfar.Signal):
         cropped_signal = pyfar.Signal(time_data, signal.sampling_rate)
@@ -3018,7 +3018,9 @@ def correlate(signal_1, signal_2, mode='full', normalize=False):
 
     # apply normalization
     if normalize:
-        correlation /= normalization
+        # add an axis to normalization to allow broadcasting
+        # for multi-channel signals
+        correlation /= normalization[..., np.newaxis]
 
     # compute lags, i.e., times that the second signal was shifted
     # with respect to the first

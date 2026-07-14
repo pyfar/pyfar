@@ -2,6 +2,21 @@
 History
 =======
 
+unreleased
+----------
+
+Added
+^^^^^
+- A new submodule `pyfar.level` with various functions to compute and work with levels (PR #949), consisting of:
+    - `level.equivalent_continuous_level` for the Leq (PR #948)
+
+Fixed
+^^^^^
+- Fixed deprecated Matplotlib subplot behavior (PR #942)
+- `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
+- A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
+- Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
+
 
 0.8.0 (2026-03-16)
 ------------------
