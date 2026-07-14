@@ -89,3 +89,21 @@ def equivalent_continuous_level(
     mean_energy_per_channel = np.mean(signal.time**2, axis=-1)
     levels = _energies_to_levels(mean_energy_per_channel, reference_pressure)
     return levels
+
+
+def exposure_level(
+        signal,
+        frequency_weighting: Literal["A", "C", "Z"],
+        duration: float | None = None,
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+):
+    signal = _check_signal_type(signal)
+    eq_level = equivalent_continuous_level(
+        signal, frequency_weighting, None, reference_pressure)
+
+    duration = signal.signal_length if duration is None else duration
+    if duration <= 0:
+        raise ValueError("Duration must be a positive number.")
+    duration_term = 10 * np.log10(duration)
+
+    return eq_level + duration_term
