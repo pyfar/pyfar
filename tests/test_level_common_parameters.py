@@ -201,7 +201,7 @@ def test_level_common_oversampling_intersample():
 
     assert level_with_over > level_no_over
     # peak must be at the 4th sample (0-indexed)
-    assert time_no_over == 0.03 
-    # after oversampling, the peak is at the 7th sample, i.e. between the 
+    assert time_no_over == 0.03
+    # after oversampling, the peak is at the 7th sample, i.e. between the
     # 3rd and 4th sample at the original sampling rate
     assert time_with_over == 0.035 # at 7th oversampled sample
