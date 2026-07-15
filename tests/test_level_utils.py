@@ -48,3 +48,13 @@ def test_level_time_weighted_pressure_same_level(weighting):
     # so the exp-filter has enough time to integrate energy
     level = 10 * np.log10(weighted.time[0][-1] ** 2)
     assert abs(L_eq - level) < 0.1
+
+
+@pytest.mark.parametrize(("time_weighting", "err_type"), [
+    (None, TypeError), ("X", ValueError)])
+def test_level_time_weighted_pressure_time_weighting_error(
+    time_weighting, err_type,
+):
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(err_type, match="Time weighting"):
+        pf.level.time_weighted_pressure(s, time_weighting)

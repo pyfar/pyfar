@@ -75,13 +75,15 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
         >>> plt.legend()
         >>> plt.show()
     """
+    if not isinstance(time_weighting, str):
+        raise TypeError("Time weighting must be a string.")
     weighting = time_weighting.upper()
     if weighting in ["F"]:
         time_constant = 0.125
     elif weighting in ["S"]:
         time_constant = 1
     else:
-        raise ValueError("'time_weighting' must be 'F' or 'S'")
+        raise ValueError("Time weighting must be 'F' or 'S'")
 
     signal = _check_signal_type(signal)
     energies = signal.time**2
