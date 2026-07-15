@@ -182,6 +182,19 @@ def sliding_equivalent_continuous_level(
     .. [#] International Electrotechnical Commission,
         "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
         Specifications", IEC, 2013.
+
+    Examples
+    --------
+    Obtain the equivalent continuous level in 2-second intervals in dbFS(A).
+
+    >>> import pyfar as pf
+    >>> fs = 48000
+    >>> interval = 2
+    >>> signal = pf.signals.files.guitar()
+    >>> sliding_levels = pf.level.sliding_equivalent_continuous_level(
+    >>>         signal, "A", window_duration=interval, reference_pressure=1)
+    >>> interval_levels = sliding_levels[0][fs*interval::fs*interval]
+    >>> print(interval_levels) # [-32.24998448 -31.61894792 -28.19029974]
     """
     signal = _check_signal_type(signal)
     signal = _apply_frequency_weighting(signal, frequency_weighting)
