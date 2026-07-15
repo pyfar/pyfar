@@ -167,9 +167,9 @@ def time_weighted_level(signal,
         The calculated levels at each sample in dB relative to the
         `reference_pressure`.
 
-        .. note::
-            If `num_octave_band_fractions` is not ``None``, the returned array
-            will have an additional first dimension for the individual bands.
+        `levels` has shape ``signal.time.shape`` if `num_octave_band_fractions`
+        is ``None`` and ``(n_bands, signal.time.shape)`` otherwise, where
+        `n_bands` denotes the number of (fractional) octave bands.
 
     References
     ----------
