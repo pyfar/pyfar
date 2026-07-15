@@ -133,7 +133,7 @@ def exposure_level(
         set to the length of the signal in seconds to calculate the exposure
         of just the signal. You can specify a different duration to extrapolate
         the exposure level to a longer (or shorter) time period assuming the
-        same average sound pressure remains constant. 
+        same average sound pressure remains constant.
         The duration must be a positive number.
 
     reference_pressure: float
