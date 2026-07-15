@@ -9,6 +9,7 @@ Added
 ^^^^^
 - A new submodule `pyfar.level` with various functions to compute and work with levels (PR #949), consisting of:
     - `level.equivalent_continuous_level` for the Leq (PR #948)
+    - `level.time_weighted_level` and `level.time_weighted_pressure` for time-weighting (PR #954)
 
 Fixed
 ^^^^^
