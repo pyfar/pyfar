@@ -100,6 +100,7 @@ def sliding_equivalent_continuous_level(
     cyclic: bool = False,
     center_window: bool = False,
     reference_pressure: float = pf.constants.reference_sound_pressure,
+    replace_zeros: bool = True,
 ):
     r"""Calculate the frequency-weighted equivalent continuous sound
     pressure level with a sliding time window.
@@ -159,6 +160,13 @@ def sliding_equivalent_continuous_level(
         to correct for the recording setup afterwards, this parameter
         should be ``1``.
 
+    replace_zeros: bool
+        If ``False``, the function will return ``-inf`` for samples where the
+        time-weighted energy is zero. If ``True``, these energy values will be
+        replaced with a very small number (the array type epsilon)
+        to avoid ``-inf`` values and corresponding numpy warnings.
+        The default is ``True``.
+
     Returns
     -------
     levels: NDArray
@@ -183,5 +191,6 @@ def sliding_equivalent_continuous_level(
     energies = signal.time**2
     mean_energies = _moving_average(energies, window_size, cyclic=cyclic,
                                     center_window=center_window)
-    levels = _energies_to_levels(mean_energies, reference_pressure)
+    levels = _energies_to_levels(
+        mean_energies, reference_pressure, replace_zeros)
     return levels
