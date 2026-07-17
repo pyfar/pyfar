@@ -9,6 +9,7 @@ Added
 ^^^^^
 - A new submodule `pyfar.level` with various functions to compute and work with levels (PR #949), consisting of:
     - `level.equivalent_continuous_level` for the Leq (PR #948)
+    - `level.peak_level` for (true) peak level detection (PR #955)
 
 Fixed
 ^^^^^
