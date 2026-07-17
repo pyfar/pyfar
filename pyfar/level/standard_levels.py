@@ -112,7 +112,7 @@ def sliding_equivalent_continuous_level(
     Parameters
     ----------
     signal: Signal
-        The signal object to calculate the levels of
+        The signal object to calculate the levels of.
 
     frequency_weighting: ``"A"``, ``"C"``, or ``"Z"``
         The frequency weighting type. If ``"A"`` or ``"C"``, the corresponding
