@@ -26,6 +26,7 @@ import pytest
 ])
 @pytest.mark.parametrize("function", [
     lambda s: pf.level.equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.peak_level(s, "Z"),
     # other level functions go here once implemented
 ])
 def test_level_common_signal_parameter(signal, function):
@@ -38,6 +39,7 @@ def test_level_common_signal_parameter(signal, function):
 
 FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
     lambda s, w: pf.level.equivalent_continuous_level(s, w),
+    lambda s, w: pf.level.peak_level(s, w)[0],
     # other level functions go here once implemented
 ]
 
@@ -129,6 +131,7 @@ def test_level_common_num_octave_band_fractions_errors(
 FUNCTION_WRAPPERS_REFERENCE_PRESSURE = [
     lambda s, r: pf.level.equivalent_continuous_level(
         s, "Z", None, r),
+    lambda s, r: pf.level.peak_level(s, "Z", None, r)[0],
     # other level functions go here once implemented
 ]
 
@@ -150,3 +153,55 @@ def test_level_common_reference_pressure_errors(function):
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(ValueError, match="Reference pressure"):
         function(s, 0)
+
+
+### oversampling parameter tests ###
+
+FUNCTION_WRAPPERS_OVERSAMPLING = [
+    lambda s, o: pf.level.peak_level(s, "Z", o),
+]
+
+
+@pytest.mark.parametrize("oversampling", [None, 2, 3.5, 8])
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_OVERSAMPLING)
+def test_level_common_oversampling_shape(function, oversampling):
+    """Test that the oversampling parameter does not change the shape
+    of the output.
+    """
+    s = pf.signals.impulse(1000, sampling_rate=48000)
+    levels, times = function(s, oversampling)
+    assert levels.shape == s.cshape
+    assert times.shape == s.cshape
+
+
+@pytest.mark.parametrize(("oversampling", "error_type", "match"), [
+    ("4", TypeError, "number"),
+    (np.array([1, 2]), TypeError, "number"),
+    (-1, ValueError, "greater"),
+    (0, ValueError, "greater"),
+])
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_OVERSAMPLING)
+def test_level_common_oversampling_errors(
+    function, oversampling, error_type, match):
+    """Test that an invalid oversampling factor raises an error."""
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(error_type, match=match):
+        function(s, oversampling)
+
+
+def test_level_common_oversampling_intersample():
+    """Test that oversampling is actually applied by checking that the
+    peak level of a signal with intersample peaks is higher than the
+    peak level of the same signal without oversampling.
+    """
+    s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
+
+    level_no_over, time_no_over = pf.level.peak_level(s, "Z", None)
+    level_with_over, time_with_over = pf.level.peak_level(s, "Z", 2)
+
+    assert level_with_over > level_no_over
+    # peak must be at the 4th sample (0-indexed)
+    assert time_no_over == 0.03
+    # after oversampling, the peak is at the 7th sample, i.e. between the
+    # 3rd and 4th sample at the original sampling rate
+    assert time_with_over == 0.035 # at 7th oversampled sample

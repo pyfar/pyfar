@@ -8,6 +8,7 @@ from ._utils import (
     _check_signal_type,
     _apply_frequency_weighting,
     _apply_multi_band,
+    _apply_oversampling,
     _energies_to_levels,
 )
 
@@ -35,7 +36,7 @@ def equivalent_continuous_level(
     Parameters
     ----------
     signal: Signal
-        The signal object to calculate the levels of
+        The signal object to calculate the levels of.
 
     frequency_weighting: ``"A"``, ``"C"``, or ``"Z"``
         The frequency weighting type. If ``"A"`` or ``"C"``, the corresponding
@@ -89,3 +90,82 @@ def equivalent_continuous_level(
     mean_energy_per_channel = np.mean(signal.time**2, axis=-1)
     levels = _energies_to_levels(mean_energy_per_channel, reference_pressure)
     return levels
+
+
+def peak_level(
+        signal,
+        frequency_weighting: Literal["A", "C", "Z"],
+        oversampling: float | None = 4,
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+):
+    """Calculate the frequency-weighted peak sound pressure level.
+
+    The levels are calculated per channel; and according to IEC 61672-1 [#]_.
+
+    Oversampling can be applied optionally to find inter-sample ("true")
+    peaks. This is useful for digital signals containing significant energy
+    at high frequencies (near the Nyquist frequency), which can cause the
+    true (analog) peak between two samples to exceed the digital peak value.
+    Please refer to ITU-R BS.1770-5 [#]_ Annex 2 for further information and
+    on why oversampling is used for true-peak detection as well as for
+    recommendations on the oversampling factor.
+
+    Parameters
+    ----------
+    signal: Signal
+        The signal object to calculate the levels of.
+
+    frequency_weighting: ``"A"``, ``"C"``, or ``"Z"``
+        The frequency weighting type. If ``"A"`` or ``"C"``, the corresponding
+        frequency weighting filter is applied before level
+        calculation. If ``"Z"``, no frequency weighting is applied.
+
+        The frequency weighting is applied using
+        :py:func:`~pyfar.dsp.filter.frequency_weighting_filter` with its
+        (standard-compliant) default parameters. If you need more control,
+        you can set this parameter to ``"Z"`` and apply the frequency
+        weighting filter yourself before calling this function.
+
+    oversampling: float or ``None``
+        The oversampling factor to apply before calculating the peak level.
+        The default value of ``4`` matches the true-peak detection
+        recommendation from ITU-R BS.1770-5 for 48 kHz signals.
+
+    reference_pressure: float
+        The reference pressure to calculate levels relative to. The default
+        value, ``20e-6``, corresponds to the standard reference pressure of
+        20 micropascals, which assumes the signal is in units of pascals (Pa).
+        To compute the level in dBFS of a digital signal, or if you plan
+        to correct for the recording setup afterwards, this parameter
+        should be ``1``.
+
+    Returns
+    -------
+    levels: np.ndarray
+        The peak sound pressure levels in dB, one per channel.
+    times: np.ndarray
+        The times of the peak levels in seconds, one per channel. If
+        `oversampling` is ``None``, the times match sample times of the input.
+        Otherwise, `times` may contain inter-sample times.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+
+    .. [#] International Telecommunication Union,
+        Recommendation ITU-R BS.1770-5 (11/2023): "Algorithms to measure
+        audio programme loudness and true-peak audio level".
+        https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-5-202311-I!!PDF-E.pdf
+    """
+    signal = _check_signal_type(signal)
+    signal = _apply_frequency_weighting(signal, frequency_weighting)
+    signal = _apply_oversampling(signal, oversampling)
+    energies = signal.time**2
+
+    maxima = np.max(energies, axis=-1)
+    indexes = np.argmax(energies, axis=-1)
+    levels = _energies_to_levels(maxima, reference_pressure)
+    times: np.ndarray = indexes / signal.sampling_rate
+    return levels, times

@@ -39,6 +39,22 @@ def _apply_multi_band(signal, num_octave_band_fractions: int | None):
         signal, num_octave_band_fractions)
 
 
+def _apply_oversampling(signal, oversampling: float | None):
+    """Applies oversampling to the signal or does nothing if `oversampling`
+    is None. Raises a ValueError if `oversampling` is not greater than 1.
+    """
+    if oversampling is None:
+        return signal
+    elif not isinstance(oversampling, (int, float)):
+        raise TypeError("Oversampling must be a number.")
+    elif oversampling > 1:
+        return pf.dsp.resample(
+            signal, signal.sampling_rate * oversampling, "time")
+    else:
+        raise ValueError(
+            "Oversampling must be greater than 1 or None")
+
+
 def _energies_to_levels(energies: np.ndarray, reference_pressure: float):
     """Converts energies to levels in dB relative to the reference pressure.
     """
