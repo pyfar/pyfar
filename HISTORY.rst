@@ -2,12 +2,12 @@
 History
 =======
 
-0.9.0 (2026-XX-XX)
-------------------
+unreleased
+----------
 
 Added
 ^^^^^
-- The methods `find_nearest_frequency()` and `find_nearest_time()` were extended with a new parameter `method`." (PR #947)
+- The methods `find_nearest_frequency()` and `find_nearest_time()` were extended with a new parameter `method`. (PR #947)
 
 0.8.0 (2026-03-16)
 ------------------

@@ -436,9 +436,6 @@ class TimeData(_Audio):
             Query times outside the range of self.times are mapped to the first
             or last valid index.
         """
-        if len(self.times) == 0:
-            raise ValueError("The TimeData object must not be empty.")
-
         result = _find_nearest_helper(self.times, value, method)
 
         return result
@@ -642,9 +639,6 @@ class FrequencyData(_Audio):
             Query frequencies outside the range of self.frequencies are mapped
             to the first or last valid index.
         """
-        if len(self.frequencies) == 0:
-            raise ValueError("The FrequencyData object must not be empty.")
-
         result = _find_nearest_helper(self.frequencies, value, method)
 
         return result
@@ -1933,6 +1927,9 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
 
 
 def _find_nearest_helper(self_values, desired_value, method):
+        if len(self_values) == 0:
+            raise ValueError("The FrequencyData/TimeData object"
+                                         " must not be empty.")
 
         values = np.atleast_1d(desired_value)
         indices = np.zeros_like(values).astype(int)
