@@ -4,6 +4,7 @@ between many of the standardized level functions.
 
 import numpy as np
 import pyfar as pf
+import scipy.ndimage
 
 
 def _check_signal_type(signal):
@@ -39,9 +40,65 @@ def _apply_multi_band(signal, num_octave_band_fractions: int | None):
         signal, num_octave_band_fractions)
 
 
-def _energies_to_levels(energies: np.ndarray, reference_pressure: float):
+def _energies_to_levels(energies: np.ndarray,
+                        reference_pressure: float,
+                        replace_zeros: bool = False):
     """Converts energies to levels in dB relative to the reference pressure.
+    Raises an error if the reference pressure is zero.
+    If `replace_zeros` is ``True``, zeros in the energies are replaced with
+    the float epsilon to avoid ``-inf`` values and resulting numpy warnings.
     """
     if reference_pressure == 0:
         raise ValueError("Reference pressure must not be zero.")
+    if replace_zeros:
+        energies = np.where(
+            energies == 0, np.finfo(energies.dtype).eps, energies)
     return 10 * np.log10(energies / reference_pressure**2)
+
+
+def _moving_average(array: np.ndarray,
+                    window_size: int,
+                    axis: int = -1,
+                    cyclic: bool = False,
+                    center_window: bool = False,
+                    ):
+    """Efficiently calculates the moving average of an array along
+    an axis.
+    If `cyclic` is ``True``, the array is treated as if it were periodic
+    (like a cyclic convolution). If ``False`` (default), edges are
+    zero-padded, leading to fade-like boundary effects.
+    If `center_window` is ``True``, the window is centered on the current
+    sample. If ``False`` (default), the window is causal, meaning it only
+    considers past values, same as the `convolve` functions in `numpy`,
+    `scipy.signal`, and `pyfar.dsp`.
+    """
+    if (not isinstance(window_size, int)):
+        raise TypeError("Window size must be an integer.")
+    if window_size < 1:
+        raise ValueError("Window size must be a positive integer.")
+
+    # If the input are integers, the outputs are too (rounded), which
+    # we never want in floating point audio.
+    if np.issubdtype(array.dtype, np.integer):
+        array = array.astype(np.float64)
+
+    if center_window:
+        origin = 0  # 0 means the window is centered
+    else:
+        # For a causal window, the window needs to be shifted back
+        if window_size % 2 == 1:
+            origin = window_size // 2
+        else:
+            # since scipy.ndimage is designed for images, which normally
+            # use odd window sizes, even sizes are finnicky...
+            origin = window_size // 2 - 1
+
+    mode = "wrap" if cyclic else "constant"
+
+    # This is effectively the same as a convolution with a rectangular window,
+    # but more efficient, especially for long windows.
+    # Unlike convolve, this function has a built-in "wrap" mode, but no
+    # "full" mode
+    result = scipy.ndimage.uniform_filter1d(
+        array, size=window_size, axis=axis, mode=mode, origin=origin)
+    return result
