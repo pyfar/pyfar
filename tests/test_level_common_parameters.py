@@ -26,6 +26,7 @@ import pytest
 ])
 @pytest.mark.parametrize("function", [
     lambda s: pf.level.equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.time_weighted_level(s, "A", "F"),
     # other level functions go here once implemented
 ])
 def test_level_common_signal_parameter(signal, function):
@@ -38,6 +39,7 @@ def test_level_common_signal_parameter(signal, function):
 
 FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
     lambda s, w: pf.level.equivalent_continuous_level(s, w),
+    lambda s, w: pf.level.time_weighted_level(s, w, "F")[0][-1],
     # other level functions go here once implemented
 ]
 
@@ -82,6 +84,7 @@ def test_level_common_freq_weighting_errors(weighting, function):
 
 FUNCTION_WRAPPERS_BAND_FRACTIONS = [
     lambda s, n: pf.level.equivalent_continuous_level(s, "Z", n),
+    lambda s, n: pf.level.time_weighted_level(s, "Z", "F", n),
     # other level functions go here once implemented
 ]
 
@@ -129,6 +132,7 @@ def test_level_common_num_octave_band_fractions_errors(
 FUNCTION_WRAPPERS_REFERENCE_PRESSURE = [
     lambda s, r: pf.level.equivalent_continuous_level(
         s, "Z", None, r),
+    lambda s, r: pf.level.time_weighted_level(s, "Z", "F", None, r)[0][-1],
     # other level functions go here once implemented
 ]
 

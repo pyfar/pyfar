@@ -39,9 +39,17 @@ def _apply_multi_band(signal, num_octave_band_fractions: int | None):
         signal, num_octave_band_fractions)
 
 
-def _energies_to_levels(energies: np.ndarray, reference_pressure: float):
+def _energies_to_levels(energies: np.ndarray,
+                        reference_pressure: float,
+                        replace_zeros: bool = False):
     """Converts energies to levels in dB relative to the reference pressure.
+    Raises an error if the reference pressure is zero.
+    If `replace_zeros` is ``True``, zeros in the energies are replaced with
+    the float epsilon to avoid ``-inf`` values and resulting numpy warnings.
     """
     if reference_pressure == 0:
         raise ValueError("Reference pressure must not be zero.")
+    if replace_zeros:
+        energies = np.where(
+            energies == 0, np.finfo(energies.dtype).eps, energies)
     return 10 * np.log10(energies / reference_pressure**2)
