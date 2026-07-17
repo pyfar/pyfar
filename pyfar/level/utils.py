@@ -38,7 +38,7 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     Parameters
     ----------
     signal: Signal
-        The signal object to apply the weighting to
+        The signal object to apply the weighting to.
 
     time_weighting: ``"F"`` or ``"S"``
         The time weighting type. Options are ``"F"`` (fast) and ``"S"`` (slow),
@@ -49,7 +49,7 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     -------
     weighted: TimeData
         A series of positive sound pressure values to which the
-        weighting was applied
+        weighting was applied.
 
     References
     ----------
