@@ -112,6 +112,16 @@ def exposure_level(
     :math:`p_0` is the `reference_pressure`,
     and :math:`T` is the duration of the signal or the `duration` specified.
 
+    .. note::
+        The standard defines the sound exposure level relative to
+        a reference *energy* :math:`E_0 = p_0^2 T_0
+        = 20\,\mu\text{Pa}^2 \cdot 1 \text{ s}
+        = 400 \cdot 10^{-12} \text{ J}`.
+        However, this function uses a reference *pressure* instead to remain
+        consistent with the other level functions.
+        You can obtain the `reference_pressure` by taking the square root of of
+        the desired reference energy.
+
     Parameters
     ----------
     signal: Signal
