@@ -89,3 +89,94 @@ def equivalent_continuous_level(
     mean_energy_per_channel = np.mean(signal.time**2, axis=-1)
     levels = _energies_to_levels(mean_energy_per_channel, reference_pressure)
     return levels
+
+
+def exposure_level(
+        signal,
+        frequency_weighting: Literal["A", "C", "Z"],
+        duration: float | None = None,
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+):
+    r"""Calculate the frequency-weighted sound exposure level.
+
+    The levels are calculated per channel and according to IEC 61672-1 [#]_.
+    For instance, the A-weighted sound exposure level is calculated as:
+
+    .. math::
+        L_{\text{A}E,T} = 10 \log_{10} \left[ \frac{(1/N) \sum_{n=0}^{N-1}
+        p_{\text{A}}^2[n] T} {p_0^2} \right] \text{ dB}
+        = L_\text{Aeq} + 10 \log_{10}(T) \text{ dB}
+
+    where :math:`N` is the number of samples in the signal,
+    :math:`p_\mathrm{A}` the A-weighted sound pressure at index :math:`n`,
+    :math:`p_0` is the `reference_pressure`,
+    and :math:`T` is the duration of the signal or the `duration` specified.
+
+    .. note::
+        The standard defines the sound exposure level relative to
+        a reference *energy* :math:`E_0 = p_0^2 T_0
+        = 20\,\mu\text{Pa}^2 \cdot 1 \text{ s}
+        = 400 \cdot 10^{-12} \text{ J}`.
+        However, this function uses a reference *pressure* instead to remain
+        consistent with the other level functions.
+        You can obtain the `reference_pressure` by taking the square root of of
+        the desired reference energy.
+
+    Parameters
+    ----------
+    signal: Signal
+        The signal object to calculate the levels of.
+
+    frequency_weighting: ``"A"``, ``"C"``, or ``"Z"``
+        The frequency weighting type. If ``"A"`` or ``"C"``, the corresponding
+        frequency weighting filter is applied before level
+        calculation. If ``"Z"``, no frequency weighting is applied.
+
+        The frequency weighting is applied using
+        :py:func:`~pyfar.dsp.filter.frequency_weighting_filter` with its
+        (standard-compliant) default parameters. If you need more control,
+        you can set this parameter to ``"Z"`` and apply the frequency
+        weighting filter yourself before calling this function.
+
+    duration: float or ``None``
+        The duration of the signal in seconds. If ``None``, the duration is
+        set to the length of the signal in seconds to calculate the exposure
+        of just the signal. You can specify a different duration to extrapolate
+        the exposure level to a longer (or shorter) time period assuming the
+        same average sound pressure remains constant.
+        The duration must be a positive number.
+
+    reference_pressure: float
+        The reference pressure to calculate levels relative to. The default
+        value, ``20e-6``, corresponds to the standard reference pressure of
+        20 micropascals, which assumes the signal is in units of pascals (Pa).
+        To compute the level in dBFS of a digital signal, or if you plan
+        to correct for the recording setup afterwards, this parameter
+        should be ``1``.
+
+    Returns
+    -------
+    levels: NDArray
+        The calculated levels of each channel in dB relative to the
+        `reference_pressure`.
+
+        `levels` has shape ``signal.cshape``.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+    """
+    signal = _check_signal_type(signal)
+    eq_level = equivalent_continuous_level(
+        signal, frequency_weighting, None, reference_pressure)
+
+    duration = signal.signal_length if duration is None else duration
+    if not isinstance(duration, (int, float, np.number)):
+        raise TypeError("Duration must be a number.")
+    if duration <= 0:
+        raise ValueError("Duration must be a positive number.")
+    duration_term = 10 * np.log10(duration)
+
+    return eq_level + duration_term
