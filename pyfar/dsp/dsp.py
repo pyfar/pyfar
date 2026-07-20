@@ -1523,7 +1523,7 @@ def find_impulse_response_delay(impulse_response, N=1):
                 else:
                     start_sample[idx] = np.nan
                     warnings.warn(
-                        f'Starting sample not found for channel {ch}',
+                        f'Delay sample not found for channel {ch}',
                         stacklevel=2,
                     )
             else:
