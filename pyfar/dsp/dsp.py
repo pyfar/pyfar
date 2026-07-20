@@ -1390,6 +1390,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     starting sample of the impulse and plot.
 
     .. plot::
+        :context: close-figs
 
         >>> import pyfar as pf
         >>> import numpy as np
@@ -1404,6 +1405,35 @@ def find_impulse_response_delay(impulse_response, N=1):
         ...     color='k', linestyle='-.', label='start sample')
         >>> ax.legend()
 
+    Plot the estimation error for a sinc function shifted
+    by a fractional number of samples. The plot illustrates the expected
+    sub-sample precision of the delay estimation method for this example.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> n_samples = 2**10
+        >>> frac_delays = np.linspace(0, 1, 100, endpoint=True)
+        >>> err = []
+        >>> for frac_delay in frac_delays:
+        ...     samples = np.arange(n_samples)
+        ...     # center the sinc peak
+        ...     true_delay = n_samples // 2 + frac_delay
+        ...     sinc = np.sinc(samples - true_delay)
+        ...     ir = pf.Signal(sinc, 44.1e3)
+        ...     ir = pf.dsp.time_window(ir, (0, n_samples), shape='left')
+        ...     est_delay = pf.dsp.find_impulse_response_delay(ir)
+        ...     err.append(true_delay - est_delay[0])
+        >>> # Plot the estimation error
+        >>> plt.figure(figsize=(7, 4))
+        >>> plt.plot(frac_delays, err)
+        >>> plt.ylabel('Error in Samples')
+        >>> plt.xlabel('Fractional Delay in Samples')
+        >>> plt.axhline(0, color='k', linewidth=0.8)
+        >>> plt.title('Delay estimation error for a shifted sinc')
     """
     n = int(np.ceil((N+2)/2))
 

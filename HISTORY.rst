@@ -14,6 +14,9 @@ Fixed
 - Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
 - Limit Sphinx versions to < 0.9.0 to avoid invalid references for type annotations (PR #929)
 
+Added
+^^^^^
+- Added example to `find_impulse_response_delay` plotting the inter-sample delay estimation accuracy. (PR #950)
 
 0.8.0 (2026-03-16)
 ------------------
