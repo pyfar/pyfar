@@ -30,3 +30,17 @@ def test_level_exposure_level_duration(duration, level_increase):
     levels = pf.level.exposure_level(s, "Z", duration)
     # 94 dB is 1 Pa, -3.01 dB is the crest factor of sine signals
     assert np.isclose(levels, 94 - 3.01 + level_increase, atol=0.1)
+
+
+@pytest.mark.parametrize("duration", [-1, 0, np.int32(-1)])
+def test_level_exposure_level_duration_value_errors(duration):
+    s = pf.signals.sine(1000, 44100, sampling_rate=44100)
+    with pytest.raises(ValueError, match="positive"):
+        pf.level.exposure_level(s, "Z", duration)
+
+
+@pytest.mark.parametrize("duration", ["1", np.array([1]), [1], complex(1, 0)])
+def test_level_exposure_level_duration_type_errors(duration):
+    s = pf.signals.sine(1000, 44100, sampling_rate=44100)
+    with pytest.raises(TypeError, match="number"):
+        pf.level.exposure_level(s, "Z", duration)
