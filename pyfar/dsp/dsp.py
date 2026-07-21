@@ -1401,10 +1401,11 @@ def _estimate_zero_crossing(lags, values, argmax, order):
     # root must within the samples at which the zero crossing
     # with positive gradient occurs
     roots = roots[(roots >= x_1[idx]) & (roots <= x_2[idx])]
+    # return None if no positive-gradient zero crossing exists
     if roots.size:
         return roots[np.argmin(np.abs(roots - linear_roots[idx]))]
-
-    return None
+    else:
+        return None
 
 
 def find_impulse_response_delay(impulse_response, N=1):
