@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib.ticker import (
     FixedFormatter,
     FixedLocator,
-    LogLocator,
     MultipleLocator,
     Formatter)
 
