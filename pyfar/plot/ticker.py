@@ -1,7 +1,6 @@
 """Custom tick locators and formatters for matplotlib."""
 import numpy as np
 from matplotlib.ticker import (
-    FixedFormatter,
     FixedLocator,
     LogLocator,
     MultipleLocator,
