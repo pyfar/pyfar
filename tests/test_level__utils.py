@@ -21,7 +21,6 @@ def test_level_moving_average_same_results(signal_data, window_size, cyclic):
     result = pf.level._utils._moving_average(
         signal_data, window_size, -1, cyclic, False)
     result = np.atleast_2d(result)
-    print(result)
 
     assert expected.shape == result.shape
     assert np.allclose(expected, result)
