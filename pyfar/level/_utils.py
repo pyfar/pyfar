@@ -76,6 +76,10 @@ def _moving_average(array: np.ndarray,
         raise TypeError("Window size must be an integer.")
     if window_size < 1:
         raise ValueError("Window size must be a positive integer.")
+    if not isinstance(cyclic, bool):
+        raise TypeError("'cyclic' parameter must be a boolean.")
+    if not isinstance(center_window, bool):
+        raise TypeError("'center_window' parameter must be a boolean.")
 
     # If the input are integers, the outputs are too (rounded), which
     # we never want in floating point audio.

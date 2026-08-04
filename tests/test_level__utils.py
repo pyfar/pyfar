@@ -53,3 +53,14 @@ def test_level_moving_average_invalid_window_size(window_size, err, match):
     """
     with pytest.raises(err, match=match):
         pf.level._utils._moving_average(np.array([0, 1, 2]), window_size)
+
+
+def test_level_moving_average_center_window_error():
+    with pytest.raises(TypeError, match="boolean"):
+        pf.level._utils._moving_average(
+            np.array([0, 1, 2]), 3, center_window=1)
+
+
+def test_level_moving_average_cyclic_error():
+    with pytest.raises(TypeError, match="boolean"):
+        pf.level._utils._moving_average(np.array([0, 1, 2]), 3, cyclic=1)
