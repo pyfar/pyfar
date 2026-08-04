@@ -187,14 +187,71 @@ def sliding_equivalent_continuous_level(
     --------
     Obtain the equivalent continuous level in 2-second intervals in dbFS(A).
 
-    >>> import pyfar as pf
-    >>> fs = 48000
-    >>> interval = 2
-    >>> signal = pf.signals.files.guitar()
-    >>> sliding_levels = pf.level.sliding_equivalent_continuous_level(
-    >>>         signal, "A", window_duration=interval, reference_pressure=1)
-    >>> interval_levels = sliding_levels[0][fs*interval::fs*interval]
-    >>> print(interval_levels) # [-32.24998448 -31.61894792 -28.19029974]
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fs = 48000
+        >>> interval = 2
+        >>> chunk_size = interval * fs
+        >>> signal: pf.Signal = pf.signals.files.guitar()
+        >>> sliding_levels = pf.level.sliding_equivalent_continuous_level(
+        >>>         signal, "A", window_duration=interval,
+        >>>         reference_pressure=1)
+        >>> interval_levels = sliding_levels[0][chunk_size::chunk_size]
+        >>> print(interval_levels) # [-32.24998448 -31.61894792 -28.19029974]
+        >>> pf.plot.time(signal, True, alpha=0.6, label="Signal")
+        >>> plt.plot(signal.times, sliding_levels[0], label="Sliding Leq")
+        >>> starts = [i * interval for i in range(len(interval_levels))]
+        >>> ends = [s + interval for s in starts]
+        >>> plt.vlines(ends, -50, 0, color='#777')
+        >>> plt.hlines(interval_levels, starts, ends,
+        >>>            color='#444', alpha=0.8, label="Interval Leq")
+        >>> plt.legend()
+        >>> plt.ylim(-50, 0)
+        >>> plt.show()
+
+    Demonstrate the difference between centered vs causal windows and
+    cyclic vs non-cyclic processing.
+    Note how the centered (acausal) window leads to peaks at the most
+    energy-dense times of the signal, but rises before the energy is present.
+    The causal (non-centered) window rises only after the energy is present,
+    but lags behind the most energy-dense times.
+    Also note how the cyclic processing leads to a wrap-around of the energy
+    at the edges. With non-cyclic processing, a causal window will always
+    lead to levels starting at zero and remaining identical to the cyclic ones
+    after reaching the window duration.
+    In contrast, with a non-cyclic, centered window, the
+    levels will start with the energy of the right half of the window, and
+    diverge from the cyclic ones at both edges.
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> fs = 44100
+        >>> signal = pf.signals.pulsed_noise(
+        >>>     fs, fs, repetitions=2, rms=0.2, sampling_rate=fs, seed=0)
+        >>> signal = pf.dsp.pad_zeros(signal, fs // 4, "beginning")
+        >>> pf.plot.time(signal, True, alpha=0.6, label="Signal")
+        >>> variants = [
+        >>>     ("Causal, non-cyclic", False, False),
+        >>>     ("Causal, cyclic", False, True),
+        >>>     ("Centered, non-cyclic", True, False),
+        >>>     ("Centered, cyclic", True, True),
+        >>> ]
+        >>> for title, center_window, cyclic in variants:
+        >>>     ls = "dashed" if cyclic else "solid"
+        >>>     s = pf.level.sliding_equivalent_continuous_level(
+        >>>         signal, "Z", None, 1.1,
+        >>>         cyclic, center_window, 1, True
+        >>>     )
+        >>>     plt.plot(signal.times, s[0], label=title, linestyle=ls)
+        >>> plt.legend()
+        >>> plt.ylim(-40, 0)
+        >>> plt.show()
     """
     signal = _check_signal_type(signal)
     signal = _apply_frequency_weighting(signal, frequency_weighting)
