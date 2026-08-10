@@ -103,14 +103,15 @@ def exposure_level(
     For instance, the A-weighted sound exposure level is calculated as:
 
     .. math::
-        L_{\text{A}E,T} = 10 \log_{10} \left[ \frac{(1/N) \sum_{n=0}^{N-1}
-        p_{\text{A}}^2[n] T} {p_0^2} \right] \text{ dB}
+        L_{\text{A}E,T} = 10 \log_{10} \left[ \frac{T/N \sum_{n=0}^{N-1}
+        p_{\text{A}}^2[n]} {p_0^2 T_0} \right] \text{ dB}
         = L_\text{Aeq} + 10 \log_{10}(T) \text{ dB}
 
     where :math:`N` is the number of samples in the signal,
     :math:`p_\mathrm{A}` the A-weighted sound pressure at index :math:`n`,
     :math:`p_0` is the `reference_pressure`,
-    and :math:`T` is the duration of the signal or the `duration` specified.
+    :math:`T_0` is the reference duration of 1 second, and
+    :math:`T` is the duration of the signal or the `duration` specified.
 
     .. note::
         The standard defines the sound exposure level relative to
