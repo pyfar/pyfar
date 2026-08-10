@@ -27,10 +27,9 @@ def test_level_sliding_equivalent_continuous_level_known_value():
     s = pf.signals.sine(1000, 44100, phase=0.01, sampling_rate=44100)
     levels = pf.level.sliding_equivalent_continuous_level(
         s, "Z", None, 1, False, False, 2e-5)
-    # 94 dB is 1 Pa, -3.01 dB is the crest factor of sine signals
     # with 1 second window size, the value at 1 second should be
     # the same as the equivalent continuous level of the full signal
-    assert np.isclose(levels[0][-1], 94 - 3.01, atol=0.1)
+    assert np.isclose(levels[0][-1], ONE_PA - SINE_PAPR, atol=0.001)
 
 
 def test_level_sliding_equivalent_continuous_level_shape():
