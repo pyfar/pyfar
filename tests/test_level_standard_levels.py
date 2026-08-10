@@ -9,13 +9,16 @@ against known values or other tests that are specific to a single function.
 import pyfar as pf
 import numpy as np
 
+# 1 Pa in dB SPL
+ONE_PA = 20 * np.log10(1 / pf.constants.reference_sound_pressure)
+SINE_PAPR = 10 * np.log10(2)  # peak-to-average power ratio of sine signals
+
 
 def test_level_equivalent_continuous_level_known_value():
     s = pf.signals.sine(1000, 22050)
     levels = pf.level.equivalent_continuous_level(
         s, "Z", None, 2e-5)
-    # 94 dB is 1 Pa, -3.01 dB is the crest factor of sine signals
-    assert np.isclose(levels, 94 - 3.01, atol=0.1)
+    assert np.isclose(levels, ONE_PA - SINE_PAPR, atol=0.001)
 
 
 def test_level_sliding_equivalent_continuous_level_known_value():
