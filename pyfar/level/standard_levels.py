@@ -170,14 +170,13 @@ def exposure_level(
         Specifications", IEC, 2013.
     """
     signal = _check_signal_type(signal)
-    eq_level = equivalent_continuous_level(
-        signal, frequency_weighting, None, reference_pressure)
-
     duration = signal.signal_length if duration is None else duration
     if not isinstance(duration, (int, float, np.number)):
         raise TypeError("Duration must be a number.")
     if duration <= 0:
         raise ValueError("Duration must be a positive number.")
-    duration_term = 10 * np.log10(duration)
 
+    eq_level = equivalent_continuous_level(
+        signal, frequency_weighting, None, reference_pressure)
+    duration_term = 10 * np.log10(duration)
     return eq_level + duration_term
