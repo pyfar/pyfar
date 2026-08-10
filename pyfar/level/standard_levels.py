@@ -111,7 +111,7 @@ def exposure_level(
     :math:`p_\mathrm{A}` the A-weighted sound pressure at index :math:`n`,
     :math:`p_0` is the `reference_pressure`,
     :math:`T_0` is the reference duration of 1 second, and
-    :math:`T` is the duration of the signal or the `duration` specified.
+    :math:`T` is the duration of the sound exposure (see below).
 
     .. note::
         The standard defines the sound exposure level relative to
