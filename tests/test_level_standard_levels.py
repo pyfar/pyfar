@@ -7,7 +7,6 @@ against known values or other tests that are specific to a single function.
 """
 
 import pytest
-
 import pyfar as pf
 import numpy as np
 
