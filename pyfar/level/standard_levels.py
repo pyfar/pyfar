@@ -143,8 +143,10 @@ def exposure_level(
         The duration of the signal in seconds. If ``None``, the duration is
         set to the length of the signal in seconds to calculate the exposure
         of just the signal. You can specify a different duration to extrapolate
-        the exposure level to a longer (or shorter) time period assuming the
-        same average sound pressure remains constant.
+        the exposure level to a longer (or shorter) time period. This
+        extrapolation is valid if the equivalent sound pressure level
+        :math:`L_\text{eq}` over the longer (or shorter) time period is the
+        same as that of this signal.
         The duration must be a positive number.
 
     reference_pressure: float
