@@ -273,7 +273,6 @@ workflows:
             - build_and_test
             - ruff
             - test_documentation_build
-            - test_deprecation_warnings
           filters:
             branches:
               ignore: /.*/
