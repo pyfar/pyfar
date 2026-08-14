@@ -9,6 +9,7 @@ Added
 ^^^^^
 - A new submodule `pyfar.level` with various functions to compute and work with levels (PR #949), consisting of:
     - `level.equivalent_continuous_level` for the Leq (PR #948)
+    - `level.exposure_level` for the sound exposure level (PR #951)
     - `level.sliding_continuous_level` for the Leq with a sliding window (PR #952)
 
 Fixed
