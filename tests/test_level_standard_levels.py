@@ -47,3 +47,20 @@ def test_level_exposure_level_duration_type_errors(duration):
     s = pf.signals.sine(1000, 44100, sampling_rate=44100)
     with pytest.raises(TypeError, match="number"):
         pf.level.exposure_level(s, "Z", duration)
+
+
+def test_level_sliding_equivalent_continuous_level_known_value():
+    # phase prevents the first sample from being exactly zero, which would
+    # cause a division by zero in the level calculation
+    s = pf.signals.sine(1000, 44100, phase=0.01, sampling_rate=44100)
+    levels = pf.level.sliding_equivalent_continuous_level(
+        s, "Z", None, 1, False, False, 2e-5)
+    # with 1 second window size, the value at 1 second should be
+    # the same as the equivalent continuous level of the full signal
+    assert np.isclose(levels[0][-1], ONE_PA - SINE_PAPR, atol=0.001)
+
+
+def test_level_sliding_equivalent_continuous_level_shape():
+    s = pf.signals.impulse(1000, sampling_rate=48000)
+    levels = pf.level.sliding_equivalent_continuous_level(s, "Z")
+    assert levels.shape == s.time.shape
