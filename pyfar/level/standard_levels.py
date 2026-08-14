@@ -185,29 +185,21 @@ def sliding_equivalent_continuous_level(
 
     Examples
     --------
-    Obtain the equivalent continuous level in 2-second intervals in dbFS(A).
+    Obtain the equivalent continuous sound pressure level
+    over a 2-second window in dbFS(A). Note how the sliding level is rising
+    monotonically for the first 2 seconds, due to the 2 seconds before the
+    signal start being treated as zero.
 
     .. plot::
 
         >>> import pyfar as pf
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
-        >>> fs = 48000
-        >>> interval = 2
-        >>> chunk_size = interval * fs
         >>> signal: pf.Signal = pf.signals.files.guitar()
         >>> sliding_levels = pf.level.sliding_equivalent_continuous_level(
-        >>>         signal, "A", window_duration=interval,
-        >>>         reference_pressure=1)
-        >>> interval_levels = sliding_levels[0][chunk_size::chunk_size]
-        >>> print(interval_levels) # [-32.24998448 -31.61894792 -28.19029974]
+        >>>         signal, "A", window_duration=2, reference_pressure=1)
         >>> pf.plot.time(signal, True, alpha=0.6, label="Signal")
         >>> plt.plot(signal.times, sliding_levels[0], label="Sliding Leq")
-        >>> starts = [i * interval for i in range(len(interval_levels))]
-        >>> ends = [s + interval for s in starts]
-        >>> plt.vlines(ends, -50, 0, color='#777')
-        >>> plt.hlines(interval_levels, starts, ends,
-        >>>            color='#444', alpha=0.8, label="Interval Leq")
         >>> plt.legend()
         >>> plt.ylim(-50, 0)
         >>> plt.show()
