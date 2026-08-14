@@ -19,6 +19,10 @@ Added
 ^^^^^
 - Added example to `find_impulse_response_delay` plotting the inter-sample delay estimation accuracy. (PR #950)
 
+Maintenance
+^^^^^^^^^^^
+- Replaced strict CircleCI deprecation warning workflow with manual approval for release workflow. (PR #959)
+
 0.8.0 (2026-03-16)
 ------------------
 
