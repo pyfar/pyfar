@@ -11,6 +11,16 @@ def fractional_octave_frequencies(
     """Return the octave center frequencies according to the IEC 61260:1:2014
     standard.
 
+    .. note::
+
+        This function will be deprecated in pyfar v0.10.0 in favor of
+        :py:func:`pyfar.constants.fractional_octave_frequencies_exact` and
+        :py:func:`pyfar.constants.fractional_octave_frequencies_nominal`.
+
+        Note that the new functions include all bands that overlap with
+        the specified `frequency_range`, while this function only
+        includes bands whose center frequencies are within this range.
+
     For numbers of fractions other than ``1`` and ``3``, only the
     exact center frequencies are returned, since nominal frequencies are not
     specified by corresponding standards.
