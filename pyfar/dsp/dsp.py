@@ -2594,7 +2594,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
     elif mode == 'magnitude_phase':
-        data = [np.abs(signal.freq), pyfar.dsp.phase(signal, unwrap=True)]
+        data = np.abs(signal.freq)
+        phase_data = pyfar.dsp.phase(signal, unwrap=True)
     elif mode == 'power':
         data = np.abs(signal.freq)**2
     elif mode == 'log_magnitude_zerophase':
@@ -2616,12 +2617,13 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         weights = np.broadcast_to(np.array(weights)[..., None],
                                   data.shape)
     # average the data
+    data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
     if mode == 'magnitude_phase':
-        data = [np.average(d, axis=axis, weights=weights,
-                           keepdims=keepdims) for d in data]
-        data = data[0] * np.exp(1j * data[1])
-    else:
-        data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
+        # for this mode, also average and reapply the phase
+        phase_data = np.average(phase_data, axis=axis, weights=weights,
+                                keepdims=keepdims)
+        data = data * np.exp(1j * phase_data)
+
     # reconstruct frequency data
     if mode == 'power':
         data = np.sqrt(data)
