@@ -2,6 +2,13 @@
 History
 =======
 
+Unreleased
+----------
+
+Added
+^^^^^
+- Added an `exclude_end` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to Python's built-in `range` function or numpy array slicing (PR #963)
+
 0.8.1 (2026-08-14)
 ------------------
 
