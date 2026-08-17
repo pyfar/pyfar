@@ -2,6 +2,13 @@
 History
 =======
 
+Unreleased
+----------
+
+Fixed
+^^^^^
+- A bug in `pyfar.dsp.average` that raised errors when trying to use `magnitude_phase` mode with weights (Issue #928, PR #962).
+
 0.8.1 (2026-08-14)
 ------------------
 
