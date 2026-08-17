@@ -793,6 +793,42 @@ def test_time_crop_unit_seconds_error(signal):
     ' the boundaries'):
         dsp.time_crop(signal, interval=[2, 3], unit='s')
 
+def test_time_crop_exclude_end_seconds():
+    """
+    Test the `time_crop` function with exclude_end=True
+    and unit='s' for a signal of type pf.Signal.
+    """
+    signal = pf.signals.sine(100, 50000, sampling_rate=48000)
+    cropped_incl = pf.dsp.time_crop(signal, interval=(0, 1), unit='s')
+    cropped_excl = pf.dsp.time_crop(signal, interval=(0, 1), unit='s',
+                                    exclude_end=True)
+    assert cropped_incl.n_samples == 48001
+    assert cropped_excl.n_samples == 48000
+
+def test_time_crop_exclude_end_samples():
+    """
+    Test the `time_crop` function with exclude_end=True
+    and unit='samples' for a signal of type pf.Signal.
+    """
+    signal = pf.signals.sine(100, 50000, sampling_rate=48000)
+    cropped_incl = pf.dsp.time_crop(signal, interval=(0, 100), unit='samples')
+    cropped_excl = pf.dsp.time_crop(signal, interval=(0, 100), unit='samples',
+                                    exclude_end=True)
+    assert cropped_incl.n_samples == 101
+    assert cropped_excl.n_samples == 100
+
+def test_time_crop_exclude_end_between_samples():
+    """
+    exclude_end should make no difference when the boundary
+    lies between two samples.
+    """
+    time_data = pf.TimeData([1, 2, 3, 4], [0, 1, 2, 3])
+    cropped_incl = pf.dsp.time_crop(time_data, interval=(0, 2.5), unit='s')
+    cropped_excl = pf.dsp.time_crop(time_data, interval=(0, 2.5), unit='s',
+                                    exclude_end=True)
+    assert cropped_incl.n_samples == 3
+    assert cropped_excl.n_samples == 3
+
 @pytest.mark.parametrize("signal", [pyfar.Signal(np.ones((1,1,10)), 2),
                                      pf.TimeData(np.ones((1,1,3)), [1, 2, 3])])
 def test_time_crop_multidim(signal):
