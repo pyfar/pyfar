@@ -7,7 +7,7 @@ Unreleased
 
 Fixed
 ^^^^^
-- Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (issue #938, PR #961)
+- Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
 
 0.8.1 (2026-08-14)
 ------------------
