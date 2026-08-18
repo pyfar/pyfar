@@ -17,9 +17,9 @@ def fractional_octave_frequencies(
         :py:func:`pyfar.constants.fractional_octave_frequencies_exact` and
         :py:func:`pyfar.constants.fractional_octave_frequencies_nominal`.
 
-        Note that the new functions include all bands that overlap with
-        the specified `frequency_range`, while this function only
-        includes bands whose center frequencies are within this range.
+        Note that the new functions return all bands whose cutoff frequencies
+        are in the specified `frequency_range`, while this function only
+        returns bands whose center frequencies are within this range.
 
     For numbers of fractions other than ``1`` and ``3``, only the
     exact center frequencies are returned, since nominal frequencies are not
