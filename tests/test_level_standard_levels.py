@@ -6,6 +6,7 @@ Note that the tests for the shared parameters of these functions are in
 against known values or other tests that are specific to a single function.
 """
 
+import pytest
 import pyfar as pf
 import numpy as np
 
@@ -21,11 +22,13 @@ def test_level_equivalent_continuous_level_known_value():
     assert np.isclose(levels, ONE_PA - SINE_PAPR, atol=0.001)
 
 
-def test_level_peak_level_known_value():
-    s = pf.signals.impulse(1000)
-    levels, times = pf.level.peak_level(s, "Z", None, 1)
-    assert levels[0] == 0   # peak is 1, so 0 dbFS
-    assert times[0] == 0
+@pytest.mark.parametrize("oversampling", [None, 4, 8])
+def test_level_peak_level_known_value(oversampling):
+    delay = 5432
+    s = pf.signals.impulse(10000, delay)
+    levels, times = pf.level.peak_level(s, "Z", oversampling, 1)
+    assert np.isclose(levels[0], 0, atol=0.01)   # peak is 1, so 0 dbFS
+    assert np.isclose(times[0], delay / s.sampling_rate, atol=0.001)
 
 
 def test_level_peak_level_intersample_peak():
