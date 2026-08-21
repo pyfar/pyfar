@@ -27,17 +27,20 @@ def test_level_time_weighted_level_replace_zeros_false():
     with pytest.warns(RuntimeWarning, match="divide by zero"):
         levels_no_replace = pf.level.time_weighted_level(
             s, "Z", "F", replace_zeros=False)
-    assert levels_no_replace[0][100] == -np.inf
+    assert np.all(levels_no_replace == -np.inf)
 
 
 def test_level_time_weighted_level_replace_zeros_true():
+    """Test that setting replace_zeros to True replaces zeros with the
+    array type's epsilon to avoid -inf values and numpy warnings.
+    """
     s = pf.Signal(np.zeros(1000), sampling_rate=48000)
     levels_replace = pf.level.time_weighted_level(
         s, "Z", "F", replace_zeros=True)
 
-    # since there are only zeros in the signal, all values must be the same
-    assert np.all(levels_replace[0] == levels_replace[0][0])
-    assert np.isfinite(levels_replace[0][100])
+    # since there are only zeros in the signal, all values must be epsilon
+    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
+    assert np.allclose(levels_replace, expected_value)
 
 
 @pytest.mark.parametrize(("time_weighting", "err_type"), [
