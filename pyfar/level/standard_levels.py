@@ -102,10 +102,11 @@ def peak_level(
 
     The levels are calculated per channel; and according to IEC 61672-1 [#]_.
 
-    Oversampling can be applied optionally to find inter-sample ("true")
-    peaks. This is useful for digital signals containing significant energy
-    at high frequencies (near the Nyquist frequency), which can cause the
-    true (analog) peak between two samples to exceed the digital peak value.
+    Applies optional oversampling to find the "true" inter-sample peak.
+    The actual peak amplitude of a digital signal may occur between
+    discrete time samples, especially for high frequencies. This can cause
+    the true analog peak to exceed the digital peak value unless oversampling
+    is applied.
     Please refer to ITU-R BS.1770-5 [#]_ Annex 2 for further information and
     on why oversampling is used for true-peak detection as well as for
     recommendations on the oversampling factor.
