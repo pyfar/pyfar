@@ -26,3 +26,21 @@ def test_level_peak_level_known_value():
     levels, times = pf.level.peak_level(s, "Z", None, 1)
     assert levels[0] == 0   # peak is 1, so 0 dbFS
     assert times[0] == 0
+
+
+def test_level_peak_level_intersample_peak():
+    """Test that oversampling is actually applied by checking that the
+    peak level of a signal with intersample peaks is higher than the
+    peak level of the same signal without oversampling.
+    """
+    s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
+
+    level_no_over, time_no_over = pf.level.peak_level(s, "Z", None)
+    level_with_over, time_with_over = pf.level.peak_level(s, "Z", 2)
+
+    assert level_with_over > level_no_over
+    # peak must be at the 4th sample (0-indexed)
+    assert time_no_over == 0.03
+    # after oversampling, the peak is at the 7th sample, i.e. between the
+    # 3rd and 4th sample at the original sampling rate
+    assert time_with_over == 0.035 # at 7th oversampled sample
