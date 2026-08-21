@@ -102,6 +102,7 @@ def time_weighted_level(signal,
     r"""
     Calculates frequency and time weighted sound pressure levels for
     each sample of a signal.
+
     The levels are calculated per channel according to IEC 61672-1 [#]_.
     The returned array has the same shape as the input in the time domain,
     containing sound pressure levels in dB relative to the
