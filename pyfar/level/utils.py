@@ -102,6 +102,6 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     # normalize the integral
     normalized = weighted / time_constant / signal.sampling_rate
 
-    # turn energy to back to pressure
+    # convert energy back to pressure
     time_weighted_pressure = np.sqrt(normalized)
     return pf.TimeData(time_weighted_pressure, signal.times)
