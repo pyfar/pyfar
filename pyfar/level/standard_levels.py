@@ -156,9 +156,8 @@ def peak_level(
         Specifications", IEC, 2013.
 
     .. [#] International Telecommunication Union,
-        Recommendation ITU-R BS.1770-5 (11/2023): "Algorithms to measure
-        audio programme loudness and true-peak audio level".
-        https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-5-202311-I!!PDF-E.pdf
+        Recommendation ITU-R BS.1770-5 (11/2023): "`Algorithms to measure
+        audio programme loudness and true-peak audio level <https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-5-202311-I!!PDF-E.pdf>`_".
     """
     signal = _check_signal_type(signal)
     signal = _apply_frequency_weighting(signal, frequency_weighting)
