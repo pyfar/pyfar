@@ -196,7 +196,7 @@ def time_weighted_level(signal,
         >>>     24000, rms=0.001, sampling_rate=48000, seed=0)
         >>> signal = pf.dsp.pad_zeros(noise, 24000, "beginning")
         >>> signal = pf.dsp.pad_zeros(signal, 3 * 48000, "end")
-        >>> levels = pf.level.time_weighted_level(signal, "A", "F",
+        >>> levels = pf.level.time_weighted_level(signal, "Z", "F",
         >>>                                       reference_pressure=1)
         >>> noise_times = noise.times + 0.5
         >>> noise_levels = 10 * np.log10(noise.time[0]**2)
