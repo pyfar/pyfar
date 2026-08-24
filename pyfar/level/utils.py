@@ -32,11 +32,11 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
 
     .. math::
         p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{i=0}^{n} p^2[i]
-        e^{-(n-i)/(f_s \tau_\text{F})} }
+        e^{-(n-i)/(f_\text{s} \tau_\text{F})} }
 
     where :math:`n` is the sample index currently being calculated,
     :math:`p[i]` is the sound pressure at index :math:`i`,
-    :math:`f_s` is the sampling rate,
+    :math:`f_\text{s}` is the sampling rate,
     and :math:`\tau_\text{F}` is the time constant for the F weighting.
 
     .. note::
