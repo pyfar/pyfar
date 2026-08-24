@@ -115,6 +115,25 @@ def time_weighted_level(signal,
         \int_{-\infty}^{t} p_{\text{A}}^2(\xi) e^{-(t-\xi)/\tau_\text{F}} d\xi}
         {p_0^2}\right] \text{ dB}
 
+    where :math:`p_\text{A}` is the A-weighted sound pressure,
+    :math:`p_0` is the reference sound pressure,
+    :math:`t` is the time at which to calculate the level,
+    and :math:`\tau_\text{F}` is the time constant for the F weighting.
+
+    Because this function works on finite, discrete signals, this
+    formula becomes:
+
+    .. math::
+        L_\text{AF}[n] = 10 \log_{10} \left[
+            \frac{1/(f_\text{s}\tau_F) \sum_{i=0}^{n} p_\text{A}^2[i]
+            e^{-(n-i)/(f_\text{s} \tau_\text{F})} }{p_0^2}
+        \right] \text{ dB}
+
+    where :math:`n` is the sample index currently being calculated,
+    :math:`p_\text{A}[i]` is the A-weighted sound pressure at index :math:`i`,
+    :math:`f_\text{s}` is the sampling rate,
+    and :math:`\tau_\text{F}` is the time constant for the F weighting.
+
     Parameters
     ----------
     signal: Signal
