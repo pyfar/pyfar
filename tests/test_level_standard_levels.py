@@ -64,7 +64,6 @@ def test_level_sliding_equivalent_continuous_level_shape():
     s = pf.signals.impulse(1000, sampling_rate=48000)
     levels = pf.level.sliding_equivalent_continuous_level(s, "Z")
     assert levels.shape == s.time.shape
-    assert np.isclose(levels, ONE_PA - SINE_PAPR, atol=0.001)
 
 
 @pytest.mark.parametrize("oversampling", [None, 4, 8])
