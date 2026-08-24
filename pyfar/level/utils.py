@@ -15,19 +15,29 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     the time-weighted sound pressure by applying an exponentially decaying
     time weighting, but returns sound pressure values instead of levels.
 
-    The standard defines the time weighting F as:
+    The standard defines the F-weighted level as:
 
     .. math::
         L_\text{F}(t) = 10 \log_{10} \left[ \frac{(1 / \tau_{\text{F}})
         \int_{-\infty}^{t} p^2(\xi) e^{-(t-\xi)/\tau_\text{F}} d\xi}
         {p_0^2}\right] \text{ dB}
 
-    This function works on finite, discrete signals and only calculates the
-    weighted pressure:
+    where :math:`p` is the sound pressure,
+    :math:`p_0` is the reference sound pressure,
+    :math:`t` is the time at which to calculate the level,
+    and :math:`\tau_\text{F}` is the time constant for the F weighting.
+
+    In contrast, this function works on finite, discrete signals and
+    calculates the weighted pressure, equivalent to:
 
     .. math::
-        p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{0}^{N-1} p^2(n)
-        e^{-(t-n)/\tau_\text{F}} }
+        p_\text{F}[n] = \sqrt{ (1/\tau_F) \sum_{i=0}^{n} p^2[i]
+        e^{-(n-i)/(f_s \tau_\text{F})} }
+
+    where :math:`n` is the sample index currently being calculated,
+    :math:`p[i]` is the sound pressure at index :math:`i`,
+    :math:`f_s` is the sampling rate,
+    and :math:`\tau_\text{F}` is the time constant for the F weighting.
 
     .. note::
         While this function appears similar to functions in
