@@ -28,6 +28,7 @@ import pytest
     lambda s: pf.level.equivalent_continuous_level(s, "Z"),
     lambda s: pf.level.exposure_level(s, "Z"),
     lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.peak_level(s, "Z"),
     # other level functions go here once implemented
 ])
 def test_level_common_signal_parameter(signal, function):
@@ -42,6 +43,7 @@ FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
     lambda s, w: pf.level.equivalent_continuous_level(s, w),
     lambda s, w: pf.level.exposure_level(s, w),
     lambda s, w: pf.level.sliding_equivalent_continuous_level(s, w)[0][-1],
+    lambda s, w: pf.level.peak_level(s, w)[0],
     # other level functions go here once implemented
 ]
 
@@ -136,6 +138,7 @@ FUNCTION_WRAPPERS_REFERENCE_PRESSURE = [
     lambda s, r: pf.level.exposure_level(s, "Z", None, r),
     lambda s, r: pf.level.sliding_equivalent_continuous_level(
         s, "Z", None, 1, False, False, r)[0][-1],
+    lambda s, r: pf.level.peak_level(s, "Z", None, r)[0],
     # other level functions go here once implemented
 ]
 
@@ -157,3 +160,37 @@ def test_level_common_reference_pressure_errors(function):
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(ValueError, match="Reference pressure"):
         function(s, 0)
+
+
+### oversampling parameter tests ###
+
+FUNCTION_WRAPPERS_OVERSAMPLING = [
+    lambda s, o: pf.level.peak_level(s, "Z", o),
+]
+
+
+@pytest.mark.parametrize("oversampling", [None, 2, 3.5, 8])
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_OVERSAMPLING)
+def test_level_common_oversampling_shape(function, oversampling):
+    """Test that the oversampling parameter does not change the shape
+    of the output.
+    """
+    s = pf.signals.impulse(1000, sampling_rate=48000)
+    levels, times = function(s, oversampling)
+    assert levels.shape == s.cshape
+    assert times.shape == s.cshape
+
+
+@pytest.mark.parametrize(("oversampling", "error_type", "match"), [
+    ("4", TypeError, "number"),
+    (np.array([1, 2]), TypeError, "number"),
+    (-1, ValueError, "greater"),
+    (0, ValueError, "greater"),
+])
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_OVERSAMPLING)
+def test_level_common_oversampling_errors(
+    function, oversampling, error_type, match):
+    """Test that an invalid oversampling factor raises an error."""
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(error_type, match=match):
+        function(s, oversampling)
