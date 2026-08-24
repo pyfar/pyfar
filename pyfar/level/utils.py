@@ -102,8 +102,8 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     # the exponential function defined in the norm, but while the norm defines
     # it as an integral, we can implement it recursively as a scaling factor
     # for performance.
-    sample_duration = 1 / signal.sampling_rate
-    exp_func_decay = np.exp(-sample_duration / time_constant)
+    time_divisor = signal.sampling_rate * time_constant
+    exp_func_decay = np.exp(-1 / time_divisor)
 
     # this is effectively the same as looping over all samples and doing
     # > weighted[i] = exp_func_decay * weighted[i-1] + energies[i]
@@ -112,7 +112,7 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     weighted = scipy.signal.lfilter([1, 0], [1, -exp_func_decay], energies)
 
     # normalize the integral
-    normalized = weighted / time_constant / signal.sampling_rate
+    normalized = weighted / time_divisor
 
     # convert energy back to pressure
     time_weighted_pressure = np.sqrt(normalized)
