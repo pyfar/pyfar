@@ -26,6 +26,8 @@ import pytest
 ])
 @pytest.mark.parametrize("function", [
     lambda s: pf.level.equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.exposure_level(s, "Z"),
+    lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
     lambda s: pf.level.peak_level(s, "Z"),
     # other level functions go here once implemented
 ])
@@ -39,6 +41,8 @@ def test_level_common_signal_parameter(signal, function):
 
 FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
     lambda s, w: pf.level.equivalent_continuous_level(s, w),
+    lambda s, w: pf.level.exposure_level(s, w),
+    lambda s, w: pf.level.sliding_equivalent_continuous_level(s, w)[0][-1],
     lambda s, w: pf.level.peak_level(s, w)[0],
     # other level functions go here once implemented
 ]
@@ -84,6 +88,7 @@ def test_level_common_freq_weighting_errors(weighting, function):
 
 FUNCTION_WRAPPERS_BAND_FRACTIONS = [
     lambda s, n: pf.level.equivalent_continuous_level(s, "Z", n),
+    lambda s, n: pf.level.sliding_equivalent_continuous_level(s, "Z", n),
     # other level functions go here once implemented
 ]
 
@@ -129,8 +134,10 @@ def test_level_common_num_octave_band_fractions_errors(
 ### reference_pressure parameter tests ###
 
 FUNCTION_WRAPPERS_REFERENCE_PRESSURE = [
-    lambda s, r: pf.level.equivalent_continuous_level(
-        s, "Z", None, r),
+    lambda s, r: pf.level.equivalent_continuous_level(s, "Z", None, r),
+    lambda s, r: pf.level.exposure_level(s, "Z", None, r),
+    lambda s, r: pf.level.sliding_equivalent_continuous_level(
+        s, "Z", None, 1, False, False, r)[0][-1],
     lambda s, r: pf.level.peak_level(s, "Z", None, r)[0],
     # other level functions go here once implemented
 ]

@@ -22,6 +22,51 @@ def test_level_equivalent_continuous_level_known_value():
     assert np.isclose(levels, ONE_PA - SINE_PAPR, atol=0.001)
 
 
+@pytest.mark.parametrize(("duration", "level_increase"), [
+    (None, 0),  # signal is one second long, which is the unit length
+    (1, 0),     # unit length in the standard
+    (10, 10),   # 10 s => 10x the energy => 10 dB increase
+    (100, 20),  # 100 s => 100x the energy => 20 dB increase
+])
+def test_level_exposure_level_duration(duration, level_increase):
+    s = pf.signals.sine(1000, 44100, sampling_rate=44100)
+    levels = pf.level.exposure_level(s, "Z", duration)
+    # 94 dB is 1 Pa, -3.01 dB is the crest factor of sine signals
+    assert np.isclose(levels, ONE_PA - SINE_PAPR + level_increase, atol=0.001)
+
+
+@pytest.mark.parametrize("duration", [-1, 0, np.int32(-1)])
+def test_level_exposure_level_duration_value_errors(duration):
+    s = pf.signals.sine(1000, 44100, sampling_rate=44100)
+    with pytest.raises(ValueError, match="positive"):
+        pf.level.exposure_level(s, "Z", duration)
+
+
+@pytest.mark.parametrize("duration", ["1", np.array([1]), [1], complex(1, 0)])
+def test_level_exposure_level_duration_type_errors(duration):
+    s = pf.signals.sine(1000, 44100, sampling_rate=44100)
+    with pytest.raises(TypeError, match="number"):
+        pf.level.exposure_level(s, "Z", duration)
+
+
+def test_level_sliding_equivalent_continuous_level_known_value():
+    # phase prevents the first sample from being exactly zero, which would
+    # cause a division by zero in the level calculation
+    s = pf.signals.sine(1000, 44100, phase=0.01, sampling_rate=44100)
+    levels = pf.level.sliding_equivalent_continuous_level(
+        s, "Z", None, 1, False, False, 2e-5)
+    # with 1 second window size, the value at 1 second should be
+    # the same as the equivalent continuous level of the full signal
+    assert np.isclose(levels[0][-1], ONE_PA - SINE_PAPR, atol=0.001)
+
+
+def test_level_sliding_equivalent_continuous_level_shape():
+    s = pf.signals.impulse(1000, sampling_rate=48000)
+    levels = pf.level.sliding_equivalent_continuous_level(s, "Z")
+    assert levels.shape == s.time.shape
+    assert np.isclose(levels, ONE_PA - SINE_PAPR, atol=0.001)
+
+
 @pytest.mark.parametrize("oversampling", [None, 4, 8])
 def test_level_peak_level_known_value(oversampling):
     delay = 5432
