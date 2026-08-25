@@ -125,9 +125,10 @@ import re
 from copy import deepcopy
 
 import pyfar as pf
+from pyfar.classes._PyfarArithmetics import _PyfarArithmetics
 
 
-class Coordinates():
+class Coordinates(_PyfarArithmetics):
     r"""
     Create a Coordinates class object from a set of points in the
     right-handed cartesian coordinate system. See
@@ -1464,50 +1465,43 @@ class Coordinates():
         eq_comment = self._comment == other._comment
         return eq_data.all() & eq_comment
 
-    def __add__(self, other):
-        """Add two numbers/Coordinates objects."""
-        return _arithmetics(self, other, 'add')
-
-    def __radd__(self, other):
-        """Add two numbers/Coordinates objects."""
-        return _arithmetics(other, self, 'add')
-
-    def __sub__(self, other):
-        """Subtract two numbers/Coordinates objects."""
-        return _arithmetics(self, other, 'sub')
-
-    def __rsub__(self, other):
-        """Subtract two numbers/Coordinates objects."""
-        return _arithmetics(other, self, 'sub')
-
-    def __mul__(self, other):
-        """Multiply Coordinates object with number."""
-        return _arithmetics(self, other, 'mul')
-
-    def __rmul__(self, other):
-        """Multiply number with Coordinates object."""
-        return _arithmetics(other, self, 'mul')
-
-    def __div__(self, other):
-        """Divide Coordinates object with number."""
-        return _arithmetics(self, other, 'div')
-
-    def __truediv__(self, other):
-        """Divide Coordinates object with number."""
-        return _arithmetics(self, other, 'div')
-
-    def __rtruediv__(self, other):
-        """Divide number with Coordinates object."""
-        return _arithmetics(other, self, 'div')
-
-    def __rdiv__(self, other):
-        """Divide number with Coordinates object."""
-        return _arithmetics(other, self, 'div')
-
     def _check_empty(self):
         """Check if object is empty."""
         if self.cshape == (0,):
             raise ValueError('Object is empty.')
+    def _extract_data(self, other, mode, operation: str):
+        del mode
+        data = []
+        num_objects = 0
+        for obj in [self, other]:
+            if isinstance(obj, Coordinates):
+                data.append(obj.cartesian)
+                num_objects += 1
+            elif isinstance(obj, (int, float)):
+                data.append(np.array(obj))
+            else:
+                if operation == '_add':
+                    op = 'Addition'
+                elif operation == '_subtract':
+                    op = 'Subtraction'
+                elif operation == '_multiply':
+                    op = 'Multiplication'
+                elif operation == '_divide':
+                    op = 'Division'
+                raise TypeError(
+                    f"{op} is only possible with Coordinates or number.")
+
+        if operation in ['_multiply', '_divide'] and num_objects > 1:
+                raise TypeError(
+                "Multiplication and division are only possible with one "
+                "Coordinates object.")
+
+        # broadcast shapes
+        shape = np.broadcast_shapes(data[0].shape, data[1].shape)
+        new = pf.Coordinates()
+        new.cartesian = np.zeros(shape)
+
+        return (data[0], data[1], new)
 
 
 def dot(a, b):
@@ -1589,66 +1583,6 @@ def cross(a, b):
     new.y = a.z * b.x - a.x * b.z
     new.z = a.x * b.y - a.y * b.x
 
-    return new
-
-def _arithmetics(first, second, operation):
-    """Add or Subtract two Coordinates objects, numbers or arrays.
-
-    Parameters
-    ----------
-    first : Coordinates, number, array
-        first operand
-    second : Coordinates, number, array
-        second operand
-    operation : 'add', 'sub', 'mul', 'div'
-        whether to add or subtract the two objects
-
-    Returns
-    -------
-    new : Coordinates
-        result of the operation
-
-    """
-    # convert data
-    data = []
-    num_objects = 0
-    for obj in [first, second]:
-        if isinstance(obj, Coordinates):
-            data.append(obj.cartesian)
-            num_objects += 1
-        elif isinstance(obj, (int, float)):
-            data.append(np.array(obj))
-        else:
-            if operation == 'add':
-                op = 'Addition'
-            elif operation == 'sub':
-                op = 'Subtraction'
-            elif operation == 'mul':
-                op = 'Multiplication'
-            elif operation == 'div':
-                op = 'Division'
-            raise TypeError(
-                f"{op} is only possible with Coordinates or number.")
-
-    if operation in ['mul', 'div'] and num_objects > 1:
-        raise TypeError(
-            "Multiplication and division are only possible with one "
-            "Coordinates object.")
-
-    # broadcast shapes
-    shape = np.broadcast_shapes(data[0].shape, data[1].shape)
-    new = pf.Coordinates()
-    new.cartesian = np.zeros(shape)
-
-    # perform operation
-    if operation == 'add':
-        new.cartesian = data[0] + data[1]
-    elif operation == 'sub':
-        new.cartesian = data[0] - data[1]
-    elif operation == 'mul':
-        new.cartesian = data[0] * data[1]
-    elif operation == 'div':
-        new.cartesian = data[0] / data[1]
     return new
 
 

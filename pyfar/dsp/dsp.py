@@ -2830,9 +2830,8 @@ def normalize(signal, reference_method='max', domain='auto',
     # Apply normalization in the current domain of the signal. This avoids
     # unnecessary conversions between the time and frequency domain which
     # introduce numerical errors.
-    normalized_signal = pyfar.divide(
-        (pyfar.multiply((signal.copy(), target), domain=signal.domain),
-         reference_norm), domain=signal.domain)
+    normalized_signal = (signal.multiply(target, mode=signal.domain)).divide(
+        reference_norm, mode=signal.domain)
 
     # Restore original domain of Signals. This only affects edge cases where
     # normalization is not applied in the signal's native domain.

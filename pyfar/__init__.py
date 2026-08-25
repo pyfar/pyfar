@@ -8,8 +8,7 @@ __version__ = '0.8.0'
 
 
 from .classes.audio import Signal, TimeData, FrequencyData
-from .classes.audio import (add, subtract, multiply, divide, power,
-                            matrix_multiplication)
+from .classes.audio import matrix_multiplication
 from .classes.coordinates import Coordinates
 from .classes.coordinates import (deg2rad, rad2deg, dot, cross)
 from .classes.orientations import Orientations

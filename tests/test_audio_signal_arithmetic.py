@@ -13,7 +13,7 @@ def test_add_two_signals_time():
     x = Signal([1, 0, 0], 44100)
 
     # time domain
-    y = pf.add((x, x), 'time')
+    y = x.add(x, mode="time")
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
     # check result
@@ -28,7 +28,7 @@ def test_add_two_signals_time_complex():
     x = Signal([1, 0, 0], 44100, is_complex=True)
 
     # time domain
-    y = pf.add((x, x), 'time')
+    y = x.add(x, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -46,7 +46,7 @@ def test_add_two_signal_time_real_and_complex():
     y = Signal([1, 0, 0], 44100, is_complex=False)
 
     # time domain
-    z = pf.add((x, y), 'time')
+    z = x.add(y, mode="time")
 
     # check if old signals did not change
     npt.assert_allclose(x.time, np.atleast_2d([1+0j, 0+0j, 0+0j]), atol=1e-15)
@@ -66,7 +66,7 @@ def test_add_two_signals_freq():
     x = Signal([1, 0, 0], 44100)
 
     # frequency domain
-    y = pf.add((x, x), 'freq')
+    y = x.add(x, mode="freq")
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
     # check result
@@ -81,7 +81,7 @@ def test_add_two_signals_freq_complex():
     x = Signal([1, 0, 0], 44100, is_complex=True)
 
     # frequency domain
-    y = pf.add((x, x), 'freq')
+    y = x.add(x, mode="freq")
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1 + 0j, 0 + 0j, 0 + 0j]),
                         atol=1e-15)
@@ -101,7 +101,7 @@ def test_add_two_signals_freq_real_and_complex():
     y = Signal([1, 0, 0], 44100, is_complex=False)
 
     # frequency domain
-    z = pf.add((x, x), 'freq')
+    z = x.add(y, mode="freq")
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1 + 0j, 0 + 0j, 0 + 0j]),
                         atol=1e-15)
@@ -119,7 +119,7 @@ def test_add_two_signals_freq_real_and_complex():
 def test_add_three_signals():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, x, x), 'time')
+    y = x.add(x, x, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -134,7 +134,7 @@ def test_add_three_signals():
 def test_add_signal_and_number():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, 1), 'time')
+    y = x.add(1, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -149,7 +149,7 @@ def test_add_signal_and_number():
 def test_add_signal_and_complex_number():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, 1 + 1j), 'time')
+    y = x.add(1 + 1j, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -166,7 +166,7 @@ def test_add_signal_and_complex_number():
 def test_add_number_and_signal():
     # generate and add signals
     x = Signal([1, 0, 0], 44100)
-    y = pf.add((1, x), 'time')
+    y = x.add(1, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -181,7 +181,7 @@ def test_add_number_and_signal():
 def test_add_number_and_complex_signal():
     # generate and add signals
     x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = pf.add((1, x), 'time')
+    y = x.add(1, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -198,7 +198,7 @@ def test_add_number_and_complex_signal():
 def test_add_number_and_complex_signal_freq():
     # generate and add signals
     x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = pf.add((1, x), 'freq')
+    y = x.add(1, mode="freq")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -214,7 +214,7 @@ def test_add_number_and_complex_signal_freq():
 def test_add_time_data_and_number():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, 1), 'time')
+    y = x.add(1, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -229,7 +229,7 @@ def test_add_time_data_and_number():
 def test_add_time_data_and_time_data():
     # generate and add signals
     x = TimeData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, x), 'time')
+    y = x.add(x, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -246,7 +246,7 @@ def test_add_time_data_and_number_wrong_domain():
     x = TimeData([1, 0, 0], [0, .1, .5])
     match = "The domain must be 'time'."
     with pytest.raises(ValueError, match=match):
-        pf.add((x, 1), 'freq')
+        x.add(1, mode='freq')
 
 
 def test_add_time_data_and_number_wrong_times():
@@ -255,16 +255,16 @@ def test_add_time_data_and_number_wrong_times():
     y = TimeData([1, 0, 0], [0, .1, .4])
     match = 'The times does not match.'
     with pytest.raises(ValueError, match=match):
-        pf.add((x, y), 'time')
+        x.add(y, mode="time")
 
 
 def test_add_frequency_data_and_number():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, 1), 'freq')
+    y = x.add(1, mode="freq")
     match = "The domain must be 'freq'."
     with pytest.raises(ValueError, match=match):
-        pf.add((x, 1), 'time')
+        y = x.add(1, mode="time")
 
     # check if old signal did not change
     npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -279,7 +279,7 @@ def test_add_frequency_data_and_number():
 def test_add_frequency_data_and_frequency_data():
     # generate and add signals
     x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, x), 'freq')
+    y = x.add(x, mode="freq")
 
     # check if old signal did not change
     npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
@@ -296,7 +296,7 @@ def test_add_frequency_data_and_number_wrong_domain():
     x = FrequencyData([1, 0, 0], [0, .1, .5])
     match = "The domain must be 'freq'."
     with pytest.raises(ValueError, match=match):
-        pf.add((x, 1), 'time')
+        x.add(1, mode="time")
 
 
 def test_add_frequency_data_and_number_wrong_frequencies():
@@ -305,20 +305,20 @@ def test_add_frequency_data_and_number_wrong_frequencies():
     y = FrequencyData([1, 0, 0], [0, .1, .4])
     match = 'The frequencies do not match.'
     with pytest.raises(ValueError, match=match):
-        pf.add((x, y), 'freq')
+        x.add(y, mode="freq")
 
 
 def test_add_array_and_signal():
     # shapes match
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    z = pf.add((x, y))
+    z = y.add(x, mode="freq")
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
     # broadcasting
     x = np.arange(3 * 4).reshape((3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    z = pf.add((x, y))
+    z = y.add(x, mode="freq")
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
 
@@ -327,13 +327,13 @@ def test_add_signal_and_array():
     # shapes match
     x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
-    z = pf.add((x, y))
+    z = x.add(y, mode="freq")
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
     # broadcasting
     x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     y = np.arange(3 * 4).reshape((3, 4))
-    z = pf.add((x, y))
+    z = x.add(y, mode="freq")
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
 
@@ -342,7 +342,7 @@ def test_add_arrays():
     # With broadcasting
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
-    z = pf.add((x, y))
+    z = x.add(y, mode="freq")
     npt.assert_allclose(
         z, x + y, atol=1e-15)
 
@@ -361,7 +361,7 @@ def test_subtraction():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = pf.subtract((x, y), 'time')
+    z = x.subtract(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([1, -1, 0]), atol=1e-15)
@@ -371,7 +371,7 @@ def test_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'time')
+    z = x.multiply(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0, 0, 0]), atol=1e-15)
@@ -381,7 +381,7 @@ def test_complex_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100, is_complex=True)
     y = Signal([0, 1, 0], 44100, is_complex=True)
-    z = pf.multiply((x, y), 'time')
+    z = x.multiply(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
@@ -392,7 +392,7 @@ def test_complex_real_multiplication():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100, is_complex=True)
-    z = pf.multiply((x, y), 'time')
+    z = x.multiply(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
@@ -400,7 +400,7 @@ def test_complex_real_multiplication():
 
     x = Signal([1, 0, 0], 44100, is_complex=True)
     y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'time')
+    z = x.multiply(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
@@ -411,7 +411,7 @@ def test_complex_real_multiplication_freq():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100, is_complex=True)
-    z = pf.multiply((x, y), 'freq')
+    z = x.multiply(y, mode="freq")
 
     # check result
     x.complex = True
@@ -420,7 +420,7 @@ def test_complex_real_multiplication_freq():
 
     x = Signal([1, 0, 0], 44100, is_complex=True)
     y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'freq')
+    z = x.multiply(y, mode="freq")
 
     # check result
     y.complex = True
@@ -432,7 +432,7 @@ def test_division():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([2, 2, 2], 44100)
-    z = pf.divide((x, y), 'time')
+    z = x.divide(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0.5, 0, 0]), atol=1e-15)
@@ -442,7 +442,7 @@ def test_complex_division():
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([2, 2, 2], 44100, is_complex=True)
-    z = pf.divide((x, y), 'time')
+    z = x.divide(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0.5 + 0j, 0 + 0j, 0 + 0j]),
@@ -453,7 +453,7 @@ def test_power():
     # only test one case - everything else is tested below
     x = Signal([2, 1, 0], 44100)
     y = Signal([2, 2, 2], 44100)
-    z = pf.power((x, y), 'time')
+    z = x.power(y, mode="time")
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([4, 1, 0]), atol=1e-15)
@@ -815,13 +815,13 @@ def test_array_broadcasting_errors():
     x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     with pytest.raises(ValueError, match="array dimension"):
-        pf.add((x, y), domain='time')
+        y.add(x, mode='time')
 
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
     match = 'operands could not be broadcast together with shapes'
     with pytest.raises(ValueError, match=match):
-        pf.add((x, y))
+        y.add(x, mode='time')
 
 
 def test_matrix_multiplication_default():
@@ -1040,25 +1040,3 @@ def test_matrix_multiplication_undocumented():
     y = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
     pf.matrix_multiplication(
         (x, y), domain='time', axes=[(-2, -1), (-3, -2), (-2, -1)])
-
-
-@pytest.mark.parametrize('audio_object', [
-    pf.Signal([1, -1, 1], 1, fft_norm='none'),
-    pf.Signal([1, -1, 1], 1, fft_norm='rms'),
-    pf.FrequencyData([1, -1, 1], [0, 1, 3]),
-    pf.TimeData([1, -1, 1], [1, 2, 3])])
-@pytest.mark.parametrize('operation', [
-    pf.add, pf.subtract, pf.multiply, pf.divide, pf.power])
-def test_audio_object_and_number(audio_object, operation):
-    """
-    Test if arithmetic operations work regardless of the fft norm and
-    audio object type if only one audio object is involved.
-    """
-
-    domain = 'time' if type(audio_object) is pf.TimeData else 'freq'
-
-    result = operation((1, audio_object), domain=domain)
-    assert type(result) is type(audio_object)
-
-    result = operation((audio_object, 1), domain=domain)
-    assert type(result) is type(audio_object)
