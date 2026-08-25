@@ -16,6 +16,25 @@ import numpy as np
         1.0,
     ],
 )
+def test_arithmetic_coordinates_add(other):
+    coords = pf.Coordinates([0, 1], [0, 1], [0, 1])
+    new = coords + other
+    desired = pf.Coordinates([1, 2], [1, 2], [1, 2])
+    npt.assert_array_equal(new.cartesian, desired.cartesian)
+
+
+@pytest.mark.parametrize(
+    "other",
+    [
+        # 1d coords
+        pf.Coordinates(1, 1, 1),
+        # 2d coords
+        pf.Coordinates([1, 1], [1, 1], [1, 1]),
+        # numbers
+        1,
+        1.0,
+    ],
+)
 @pytest.mark.parametrize(
     "operator",
     [

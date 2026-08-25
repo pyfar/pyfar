@@ -2,133 +2,163 @@ from pyfar.classes._PyfarArithmetics import _PyfarArithmetics
 import numpy as np
 import pytest
 from unittest.mock import patch
+import operator
 
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-@pytest.mark.parametrize('method', ['add', 'radd'])
-def test_add_radd(method):
-    """
-    Test the add and radd methods with a _PyfarArithmetics instance as other.
-    """
+def _extract_data(self, other, mode=None, operation=None):
+    """Provide an implementation for the @abstractmethod _extract_data()."""
+    del mode, operation
+    result = self.copy()
+    a = self._data
+    if hasattr(other, "_data"):
+        b = other._data
+    else:
+        b = other
+    return (a, b, result)
+
+
+@pytest.fixture()
+def _fixture_arithmetics():
+    """Patch the abstract methods of _PyfarArithmetics."""
+    with patch.multiple(_PyfarArithmetics, __abstractmethods__=set()), \
+         patch.object(_PyfarArithmetics, "_extract_data", _extract_data):
+        yield
+
+
+@pytest.fixture()
+def instances(_fixture_arithmetics):
+    """Create instances of _PyfarArithmetics for testing."""
     data = np.ones((2, 3, 4))
-    allowed_classes = (_PyfarArithmetics,)
-    instance1, instance2 = _PyfarArithmetics(), _PyfarArithmetics()
-
-    instance1._data = data
-    instance2._data = data
-
-    instance1._allowed_datatypes_add_sub = allowed_classes
-    instance2._allowed_datatypes_add_sub = allowed_classes
-
-    result = getattr(instance1, method)(instance2)
-
-    assert (result._data == (np.ones((2, 3, 4)) + np.ones((2, 3, 4)))).all()
+    a, b = _PyfarArithmetics(), _PyfarArithmetics()
+    a._data = data
+    b._data = 3 * data
+    return a, b
 
 
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-@pytest.mark.parametrize('method', ['add', 'radd'])
-def test_add_radd_with_array(method):
-    """Test the add and radd methods with an array as other."""
-    data = np.ones((2, 3, 4))
-    allowed_classes = (np.ndarray,)
-    instance1 = _PyfarArithmetics()
+@pytest.mark.parametrize("swap", [False, True])
+def test_add(_fixture_arithmetics,  instances, swap):
+    """Test the add method with a _PyfarArithmetics instance as other."""
+    instance1, instance2 = instances
+    if swap:
+        result = instance1.add(instance2)
+    else:
+        result = instance2.add(instance1)
+
+    assert (result._data == (np.ones((2, 3, 4)) + 3*np.ones((2, 3, 4)))).all()
+
+
+@pytest.mark.parametrize("swap", [False, True])
+def test_subtract(_fixture_arithmetics, instances, swap):
+    """Test the subtract method with a _PyfarArithmetics instance as other."""
+    instance1, instance2 = instances
+    if swap:
+        result = instance1.subtract(instance2)
+        assert (result._data == (
+            np.ones((2, 3, 4)) - 3*np.ones((2, 3, 4)))).all()
+    else:
+        result = instance2.subtract(instance1)
+        assert (result._data == (
+            3*np.ones((2, 3, 4)) - np.ones((2, 3, 4)))).all()
+
+
+@pytest.mark.parametrize("swap", [False, True])
+def test_multiply(_fixture_arithmetics, instances, swap):
+    """Test the multiply method with a _PyfarArithmetics instance as other."""
+    instance1, instance2 = instances
+    if swap:
+        result = instance1.multiply(instance2)
+    else:
+        result = instance2.multiply(instance1)
+
+    assert (result._data == (np.ones((2, 3, 4)) * 3*np.ones((2, 3, 4)))).all()
+
+
+@pytest.mark.parametrize("swap", [False, True])
+def test_divide(_fixture_arithmetics, instances, swap):
+    """Test the divide method with a _PyfarArithmetics instance as other."""
+    instance1, instance2 = instances
+    if swap:
+        result = instance1.divide(instance2)
+        assert (result._data == (
+            np.ones((2, 3, 4)) / 3*np.ones((2, 3, 4)))).all()
+    else:
+        result = instance2.divide(instance1)
+        assert (result._data == (
+            3*np.ones((2, 3, 4)) / np.ones((2, 3, 4)))).all()
+
+
+@pytest.mark.parametrize(("method_name", "op"), [
+    ("add", operator.add),
+    ("subtract", operator.sub),
+    ("multiply", operator.mul),
+    ("divide", operator.truediv),
+    ("power", operator.pow),
+])
+def test_dunder_methods(_fixture_arithmetics, instances, method_name, op):
+    """Test the dunder methods with a _PyfarArithmetics instance as other."""
+    instance1, instance2  = instances
+    assert op(instance1, instance2) == getattr(
+        instance1, method_name)(instance2)
+
+
+@pytest.mark.parametrize(("method_name", "other", "expected"), [
+    ("add", 3, np.array(np.ones((2, 3, 4)) + 3)),
+    ("subtract", 3, np.array(np.ones((2, 3, 4)) - 3)),
+    ("multiply", 3, np.array(np.ones((2, 3, 4)) * 3)),
+    ("divide", 3, np.array(np.ones((2, 3, 4)) / 3)),
+    ("power", 3, np.array(np.ones((2, 3, 4)) ** 3)),
+    ("add", 3*np.ones((2, 3, 4)),
+        np.array(np.ones((2, 3, 4)) + 3*np.ones((2, 3, 4)))),
+    ("subtract", 3*np.ones((2, 3, 4)),
+        np.array(np.ones((2, 3, 4)) - 3*np.ones((2, 3, 4)))),
+    ("multiply", 3*np.ones((2, 3, 4)),
+        np.array(np.ones((2, 3, 4)) * 3*np.ones((2, 3, 4)))),
+    ("divide", 3*np.ones((2, 3, 4)),
+        np.array(np.ones((2, 3, 4)) / 3*np.ones((2, 3, 4)))),
+    ("power", 3*np.ones((2, 3, 4)),
+        np.array(np.ones((2, 3, 4)) ** 3*np.ones((2, 3, 4)))),
+])
+def test_all_methods_with_array_and_int(_fixture_arithmetics, instances,
+                                   method_name, other, expected):
+    """Test the dunder methods with a numpy array and an int as other."""
+    instance1, _  = instances
+    instance2 = other
+    actual = getattr(instance1, method_name)(instance2)
+    assert (actual._data == expected).all()
+
+
+@pytest.mark.parametrize(("method_name", "op"), [
+    ("add", operator.add),
+    ("subtract", operator.sub),
+    ("multiply", operator.mul),
+    ("divide", operator.truediv),
+    ("power", operator.pow),
+])
+def test_dunder_methods_with_array(_fixture_arithmetics, instances,
+                                   method_name, op):
+    """Test the dunder methods with a numpy array as other."""
+    instance1, _  = instances
     instance2 = np.ones((2, 3, 4))
-
-    instance1._data = data
-    instance1._allowed_datatypes_add_sub = allowed_classes
-
-    result = getattr(instance1, method)(instance2)
-
-    assert (result._data == (np.ones((2, 3, 4)) + np.ones((2, 3, 4)))).all()
+    assert op(instance1, instance2) == getattr(
+        instance1, method_name)(instance2)
 
 
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-@pytest.mark.parametrize('method', ['sub', 'rsub'])
-def test_sub_rsub(method):
-    """
-    Test the sub and rsub methods with a _PyfarArithmetics instance as other.
-    """
-    data = np.ones((2, 3, 4))
-    allowed_classes = (_PyfarArithmetics,)
-    instance1, instance2 = _PyfarArithmetics(), _PyfarArithmetics()
+@pytest.mark.parametrize(("expected", "op"), [
+    (np.array(np.ones((2, 3, 4)) + 3*np.ones((2, 3, 4))),
+                  operator.add),
+    ((np.ones((2, 3, 4)) - 3*np.ones((2, 3, 4))),
+                  operator.sub),
+    ((np.ones((2, 3, 4)) * 3*np.ones((2, 3, 4))),
+                  operator.mul),
+    ((np.ones((2, 3, 4)) / 3*np.ones((2, 3, 4))),
+                  operator.truediv),
+    ((np.ones((2, 3, 4)) ** 3*np.ones((2, 3, 4))),
+                  operator.pow),
+])
+def test_reflected_dunder_methods_with_array(_fixture_arithmetics, instances,
+                                              op, expected):
+    """Test the reflected dunder methods with a numpy array as other."""
+    _, instance2= instances
+    instance1 = np.ones((2, 3, 4))
+    actual = op(instance1, instance2)
+    assert (actual._data == expected).all()
 
-    instance1._data = data
-    instance2._data = data
-
-    instance1._allowed_datatypes_add_sub = allowed_classes
-    instance2._allowed_datatypes_add_sub = allowed_classes
-
-    result =  getattr(instance1, method)(instance2)
-    assert (result._data == (np.ones((2, 3, 4)) - np.ones((2, 3, 4)))).all()
-
-
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-@pytest.mark.parametrize('method', ['sub', 'rsub'])
-def test_sub_rsub_with_array(method):
-    """Test the sub and rsub methods with an array as other."""
-    data = np.ones((2, 3, 4))
-    allowed_classes = (np.ndarray,)
-    instance1 = _PyfarArithmetics()
-    instance2 = np.ones((2, 3, 4))
-
-    instance1._data = data
-    instance1._allowed_datatypes_add_sub = allowed_classes
-
-    result = getattr(instance1, method)(instance2)
-
-    assert (result._data == (np.ones((2, 3, 4)) - np.ones((2, 3, 4)))).all()
-
-
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-def test_sub_rsub_difference():
-    """Test the difference between the sub and rsub methods."""
-    data = np.array([[1, -2], [3, 4]])
-
-    allowed_classes = (np.ndarray,)
-    instance1 = _PyfarArithmetics()
-    instance2 = np.array([[-1, 0], [-4, 1]])
-
-    instance1._data = data
-    instance1._allowed_datatypes_add_sub = allowed_classes
-
-    result1 = instance1.sub(instance2)
-    result2 = instance1.rsub(instance2)
-
-    assert (result1._data == -result2._data).all()
-
-
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-@pytest.mark.parametrize('method', ['add', 'radd', 'sub', 'rsub'])
-def test_additive_methods_type_error(method):
-    """
-    Test the methods with an instance of an invalid datatype, which should
-    cause a type error.
-    """
-    data = np.ones((2, 3, 4))
-    allowed_classes = (int, float, _PyfarArithmetics)
-    instance1 = _PyfarArithmetics()
-    instance2 = "cat"
-
-    instance1._data = data
-    instance1._allowed_datatypes_add_sub = allowed_classes
-
-    with pytest.raises(TypeError,  match="Incompatible object for additive"):
-        getattr(instance1, method)(instance2)
-
-
-@patch.multiple(_PyfarArithmetics, __abstractmethods__=set())
-@pytest.mark.parametrize('method', ['add', 'radd', 'sub', 'rsub'])
-def test_additive_methods_value_error(method):
-    """
-    Test the methods with data of different shapes, which should cause
-    an value error.
-    """
-    data = np.ones((2, 3, 4))
-    allowed_classes = (np.ndarray)
-    instance1 = _PyfarArithmetics()
-    instance2 =  np.ones((2, 4))
-
-    instance1._data = data
-    instance1._allowed_datatypes_add_sub = allowed_classes
-
-    with pytest.raises(ValueError, match="Incompatible shapes for additive"):
-        getattr(instance1, method)(instance2)

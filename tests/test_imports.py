@@ -39,9 +39,4 @@ def test_import_submodules():
 
 
 def test_import_functions():
-    from pyfar import add                    # noqa: F401
-    from pyfar import subtract               # noqa: F401
-    from pyfar import multiply               # noqa: F401
-    from pyfar import divide                 # noqa: F401
-    from pyfar import power                  # noqa: F401
     from pyfar import matrix_multiplication  # noqa: F401

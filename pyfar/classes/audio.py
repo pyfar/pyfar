@@ -35,6 +35,7 @@ import deepdiff
 import numpy as np
 import pyfar.dsp.fft as fft
 from typing import Callable
+from pyfar.classes._PyfarArithmetics import _PyfarArithmetics
 
 
 class _Audio():
@@ -304,7 +305,96 @@ class _Audio():
                 "least one non-numerical value (inf or NaN)"))
 
 
-class TimeData(_Audio):
+    def _extract_data(self, other, domain: str, operation:str):
+        """Extract the data from self and other for arithmetic operations."""
+        result = self.copy()
+        division = True if operation == "_divide" else False
+        matmul = True if operation == "_matrix_multiplication" else False
+        sampling_rate, _, fft_norm, _, _, audio_type, \
+            cshape, contains_complex = _assert_match_for_arithmetic(
+                (self, other), domain, division, matmul)
+
+        a = _get_arithmetic_data(
+            self, domain, cshape, matmul, audio_type, contains_complex)
+        b = _get_arithmetic_data(
+            other, domain, cshape, matmul, audio_type, contains_complex)
+
+        if hasattr(result, "sampling_rate"):
+            result.sampling_rate = sampling_rate
+        if hasattr(result, "_complex"):
+            result._complex = contains_complex
+        if hasattr(result, "_fft_norm"):
+            result._fft_norm = fft_norm
+        result._domain = domain
+
+        return (a, b, result)
+
+
+    def __add__(self, data):
+        """Return self + data."""
+        return self.add(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __radd__(self, data):
+        """Return data + self."""
+        return self.add(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __sub__(self, data):
+        """Return self - data."""
+        return self.subtract(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __rsub__(self, data):
+        """Return data - self."""
+        return (self.subtract(
+            data, mode="time" if self.domain == "time" else "freq"))*-1
+
+    def __mul__(self, data):
+        """Return self * data."""
+        return self.multiply(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __rmul__(self, data):
+        """Return data * self."""
+        return self.multiply(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __truediv__(self, data):
+        """Return self / data."""
+        return self.divide(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __rtruediv__(self, data):
+        """Return data / self."""
+        return (self.divide(
+            data, mode="time" if self.domain == "time" else "freq"))**(-1)
+
+    def __pow__(self, data):
+        """Return self ** data."""
+        return self.power(
+            data, mode="time" if self.domain == "time" else "freq")
+
+    def __rpow__(self, data):
+        """Return data ** self."""
+        a, b, result = self._extract_data(
+            data, domain="time" if self.domain == "time" else "freq",
+            operation="_power")
+        result._data = b**a
+        return result
+
+    def __matmul__(self, data):
+        """Matrix multiplication of two Audio objects."""
+        return matrix_multiplication(
+            (self, data), domain="time" if self.domain == "time" else "freq")
+
+    def __rmatmul__(self, data):
+        """Matrix multiplication of two Audio objects."""
+        return matrix_multiplication(
+            (data, self), domain="time" if self.domain == "time" else "freq")
+
+
+class TimeData(_Audio, _PyfarArithmetics):
     """
     Create audio object with time data and times.
 
@@ -463,58 +553,8 @@ class TimeData(_Audio):
         obj.__dict__.update(obj_dict)
         return obj
 
-    def __add__(self, data):
-        """Add two TimeData objects."""
-        return add((self, data), 'time')
 
-    def __radd__(self, data):
-        """Add two TimeData objects."""
-        return add((data, self), 'time')
-
-    def __sub__(self, data):
-        """Subtract two TimeData objects."""
-        return subtract((self, data), 'time')
-
-    def __rsub__(self, data):
-        """Subtract two TimeData objects."""
-        return subtract((data, self), 'time')
-
-    def __mul__(self, data):
-        """Multiply two TimeData objects."""
-        return multiply((self, data), 'time')
-
-    def __rmul__(self, data):
-        """Multiply two TimeData objects."""
-        return multiply((data, self), 'time')
-
-    def __truediv__(self, data):
-        """Divide two TimeData objects."""
-        return divide((self, data), 'time')
-
-    def __rtruediv__(self, data):
-        """Divide two TimeData objects."""
-        return divide((data, self), 'time')
-
-    def __pow__(self, data):
-        """Raise two TimeData objects to the power."""
-        return power((self, data), 'time')
-
-    def __rpow__(self, data):
-        """Raise two TimeData objects to the power."""
-        return power((data, self), 'time')
-
-    def __matmul__(self, data):
-        """Matrix multiplication of two TimeData objects."""
-        return matrix_multiplication(
-            (self, data), 'time')
-
-    def __rmatmul__(self, data):
-        """Matrix multiplication of two TimeData objects."""
-        return matrix_multiplication(
-            (data, self), 'time')
-
-
-class FrequencyData(_Audio):
+class FrequencyData(_Audio, _PyfarArithmetics):
     """
     Create audio object with frequency data and frequencies.
 
@@ -654,46 +694,6 @@ class FrequencyData(_Audio):
             obj_dict['_comment'])
         obj.__dict__.update(obj_dict)
         return obj
-
-    def __add__(self, data):
-        """Add two FrequencyData objects."""
-        return add((self, data), 'freq')
-
-    def __radd__(self, data):
-        """Add two FrequencyData objects."""
-        return add((data, self), 'freq')
-
-    def __sub__(self, data):
-        """Subtract two FrequencyData objects."""
-        return subtract((self, data), 'freq')
-
-    def __rsub__(self, data):
-        """Subtract two FrequencyData objects."""
-        return subtract((data, self), 'freq')
-
-    def __mul__(self, data):
-        """Multiply two FrequencyData objects."""
-        return multiply((self, data), 'freq')
-
-    def __rmul__(self, data):
-        """Multiply two FrequencyData objects."""
-        return multiply((data, self), 'freq')
-
-    def __truediv__(self, data):
-        """Divide two FrequencyData objects."""
-        return divide((self, data), 'freq')
-
-    def __rtruediv__(self, data):
-        """Divide two FrequencyData objects."""
-        return divide((data, self), 'freq')
-
-    def __pow__(self, data):
-        """Raise two FrequencyData objects to the power."""
-        return power((self, data), 'freq')
-
-    def __rpow__(self, data):
-        """Raise two FrequencyData objects to the power."""
-        return power((data, self), 'freq')
 
     def __matmul__(self, data):
         """Matrix multiplication of two FrequencyData objects."""
@@ -1130,6 +1130,58 @@ class Signal(FrequencyData, TimeData):
         """
         return _SignalIterator(self._data.__iter__(), self)
 
+    def __add__(self, data):
+        """Return self + data."""
+        return self.add(data, mode="freq")
+
+    def __radd__(self, data):
+        """Return data + self."""
+        return self.add(data, mode="freq")
+
+    def __sub__(self, data):
+        """Return self - data."""
+        return self.subtract(data, mode="freq")
+
+    def __rsub__(self, data):
+        """Return data - self."""
+        return (self.subtract(data, mode="freq"))*-1
+
+    def __mul__(self, data):
+        """Return self * data."""
+        return self.multiply(data, mode="freq")
+
+    def __rmul__(self, data):
+        """Return data * self."""
+        return self.multiply(data, mode="freq")
+
+    def __truediv__(self, data):
+        """Return self / data."""
+        return self.divide(data, mode="freq")
+
+    def __rtruediv__(self, data):
+        """Return data / self."""
+        return (self.divide(data, mode="freq"))**(-1)
+
+    def __pow__(self, data):
+        """Return self ** data."""
+        return self.power(data, mode="freq")
+
+    def __rpow__(self, data):
+        """Return data ** self."""
+        a, b, result = self._extract_data(data, "freq", "_power")
+        result._data = b**a
+        return result
+
+    def __matmul__(self, data):
+        """Matrix multiplication of two Signal objects."""
+        return matrix_multiplication(
+            (self, data), domain="freq")
+
+    def __rmatmul__(self, data):
+        """Matrix multiplication of two Signal objects."""
+        return matrix_multiplication(
+            (data, self), domain="freq")
+
 
 class _SignalIterator(object):
     """Iterator for :py:func:`Signal`.
@@ -1154,238 +1206,6 @@ class _SignalIterator(object):
             raise RuntimeError("domain changes during iterations break stuff!")
 
         return self._iterated_sig
-
-
-def add(data: tuple, domain='freq'):
-    """Add pyfar audio objects, array likes, and scalars.
-
-    Pyfar audio objects are: :py:func:`Signal`, :py:func:`TimeData`, and
-    :py:func:`FrequencyData`.
-
-    Parameters
-    ----------
-    data : tuple of the form ``(data_1, data_2, ..., data_N)``
-        Data to be added. Can contain pyfar audio objects, array likes, and
-        scalars. Pyfar audio objects can not be mixed, e.g.,
-        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See below or
-        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
-        for possible combinations of Signal FFT normalizations.
-    domain : ``'time'``, ``'freq'``, optional
-        Flag to indicate if the operation should be performed in the time or
-        frequency domain. Frequency domain operations work on the raw
-        spectrum (see :py:func:`pyfar.dsp.fft.normalization`). The default is
-        ``'freq'``.
-
-    Returns
-    -------
-    results : Signal, TimeData, FrequencyData, numpy array
-        Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object.
-
-    Notes
-    -----
-    The shape of arrays included in data need to match or be broadcastable
-    into the ``cshape`` of the resulting audio object.
-
-    The `fft_norm` of the result is as follows
-
-    * If only one signal is involved in the operation, the result gets the same
-      normalization.
-    * If one signal has the FFT normalization ``'none'``, the results gets
-      the normalization of the other signal.
-    * If both signals have the same FFT normalization, the results gets the
-      same normalization.
-    * Other combinations raise an error.
-    """  # noqa: E501
-    return _arithmetic(data, domain, _add)
-
-
-def subtract(data: tuple, domain='freq'):
-    """Subtract pyfar audio objects, array likes, and scalars.
-
-    Pyfar audio objects are: :py:func:`Signal`, :py:func:`TimeData`, and
-    :py:func:`FrequencyData`.
-
-
-    Parameters
-    ----------
-    data : tuple of the form (data_1, data_2, ..., data_N)
-        Data to be subtracted. Can contain pyfar audio objects, array likes,
-        and scalars. Pyfar audio objects can not be mixed, e.g.,
-        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See below or
-        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
-        for possible combinations of Signal FFT normalizations.
-    domain : ``'time'``, ``'freq'``, optional
-        Flag to indicate if the operation should be performed in the time or
-        frequency domain. Frequency domain operations work on the raw
-        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
-        ``'freq'``.
-
-    Returns
-    -------
-    results : Signal, TimeData, FrequencyData, numpy array
-        Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object.
-
-    Notes
-    -----
-    The shape of arrays included in data need to match or be broadcastable
-    into the ``cshape`` of the resulting audio object.
-
-    The `fft_norm` of the result is as follows
-
-    * If only one signal is involved in the operation, the result gets the same
-      normalization.
-    * If one signal has the FFT normalization ``'none'``, the results gets
-      the normalization of the other signal.
-    * If both signals have the same FFT normalization, the results gets the
-      same normalization.
-    * Other combinations raise an error.
-    """  # noqa: E501
-    return _arithmetic(data, domain, _subtract)
-
-
-def multiply(data: tuple, domain='freq'):
-    """Multiply pyfar audio objects, array likes, and scalars.
-
-    Pyfar audio objects are: :py:func:`Signal`, :py:func:`TimeData`, and
-    :py:func:`FrequencyData`.
-
-
-    Parameters
-    ----------
-    data : tuple of the form (data_1, data_2, ..., data_N)
-        Data to be multiplied. Can contain pyfar audio objects, array likes,
-        and scalars. Pyfar audio objects can not be mixed, e.g.,
-        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See below or
-        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
-        for possible combinations of Signal FFT normalizations.
-    domain : ``'time'``, ``'freq'``, optional
-        Flag to indicate if the operation should be performed in the time or
-        frequency domain. Frequency domain operations work on the raw
-        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
-        ``'freq'``.
-
-    Returns
-    -------
-    results : Signal, TimeData, FrequencyData, numpy array
-        Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object.
-
-    Notes
-    -----
-    The shape of arrays included in data need to match or be broadcastable
-    into the ``cshape`` of the resulting audio object.
-
-    The `fft_norm` of the result is as follows
-
-    * If only one signal is involved in the operation, the result gets the same
-      normalization.
-    * If one signal has the FFT normalization ``'none'``, the results gets
-      the normalization of the other signal.
-    * If both signals have the same FFT normalization, the results gets the
-      same normalization.
-    * Other combinations raise an error.
-    """  # noqa: E501
-    return _arithmetic(data, domain, _multiply)
-
-
-def divide(data: tuple, domain='freq'):
-    """Divide pyfar audio objects, array likes, and scalars.
-
-    Pyfar audio objects are: :py:func:`Signal`, :py:func:`TimeData`, and
-    :py:func:`FrequencyData`.
-
-    Parameters
-    ----------
-    data : tuple of the form (data_1, data_2, ..., data_N)
-        Data to be divided. Can contain pyfar audio objects, array likes, and
-        scalars. Pyfar audio objects can not be mixed, e.g.,
-        :py:func:`TimeData` and :py:func:`FrequencyData` objects do not work
-        together. See below or
-        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
-        for possible combinations of Signal FFT normalizations.
-    domain : ``'time'``, ``'freq'``, optional
-        Flag to indicate if the operation should be performed in the time or
-        frequency domain. Frequency domain operations work on the raw
-        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
-        ``'freq'``.
-
-    Returns
-    -------
-    results : Signal, TimeData, FrequencyData, numpy array
-        Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object.
-
-    Notes
-    -----
-    The shape of arrays included in data need to match or be broadcastable
-    into the ``cshape`` of the resulting audio object.
-
-    The `fft_norm` of the result is as follows
-
-    * If only one signal is involved in the operation, the result gets the same
-      normalization.
-    * If the denominator signal has the FFT normalization ``'none'``, the
-      result gets the normalization of the numerator signal.
-    * If both signals have the same FFT normalization, the results gets the
-      normalization ``'none'``.
-    * Other combinations raise an error.
-    """  # noqa: E501
-    return _arithmetic(data, domain, _divide)
-
-
-def power(data: tuple, domain='freq'):
-    """Power of pyfar audio objects, array likes, and scalars.
-
-    Pyfar audio objects are: :py:func:`Signal`, :py:func:`TimeData`, and
-    :py:func:`FrequencyData`.
-
-    Parameters
-    ----------
-    data : tuple of the form (data_1, data_2, ..., data_N)
-        The base for which the power is calculated. Can contain pyfar audio
-        objects, array likes, and scalars. Pyfar audio objects can not be
-        mixed, e.g., :py:func:`TimeData` and :py:func:`FrequencyData` objects
-        do not work together. See below or
-        :ref:`arithmetic operations<gallery:/gallery/interactive/pyfar_arithmetics.ipynb#DFT-normalization-and-arithmetic-operations>`
-        for possible combinations of Signal FFT normalizations.
-    domain : ``'time'``, ``'freq'``, optional
-        Flag to indicate if the operation should be performed in the time or
-        frequency domain. Frequency domain operations work on the raw
-        spectrum (See :py:func:`pyfar.dsp.fft.normalization`). The default is
-        ``'freq'``.
-
-    Returns
-    -------
-    results : Signal, TimeData, FrequencyData, numpy array
-        Result of the operation as numpy array, if `data` contains only array
-        likes and numbers. Result as pyfar audio object if `data` contains an
-        audio object.
-
-    Notes
-    -----
-    The shape of arrays included in data need to match or be broadcastable
-    into the ``cshape`` of the resulting audio object.
-
-    The `fft_norm` of the result is as follows
-
-    * If only one signal is involved in the operation, the result gets the same
-      normalization.
-    * If one signal has the FFT normalization ``'none'``, the results gets
-      the normalization of the other signal.
-    * If both signals have the same FFT normalization, the results gets the
-      same normalization.
-    * Other combinations raise an error.
-    """  # noqa: E501
-    return _arithmetic(data, domain, _power)
 
 
 def matrix_multiplication(
@@ -1562,7 +1382,7 @@ def _arithmetic(data: tuple, domain: str, operation: Callable, **kwargs):
     from pyfar.classes.transmission_matrix import TransmissionMatrix
 
     # check input and obtain meta data of new signal
-    division = True if operation == _divide else False
+    division = False
     matmul = True if operation == _matrix_multiplication else False
     sampling_rate, n_samples, fft_norm, times, frequencies, audio_type, \
         cshape, contains_complex = _assert_match_for_arithmetic(
@@ -1789,26 +1609,6 @@ def _get_arithmetic_data(data, domain, cshape, matmul, audio_type,
             raise ValueError(
                 "array dimension is larger than the channel dimensions")
     return data_out
-
-
-def _add(a, b):
-    return a + b
-
-
-def _subtract(a, b):
-    return a - b
-
-
-def _multiply(a, b):
-    return a * b
-
-
-def _divide(a, b):
-    return a / b
-
-
-def _power(a, b):
-    return a**b
 
 
 def _matrix_multiplication(a, b, axes, audio_type):
