@@ -39,7 +39,7 @@ dependencies = [
     "soundfile>=0.11.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 deploy = [
     "twine",
     "wheel",
@@ -63,7 +63,11 @@ docs = [
     "sphinx-favicon",
     "sphinx-reredirects",
 ]
-dev = ["pyfar[deploy,tests,docs]"]
+dev = [
+    {include-group = "deploy"},
+    {include-group = "tests"},
+    {include-group = "docs"},
+]
 
 [project.urls]
 Tracker = "https://github.com/pyfar/pyfar/issues"
