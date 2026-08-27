@@ -2,6 +2,9 @@
 
 from .standard_levels import (
     equivalent_continuous_level,
+    exposure_level,
+    sliding_equivalent_continuous_level,
+    peak_level,
     time_weighted_level,
 )
 
@@ -11,6 +14,9 @@ from .utils import (
 
 __all__ = [
     "equivalent_continuous_level",
+    "exposure_level",
+    "sliding_equivalent_continuous_level",
+    "peak_level",
     "time_weighted_pressure",
     "time_weighted_level",
 ]
