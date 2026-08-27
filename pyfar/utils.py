@@ -230,3 +230,45 @@ def concatenate_channels(signals, caxis=0, broadcasting=False):
                            is_complex=is_result_complex)
     else:
         return pf.FrequencyData(data, signals[0].frequencies)
+
+
+def concatenate_bins(signals):
+    """
+    Merge multiple FrequencyData objects along the frequency axe.
+
+    Parameters
+    ----------
+    signals : tuple of FrequencyData
+        The signals to concatenate. All signals must have the same cshape.
+        the frequency bins get sorted and doubles are removed, the first
+        entry is used.
+
+    Returns
+    -------
+    merged : FrequencyData
+        The merged signal object.
+    """
+    # check input
+    if not isinstance(signals, (tuple, list)):
+        raise TypeError(
+            "Input must be a tuple or list of pf.FrequencyData objects.")
+
+    for signal in signals:
+        if not isinstance(signal, (pf.FrequencyData)):
+            raise TypeError(
+                "All input data must be of type pf.FrequencyData.")
+
+    # check matching meta data of input signals.
+    [signals[0]._assert_matching_meta_data(s) for s in signals]
+
+    # concatenate data
+    data = np.concatenate([s.freq for s in signals], axis=-1)
+    frequencies = np.concatenate([s.frequencies for s in signals], axis=-1)
+
+    # Sort frequency entries
+    idx = np.argsort(frequencies)
+    frequencies = frequencies[idx]
+    data = data[..., idx]
+
+    # return merged Signal
+    return pf.FrequencyData(data, frequencies)
