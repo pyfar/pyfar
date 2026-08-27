@@ -31,7 +31,6 @@ def test_level_equivalent_continuous_level_known_value():
 def test_level_exposure_level_duration(duration, level_increase):
     s = pf.signals.sine(1000, 44100, sampling_rate=44100)
     levels = pf.level.exposure_level(s, "Z", duration)
-    # 94 dB is 1 Pa, -3.01 dB is the crest factor of sine signals
     assert np.isclose(levels, ONE_PA - SINE_PAPR + level_increase, atol=0.001)
 
 
