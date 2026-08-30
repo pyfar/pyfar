@@ -231,3 +231,57 @@ def test_errors_check_fractional_octave_band_filter_tolerance():
     with pytest.raises(ValueError, match='num_fractions and frequency_range'):
         filter.check_fractional_octave_band_filter_tolerance(
             fractional_octave_band_filter, 1, (100, 4000), 2)
+
+
+def test_energy_matching_bandwidth_fractional_octaves():
+    """Test if the energy matching bandwidth of fractional octave band filters
+    is calculated correctly."""
+
+    sampling_rate = 44100
+    num_fractions = 1
+    frequency_range = (30, 16e3)
+
+    with pytest.warns(UserWarning, match='The upper frequency limit'):
+        fractional_octave_bands = filter.fractional_octave_bands(
+            None, num_fractions, sampling_rate, frequency_range, order=6)
+
+    fcs = filter.fractional_octave_frequencies(return_cutoff=True)[2]
+    bandwidth = np.abs(fcs[1] - fcs[0]) # in Hz
+
+    # Impulse response of the filter bank
+    n_samples = 2**17
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate)
+    filtered = fractional_octave_bands.process(impulse)
+
+    # Expected energy per band ≈ 2 * bandwidth / fs (Parseval).
+    expected_energy = bandwidth / sampling_rate * 2.0
+    filter_energy = np.squeeze(pyfar.dsp.energy(filtered))
+
+    np.testing.assert_allclose(expected_energy, filter_energy, rtol=1e-1)
+
+
+def test_energy_matching_bandwidth_reconstructing_fractional_octaves():
+    """Test if the energy matching bandwidth of fractional octave band filters
+    is calculated correctly."""
+
+    sampling_rate = 44100
+    num_fractions = 1
+    frequency_range = (30, 20e3)
+
+    fractional_octave_bands = filter.reconstructing_fractional_octave_bands(
+        None, num_fractions,
+        sampling_rate=sampling_rate, frequency_range=frequency_range)[0]
+
+    fcs = filter.fractional_octave_frequencies(return_cutoff=True)[2]
+    bandwidth = np.abs(fcs[1] - fcs[0]) # in Hz
+
+    # Impulse response of the filter bank
+    n_samples = 2**17
+    impulse = pyfar.signals.impulse(n_samples, sampling_rate=sampling_rate)
+    filtered = fractional_octave_bands.process(impulse)
+
+    # Expected energy per band ≈ 2 * bandwidth / fs (Parseval).
+    expected_energy = bandwidth[1:-1] / sampling_rate * 2.0
+    filter_energy = np.squeeze(pyfar.dsp.energy(filtered))[1:-1]
+
+    np.testing.assert_allclose(expected_energy, filter_energy, rtol=1e-1, atol=1e-1)
