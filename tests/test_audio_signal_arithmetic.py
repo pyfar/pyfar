@@ -5,114 +5,36 @@ import pytest
 import pyfar as pf
 import pyfar.classes.audio as signal
 from pyfar import Signal, TimeData, FrequencyData
+import operator
 
 
-# test adding two Signals
-def test_add_two_signals_time():
-    # generate test signal
-    x = Signal([1, 0, 0], 44100)
 
-    # time domain
-    y = pf.add((x, x), 'time')
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'time'
-    npt.assert_allclose(y.time, np.atleast_2d([2, 0, 0]), atol=1e-15)
-
-
-# test adding two complex time signals
-def test_add_two_signals_time_complex():
-    # generate test signal
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-
-    # time domain
-    y = pf.add((x, x), 'time')
+@pytest.mark.parametrize(("domain", "x_complex", "y_complex", "desired"), [
+    ('time', False, False, np.atleast_2d([2, 0, 0])),
+    ('time', True, True, np.atleast_2d([2 + 0j, 0, 0])),
+    ('time', True, False, np.atleast_2d([2 + 0j, 0 + 0j, 0 + 0j])),
+    ('freq', False, False, np.atleast_2d([2, 2])),
+    ('freq', True, True, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j])),
+    ('freq', True, False, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j])),
+])
+def test_add_two_signals_time_and_freq(domain, x_complex, y_complex, desired):
+    x = Signal([1, 0, 0], 44100, is_complex=x_complex)
+    y = Signal([1, 0, 0], 44100, is_complex=y_complex)
+    z = pf.add((x, y), domain)
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    # check result
-    assert isinstance(y, Signal)
-    assert y.complex
-    assert y.domain == 'time'
-    npt.assert_allclose(y.time, np.atleast_2d([2 + 0j, 0, 0]), atol=1e-15)
-
-
-# test adding two complex time signals
-def test_add_two_signal_time_real_and_complex():
-    # generate test signal
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = Signal([1, 0, 0], 44100, is_complex=False)
-
-    # time domain
-    z = pf.add((x, y), 'time')
-
-    # check if old signals did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1+0j, 0+0j, 0+0j]), atol=1e-15)
     npt.assert_allclose(y.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
 
     # check result
+    if domain == 'time':
+        npt.assert_allclose(z.time, desired, atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, desired, atol=1e-15)
+
     assert isinstance(z, Signal)
-    assert z.complex
-    assert z.domain == 'time'
-    npt.assert_allclose(z.time, np.atleast_2d([2 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
-
-
-# test adding two Signals
-def test_add_two_signals_freq():
-    # generate test signal
-    x = Signal([1, 0, 0], 44100)
-
-    # frequency domain
-    y = pf.add((x, x), 'freq')
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'freq'
-    npt.assert_allclose(y.freq, np.atleast_2d([2, 2]), atol=1e-15)
-
-
-# test adding two Signals
-def test_add_two_signals_freq_complex():
-    # generate test signal
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-
-    # frequency domain
-    y = pf.add((x, x), 'freq')
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
-
-    # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'freq'
-    assert y.complex
-    npt.assert_allclose(y.freq, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]),
-                        atol=1e-15)
-
-
-# test adding two Signals
-def test_add_two_signals_freq_real_and_complex():
-    # generate test signal
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = Signal([1, 0, 0], 44100, is_complex=False)
-
-    # frequency domain
-    z = pf.add((x, x), 'freq')
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
-    npt.assert_allclose(y.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-
-    # check result
-    assert isinstance(z, Signal)
-    assert z.domain == 'freq'
-    assert z.complex
-    npt.assert_allclose(z.freq, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]),
-                        atol=1e-15)
+    assert z.domain == domain
+    assert z.complex == (x_complex or y_complex)
 
 
 # test adding three signals
@@ -130,212 +52,96 @@ def test_add_three_signals():
     npt.assert_allclose(y.time, np.atleast_2d([3, 0, 0]), atol=1e-15)
 
 
-# test add Signals and number
-def test_add_signal_and_number():
-    # generate and add signals
-    x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, 1), 'time')
+
+@pytest.mark.parametrize(("y", "swap", "domain", "is_complex_x",
+                           "is_complex_y", "desired"), [
+    (1, False, 'time', False, False, np.atleast_2d([2, 1, 1])),
+    (1 + 1j, False, 'time', False, True,
+        np.atleast_2d([2 + 1j, 1 + 1j, 1 + 1j])),
+    (1, True, 'time', False, False, np.atleast_2d([2, 1, 1])),
+    (1, True, 'time', True, False, np.atleast_2d([2 + 0j, 1 + 0j, 1 + 0j])),
+    (1, True, 'freq', True, False, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j])),
+])
+def test_add_signal_and_number(y, swap, domain, is_complex_x, is_complex_y,
+                                desired):
+    x = Signal([1, 0, 0], 44100, is_complex=is_complex_x)
+    z = pf.add((y, x), domain) if swap else pf.add((x, y), domain)
 
     # check if old signal did not change
     npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
 
     # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'time'
-    npt.assert_allclose(y.time, np.atleast_2d([2, 1, 1]), atol=1e-15)
+    if domain == 'time':
+        npt.assert_allclose(z.time, desired, atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, desired, atol=1e-15)
+
+    assert isinstance(z, Signal)
+    assert z.domain == domain
+    assert z.complex == (is_complex_x or is_complex_y)
 
 
-# test add Signals and number
-def test_add_signal_and_complex_number():
-    # generate and add signals
-    x = Signal([1, 0, 0], 44100)
-    y = pf.add((x, 1 + 1j), 'time')
 
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
+@pytest.mark.parametrize(("x", "y", "domain", "desired_data",
+                           "desired_instances"), [
+    (TimeData([1, 0, 0], [0, .1, .5]), 1, 'time', np.atleast_2d([2, 1, 1]),
+        np.atleast_1d([0, .1, .5])),
+    (TimeData([1, 0, 0], [0, .1, .5]), TimeData([1, 0, 0], [0, .1, .5]),
+        'time', np.atleast_2d([2, 0, 0]), np.atleast_1d([0, .1, .5])),
+    (FrequencyData([1, 0, 0], [0, .1, .5]), 1, 'freq',
+        np.atleast_2d([2, 1, 1]), np.atleast_1d([0, .1, .5])),
+    (FrequencyData([1, 0, 0], [0, .1, .5]),
+        FrequencyData([1, 0, 0], [0, .1, .5]), 'freq',
+        np.atleast_2d([2, 0, 0]), np.atleast_1d([0, .1, .5])),
 
+])
+def test_add_time_data_frequency_data(x, y, domain, desired_data,
+                                       desired_instances):
+    z = pf.add((x, y), domain)
+
+    if domain == "time":
+        assert isinstance(z, TimeData)
+        x_data, x_instances = x.time, x.times
+        z_data, z_instances = z.time, z.times
+    else:
+        assert isinstance(z, FrequencyData)
+        x_data, x_instances = x.freq, x.frequencies
+        z_data, z_instances = z.freq, z.frequencies
+
+    npt.assert_allclose(x_data, np.atleast_2d([1, 0, 0]), atol=1e-15)
+    npt.assert_allclose(x_instances, np.atleast_1d([0, .1, .5]), atol=1e-15)
     # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'time'
-    assert y.complex
-    npt.assert_allclose(y.time, np.atleast_2d([2 + 1j, 1 + 1j, 1 + 1j]),
-                        atol=1e-15)
+    npt.assert_allclose(z_data, desired_data, atol=1e-15)
+    npt.assert_allclose(z_instances, desired_instances, atol=1e-15)
 
 
-# test add number and Signal
-def test_add_number_and_signal():
-    # generate and add signals
-    x = Signal([1, 0, 0], 44100)
-    y = pf.add((1, x), 'time')
 
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'time'
-    npt.assert_allclose(y.time, np.atleast_2d([2, 1, 1]), atol=1e-15)
-
-
-# test add number and complex signal
-def test_add_number_and_complex_signal():
-    # generate and add signals
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = pf.add((1, x), 'time')
-
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'time'
-    assert y.complex
-    npt.assert_allclose(y.time, np.atleast_2d([2 + 0j, 1 + 0j, 1 + 0j]),
-                        atol=1e-15)
-
-
-# test add number and complex signal
-def test_add_number_and_complex_signal_freq():
-    # generate and add signals
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = pf.add((1, x), 'freq')
-
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, Signal)
-    assert y.domain == 'freq'
-    assert y.complex
-    npt.assert_allclose(y.freq, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]),
-                        atol=1e-15)
-
-
-def test_add_time_data_and_number():
-    # generate and add signals
-    x = TimeData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, 1), 'time')
-
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    npt.assert_allclose(x.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, TimeData)
-    npt.assert_allclose(y.time, np.atleast_2d([2, 1, 1]), atol=1e-15)
-    npt.assert_allclose(y.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-
-def test_add_time_data_and_time_data():
-    # generate and add signals
-    x = TimeData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, x), 'time')
-
-    # check if old signal did not change
-    npt.assert_allclose(x.time, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    npt.assert_allclose(x.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, TimeData)
-    npt.assert_allclose(y.time, np.atleast_2d([2, 0, 0]), atol=1e-15)
-    npt.assert_allclose(y.times, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-
-def test_add_time_data_and_number_wrong_domain():
-    # generate and add signals
-    x = TimeData([1, 0, 0], [0, .1, .5])
-    match = "The domain must be 'time'."
+@pytest.mark.parametrize(("x", "y", "domain", "match"), [
+    (TimeData([1, 0, 0], [0, .1, .5]), 1, 'freq',
+        "The domain must be 'time'."),
+    (TimeData([1, 0, 0], [0, .1, .5]), TimeData([1, 0, 0], [0, .1, .4]),
+        'time', 'The times does not match.'),
+    (FrequencyData([1, 0, 0], [0, .1, .5]), 1, 'time',
+        "The domain must be 'freq'."),
+    (FrequencyData([1, 0, 0], [0, .1, .5]),
+        FrequencyData([1, 0, 0], [0, .1, .4]), 'freq',
+        'The frequencies do not match.'),
+])
+def test_add_time_data_frequency_data_errors(x, y, domain, match):
     with pytest.raises(ValueError, match=match):
-        pf.add((x, 1), 'freq')
+        pf.add((x, y), domain)
 
 
-def test_add_time_data_and_number_wrong_times():
-    # generate and add signals
-    x = TimeData([1, 0, 0], [0, .1, .5])
-    y = TimeData([1, 0, 0], [0, .1, .4])
-    match = 'The times does not match.'
-    with pytest.raises(ValueError, match=match):
-        pf.add((x, y), 'time')
-
-
-def test_add_frequency_data_and_number():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, 1), 'freq')
-    match = "The domain must be 'freq'."
-    with pytest.raises(ValueError, match=match):
-        pf.add((x, 1), 'time')
-
-    # check if old signal did not change
-    npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    npt.assert_allclose(x.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, FrequencyData)
-    npt.assert_allclose(y.freq, np.atleast_2d([2, 1, 1]), atol=1e-15)
-    npt.assert_allclose(y.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-
-def test_add_frequency_data_and_frequency_data():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = pf.add((x, x), 'freq')
-
-    # check if old signal did not change
-    npt.assert_allclose(x.freq, np.atleast_2d([1, 0, 0]), atol=1e-15)
-    npt.assert_allclose(x.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-    # check result
-    assert isinstance(y, FrequencyData)
-    npt.assert_allclose(y.freq, np.atleast_2d([2, 0, 0]), atol=1e-15)
-    npt.assert_allclose(y.frequencies, np.atleast_1d([0, .1, .5]), atol=1e-15)
-
-
-def test_add_frequency_data_and_number_wrong_domain():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    match = "The domain must be 'freq'."
-    with pytest.raises(ValueError, match=match):
-        pf.add((x, 1), 'time')
-
-
-def test_add_frequency_data_and_number_wrong_frequencies():
-    # generate and add signals
-    x = FrequencyData([1, 0, 0], [0, .1, .5])
-    y = FrequencyData([1, 0, 0], [0, .1, .4])
-    match = 'The frequencies do not match.'
-    with pytest.raises(ValueError, match=match):
-        pf.add((x, y), 'freq')
-
-
-def test_add_array_and_signal():
-    # shapes match
-    x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
+@pytest.mark.parametrize("swap", [False, True])
+@pytest.mark.parametrize("x", [
+    (np.arange(2 * 3 * 4).reshape((2, 3, 4))),
+    (np.arange(3 * 4).reshape((3, 4)))])
+def test_add_array_and_signal(x, swap):
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    z = pf.add((x, y))
+    # shapes match
+    z = pf.add((y, x)) if swap else pf.add((x, y))
     npt.assert_allclose(
         z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
-    # broadcasting
-    x = np.arange(3 * 4).reshape((3, 4))
-    y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    z = pf.add((x, y))
-    npt.assert_allclose(
-        z.freq, np.ones_like(z.freq)*x[..., None] + 1, atol=1e-15)
-
-
-def test_add_signal_and_array():
-    # shapes match
-    x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    y = np.arange(2 * 3 * 4).reshape((2, 3, 4))
-    z = pf.add((x, y))
-    npt.assert_allclose(
-        z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
-    # broadcasting
-    x = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
-    y = np.arange(3 * 4).reshape((3, 4))
-    z = pf.add((x, y))
-    npt.assert_allclose(
-        z.freq, np.ones_like(z.freq)*y[..., None] + 1, atol=1e-15)
 
 
 def test_add_arrays():
@@ -367,86 +173,51 @@ def test_subtraction():
     npt.assert_allclose(z.time, np.atleast_2d([1, -1, 0]), atol=1e-15)
 
 
-def test_multiplication():
+@pytest.mark.parametrize(('domain', 'desired'), [
+    ("time", np.atleast_2d([0, 0, 0])),
+    ("freq",  np.atleast_2d([1+0j, -0.5-0.8660254j]))])
+def test_real_multiplication(domain, desired):
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
     y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'time')
+    z = pf.multiply((x, y), domain)
 
     # check result
-    npt.assert_allclose(z.time, np.atleast_2d([0, 0, 0]), atol=1e-15)
+    if domain == "time":
+        npt.assert_allclose(z.time, desired, atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
-def test_complex_multiplication():
+@pytest.mark.parametrize(('domain', 'desired'), [
+    ("time", np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j])),
+    ("freq", np.atleast_2d([-0.5+0.8660254j,  1+0j, -0.5-0.8660254j]))])
+@pytest.mark.parametrize(('is_complex_x', 'is_complex_y'), [
+    (True, True), (False, True), (True, False)])
+def test_complex_multiplication(domain, desired, is_complex_x, is_complex_y):
     # only test one case - everything else is tested below
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = Signal([0, 1, 0], 44100, is_complex=True)
-    z = pf.multiply((x, y), 'time')
+    x = Signal([1, 0, 0], 44100, is_complex=is_complex_x)
+    y = Signal([0, 1, 0], 44100, is_complex=is_complex_y)
+    z = pf.multiply((x, y), domain)
 
     # check result
-    npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
+    if domain == "time":
+        npt.assert_allclose(z.time, desired, atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
-def test_complex_real_multiplication():
-    # only test one case - everything else is tested below
-    x = Signal([1, 0, 0], 44100)
-    y = Signal([0, 1, 0], 44100, is_complex=True)
-    z = pf.multiply((x, y), 'time')
-
-    # check result
-    npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
-
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'time')
-
-    # check result
-    npt.assert_allclose(z.time, np.atleast_2d([0 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
-
-
-def test_complex_real_multiplication_freq():
+@pytest.mark.parametrize('is_complex_y', [
+    False, True])
+def test_division(is_complex_y):
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
-    y = Signal([0, 1, 0], 44100, is_complex=True)
-    z = pf.multiply((x, y), 'freq')
-
-    # check result
-    x.complex = True
-    ref = x.freq * y.freq
-    npt.assert_allclose(z.freq, ref, atol=1e-15)
-
-    x = Signal([1, 0, 0], 44100, is_complex=True)
-    y = Signal([0, 1, 0], 44100)
-    z = pf.multiply((x, y), 'freq')
-
-    # check result
-    y.complex = True
-    ref = x.freq * y.freq
-    npt.assert_allclose(z.freq, ref, atol=1e-15)
-
-
-def test_division():
-    # only test one case - everything else is tested below
-    x = Signal([1, 0, 0], 44100)
-    y = Signal([2, 2, 2], 44100)
+    y = Signal([2, 2, 2], 44100, is_complex=is_complex_y)
     z = pf.divide((x, y), 'time')
 
     # check result
     npt.assert_allclose(z.time, np.atleast_2d([0.5, 0, 0]), atol=1e-15)
-
-
-def test_complex_division():
-    # only test one case - everything else is tested below
-    x = Signal([1, 0, 0], 44100)
-    y = Signal([2, 2, 2], 44100, is_complex=True)
-    z = pf.divide((x, y), 'time')
-
-    # check result
-    npt.assert_allclose(z.time, np.atleast_2d([0.5 + 0j, 0 + 0j, 0 + 0j]),
-                        atol=1e-15)
+    assert z.complex == is_complex_y
 
 
 def test_power():
@@ -459,273 +230,124 @@ def test_power():
     npt.assert_allclose(z.time, np.atleast_2d([4, 1, 0]), atol=1e-15)
 
 
-def test_overloaded_operators_signal():
-    x = Signal([3, 2, 1], 44100, n_samples=5, domain='freq')
-    y_s = Signal([2, 2, 2], 44100, n_samples=5, domain='freq')
+@pytest.mark.parametrize(('x','y'),[
+    (Signal([3, 2, 1], 44100, n_samples=5, domain='freq'),
+    Signal([2, 2, 2], 44100, n_samples=5, domain='freq')),
+    (Signal([3, 2, 1], 44100, n_samples=5, domain='freq'), 2),
+    (TimeData([3, 2, 1], [0, 1, 2]),
+    TimeData([2, 2, 2], [0, 1, 2])),
+    (TimeData([3, 2, 1], [0, 1, 2]), 2),
+    (FrequencyData([3, 2, 1], [0, 1, 2]),
+    FrequencyData([2, 2, 2], [0, 1, 2])),
+    (FrequencyData([3, 2, 1], [0, 1, 2]), 2)])
 
-    for y in [y_s, 2]:
-        # addition
-        z = x + y
-        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
-        z = y + x
-        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
-        # subtraction
-        z = x - y
-        npt.assert_allclose(z.freq, np.array([1, 0, -1], ndmin=2), atol=1e-15)
-        z = y - x
-        npt.assert_allclose(z.freq, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
-        # multiplication
-        z = x * y
-        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
-        z = y * x
-        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
-        # division
-        z = x / y
-        npt.assert_allclose(
-            z.freq, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
-        z = y / x
-        npt.assert_allclose(z.freq, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
-        # power
-        z = x**y
-        npt.assert_allclose(z.freq, np.array([9, 4, 1], ndmin=2), atol=1e-15)
-        z = y**x
-        npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
+@pytest.mark.parametrize(("swap", "op", "desired"), [
+    (False, operator.add, [5, 4, 3]),
+    (False, operator.sub, [1, 0, -1]),
+    (False, operator.mul, [6, 4, 2]),
+    (False, operator.truediv, [1.5, 1, .5]),
+    (False, operator.pow, [9, 4, 1]),
+    (True, operator.add, [5, 4, 3]),
+    (True, operator.sub, [-1, 0, 1]),
+    (True, operator.mul, [6, 4, 2]),
+    (True, operator.truediv, [2/3, 1, 2]),
+    (True, operator.pow, [8, 4, 2])])
+def test_overloaded_operators_signal_time_freq_data(x, y, swap, op, desired):
+    z = op(y, x) if swap else op(x, y)
+    if z.domain == 'time':
+        npt.assert_allclose(z.time, np.array(desired, ndmin=2), atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, np.array(desired, ndmin=2), atol=1e-15)
 
 
-def test_overloaded_operators_time_data():
-    x = TimeData([3, 2, 1], [0, 1, 2])
-    y_s = TimeData([2, 2, 2], [0, 1, 2])
-
-    for y in [y_s, 2]:
-        # addition
-        z = x + y
-        npt.assert_allclose(z.time, np.array([5, 4, 3], ndmin=2), atol=1e-15)
-        z = y + x
-        npt.assert_allclose(z.time, np.array([5, 4, 3], ndmin=2), atol=1e-15)
-        # subtraction
-        z = x - y
-        npt.assert_allclose(z.time, np.array([1, 0, -1], ndmin=2), atol=1e-15)
-        z = y - x
-        npt.assert_allclose(z.time, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
-        # multiplication
-        z = x * y
-        npt.assert_allclose(z.time, np.array([6, 4, 2], ndmin=2), atol=1e-15)
-        z = y * x
-        npt.assert_allclose(z.time, np.array([6, 4, 2], ndmin=2), atol=1e-15)
-        # division
-        z = x / y
-        npt.assert_allclose(
-            z.time, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
-        z = y / x
-        npt.assert_allclose(z.time, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
-        # power
-        z = x**y
-        npt.assert_allclose(z.time, np.array([9, 4, 1], ndmin=2), atol=1e-15)
-        z = y**x
-        npt.assert_allclose(z.time, np.array([8, 4, 2], ndmin=2), atol=1e-15)
-
-
-def test_overloaded_operators_frequency_data():
-    x = FrequencyData([3, 2, 1], [0, 1, 2])
-    y_s = FrequencyData([2, 2, 2], [0, 1, 2])
-
-    for y in [y_s, 2]:
-        # addition
-        z = x + y
-        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
-        z = y + x
-        npt.assert_allclose(z.freq, np.array([5, 4, 3], ndmin=2), atol=1e-15)
-        # subtraction
-        z = x - y
-        npt.assert_allclose(z.freq, np.array([1, 0, -1], ndmin=2), atol=1e-15)
-        z = y - x
-        npt.assert_allclose(z.freq, np.array([-1, 0, 1], ndmin=2), atol=1e-15)
-        # multiplication
-        z = x * y
-        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
-        z = y * x
-        npt.assert_allclose(z.freq, np.array([6, 4, 2], ndmin=2), atol=1e-15)
-        # division
-        z = x / y
-        npt.assert_allclose(
-            z.freq, np.array([1.5, 1, .5], ndmin=2), atol=1e-15)
-        z = y / x
-        npt.assert_allclose(z.freq, np.array([2/3, 1, 2], ndmin=2), atol=1e-15)
-        # power
-        z = x**y
-        npt.assert_allclose(z.freq, np.array([9, 4, 1], ndmin=2), atol=1e-15)
-        z = y**x
-        npt.assert_allclose(z.freq, np.array([8, 4, 2], ndmin=2), atol=1e-15)
-
-
-def test_overloaded_operators_array_and_signal():
+@pytest.mark.parametrize(("swap", "op"), [
+    (False, operator.add),
+    (False, operator.sub),
+    (False, operator.mul),
+    (False, operator.truediv),
+    (False, operator.pow),
+    (True, operator.add),
+    (True, operator.sub),
+    (True, operator.mul),
+    (True, operator.truediv),
+    (True, operator.pow)])
+def test_overloaded_operators_array_and_signal(swap, op):
     x = np.arange(2 * 3 * 4).reshape(2, 3, 4) + 1
     y = Signal(np.ones((2, 3, 4, 5)), 44100, n_samples=8, domain='freq')
 
-    # addition
-    z = x + y
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None] + 1, atol=1e-15)
-    z = y + x
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None] + 1, atol=1e-15)
-    # subtraction
-    z = x - y
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None] - 1, atol=1e-15)
-    z = y - x
-    npt.assert_allclose(
-        z.freq, -1 * (np.ones((2, 3, 4, 5)) * x[..., None] - 1), atol=1e-15)
-    # multiplication
-    z = x * y
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
-    z = y * x
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
-    # division
-    z = x / y
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
-    z = y / x
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) / x[..., None], atol=1e-15)
-    # power
-    z = x**y
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)) * x[..., None], atol=1e-15)
-    z = y**x
-    npt.assert_allclose(
-        z.freq, np.ones((2, 3, 4, 5)), atol=1e-15)
+    n = np.broadcast_to(np.arange(1, 25).reshape(2, 3, 4, 1), (2, 3, 4, 5))
+    desired = op(1, n) if swap else op(n, 1)
+    z = op(y, x) if swap else op(x, y)
+
+    npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
-def test_assert_match_for_arithmetic():
-    s = Signal([1, 2, 3, 4], 44100)
-    s1 = Signal([1, 2, 3, 4], 48000)
-    s2 = Signal([1, 2, 3], 44100)
-    s4 = Signal([1, 2, 3, 4], 44100, fft_norm="rms")
-    s5 = Signal([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 48000, is_complex=True)
-    s6 = FrequencyData([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j],
-                       [10, 200, 1000, 20000])
-
-    # check with two signals
-    signal._assert_match_for_arithmetic(
-        (s, s), 'time', division=False, matmul=False)
-    # check with one signal and one array like
-    signal._assert_match_for_arithmetic(
-        (s, [1, 2]), 'time', division=False, matmul=False)
-    # check with more than two inputs
-    signal._assert_match_for_arithmetic(
-        (s, s, s), 'time', division=False, matmul=False)
-
-    # check output
+SIGNALS = {
+    "s":  lambda: Signal([1, 2, 3, 4], 44100),
+    "s1": lambda: Signal([1, 2, 3, 4], 48000),
+    "s2": lambda: Signal([1, 2, 3], 44100),
+    "s4": lambda: Signal([1, 2, 3, 4], 44100, fft_norm="rms"),
+    "s5": lambda: Signal([1+1j, 2+2j, 3+3j, 4+4j], 48000, is_complex=True),
+    "s6": lambda: FrequencyData(
+        [1+1j, 2+2j, 3+3j, 4+4j], [10, 200, 1000, 20000]),
+}
+@pytest.mark.parametrize(("data", "domain", "is_complex"), [
+    (("s5", "s5"), 'time', True),
+    (("s", "s"), 'time', False),
+    (("s5", "s1"), 'time', True),
+    (("s1", "s5"), 'time', True),
+    ((1 + 1j, "s5"), 'time', True),
+    (("s5", 1 + 1j), 'time', True),
+    ((1, "s"), 'time', False),
+    (("s", 1), 'time', False),
+    ((1, "s6"), 'freq', False),
+    (("s6", 1), 'freq', False),
+    ((1 + 1j, "s6"), 'freq', False),
+    (("s6", 1 + 1j), 'freq', False)])
+def test_assert_match_for_arithmetic_complex_flag(data, domain, is_complex):
+    resolved = tuple(SIGNALS[d]() if isinstance(d, str) else d for d in data)
     out = signal._assert_match_for_arithmetic(
-        (s, s), 'time', division=False, matmul=False)
-    assert out[0] == 44100
-    assert out[1] == 4
-    assert out[2] == 'none'
-    assert out[6] == (1,)
-    assert not out[7]
-    out = signal._assert_match_for_arithmetic(
-        (s, s4), 'time', division=False, matmul=False)
-    assert out[2] == 'rms'
+        resolved, domain, division=False, matmul=False)
+    assert out[7] == is_complex
 
-    # check if complex flag is set with two complex-valued
-    # signals
-    out = signal._assert_match_for_arithmetic(
-        (s5, s5), 'time', division=False, matmul=False)
-    assert out[7]
 
-    # check if complex flag is not set with two real-valued
-    # signals
-    out = signal._assert_match_for_arithmetic(
-        (s, s), 'time', division=False, matmul=False)
-    assert not out[7]
-
-    # check if complex flag is set with one complex and
-    # one real-valued signal
-    out = signal._assert_match_for_arithmetic(
-        (s5, s1), 'time', division=False, matmul=False)
-    assert out[7]
-
-    # check if complex flag is set with one complex and
-    # one real-valued signal
-    out = signal._assert_match_for_arithmetic(
-        (s1, s5), 'time', division=False, matmul=False)
-    assert out[7]
-
-    # check if complex flag is set with one real-valued
-    # signal and one complex-valued number passed at position
-    # position 1
-    out = signal._assert_match_for_arithmetic(
-        (1 + 1j, s5), 'time', division=False, matmul=False)
-    assert out[7]
-
-    # check if complex flag is set with one real-valued
-    # signal and one complex-valued number passed at position
-    # position 2
-    out = signal._assert_match_for_arithmetic(
-        (s5, 1 + 1j), 'time', division=False, matmul=False)
-    assert out[7]
-
-    # check if complex flag is not set with one real-valued
-    # signal and one real-valued number passed at position
-    # position 1
-    out = signal._assert_match_for_arithmetic(
-        (1, s), 'time', division=False, matmul=False)
-    assert not out[7]
-
-    # check if complex flag is not set with one real-valued
-    # signal and one real-valued number passed at position
-    # position 2
-    out = signal._assert_match_for_arithmetic(
-        (s, 1), 'time', division=False, matmul=False)
-    assert not out[7]
-
-    # check if complex flag is not set with one frequencyData
-    # and one real-valued number passed at position 1
-    out = signal._assert_match_for_arithmetic(
-        (1, s6), 'freq', division=False, matmul=False)
-    assert not out[7]
-
-    # check if complex flag is not set with one frequencyData
-    # and one complex-valued number passed at position 2
-    out = signal._assert_match_for_arithmetic(
-        (s6, 1), 'freq', division=False, matmul=False)
-    assert not out[7]
-
-    # check if complex flag is not set with one frequencyData
-    # and one complex-valued number passed at position 1
-    out = signal._assert_match_for_arithmetic(
-        (1 + 1j, s6), 'freq', division=False, matmul=False)
-    assert not out[7]
-
-    # check if complex flag is not set with one frequencyData
-    # and one complex-valued number passed at position 2
-    out = signal._assert_match_for_arithmetic(
-        (s6, 1 + 1j), 'freq', division=False, matmul=False)
-    assert not out[7]
-
-    # check with non-tuple input for first argument
-    match = "Input argument 'data' must be a tuple."
+@pytest.mark.parametrize(("data", "domain", "match"), [
+    ("s", 'time',
+        "Input argument 'data' must be a tuple."),
+    (("s", ['str', 'ing']), 'time',
+        "Input must be of type Signal, int, float, or complex"),
+    (("s", "s1"), 'time', 'The sampling rates do not match'),
+    (("s", "s2"), 'time', 'The number of samples does not match')])
+def test_assert_match_for_arithmetic_complex_flag_errors(data, domain,match):
+    if isinstance(data, tuple):
+        resolved = tuple(SIGNALS[d]() if isinstance(d, str)
+                          else d for d in data)
+    else:
+        resolved = SIGNALS[data]() if isinstance(data, str) else data
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
-            s, 'time', division=False, matmul=False)
-    # check with invalid data type in first argument
-    match = 'Input must be of type Signal, int, float, or complex'
-    with pytest.raises(ValueError, match=match):
-        signal._assert_match_for_arithmetic(
-            (s, ['str', 'ing']), 'time', division=False, matmul=False)
-    # test signals with different sampling rates
-    match = 'The sampling rates do not match'
-    with pytest.raises(ValueError, match=match):
-        signal._assert_match_for_arithmetic(
-            (s, s1), 'time', division=False, matmul=False)
-    # test signals with different n_samples
-    match = 'The number of samples does not match'
-    with pytest.raises(ValueError, match=match):
-        signal._assert_match_for_arithmetic(
-            (s, s2), 'time', division=False, matmul=False)
+            resolved, domain, division=False, matmul=False)
+
+
+@pytest.mark.parametrize("data", [
+    ("s", "s"),
+    ("s", [1, 2]),
+    ("s", "s", "s")  ])
+def test_assert_match_for_arithmetic(data):
+    resolved = tuple(SIGNALS[d]() if isinstance(d, str) else d for d in data)
+    signal._assert_match_for_arithmetic(resolved, 'time', division=False,
+                                         matmul=False)
+
+
+@pytest.mark.parametrize(("data", "index", "expected"), [
+    (("s", "s"), [0,1,2,6,7], [44100, 4, 'none', (1,), False]),
+    (("s", "s4"), [0,1,2,6,7], [44100, 4, 'rms', (1,), False])])
+def test_assert_match_for_arithmetic_output(data, index, expected):
+    resolved = tuple(SIGNALS[d]() if isinstance(d, str) else d for d in data)
+    out = signal._assert_match_for_arithmetic(
+        resolved, 'time', division=False, matmul=False)
+    for exp_ind, ind in enumerate(index):
+        assert out[ind] == expected[exp_ind]
 
 
 def test_get_arithmetic_data_with_array():
@@ -735,40 +357,39 @@ def test_get_arithmetic_data_with_array():
     npt.assert_allclose(data_in, data_out)
 
 
-def test_get_arithmetic_data_with_signal():
-    # all possible combinations of `domain`, `signal_type`, and `fft_norm`
-    meta = [['time', 'none'],
-            ['freq', 'none'],
-            ['time', 'unitary'],
-            ['freq', 'unitary'],
-            ['time', 'amplitude'],
-            ['freq', 'amplitude'],
-            ['time', 'rms'],
-            ['freq', 'rms'],
-            ['time', 'power'],
-            ['freq', 'power'],
-            ['time', 'psd'],
-            ['freq', 'psd']]
+@pytest.mark.parametrize("domain", ["time", "freq"])
+# all possible combinations of `domain`, `signal_type`, and `fft_norm`
+@pytest.mark.parametrize("meta", [
+        ['time', 'none'],
+        ['freq', 'none'],
+        ['time', 'unitary'],
+        ['freq', 'unitary'],
+        ['time', 'amplitude'],
+        ['freq', 'amplitude'],
+        ['time', 'rms'],
+        ['freq', 'rms'],
+        ['time', 'power'],
+        ['freq', 'power'],
+        ['time', 'psd'],
+        ['freq', 'psd']])
+def test_get_arithmetic_data_with_signal(domain, meta):
 
     # reference signal - _get_arithmetic_data should return the data without
     # any normalization regardless of the input data
     s_ref = Signal([1, 0, 0], 44100)
+    m_in = meta
 
-    for m_in in meta:
-        # create input signal with current domain, type, and norm
-        s_in = Signal([1, 0, 0], 44100, fft_norm=m_in[1])
-        s_in.domain = m_in[0]
-        for domain in ['time', 'freq']:
-            print(f"Testing from {m_in[0]} ({m_in[1]}) to {domain}.")
-
-            # get output data
-            data_out = signal._get_arithmetic_data(
-                s_in, domain=domain, cshape=(1,), matmul=False,
-                audio_type=Signal, contains_complex=False)
-            if domain == 'time':
-                npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
-            elif domain == 'freq':
-                npt.assert_allclose(s_ref.freq, data_out, atol=1e-15)
+    # create input signal with current domain, type, and norm
+    s_in = Signal([1, 0, 0], 44100, fft_norm=m_in[1])
+    s_in.domain = m_in[0]
+    # get output data
+    data_out = signal._get_arithmetic_data(
+        s_in, domain=domain, cshape=(1,), matmul=False,
+        audio_type=Signal, contains_complex=False)
+    if domain == 'time':
+        npt.assert_allclose(s_ref.time, data_out, atol=1e-15)
+    elif domain == 'freq':
+        npt.assert_allclose(s_ref.freq, data_out, atol=1e-15)
 
 
 def test_get_arithmetic_data_with_signal_complex_casting():
@@ -811,12 +432,14 @@ def test_get_arithmetic_data_wrong_domain():
             contains_complex=False)
 
 
-def test_array_broadcasting_errors():
+def test_array_broadcasting_dimension_error():
     x = np.arange(2 * 3 * 4 * 10).reshape((2, 3, 4, 10))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 4)))
     with pytest.raises(ValueError, match="array dimension"):
         pf.add((x, y), domain='time')
 
+
+def test_array_broadcasting_shape_error():
     x = np.arange(2 * 3 * 4).reshape((2, 3, 4))
     y = pf.signals.impulse(10, amplitude=np.ones((2, 3, 5)))
     match = 'operands could not be broadcast together with shapes'
@@ -843,16 +466,15 @@ def test_matrix_multiplication_time_domain():
     npt.assert_allclose(z.time, desired, atol=1e-15)
 
 
-def test_matrix_multiplication_operator():
+@pytest.mark.parametrize(('swap', 'desired'),
+    [(False, np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 6))),
+     (True, np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+                                                        np.ones((3, 3, 6)))])
+def test_matrix_multiplication_operator(swap, desired):
     """Test overloaded @ operator."""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
     y = pf.signals.impulse(10, amplitude=np.array([[1, 2], [3, 4], [5, 6]]))
-    z = x @ y
-    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 6))
-    npt.assert_allclose(z.freq, desired, atol=1e-15)
-    z = y @ x
-    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
-        * np.ones((3, 3, 6))
+    z = y @ x if swap else x @ y
     npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
@@ -878,36 +500,29 @@ def test_matrix_multiplication_shape_mismatch():
         pf.matrix_multiplication((x, y))
 
 
-def test_matrix_multiplication_TimeData():
-    """Test @ operate for TimeData."""
+@pytest.mark.parametrize(("pf_class", "swap", "desired"), [
+    (pf.TimeData, False,
+     np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
+    (pf.TimeData, True,
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+        np.ones((3, 3, 10))),
+    (pf.FrequencyData, False,
+     np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
+    (pf.FrequencyData, True,
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+        np.ones((3, 3, 10)))])
+def test_matrix_multiplication_TimeData_FrequencyData(pf_class, swap, desired):
+    """Test @ operator for TimeData and FrequencyData."""
     times = np.arange(10)
     xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
     ydata = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
-    x = pf.TimeData(xdata, times)
-    y = pf.TimeData(ydata, times)
-    z = x @ y
-    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
-    npt.assert_allclose(z.time, desired, atol=1e-15)
-    z = y @ x
-    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
-        * np.ones((3, 3, 10))
-    npt.assert_allclose(z.time, desired, atol=1e-15)
-
-
-def test_matrix_multiplication_FrequencyData():
-    """Test @ operator for FrequencyData."""
-    freqs = np.arange(10)
-    xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
-    ydata = np.ones((3, 2, 10)) * np.array([[1, 2], [3, 4], [5, 6]])[..., None]
-    x = pf.FrequencyData(xdata, freqs)
-    y = pf.FrequencyData(ydata, freqs)
-    z = x @ y
-    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
-    npt.assert_allclose(z.freq, desired, atol=1e-15)
-    z = y @ x
-    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
-        * np.ones((3, 3, 10))
-    npt.assert_allclose(z.freq, desired, atol=1e-15)
+    x = pf_class(xdata, times)
+    y = pf_class(ydata, times)
+    z = y @ x if swap else x @ y
+    if z.domain == 'time':
+        npt.assert_allclose(z.time, desired, atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
 def test_matrix_multiplication_frequency_axis():
@@ -936,34 +551,29 @@ def test_matrix_multiplication_signal_times_array():
     npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
-def test_matrix_multiplication_TimeData_times_array():
-    """Test multiplication of TimeData with array."""
+@pytest.mark.parametrize(("pf_class", "swap", "desired"), [
+    (pf.TimeData, False,
+     np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
+    (pf.TimeData, True,
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+        np.ones((3, 3, 10))),
+    (pf.FrequencyData, False,
+     np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
+    (pf.FrequencyData, True,
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+     np.ones((3, 3, 10)))])
+def test_matrix_multiplication_TimeData_FrequencyData_times_array(pf_class,
+                                                                swap, desired):
+    """Test multiplication of TimeData and FrequencyData with array."""
     times = np.arange(10)
     xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
-    x = pf.TimeData(xdata, times)
+    x = pf_class(xdata, times)
     y = np.ones((3, 2)) * np.array([[1, 2], [3, 4], [5, 6]])
-    z = x @ y
-    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
-    npt.assert_allclose(z.time, desired, atol=1e-15)
-    z = y @ x
-    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
-        * np.ones((3, 3, 10))
-    npt.assert_allclose(z.time, desired, atol=1e-15)
-
-
-def test_matrix_multiplication_FrequencyData_times_array():
-    """Test multiplication of FrequencyData with array."""
-    times = np.arange(10)
-    xdata = np.ones((2, 3, 10)) * np.array([[1, 2, 3], [4, 5, 6]])[..., None]
-    x = pf.FrequencyData(xdata, times)
-    y = np.ones((3, 2)) * np.array([[1, 2], [3, 4], [5, 6]])
-    z = x @ y
-    desired = np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))
-    npt.assert_allclose(z.freq, desired, atol=1e-15)
-    z = y @ x
-    desired = np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] \
-        * np.ones((3, 3, 10))
-    npt.assert_allclose(z.freq, desired, atol=1e-15)
+    z = y @ x if swap else x @ y
+    if z.domain == 'time':
+        npt.assert_allclose(z.time, desired, atol=1e-15)
+    else:
+        npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
 def test_matrix_multiplication_axes():
