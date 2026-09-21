@@ -1,13 +1,12 @@
 """Public utility functions related to sound level calculations."""
 
-from typing import Literal
 import numpy as np
 import scipy.signal
 import pyfar as pf
 
 from ._utils import _check_signal_type
 
-def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
+def time_weighted_pressure(signal, time_constant: float = 0.125):
     r"""
     Calculate the time-weighted sound pressure.
 
@@ -52,10 +51,15 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
     signal: Signal
         The signal object to apply the weighting to.
 
-    time_weighting: ``"F"`` or ``"S"``
-        The time weighting type. Options are ``"F"`` (fast) and ``"S"`` (slow),
+    time_constant: float
+        The time constant for the time weighting in seconds.
+        The standard-conform values are ``0.125`` for the "fast" (F)
+        weighting and ``1`` for the "slow" (S) weighting,
         which correspond to level decays of -34.7 dB and -4.3 dB per second,
-        respectively.
+        respectively. The default is ``0.125`` for the "fast" weighting.
+        It is also possible to specifiy a custom time constant if you want
+        to use this function for other forms of exponential smoothing of
+        energy in the time domain.
 
     Returns
     -------
@@ -78,8 +82,8 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
         >>> import pyfar as pf
         >>> import matplotlib.pyplot as plt
         >>> audio = pf.signals.files.drums()
-        >>> fast_weighted = pf.level.time_weighted_pressure(audio, "F")
-        >>> slow_weighted = pf.level.time_weighted_pressure(audio, "S")
+        >>> fast_weighted = pf.level.time_weighted_pressure(audio, 0.125)
+        >>> slow_weighted = pf.level.time_weighted_pressure(audio, 1)
         >>> pf.plot.time(audio, dB=True, label="Audio content", alpha=0.7)
         >>> pf.plot.time(fast_weighted, dB=True, label="Fast-weighted level")
         >>> pf.plot.time(slow_weighted, dB=True, label="Slow-weighted level")
@@ -87,14 +91,10 @@ def time_weighted_pressure(signal, time_weighting: Literal["F", "S"]):
         >>> plt.legend()
         >>> plt.show()
     """
-    if not isinstance(time_weighting, str):
-        raise TypeError("Time weighting must be a string.")
-    if time_weighting == "F":
-        time_constant = 0.125
-    elif time_weighting == "S":
-        time_constant = 1
-    else:
-        raise ValueError("Time weighting must be 'F' or 'S'")
+    if not isinstance(time_constant, (int, float)):
+        raise TypeError("Time constant must be a number.")
+    if time_constant <= 0 or not np.isfinite(time_constant):
+        raise ValueError("Time constant must be positive and finite.")
 
     signal = _check_signal_type(signal)
     energies = signal.time**2

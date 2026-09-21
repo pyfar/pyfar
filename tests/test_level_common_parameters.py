@@ -198,3 +198,22 @@ def test_level_common_oversampling_errors(
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(error_type, match=match):
         function(s, oversampling)
+
+
+### time_weighting parameter tests ###
+
+FUNCTION_WRAPPERS_TIME_WEIGHTING = [
+    lambda s, t: pf.level.time_weighted_level(s, "Z", t),
+]
+
+
+@pytest.mark.parametrize(("weighting", "error_type"), [
+    (None, TypeError),
+    (123, TypeError),
+    ("X", ValueError),
+])
+def test_level_common_time_weighting_errors(weighting, error_type):
+    """Test that an invalid time weighting raises an error."""
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(error_type, match="Time weighting"):
+        FUNCTION_WRAPPERS_TIME_WEIGHTING[0](s, weighting)

@@ -3,21 +3,21 @@ import pyfar as pf
 import numpy as np
 
 
-@pytest.mark.parametrize("weighting", ["F", "S"])
+@pytest.mark.parametrize("time_constant", [0.125, 1])
 @pytest.mark.parametrize("amplitude", [1, [1, 1]])
-def test_level_time_weighted_pressure_shape(weighting, amplitude):
+def test_level_time_weighted_pressure_shape(time_constant, amplitude):
     fs = 48000
     impulse = pf.signals.impulse(fs + 1, 0, amplitude, fs)
-    weighted = pf.level.time_weighted_pressure(impulse, weighting)
+    weighted = pf.level.time_weighted_pressure(impulse, time_constant)
 
     assert isinstance(weighted, pf.TimeData)
     assert impulse.time.shape == weighted.time.shape
 
 
 @pytest.mark.parametrize("fs", [44100, 48000, 192000])
-@pytest.mark.parametrize(("weighting", "expected_decay"),
-                         [("F", -34.7), ("S", -4.3)])
-def test_level_time_weighted_pressure_decay(weighting, expected_decay, fs):
+@pytest.mark.parametrize(("time_constant", "expected_decay"),
+                         [(0.125, -34.7), (1, -4.3)])
+def test_level_time_weighted_pressure_decay(time_constant, expected_decay, fs):
     """
     According to DIN EN 61672-1 §5.8.2, after an impulse the level
     should fall of at a rate of 34.7 dB/s for FAST and 4.3 dB/s for the
@@ -25,7 +25,7 @@ def test_level_time_weighted_pressure_decay(weighting, expected_decay, fs):
     """
     impulse = pf.signals.impulse(2 * fs, sampling_rate=fs)
 
-    weighted = pf.level.time_weighted_pressure(impulse, weighting)
+    weighted = pf.level.time_weighted_pressure(impulse, time_constant)
     levels = 10 * np.log10(weighted.time ** 2)
     diff1 = levels[0][fs] - levels[0][0]
     diff2 = levels[0][fs + 100] - levels[0][100]
@@ -33,8 +33,8 @@ def test_level_time_weighted_pressure_decay(weighting, expected_decay, fs):
     assert abs(diff2 - expected_decay) < 0.1
 
 
-@pytest.mark.parametrize("weighting", ["F", "S"])
-def test_level_time_weighted_pressure_same_level(weighting):
+@pytest.mark.parametrize("time_constant", [0.125, 1])
+def test_level_time_weighted_pressure_same_level(time_constant):
     """The energy of a long 1kHz signal must be identical
     across F, S and eq levels (DIN EN 61672-1 §5.8.3).
     """
@@ -43,18 +43,25 @@ def test_level_time_weighted_pressure_same_level(weighting):
     x = pf.signals.sine(1000, fs * duration, sampling_rate=48000)
 
     L_eq = 10 * np.log10(np.sum(x.time[0]**2) / x.n_samples)
-    weighted = pf.level.time_weighted_pressure(x, weighting)
+    weighted = pf.level.time_weighted_pressure(x, time_constant)
     # compare last sample to the equivalent average,
     # so the exp-filter has enough time to integrate energy
     level = 10 * np.log10(weighted.time[0][-1] ** 2)
     assert abs(L_eq - level) < 0.1
 
 
-@pytest.mark.parametrize(("time_weighting", "err_type"), [
-    (None, TypeError), ("X", ValueError)])
-def test_level_time_weighted_pressure_time_weighting_error(
-    time_weighting, err_type,
+@pytest.mark.parametrize(("time_constant", "err_type"), [
+    (None, TypeError),
+    ("F", TypeError),
+    ("S", TypeError),
+    (-1, ValueError),
+    (0, ValueError),
+    (np.nan, ValueError),
+    (np.inf, ValueError),
+])
+def test_level_time_weighted_pressure_time_constant_error(
+    time_constant, err_type,
 ):
     s = pf.signals.sine(1000, 22050)
-    with pytest.raises(err_type, match="Time weighting"):
-        pf.level.time_weighted_pressure(s, time_weighting)
+    with pytest.raises(err_type, match="Time constant"):
+        pf.level.time_weighted_pressure(s, time_constant)

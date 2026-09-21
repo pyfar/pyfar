@@ -10,6 +10,7 @@ from ._utils import (
     _apply_frequency_weighting,
     _apply_multi_band,
     _apply_oversampling,
+    _time_weighting_to_constant,
     _energies_to_levels,
     _moving_average,
 )
@@ -570,7 +571,8 @@ def time_weighted_level(signal,
     signal = _check_signal_type(signal)
     signal = _apply_frequency_weighting(signal, frequency_weighting)
     signal = _apply_multi_band(signal, num_octave_band_fractions)
-    weighted = time_weighted_pressure(signal, time_weighting)
+    time_constant = _time_weighting_to_constant(time_weighting)
+    weighted = time_weighted_pressure(signal, time_constant)
     energies = weighted.time**2
     levels = _energies_to_levels(energies, reference_pressure, replace_zeros)
     return levels
