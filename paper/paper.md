@@ -127,6 +127,10 @@ Beyond the usage in research, `pyfar` is also used in university teaching.  Sinc
 - Open educational resources are available to support learning and teaching in acoustics and audio signal processing using `pyfar`.
 - Additional packages in the `pyfar` ecosystem provide functionality for specific use cases, e.g., room acoustics analysis, spherical array signal processing, and reading and writing of _sofa_ files standardized in AES69.
 
+# AI usage disclosure
+
+GitHub Copilot was used as an auto-completion engine and occasionally to review GitHub pull requests. No generative AI tools were used in the writing of this manuscript, or the preparation of supporting materials.
+
 # Acknowledgements
 
 We gratefully acknowledge contributions by the open-source community in the form of bug-fixes, functionality additions, and usability or documentation improvements.
