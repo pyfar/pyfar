@@ -50,7 +50,7 @@ On top of that `pyfar` provides functionality for
 - visualization,
 - file I/O.
 
-`Pyfar` is the base package of the pyfar ecosystem, which contains more specific packages that depend on pyfar to realise, for example, room acoustic analysis and spherical array processing.
+`Pyfar` is the base package of the pyfar ecosystem, which contains more specific packages that depend on pyfar to realise, for example, room acoustic analysis and spherical array processing. The `pyfar` package and ecosystem are hosted on [pyfar.org](https://pyfar.org).
 
 # Statement of need
 
@@ -95,7 +95,7 @@ therefore not designed to be sufficiently modular and flexible.
 
 The `pyfar` ecosystem and base package are designed with the following core concepts in mind:
 
-1. **Encapsulation**: `Pyfar` provides encapsulated data structures for audio data, filters, and coordinates, as well as modifications such as rotations. This allows to store relevant meta-data (e.g. the sampling rate of an audio signal, the normalization of the Fourier spectrum, or user- defined comments) alongside the data itself. Further, relevant operators are implemented, allowing for intuitive modifications of the data such as summing two audio signals in the time domain by simply using the `+` operator. Additionally, most objects provide methods to convert between different representations of the data such as conversions between the time and frequency domain for audio signals, or conversion between Cartesian, cylindrical, and spherical coordinates for coordinate objects.
+1. **Encapsulation**: `Pyfar` provides encapsulated data structures for audio data, filters, and coordinates, as well as modifications such as rotations. This allows to store relevant meta-data (e.g. the sampling rate of an audio signal, the normalization of the Fourier spectrum, or user-defined comments) alongside the data itself. Further, relevant operators are implemented, allowing for intuitive modifications of the data such as summing two audio signals in the time domain by simply using the `+` operator. Additionally, most objects provide methods to convert between different representations of the data such as conversions between the time and frequency domain for audio signals, or conversion between Cartesian, cylindrical, and spherical coordinates for coordinate objects.
 Functionality for digital signal processing and other data manipulations are primarily immplemented as functions that operate on the respective data objects.
 This design allows for more intuitive and readable code but also reduces the chance of errors as relevant meta-data is stored and handled together with the data itself.
 From a maintainers perspective, this design also has the benefit of well defined and consistent interfaces between functions and data structures.
