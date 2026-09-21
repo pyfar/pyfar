@@ -22,7 +22,7 @@ authors:
 affiliations:
   - name: Department of the Built Environment, Technical University of Eindhoven, The Netherlands
     index: 1
-  - name: TU Berlin, Germany
+  - name: Audio Communication Group, Technische Universität Berlin, Germany
     index: 2
   - name: Institute for Hearing Technology and Acoustics, RWTH Aachen, Germany
     index: 3
