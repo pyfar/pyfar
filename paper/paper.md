@@ -104,10 +104,15 @@ From a maintainers perspective, this design also has the benefit of well defined
 
 3. **Usability**: In addition to the user-friendly encapsulation of data structures and easy to navigate modular design, `pyfar` strives to provide extensive documentation of all functionality via the Sphinx documentation framework. The documentation is available online via the platform `readthedocs.org` [^3]. Examples are included as part of the API-documentation and additionally a growing number of application examples in the form of interactive Jupyter notebooks are provided. The Jupyter notebooks are organized in a gallery which further supports interactive execution via the online computation platform mybinder.org [^4].
 
+4. **Reliability**: The `pyfar` base package and ecosystem are developed, maintained, and reviewed by researchers and students from the field of acoustics. This aims at ensuring a high quality in the initial implementation of functionality and algorithms, while continuous integration based on `pytest` [^5] and hosted on `circle ci` [^6] is installed to monitor and guarantee deployability across different Python versions.
+
 [^1]: https://github.com/pyfar/spharpy
 [^2]: https://github.com/pyfar/pyrato
 [^3]: https://pyfar.readthedocs.org
 [^4]: https://mybinder.org
+[^5]: https://docs.pytest.org/en/latest/
+[^6]: https://circleci.com
+
 
 # Research impact statement
 
@@ -117,10 +122,10 @@ Accordingly, it can be concluded that the core idea of developing `pyfar` as a c
 Since its initial release in 2021 a total of 34 versions were released. The latest version is `0.8.1`, which was released on August 14, 2026.
 In addition to an active developer community, users actively contribute to `pyfar` by reporting issues and suggesting features via the GitHub issue tracker.
 
-`Pyfar` has been downloaded from PyPI over 254,000 times in total, out of which of which 91,000 downloads were in the past year, i.e. 2025. These numbers were obtained using the clickpy platform [^5]. Note that these numbers also include downloads by automated tools such as continuous integration pipelines, which may inflate the numbers. However, they still indicate a significant and active user base.
+`Pyfar` has been downloaded from PyPI over 254,000 times in total, out of which of which 91,000 downloads were in the past year, i.e. 2025. These numbers were obtained using the clickpy platform [^7]. Note that these numbers also include downloads by automated tools such as continuous integration pipelines, which may inflate the numbers. However, they still indicate a significant and active user base.
 
 Due to a lack of an official citation for `pyfar` until this paper, it is difficult to estimate the total number of projects and research using `pyfar`.
-We found 41 open source repositories and 13 software packages that rely on `pyfar` as a dependency [^6] including:
+We found 41 open source repositories and 13 software packages that rely on `pyfar` as a dependency [^8] including:
 
 - [`bayesian_listner`](https://github.com/robaru/bayesian_listener_package): Bayesian auditory model for human localization performance.
 - [`choras`](https://github.com/choras-org/CHORAS): Web-based platform for running and comparing room acoustics simulations.
@@ -136,14 +141,14 @@ Note that we omitted dependent packages from the the `pyfar` ecosystem in the li
 
 Beyond the usage in research software detailed above, `pyfar` is also used in university teaching.  Since 2025, the `pyfar` community created and maintained a collection of open educational resources, which was introduced in @Brinkmann_2025_OpenEducationalResources. As of fall 2026, the collection includes coding assignments in the form of Jupyter notebooks for 3 different courses at M.Sc. level.
 
-[^5]: https://clickpy.clickhouse.com/dashboard/pyfar
-[^6]: Aggregated from https://github.com/pyfar/pyfar/network/dependents?dependent_type=PACKAGE and https://deps.dev/pypi/pyfar/0.8.1/dependents on Sept. 21st 2026.
+[^7]: https://clickpy.clickhouse.com/dashboard/pyfar
+[^8]: Aggregated from https://github.com/pyfar/pyfar/network/dependents?dependent_type=PACKAGE and https://deps.dev/pypi/pyfar/0.8.1/dependents on Sept. 21st 2026.
 
 # Additional information and future developments
 
-- Example gallery with tutorials and use cases
-- Open educational resources are available to support learning and teaching in acoustics and audio signal processing using `pyfar`.
-- Additional packages in the `pyfar` ecosystem provide functionality for specific use cases, e.g., room acoustics analysis, spherical array signal processing, and reading and writing of _sofa_ files standardized in AES69.
+The pyfar ecosystem, which is the overarching home and conceptual foundation of the `pyfar` base package is hosted on [pyfar.org](https://pyfar.org). The ecosystem bundles the documentation off all contained packages, offers and example gallery containing interactive Jupyter Notebooks to enable an intuitive extension to the package documentations through tutorials and example use cases, and educational resources for teaching acoustics and audio signal processing on a university level.
+
+At the time of writing, the pyfar ecosystem also comprised the `pyrato` package for room acoustics analysis, `spharpy` for spherical array signal processing, and `sofar` for reading and writing of _sofa_ files standardized in AES69 [@AES69-2022].
 
 # AI usage disclosure
 
