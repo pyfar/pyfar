@@ -1,5 +1,5 @@
 ---
-title: 'Pyfar: A Python package and ecosystem for acoustics research'
+title: 'Pyfar: Python package for acoustics research'
 tags:
   - Python
   - signal processing
@@ -38,7 +38,7 @@ bibliography: references.bib
 
 # Summary
 
-`Pyfar` is a Python package and ecosystem for researchers in acoustics and audio signal processing.
+`Pyfar` is a Python package for researchers and students in acoustics and audio signal processing.
 It provides well documented and tested implementations of common operations and algorithms.
 At it's core, `pyfar` provides encapsulated audio, filter, and coordinate objects to facilitate convenient
 handling of data and related meta-data.
@@ -49,6 +49,8 @@ On top of that `pyfar` provides functionality for
 - signal and data processing,
 - visualization,
 - file I/O.
+
+`Pyfar` is the base package of the pyfar ecosystem, which contains more specific packages that depend on pyfar to realise, for example, room acoustic analysis and spherical array processing.
 
 # Statement of need
 
@@ -115,16 +117,16 @@ From a maintainers perspective, this design also has the benefit of well defined
 
 # Research impact statement
 
-The `pyfar` base package and ecosystem is currently developed by a core team of `xx` developers. The base package has seen contributions by 21 developers (including the core team). As of spring 2026, the group of developers spans a total of 10 institutions.
+At the time of writing, the `pyfar` package has seen contributions by 21 developers (including the core team). As of spring 2026, the group of developers spans a total of 10 institutions.
 Accordingly, it can be concluded that the core idea of developing `pyfar` as a cross-institutional community effort is successfully implemented.
 
-Since its initial release in 2021 a total of `xx` versions were released. The latest version is `0.8.0`, which was released on March 16, 2026.
+Since its initial release in 2021 a total of 34 versions were released. The latest version is `0.8.1`, which was released on August 14, 2026.
 In addition to an active developer community, users actively contribute to `pyfar` by reporting issues and suggesting features via the GitHub issue tracker.
 
-`Pyfar` has been downloaded from PyPI over 170,000 times in total, out of which of which 91,000 downloads were in the past year, i.e. 2025. These numbers were obtained using the clickpy platform [^5]. Note that these numbers also include downloads by automated tools such as continuous integration pipelines, which may inflate the numbers. However, they still indicate a significant and active user base.
+`Pyfar` has been downloaded from PyPI over 254,000 times in total, out of which of which 91,000 downloads were in the past year, i.e. 2025. These numbers were obtained using the clickpy platform [^5]. Note that these numbers also include downloads by automated tools such as continuous integration pipelines, which may inflate the numbers. However, they still indicate a significant and active user base.
 
 Due to a lack of an official citation for `pyfar` until this paper, it is difficult to estimate the total number of projects and research using `pyfar`.
-At the time of writing, we found 41 open source repositories and 13 software packages that rely on `pyfar` as a dependency [^6] including:
+We found 41 open source repositories and 13 software packages that rely on `pyfar` as a dependency [^6] including:
 
 - [`bayesian_listner`](https://github.com/robaru/bayesian_listener_package): Bayesian auditory model for human localization performance.
 - [`choras`](https://github.com/choras-org/CHORAS): Web-based platform for running and comparing room acoustics simulations.
@@ -136,9 +138,9 @@ At the time of writing, we found 41 open source repositories and 13 software pac
 - [`spectacular`](https://github.com/acoular/spectacoular): GUI-based interface for microphone array signal processing.
 - [`universal_transcoder`](https://github.com/DolbyLaboratories/universal_transcoder): A universal spatial audio transcoder by Dolby Laboratories.
 
-Note that we omit other packages that are actively developed within the `pyfar` ecosystem, such as `spharpy` and `pyrato`, which also rely on the `pyfar` base package.
+Note that we omitted dependent packages from the the `pyfar` ecosystem in the list above.
 
-Beyond the usage in research, `pyfar` is also used in university teaching.  Since 2025, the developers of the `pyfar` ecosystem have create a collection of open educational reosurces, which was introduced in @Brinkmann_2025_OpenEducationalResources. As of spring 2026, the collection includes coding assignments in the form of Jupyter notebooks for 3 different courses at M.Sc. level.
+Beyond the usage in research software detailed above, `pyfar` is also used in university teaching.  Since 2025, the `pyfar` community created and maintained a collection of open educational resources, which was introduced in @Brinkmann_2025_OpenEducationalResources. As of fall 2026, the collection includes coding assignments in the form of Jupyter notebooks for 3 different courses at M.Sc. level.
 
 [^5]: https://clickpy.clickhouse.com/dashboard/pyfar
 [^6]: Aggregated from https://github.com/pyfar/pyfar/network/dependents?dependent_type=PACKAGE and https://deps.dev/pypi/pyfar/0.8.1/dependents on Sept. 21st 2026.
