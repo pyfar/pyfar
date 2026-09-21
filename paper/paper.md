@@ -8,10 +8,25 @@ authors:
   - name: Marco Berzborn
     orcid: 0000-0002-4421-1702
     equal-contrib: true
-    affiliation: "1" # (Multiple affiliations must be quoted)
+    affiliation: "1"
+  - name: Fabian Brinkmann
+    affiliation: "2"
+    equal-contrib: true
+  - name: Anne Heimes
+    affiliation: "3"
+    equal-contrib: true
+  - name: Simon Kersten
+    affiliation: "3"
+    equal-contrib: true
+
 affiliations:
- - name: Department of the Built Environment, Technical University of Eindhoven, The Netherlands
-   index: 1
+  - name: Department of the Built Environment, Technical University of Eindhoven, The Netherlands
+    index: 1
+  - name: TU Berlin, Germany
+    index: 2
+  - name: Institute for Hearing Technology and Acoustics, RWTH Aachen, Germany
+    index: 3
+
 date: 17 May 2024
 bibliography: references.bib
 
