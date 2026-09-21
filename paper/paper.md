@@ -40,6 +40,7 @@ On top of that `pyfar` provides functionality for
 - Researchers in acoustics and audio signal processing often need to implement similar algorithms and functionality.
 - Existing implementations are often developed at single institutions for in-house use and later shared as open source solutions.
 - This leads to duplicated work, slower research progress, and less reliable results.
+- Research software is often developed within a specific project or by researchers who are on temporary contacts. This leads to risks of discontinued maintenance and support of the software. A shared cross-institutional codebase can mitigate this risk and extend the lifetime and continuity of the software.
 - `Pyfar` is a cross-institutional community effort to provide a common foundation for acoustics research in Python.
 - `Pyfar` provides a well-documented and tested package that researchers can use and contribute to.
 - `Pyfar` is designed to be user-friendly and intuitive, making it easier for researchers to implement their ideas and share their work with others.
