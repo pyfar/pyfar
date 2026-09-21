@@ -124,19 +124,24 @@ In addition to an active developer community, users actively contribute to `pyfa
 `Pyfar` has been downloaded from PyPI over 170,000 times in total, out of which of which 91,000 downloads were in the past year, i.e. 2025. These numbers were obtained using the clickpy platform [^5]. Note that these numbers also include downloads by automated tools such as continuous integration pipelines, which may inflate the numbers. However, they still indicate a significant and active user base.
 
 Due to a lack of an official citation for `pyfar` until this paper, it is difficult to estimate the total number of projects and research using `pyfar`.
-Google Scholar lists at least `xx` manuscripts referencing the usage of `pyfar`.
-To the authors knowledge, the following software packages rely on `pyfar` as a dependency:
+At the time of writing, we found 41 open source repositories and 13 software packages that rely on `pyfar` as a dependency [^6] including:
 
-- `misuka`
-- `mesh2hrtf`
-- `sparrowpy`
-- `choras`
+- [`bayesian_listner`](https://github.com/robaru/bayesian_listener_package): Bayesian auditory model for human localization performance.
+- [`choras`](https://github.com/choras-org/CHORAS): Web-based platform for running and comparing room acoustics simulations.
+- [`flamo`](https://github.com/gdalsanto/flamo): Open source library for frequency-domain differentiable audio processing.
+- [`mesh2hrtf`](https://github.com/Any2HRTF/Mesh2HRTF) and [`mesh2scattering`](https://github.com/ahms5/Mesh2scattering): Boundary element-based simulation of head-related transfer functions and scattering coefficients.
+- [`pyFDN`](https://github.com/artificial-audio/pyFDN): Building blocks for designing, simulating, and analysing Feedback Delay Networks (FDNs).
+- [`QASTAnet`](https://github.com/Orange-OpenSource/QASTAnet): Metric for predicting global audio quality of 3D audio signals by Orange.
+- [`sparrowpy`](https://github.com/sparrow-acoustics/sparrowpy): Sound propagation with acoustic radiosity for realistic outdoor worlds.
+- [`spectacular`](https://github.com/acoular/spectacoular): GUI-based interface for microphone array signal processing.
+- [`universal_transcoder`](https://github.com/DolbyLaboratories/universal_transcoder): A universal spatial audio transcoder by Dolby Laboratories.
 
 Note that we omit other packages that are actively developed within the `pyfar` ecosystem, such as `spharpy` and `pyrato`, which also rely on the `pyfar` base package.
 
 Beyond the usage in research, `pyfar` is also used in university teaching.  Since 2025, the developers of the `pyfar` ecosystem have create a collection of open educational reosurces, which was introduced in @Brinkmann_2025_OpenEducationalResources. As of spring 2026, the collection includes coding assignments in the form of Jupyter notebooks for 3 different courses at M.Sc. level.
 
 [^5]: https://clickpy.clickhouse.com/dashboard/pyfar
+[^6]: Aggregated from https://github.com/pyfar/pyfar/network/dependents?dependent_type=PACKAGE and https://deps.dev/pypi/pyfar/0.8.1/dependents on Sept. 21st 2026.
 
 # Additional information and future developments
 
