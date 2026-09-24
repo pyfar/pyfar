@@ -239,6 +239,7 @@ def test_setter_sampling_rate():
 
 @pytest.mark.parametrize('fs', [1, [1], [[1]], [[[1]]]])
 def test_sampling_rate_parsing(fs):
+    """Test that the sampling rate is parsed correctly."""
     Signal([0], fs)
     Signal([0], np.array(fs))
 
@@ -247,6 +248,7 @@ def test_sampling_rate_parsing(fs):
     ([1, 2], "Multirate signals are not supported."),
     ('string', "Sampling rate needs to be a number.")])
 def test_sampling_rate_errors(sampling_rate, match):
+    """Test error handling of the sampling rate setter."""
     with pytest.raises(ValueError, match=match):
         Signal(1, sampling_rate)
 
