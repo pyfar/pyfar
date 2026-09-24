@@ -7,6 +7,12 @@ import pyfar.classes.audio as signal
 from pyfar import Signal, TimeData, FrequencyData
 import operator
 
+SIGNAL1 = Signal([1, 2, 3, 4], 44100)
+SIGNAL2 = Signal([1, 2, 3, 4], 48000)
+SIGNAL3 = Signal([1, 2, 3], 44100)
+SIGNAL4 = Signal([1, 2, 3, 4], 44100, fft_norm="rms")
+SIGNAL5 = Signal([1+1j, 2+2j, 3+3j, 4+4j], 48000, is_complex=True)
+SIGNAL6 = FrequencyData([1+1j, 2+2j, 3+3j, 4+4j], [10, 200, 1000, 20000])
 
 
 @pytest.mark.parametrize(("domain", "x_complex", "y_complex", "desired"), [
@@ -15,8 +21,7 @@ import operator
     ('time', True, False, np.atleast_2d([2 + 0j, 0 + 0j, 0 + 0j])),
     ('freq', False, False, np.atleast_2d([2, 2])),
     ('freq', True, True, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j])),
-    ('freq', True, False, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j])),
-])
+    ('freq', True, False, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]))])
 def test_add_two_signals_time_and_freq(domain, x_complex, y_complex, desired):
     x = Signal([1, 0, 0], 44100, is_complex=x_complex)
     y = Signal([1, 0, 0], 44100, is_complex=y_complex)
@@ -52,16 +57,14 @@ def test_add_three_signals():
     npt.assert_allclose(y.time, np.atleast_2d([3, 0, 0]), atol=1e-15)
 
 
-
 @pytest.mark.parametrize(("y", "swap", "domain", "is_complex_x",
                            "is_complex_y", "desired"), [
     (1, False, 'time', False, False, np.atleast_2d([2, 1, 1])),
     (1 + 1j, False, 'time', False, True,
-        np.atleast_2d([2 + 1j, 1 + 1j, 1 + 1j])),
+     np.atleast_2d([2 + 1j, 1 + 1j, 1 + 1j])),
     (1, True, 'time', False, False, np.atleast_2d([2, 1, 1])),
     (1, True, 'time', True, False, np.atleast_2d([2 + 0j, 1 + 0j, 1 + 0j])),
-    (1, True, 'freq', True, False, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j])),
-])
+    (1, True, 'freq', True, False, np.atleast_2d([2 + 0j, 2 + 0j, 2 + 0j]))])
 def test_add_signal_and_number(y, swap, domain, is_complex_x, is_complex_y,
                                 desired):
     x = Signal([1, 0, 0], 44100, is_complex=is_complex_x)
@@ -81,22 +84,19 @@ def test_add_signal_and_number(y, swap, domain, is_complex_x, is_complex_y,
     assert z.complex == (is_complex_x or is_complex_y)
 
 
-
 @pytest.mark.parametrize(("x", "y", "domain", "desired_data",
                            "desired_instances"), [
     (TimeData([1, 0, 0], [0, .1, .5]), 1, 'time', np.atleast_2d([2, 1, 1]),
-        np.atleast_1d([0, .1, .5])),
+     np.atleast_1d([0, .1, .5])),
     (TimeData([1, 0, 0], [0, .1, .5]), TimeData([1, 0, 0], [0, .1, .5]),
-        'time', np.atleast_2d([2, 0, 0]), np.atleast_1d([0, .1, .5])),
+     'time', np.atleast_2d([2, 0, 0]), np.atleast_1d([0, .1, .5])),
     (FrequencyData([1, 0, 0], [0, .1, .5]), 1, 'freq',
-        np.atleast_2d([2, 1, 1]), np.atleast_1d([0, .1, .5])),
+     np.atleast_2d([2, 1, 1]), np.atleast_1d([0, .1, .5])),
     (FrequencyData([1, 0, 0], [0, .1, .5]),
-        FrequencyData([1, 0, 0], [0, .1, .5]), 'freq',
-        np.atleast_2d([2, 0, 0]), np.atleast_1d([0, .1, .5])),
-
-])
-def test_add_time_data_frequency_data(x, y, domain, desired_data,
-                                       desired_instances):
+     FrequencyData([1, 0, 0], [0, .1, .5]), 'freq',
+     np.atleast_2d([2, 0, 0]), np.atleast_1d([0, .1, .5]))])
+def test_add_time_frequency_data(x, y, domain, desired_data,
+                                 desired_instances):
     z = pf.add((x, y), domain)
 
     if domain == "time":
@@ -115,18 +115,16 @@ def test_add_time_data_frequency_data(x, y, domain, desired_data,
     npt.assert_allclose(z_instances, desired_instances, atol=1e-15)
 
 
-
 @pytest.mark.parametrize(("x", "y", "domain", "match"), [
     (TimeData([1, 0, 0], [0, .1, .5]), 1, 'freq',
-        "The domain must be 'time'."),
+     "The domain must be 'time'."),
     (TimeData([1, 0, 0], [0, .1, .5]), TimeData([1, 0, 0], [0, .1, .4]),
-        'time', 'The times does not match.'),
+     'time', 'The times does not match.'),
     (FrequencyData([1, 0, 0], [0, .1, .5]), 1, 'time',
-        "The domain must be 'freq'."),
+     "The domain must be 'freq'."),
     (FrequencyData([1, 0, 0], [0, .1, .5]),
-        FrequencyData([1, 0, 0], [0, .1, .4]), 'freq',
-        'The frequencies do not match.'),
-])
+     FrequencyData([1, 0, 0], [0, .1, .4]), 'freq',
+     'The frequencies do not match.')])
 def test_add_time_data_frequency_data_errors(x, y, domain, match):
     with pytest.raises(ValueError, match=match):
         pf.add((x, y), domain)
@@ -156,7 +154,6 @@ def test_add_arrays():
 @pytest.mark.parametrize('fft_norm', ['none', 'rms'])
 def test_signal_inversion(fft_norm):
     """Test signal inversion with different FFT norms."""
-
     signal = pf.Signal([2, 0, 0], 44100, fft_norm=fft_norm)
     signal_inv = 1 / signal
     npt.assert_allclose(signal.time.flatten(), [2, 0, 0])
@@ -207,8 +204,7 @@ def test_complex_multiplication(domain, desired, is_complex_x, is_complex_y):
         npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
-@pytest.mark.parametrize('is_complex_y', [
-    False, True])
+@pytest.mark.parametrize('is_complex_y', [False, True])
 def test_division(is_complex_y):
     # only test one case - everything else is tested below
     x = Signal([1, 0, 0], 44100)
@@ -232,15 +228,14 @@ def test_power():
 
 @pytest.mark.parametrize(('x','y'),[
     (Signal([3, 2, 1], 44100, n_samples=5, domain='freq'),
-    Signal([2, 2, 2], 44100, n_samples=5, domain='freq')),
+     Signal([2, 2, 2], 44100, n_samples=5, domain='freq')),
     (Signal([3, 2, 1], 44100, n_samples=5, domain='freq'), 2),
     (TimeData([3, 2, 1], [0, 1, 2]),
-    TimeData([2, 2, 2], [0, 1, 2])),
+     TimeData([2, 2, 2], [0, 1, 2])),
     (TimeData([3, 2, 1], [0, 1, 2]), 2),
     (FrequencyData([3, 2, 1], [0, 1, 2]),
-    FrequencyData([2, 2, 2], [0, 1, 2])),
+     FrequencyData([2, 2, 2], [0, 1, 2])),
     (FrequencyData([3, 2, 1], [0, 1, 2]), 2)])
-
 @pytest.mark.parametrize(("swap", "op", "desired"), [
     (False, operator.add, [5, 4, 3]),
     (False, operator.sub, [1, 0, -1]),
@@ -282,70 +277,52 @@ def test_overloaded_operators_array_and_signal(swap, op):
     npt.assert_allclose(z.freq, desired, atol=1e-15)
 
 
-SIGNALS = {
-    "s":  lambda: Signal([1, 2, 3, 4], 44100),
-    "s1": lambda: Signal([1, 2, 3, 4], 48000),
-    "s2": lambda: Signal([1, 2, 3], 44100),
-    "s4": lambda: Signal([1, 2, 3, 4], 44100, fft_norm="rms"),
-    "s5": lambda: Signal([1+1j, 2+2j, 3+3j, 4+4j], 48000, is_complex=True),
-    "s6": lambda: FrequencyData(
-        [1+1j, 2+2j, 3+3j, 4+4j], [10, 200, 1000, 20000]),
-}
 @pytest.mark.parametrize(("data", "domain", "is_complex"), [
-    (("s5", "s5"), 'time', True),
-    (("s", "s"), 'time', False),
-    (("s5", "s1"), 'time', True),
-    (("s1", "s5"), 'time', True),
-    ((1 + 1j, "s5"), 'time', True),
-    (("s5", 1 + 1j), 'time', True),
-    ((1, "s"), 'time', False),
-    (("s", 1), 'time', False),
-    ((1, "s6"), 'freq', False),
-    (("s6", 1), 'freq', False),
-    ((1 + 1j, "s6"), 'freq', False),
-    (("s6", 1 + 1j), 'freq', False)])
+    ((SIGNAL5, SIGNAL5), 'time', True),
+    ((SIGNAL1, SIGNAL1), 'time', False),
+    ((SIGNAL5, SIGNAL2), 'time', True),
+    ((SIGNAL2, SIGNAL5), 'time', True),
+    ((1 + 1j, SIGNAL5), 'time', True),
+    ((SIGNAL5, 1 + 1j), 'time', True),
+    ((1, SIGNAL1), 'time', False),
+    ((SIGNAL1, 1), 'time', False),
+    ((1, SIGNAL6), 'freq', False),
+    ((SIGNAL6, 1), 'freq', False),
+    ((1 + 1j, SIGNAL6), 'freq', False),
+    ((SIGNAL6, 1 + 1j), 'freq', False)])
 def test_assert_match_for_arithmetic_complex_flag(data, domain, is_complex):
-    resolved = tuple(SIGNALS[d]() if isinstance(d, str) else d for d in data)
     out = signal._assert_match_for_arithmetic(
-        resolved, domain, division=False, matmul=False)
+        data, domain, division=False, matmul=False)
     assert out[7] == is_complex
 
 
 @pytest.mark.parametrize(("data", "domain", "match"), [
-    ("s", 'time',
-        "Input argument 'data' must be a tuple."),
-    (("s", ['str', 'ing']), 'time',
-        "Input must be of type Signal, int, float, or complex"),
-    (("s", "s1"), 'time', 'The sampling rates do not match'),
-    (("s", "s2"), 'time', 'The number of samples does not match')])
-def test_assert_match_for_arithmetic_complex_flag_errors(data, domain,match):
-    if isinstance(data, tuple):
-        resolved = tuple(SIGNALS[d]() if isinstance(d, str)
-                          else d for d in data)
-    else:
-        resolved = SIGNALS[data]() if isinstance(data, str) else data
+    (SIGNAL1, 'time',"Input argument 'data' must be a tuple."),
+    ((SIGNAL1, ['str', 'ing']), 'time',
+     "Input must be of type Signal, int, float, or complex"),
+    ((SIGNAL1, SIGNAL2), 'time', 'The sampling rates do not match'),
+    ((SIGNAL1, SIGNAL3), 'time', 'The number of samples does not match')])
+def test_assert_match_for_arithmetic_errors(data, domain,match):
     with pytest.raises(ValueError, match=match):
         signal._assert_match_for_arithmetic(
-            resolved, domain, division=False, matmul=False)
+            data, domain, division=False, matmul=False)
 
 
 @pytest.mark.parametrize("data", [
-    ("s", "s"),
-    ("s", [1, 2]),
-    ("s", "s", "s")  ])
+    (SIGNAL1, SIGNAL1),
+    (SIGNAL1, [1, 2]),
+    (SIGNAL1, SIGNAL1, SIGNAL1)])
 def test_assert_match_for_arithmetic(data):
-    resolved = tuple(SIGNALS[d]() if isinstance(d, str) else d for d in data)
-    signal._assert_match_for_arithmetic(resolved, 'time', division=False,
+    signal._assert_match_for_arithmetic(data, 'time', division=False,
                                          matmul=False)
 
 
 @pytest.mark.parametrize(("data", "index", "expected"), [
-    (("s", "s"), [0,1,2,6,7], [44100, 4, 'none', (1,), False]),
-    (("s", "s4"), [0,1,2,6,7], [44100, 4, 'rms', (1,), False])])
+    ((SIGNAL1, SIGNAL1), [0,1,2,6,7], [44100, 4, 'none', (1,), False]),
+    ((SIGNAL1, SIGNAL4), [0,1,2,6,7], [44100, 4, 'rms', (1,), False])])
 def test_assert_match_for_arithmetic_output(data, index, expected):
-    resolved = tuple(SIGNALS[d]() if isinstance(d, str) else d for d in data)
     out = signal._assert_match_for_arithmetic(
-        resolved, 'time', division=False, matmul=False)
+       data, 'time', division=False, matmul=False)
     for exp_ind, ind in enumerate(index):
         assert out[ind] == expected[exp_ind]
 
@@ -373,7 +350,6 @@ def test_get_arithmetic_data_with_array():
         ['time', 'psd'],
         ['freq', 'psd']])
 def test_get_arithmetic_data_with_signal(domain, meta):
-
     # reference signal - _get_arithmetic_data should return the data without
     # any normalization regardless of the input data
     s_ref = Signal([1, 0, 0], 44100)
@@ -505,12 +481,12 @@ def test_matrix_multiplication_shape_mismatch():
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.TimeData, True,
      np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
-        np.ones((3, 3, 10))),
+     np.ones((3, 3, 10))),
     (pf.FrequencyData, False,
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.FrequencyData, True,
      np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
-        np.ones((3, 3, 10)))])
+     np.ones((3, 3, 10)))])
 def test_matrix_multiplication_TimeData_FrequencyData(pf_class, swap, desired):
     """Test @ operator for TimeData and FrequencyData."""
     times = np.arange(10)
@@ -556,7 +532,7 @@ def test_matrix_multiplication_signal_times_array():
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.TimeData, True,
      np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
-        np.ones((3, 3, 10))),
+     np.ones((3, 3, 10))),
     (pf.FrequencyData, False,
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.FrequencyData, True,
@@ -588,12 +564,12 @@ def test_matrix_multiplication_axes():
     npt.assert_allclose(z.freq, des, atol=1e-15)
 
 
-@pytest.mark.parametrize(('sx', 'sy', 'az', 'sz'),
-                         [((1, 3, 5), (3, 5, 4), 5, (3, 3, 4)),
-                          ((2,), (3, 2, 4), 2, (3, 1, 4)),
-                          ((1, 2), (3, 2, 4), 2, (3, 1, 4)),
-                          ((2, 3, 4), (4,), 4, (2, 3, 1)),
-                          ((2, 3, 4), (4, 1), 4, (2, 3, 1))])
+@pytest.mark.parametrize(('sx', 'sy', 'az', 'sz'), [
+    ((1, 3, 5), (3, 5, 4), 5, (3, 3, 4)),
+    ((2,), (3, 2, 4), 2, (3, 1, 4)),
+    ((1, 2), (3, 2, 4), 2, (3, 1, 4)),
+    ((2, 3, 4), (4,), 4, (2, 3, 1)),
+    ((2, 3, 4), (4, 1), 4, (2, 3, 1))])
 def test_matrix_multiplication_broadcasting(sx, sy, az, sz):
     """Test broadcasting."""
     x = pf.signals.impulse(10, amplitude=np.ones(sx))
