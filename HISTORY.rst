@@ -8,6 +8,7 @@ Unreleased
 Changed
 ^^^^^^^
 - Improved the test functions in the file `test_audio_signal.py` by parameterising and merging some of the tests. (PR #969)
+- Improved the test functions in the file `test_audio_signal_arithmetic.py` by parameterising and merging some of the tests. (PR #966)
 
 0.8.1 (2026-08-14)
 ------------------
