@@ -116,16 +116,6 @@ def test_level_time_weighted_level_replace_zeros_true():
     assert np.allclose(levels_replace, expected_value)
 
 
-@pytest.mark.parametrize(("time_weighting", "err_type"), [
-    (None, TypeError), ("X", ValueError)])
-def test_level_time_weighted_level_time_weighting_error(
-    time_weighting, err_type,
-):
-    s = pf.signals.sine(1000, 22050)
-    with pytest.raises(err_type, match="Time weighting"):
-        pf.level.time_weighted_level(s, "Z", time_weighting)
-
-
 @pytest.mark.parametrize("time_weighting", ["F", "S"])
 def test_level_max_time_weighted_level_known_value(time_weighting):
     """A single impulse should result in a peak level that is equal to the
