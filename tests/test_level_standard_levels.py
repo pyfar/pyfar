@@ -124,3 +124,38 @@ def test_level_time_weighted_level_time_weighting_error(
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(err_type, match="Time weighting"):
         pf.level.time_weighted_level(s, "Z", time_weighting)
+
+
+@pytest.mark.parametrize("time_weighting", ["F", "S"])
+def test_level_max_time_weighted_level_known_value(time_weighting):
+    """A single impulse should result in a peak level that is equal to the
+    level of the impulse dampened by the exponential smoothing parameters,
+    which are the sampling rate and the time constant of the time weighting.
+    """
+    delay = 5432
+    s = pf.signals.impulse(10000, delay)
+    levels, times = pf.level.maximum_time_weighted_level(
+        s, "Z", time_weighting, None, 1)
+    time_constant = 0.125 if time_weighting == "F" else 1
+    expected_peak_energy = 1 / s.sampling_rate / time_constant
+    expected_peak_level = 10 * np.log10(expected_peak_energy)
+    assert np.isclose(levels[0], expected_peak_level, atol=0.01)
+    assert np.isclose(times[0], delay / s.sampling_rate, atol=0.001)
+
+
+@pytest.mark.parametrize("time_weighting", ["F", "S"])
+@pytest.mark.parametrize("frequency_weighting", ["A", "C", "Z"])
+def test_level_peak_and_max_two_sample_peak(
+    time_weighting, frequency_weighting
+):
+    """Unlike the regular peak level, when two loud samples appear
+    right next to each other and the first one is only slightly louder,
+    the maximum time-weighted level should be at the second sample, since
+    the time-weighting will integrate most of the first sample's energy
+    into the output for the second sample. 
+    """
+    s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
+    _, times_peak = pf.level.peak_level(s, "Z", None)
+    _, times_max = pf.level.maximum_time_weighted_level(s, "Z", "F", None)
+    assert np.isclose(times_peak[0], 0.03)  # at the first sample of the peak
+    assert np.isclose(times_max[0], 0.04)  # at the second sample of the peak
