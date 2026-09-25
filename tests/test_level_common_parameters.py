@@ -102,10 +102,10 @@ FUNCTION_WRAPPERS_BAND_FRACTIONS = [
 ])
 @pytest.mark.parametrize("num_fractions", [1, 3, 6])
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_BAND_FRACTIONS)
-def test_level_common_num_octave_band_fractions_dimensions(
+def test_level_common_num_octave_band_fractions_shape(
         signal, function, num_fractions):
     """Test that the number of octave band fractions is applied correctly
-    by checking the dimensions of the output.
+    by checking the shape of the output.
     """
     band_freqs, _, _ = pf.constants.fractional_octave_frequencies_exact(
         num_fractions)
