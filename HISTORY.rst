@@ -5,6 +5,15 @@ History
 0.8.1 (2026-08-14)
 ------------------
 
+Added
+^^^^^
+- A new submodule `pyfar.level` with various functions to compute and work with levels (PR #949), consisting of:
+    - `level.equivalent_continuous_level` for the Leq (PR #948)
+    - `level.exposure_level` for the sound exposure level (PR #951)
+    - `level.sliding_continuous_level` for the Leq with a sliding window (PR #952)
+    - `level.peak_level` for (true) peak level detection (PR #955)
+    - `level.time_weighted_level` and `level.time_weighted_pressure` for time-weighting (PR #954)
+
 Fixed
 ^^^^^
 - A bug in `pyfar.dsp.dsp.find_impulse_response_delay` that lead to failed delay searches for certain signals (Issue #940).
