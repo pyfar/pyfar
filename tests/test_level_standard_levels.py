@@ -143,19 +143,16 @@ def test_level_max_time_weighted_level_known_value(time_weighting):
     assert np.isclose(times[0], delay / s.sampling_rate, atol=0.001)
 
 
-@pytest.mark.parametrize("time_weighting", ["F", "S"])
-@pytest.mark.parametrize("frequency_weighting", ["A", "C", "Z"])
-def test_level_peak_and_max_two_sample_peak(
-    time_weighting, frequency_weighting
-):
+@pytest.mark.parametrize("time_w", ["F", "S"])
+def test_level_peak_and_max_two_sample_peak(time_w):
     """Unlike the regular peak level, when two loud samples appear
     right next to each other and the first one is only slightly louder,
     the maximum time-weighted level should be at the second sample, since
     the time-weighting will integrate most of the first sample's energy
-    into the output for the second sample. 
+    into the output for the second sample.
     """
     s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
     _, times_peak = pf.level.peak_level(s, "Z", None)
-    _, times_max = pf.level.maximum_time_weighted_level(s, "Z", "F", None)
+    _, times_max = pf.level.maximum_time_weighted_level(s, "Z", time_w, None)
     assert np.isclose(times_peak[0], 0.03)  # at the first sample of the peak
     assert np.isclose(times_max[0], 0.04)  # at the second sample of the peak
