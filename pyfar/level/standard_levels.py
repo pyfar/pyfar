@@ -576,3 +576,23 @@ def time_weighted_level(signal,
     energies = weighted.time**2
     levels = _energies_to_levels(energies, reference_pressure, replace_zeros)
     return levels
+
+
+def maximum_time_weighted_level(
+        signal,
+        frequency_weighting: Literal["A", "C", "Z"],
+        time_weighting: Literal["F", "S"],
+        oversampling: float | None = 4,
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+):
+
+    signal = _check_signal_type(signal)
+    signal = _apply_frequency_weighting(signal, frequency_weighting)
+    signal = _apply_oversampling(signal, oversampling)
+    time_constant = _time_weighting_to_constant(time_weighting)
+    time_weighted = time_weighted_pressure(signal, time_constant)
+    maxima = np.max(time_weighted.time, axis=-1)
+    levels = _energies_to_levels(maxima**2, reference_pressure)
+    indexes = np.argmax(time_weighted.time, axis=-1)
+    times = indexes / signal.sampling_rate
+    return levels, times
