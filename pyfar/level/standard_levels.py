@@ -585,7 +585,66 @@ def maximum_time_weighted_level(
         oversampling: float | None = 4,
         reference_pressure: float = pf.constants.reference_sound_pressure,
 ):
+    r"""Calculate the maximum time-weighted sound pressure level.
 
+    The levels are calculated per channel; and according to IEC 61672-1 [#]_,
+    where this is defined as the maximum time-weighted level of the signal,
+    such as :math:`L_{\text{AFmax}}` for the ``A`` frequency weighting and
+    ``F`` time weighting.
+
+    For more information on the oversampling and time weighting, please refer
+    to :py:func:`~pyfar.level.peak_level` and
+    :py:func:`~pyfar.level.time_weighted_level`, respectively.
+
+    Parameters
+    ----------
+    signal: Signal
+        The signal object to calculate the levels of.
+
+    frequency_weighting: ``"A"``, ``"C"``, or ``"Z"``
+        The frequency weighting type. If ``"A"`` or ``"C"``, the corresponding
+        frequency weighting filter is applied before level
+        calculation. If ``"Z"``, no frequency weighting is applied.
+
+        The frequency weighting is applied using
+        :py:func:`~pyfar.dsp.filter.frequency_weighting_filter` with its
+        (standard-compliant) default parameters. If you need more control,
+        you can set this parameter to ``"Z"`` and apply the frequency
+        weighting filter yourself before calling this function.
+
+    time_weighting: ``"F"`` or ``"S"``
+        The time weighting type. Options are ``"F"`` (fast) and
+        ``"S"`` (slow), which correspond to level decays of -34.7 dB and
+        -4.3 dB per second, respectively.
+
+    oversampling: float or ``None``
+        The oversampling factor to apply before calculating the peak level.
+        The default value of ``4`` matches the true-peak detection
+        recommendation from ITU-R BS.1770-5 for 48 kHz signals.
+
+    reference_pressure: float
+        The reference pressure to calculate levels relative to. The default
+        value, ``20e-6``, corresponds to the standard reference pressure of
+        20 micropascals, which assumes the signal is in units of pascals (Pa).
+        To compute the level in dBFS of a digital signal, or if you plan
+        to correct for the recording setup afterwards, this parameter
+        should be ``1``.
+
+    Returns
+    -------
+    levels: np.ndarray
+        The peak sound pressure levels in dB, one per channel.
+    times: np.ndarray
+        The times of the peak levels in seconds, one per channel. If
+        `oversampling` is ``None``, the times match sample times of the input.
+        Otherwise, `times` may contain inter-sample times.
+
+    References
+    ----------
+    .. [#] International Electrotechnical Commission,
+        "IEC 61672-1:2013 - Electroacoustics - Sound level meters - Part 1:
+        Specifications", IEC, 2013.
+    """
     signal = _check_signal_type(signal)
     signal = _apply_frequency_weighting(signal, frequency_weighting)
     signal = _apply_oversampling(signal, oversampling)
