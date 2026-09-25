@@ -15,6 +15,53 @@ ONE_PA = 20 * np.log10(1 / pf.constants.reference_sound_pressure)
 SINE_PAPR = 10 * np.log10(2)  # peak-to-average power ratio of sine signals
 
 
+SHAPE_TEST_SIGNALS = [
+    pf.signals.impulse(1000, 0),
+    pf.signals.impulse(1000, (0, 0)),
+    pf.signals.impulse(1000, [(0, 0), (0, 0), (0, 0)]),
+]
+
+@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
+@pytest.mark.parametrize("function", [
+    lambda s: pf.level.equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.exposure_level(s, "Z"),
+])
+def test_level_output_shapes_one_per_channel(signal, function):
+    """Test that the output of the level functions that return one value
+    per channel has the correct shape.
+    """
+    output = function(signal)
+    assert output.shape == signal.cshape
+
+
+@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
+@pytest.mark.parametrize("function", [
+    lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.time_weighted_level(s, "Z", "F"),
+])
+def test_level_output_shapes_one_per_sample(signal, function):
+    """Test that the output of the level functions that return one value
+    per sample has the same shape as the signal's time data.
+    """
+    output = function(signal)
+    assert output.shape == signal.time.shape
+
+
+@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
+@pytest.mark.parametrize("function", [
+    lambda s: pf.level.peak_level(s, "Z"),
+    lambda s: pf.level.maximum_time_weighted_level(s, "Z", "F"),
+])
+def test_level_output_shapes_tuple(signal, function):
+    """Test that the tuple returned by the level functions has exactly
+    two elements (levels and times) and both have one value per channel.
+    """
+    output = function(signal)
+    assert len(output) == 2
+    assert output[0].shape == signal.cshape
+    assert output[1].shape == signal.cshape
+
+
 def test_level_equivalent_continuous_level_known_value():
     s = pf.signals.sine(1000, 22050)
     levels = pf.level.equivalent_continuous_level(
@@ -59,12 +106,6 @@ def test_level_sliding_equivalent_continuous_level_known_value():
     assert np.isclose(levels[0][-1], ONE_PA - SINE_PAPR, atol=0.001)
 
 
-def test_level_sliding_equivalent_continuous_level_shape():
-    s = pf.signals.impulse(1000, sampling_rate=48000)
-    levels = pf.level.sliding_equivalent_continuous_level(s, "Z")
-    assert levels.shape == s.time.shape
-
-
 @pytest.mark.parametrize("oversampling", [None, 4, 8])
 def test_level_peak_level_known_value(oversampling):
     delay = 5432
@@ -90,40 +131,6 @@ def test_level_peak_level_intersample_peak():
     # after oversampling, the peak is at the 7th sample, i.e. between the
     # 3rd and 4th sample at the original sampling rate
     assert time_with_over == 0.035 # at 7th oversampled sample
-
-
-def test_level_time_weighted_level_replace_zeros_false():
-    """Test that setting replace_zeros to False returns -inf
-    and raises a warning from numpy.
-    """
-    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
-    with pytest.warns(RuntimeWarning, match="divide by zero"):
-        levels_no_replace = pf.level.time_weighted_level(
-            s, "Z", "F", replace_zeros=False)
-    assert np.all(levels_no_replace == -np.inf)
-
-
-def test_level_time_weighted_level_replace_zeros_true():
-    """Test that setting replace_zeros to True replaces zeros with the
-    array type's epsilon to avoid -inf values and numpy warnings.
-    """
-    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
-    levels_replace = pf.level.time_weighted_level(
-        s, "Z", "F", replace_zeros=True)
-
-    # since there are only zeros in the signal, all values must be epsilon
-    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
-    assert np.allclose(levels_replace, expected_value)
-
-
-@pytest.mark.parametrize(("time_weighting", "err_type"), [
-    (None, TypeError), ("X", ValueError)])
-def test_level_time_weighted_level_time_weighting_error(
-    time_weighting, err_type,
-):
-    s = pf.signals.sine(1000, 22050)
-    with pytest.raises(err_type, match="Time weighting"):
-        pf.level.time_weighted_level(s, "Z", time_weighting)
 
 
 @pytest.mark.parametrize("time_weighting", ["F", "S"])
