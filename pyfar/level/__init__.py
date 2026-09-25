@@ -6,6 +6,7 @@ from .standard_levels import (
     sliding_equivalent_continuous_level,
     peak_level,
     time_weighted_level,
+    maximum_time_weighted_level,
 )
 
 from .utils import (
@@ -19,4 +20,5 @@ __all__ = [
     "peak_level",
     "time_weighted_pressure",
     "time_weighted_level",
+    "maximum_time_weighted_level",
 ]

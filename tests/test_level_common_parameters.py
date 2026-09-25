@@ -30,7 +30,7 @@ import pytest
     lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
     lambda s: pf.level.peak_level(s, "Z"),
     lambda s: pf.level.time_weighted_level(s, "A", "F"),
-    # other level functions go here once implemented
+    lambda s: pf.level.maximum_time_weighted_level(s, "A", "F"),
 ])
 def test_level_common_signal_parameter(signal, function):
     """Test that the signal parameter type is a Signal object."""
@@ -46,7 +46,7 @@ FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
     lambda s, w: pf.level.sliding_equivalent_continuous_level(s, w)[0][-1],
     lambda s, w: pf.level.peak_level(s, w)[0],
     lambda s, w: pf.level.time_weighted_level(s, w, "F")[0][-1],
-    # other level functions go here once implemented
+    lambda s, w: pf.level.maximum_time_weighted_level(s, w, "F")[0],
 ]
 
 
@@ -92,7 +92,6 @@ FUNCTION_WRAPPERS_BAND_FRACTIONS = [
     lambda s, n: pf.level.equivalent_continuous_level(s, "Z", n),
     lambda s, n: pf.level.sliding_equivalent_continuous_level(s, "Z", n),
     lambda s, n: pf.level.time_weighted_level(s, "Z", "F", n),
-    # other level functions go here once implemented
 ]
 
 
@@ -143,7 +142,8 @@ FUNCTION_WRAPPERS_REFERENCE_PRESSURE = [
         s, "Z", None, 1, False, False, r)[0][-1],
     lambda s, r: pf.level.peak_level(s, "Z", None, r)[0],
     lambda s, r: pf.level.time_weighted_level(s, "Z", "F", None, r)[0][-1],
-    # other level functions go here once implemented
+    lambda s, r: pf.level.maximum_time_weighted_level(
+        s, "Z", "F", None, r)[0],
 ]
 
 
@@ -170,6 +170,7 @@ def test_level_common_reference_pressure_errors(function):
 
 FUNCTION_WRAPPERS_OVERSAMPLING = [
     lambda s, o: pf.level.peak_level(s, "Z", o),
+    lambda s, o: pf.level.maximum_time_weighted_level(s, "Z", "F", o),
 ]
 
 
@@ -204,6 +205,7 @@ def test_level_common_oversampling_errors(
 
 FUNCTION_WRAPPERS_TIME_WEIGHTING = [
     lambda s, t: pf.level.time_weighted_level(s, "Z", t),
+    lambda s, t: pf.level.maximum_time_weighted_level(s, "Z", t),
 ]
 
 
