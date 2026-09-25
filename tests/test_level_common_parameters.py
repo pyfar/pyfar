@@ -214,8 +214,9 @@ FUNCTION_WRAPPERS_TIME_WEIGHTING = [
     (123, TypeError),
     ("X", ValueError),
 ])
-def test_level_common_time_weighting_errors(weighting, error_type):
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_TIME_WEIGHTING)
+def test_level_common_time_weighting_errors(weighting, error_type, function):
     """Test that an invalid time weighting raises an error."""
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(error_type, match="Time weighting"):
-        FUNCTION_WRAPPERS_TIME_WEIGHTING[0](s, weighting)
+        function(s, weighting)
