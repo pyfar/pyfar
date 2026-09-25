@@ -92,30 +92,6 @@ def test_level_peak_level_intersample_peak():
     assert time_with_over == 0.035 # at 7th oversampled sample
 
 
-def test_level_time_weighted_level_replace_zeros_false():
-    """Test that setting replace_zeros to False returns -inf
-    and raises a warning from numpy.
-    """
-    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
-    with pytest.warns(RuntimeWarning, match="divide by zero"):
-        levels_no_replace = pf.level.time_weighted_level(
-            s, "Z", "F", replace_zeros=False)
-    assert np.all(levels_no_replace == -np.inf)
-
-
-def test_level_time_weighted_level_replace_zeros_true():
-    """Test that setting replace_zeros to True replaces zeros with the
-    array type's epsilon to avoid -inf values and numpy warnings.
-    """
-    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
-    levels_replace = pf.level.time_weighted_level(
-        s, "Z", "F", replace_zeros=True)
-
-    # since there are only zeros in the signal, all values must be epsilon
-    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
-    assert np.allclose(levels_replace, expected_value)
-
-
 @pytest.mark.parametrize("time_weighting", ["F", "S"])
 def test_level_max_time_weighted_level_known_value(time_weighting):
     """A single impulse should result in a peak level that is equal to the

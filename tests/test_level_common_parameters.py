@@ -220,3 +220,38 @@ def test_level_common_time_weighting_errors(weighting, error_type, function):
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(error_type, match="Time weighting"):
         function(s, weighting)
+
+
+
+### replace_zeros parameter tests ###
+
+FUNCTION_WRAPPERS_REPLACE_ZEROS = [
+    lambda s, r: pf.level.time_weighted_level(
+        s, "Z", "F", None, replace_zeros=r),
+    lambda s, r: pf.level.sliding_equivalent_continuous_level(
+        s, "Z", None, 1, replace_zeros=r),
+]
+
+
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_REPLACE_ZEROS)
+def test_level_time_weighted_level_replace_zeros_false(function):
+    """Test that setting replace_zeros to False returns -inf
+    and raises a warning from numpy.
+    """
+    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
+    with pytest.warns(RuntimeWarning, match="divide by zero"):
+        levels_no_replace = function(s, False)
+    assert np.all(levels_no_replace == -np.inf)
+
+
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_REPLACE_ZEROS)
+def test_level_time_weighted_level_replace_zeros_true(function):
+    """Test that setting replace_zeros to True replaces zeros with the
+    array type's epsilon to avoid -inf values and numpy warnings.
+    """
+    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
+    levels_replace = function(s, True)
+
+    # since there are only zeros in the signal, all values must be epsilon
+    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
+    assert np.allclose(levels_replace, expected_value)
