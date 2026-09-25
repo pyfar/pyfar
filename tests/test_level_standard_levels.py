@@ -31,7 +31,6 @@ def test_level_equivalent_continuous_level_known_value():
 def test_level_exposure_level_duration(duration, level_increase):
     s = pf.signals.sine(1000, 44100, sampling_rate=44100)
     levels = pf.level.exposure_level(s, "Z", duration)
-    # 94 dB is 1 Pa, -3.01 dB is the crest factor of sine signals
     assert np.isclose(levels, ONE_PA - SINE_PAPR + level_increase, atol=0.001)
 
 
@@ -91,3 +90,37 @@ def test_level_peak_level_intersample_peak():
     # after oversampling, the peak is at the 7th sample, i.e. between the
     # 3rd and 4th sample at the original sampling rate
     assert time_with_over == 0.035 # at 7th oversampled sample
+
+
+def test_level_time_weighted_level_replace_zeros_false():
+    """Test that setting replace_zeros to False returns -inf
+    and raises a warning from numpy.
+    """
+    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
+    with pytest.warns(RuntimeWarning, match="divide by zero"):
+        levels_no_replace = pf.level.time_weighted_level(
+            s, "Z", "F", replace_zeros=False)
+    assert np.all(levels_no_replace == -np.inf)
+
+
+def test_level_time_weighted_level_replace_zeros_true():
+    """Test that setting replace_zeros to True replaces zeros with the
+    array type's epsilon to avoid -inf values and numpy warnings.
+    """
+    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
+    levels_replace = pf.level.time_weighted_level(
+        s, "Z", "F", replace_zeros=True)
+
+    # since there are only zeros in the signal, all values must be epsilon
+    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
+    assert np.allclose(levels_replace, expected_value)
+
+
+@pytest.mark.parametrize(("time_weighting", "err_type"), [
+    (None, TypeError), ("X", ValueError)])
+def test_level_time_weighted_level_time_weighting_error(
+    time_weighting, err_type,
+):
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(err_type, match="Time weighting"):
+        pf.level.time_weighted_level(s, "Z", time_weighting)

@@ -29,6 +29,7 @@ import pytest
     lambda s: pf.level.exposure_level(s, "Z"),
     lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
     lambda s: pf.level.peak_level(s, "Z"),
+    lambda s: pf.level.time_weighted_level(s, "A", "F"),
     # other level functions go here once implemented
 ])
 def test_level_common_signal_parameter(signal, function):
@@ -44,6 +45,7 @@ FUNCTION_WRAPPERS_FREQ_WEIGHTING = [
     lambda s, w: pf.level.exposure_level(s, w),
     lambda s, w: pf.level.sliding_equivalent_continuous_level(s, w)[0][-1],
     lambda s, w: pf.level.peak_level(s, w)[0],
+    lambda s, w: pf.level.time_weighted_level(s, w, "F")[0][-1],
     # other level functions go here once implemented
 ]
 
@@ -89,6 +91,7 @@ def test_level_common_freq_weighting_errors(weighting, function):
 FUNCTION_WRAPPERS_BAND_FRACTIONS = [
     lambda s, n: pf.level.equivalent_continuous_level(s, "Z", n),
     lambda s, n: pf.level.sliding_equivalent_continuous_level(s, "Z", n),
+    lambda s, n: pf.level.time_weighted_level(s, "Z", "F", n),
     # other level functions go here once implemented
 ]
 
@@ -139,6 +142,7 @@ FUNCTION_WRAPPERS_REFERENCE_PRESSURE = [
     lambda s, r: pf.level.sliding_equivalent_continuous_level(
         s, "Z", None, 1, False, False, r)[0][-1],
     lambda s, r: pf.level.peak_level(s, "Z", None, r)[0],
+    lambda s, r: pf.level.time_weighted_level(s, "Z", "F", None, r)[0][-1],
     # other level functions go here once implemented
 ]
 
@@ -194,3 +198,22 @@ def test_level_common_oversampling_errors(
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(error_type, match=match):
         function(s, oversampling)
+
+
+### time_weighting parameter tests ###
+
+FUNCTION_WRAPPERS_TIME_WEIGHTING = [
+    lambda s, t: pf.level.time_weighted_level(s, "Z", t),
+]
+
+
+@pytest.mark.parametrize(("weighting", "error_type"), [
+    (None, TypeError),
+    (123, TypeError),
+    ("X", ValueError),
+])
+def test_level_common_time_weighting_errors(weighting, error_type):
+    """Test that an invalid time weighting raises an error."""
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(error_type, match="Time weighting"):
+        FUNCTION_WRAPPERS_TIME_WEIGHTING[0](s, weighting)

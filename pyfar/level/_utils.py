@@ -56,6 +56,22 @@ def _apply_oversampling(signal, oversampling: float | None):
             "Oversampling must be greater than 1 or None")
 
 
+def _time_weighting_to_constant(time_weighting: str):
+    """Parses the time weighting string and returns the corresponding
+    time constant in seconds if the weighting is valid, otherwise raises
+    an error.
+    """
+    if not isinstance(time_weighting, str):
+        raise TypeError("Time weighting must be a string.")
+    if time_weighting == "F":
+        time_constant = 0.125
+    elif time_weighting == "S":
+        time_constant = 1
+    else:
+        raise ValueError("Time weighting must be 'F' or 'S'")
+    return time_constant
+
+
 def _energies_to_levels(energies: np.ndarray,
                         reference_pressure: float,
                         replace_zeros: bool = False):
