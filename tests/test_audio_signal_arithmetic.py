@@ -337,18 +337,18 @@ def test_get_arithmetic_data_with_array():
 @pytest.mark.parametrize("domain", ["time", "freq"])
 # all possible combinations of `domain`, `signal_type`, and `fft_norm`
 @pytest.mark.parametrize("meta", [
-        ['time', 'none'],
-        ['freq', 'none'],
-        ['time', 'unitary'],
-        ['freq', 'unitary'],
-        ['time', 'amplitude'],
-        ['freq', 'amplitude'],
-        ['time', 'rms'],
-        ['freq', 'rms'],
-        ['time', 'power'],
-        ['freq', 'power'],
-        ['time', 'psd'],
-        ['freq', 'psd']])
+    ['time', 'none'],
+    ['freq', 'none'],
+    ['time', 'unitary'],
+    ['freq', 'unitary'],
+    ['time', 'amplitude'],
+    ['freq', 'amplitude'],
+    ['time', 'rms'],
+    ['freq', 'rms'],
+    ['time', 'power'],
+    ['freq', 'power'],
+    ['time', 'psd'],
+    ['freq', 'psd']])
 def test_get_arithmetic_data_with_signal(domain, meta):
     # reference signal - _get_arithmetic_data should return the data without
     # any normalization regardless of the input data
@@ -442,10 +442,10 @@ def test_matrix_multiplication_time_domain():
     npt.assert_allclose(z.time, desired, atol=1e-15)
 
 
-@pytest.mark.parametrize(('swap', 'desired'),
-    [(False, np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 6))),
-     (True, np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
-                                                        np.ones((3, 3, 6)))])
+@pytest.mark.parametrize(('swap', 'desired'), [
+    (False, np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 6))),
+    (True, np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] *
+     np.ones((3, 3, 6)))])
 def test_matrix_multiplication_operator(swap, desired):
     """Test overloaded @ operator."""
     x = pf.signals.impulse(10, amplitude=np.array([[1, 2, 3], [4, 5, 6]]))
@@ -480,12 +480,12 @@ def test_matrix_multiplication_shape_mismatch():
     (pf.TimeData, False,
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.TimeData, True,
-     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] *
      np.ones((3, 3, 10))),
     (pf.FrequencyData, False,
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.FrequencyData, True,
-     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] *
      np.ones((3, 3, 10)))])
 def test_matrix_multiplication_TimeData_FrequencyData(pf_class, swap, desired):
     """Test @ operator for TimeData and FrequencyData."""
@@ -531,12 +531,12 @@ def test_matrix_multiplication_signal_times_array():
     (pf.TimeData, False,
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.TimeData, True,
-     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] *
      np.ones((3, 3, 10))),
     (pf.FrequencyData, False,
      np.array([[22, 28], [49, 64]])[..., None] * np.ones((2, 2, 10))),
     (pf.FrequencyData, True,
-     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None]*
+     np.array([[9, 12, 15], [19, 26, 33], [29, 40, 51]])[..., None] *
      np.ones((3, 3, 10)))])
 def test_matrix_multiplication_TimeData_FrequencyData_times_array(pf_class,
                                                                 swap, desired):
@@ -640,7 +640,6 @@ def test_audio_object_and_number(audio_object, operation):
     Test if arithmetic operations work regardless of the fft norm and
     audio object type if only one audio object is involved.
     """
-
     domain = 'time' if type(audio_object) is pf.TimeData else 'freq'
 
     result = operation((1, audio_object), domain=domain)
