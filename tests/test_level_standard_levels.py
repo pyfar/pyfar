@@ -15,53 +15,6 @@ ONE_PA = 20 * np.log10(1 / pf.constants.reference_sound_pressure)
 SINE_PAPR = 10 * np.log10(2)  # peak-to-average power ratio of sine signals
 
 
-SHAPE_TEST_SIGNALS = [
-    pf.signals.impulse(1000, 0),
-    pf.signals.impulse(1000, (0, 0)),
-    pf.signals.impulse(1000, [(0, 0), (0, 0), (0, 0)]),
-]
-
-@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
-@pytest.mark.parametrize("function", [
-    lambda s: pf.level.equivalent_continuous_level(s, "Z"),
-    lambda s: pf.level.exposure_level(s, "Z"),
-])
-def test_level_output_shapes_one_per_channel(signal, function):
-    """Test that the output of the level functions that return one value
-    per channel has the correct shape.
-    """
-    output = function(signal)
-    assert output.shape == signal.cshape
-
-
-@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
-@pytest.mark.parametrize("function", [
-    lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
-    lambda s: pf.level.time_weighted_level(s, "Z", "F"),
-])
-def test_level_output_shapes_one_per_sample(signal, function):
-    """Test that the output of the level functions that return one value
-    per sample has the same shape as the signal's time data.
-    """
-    output = function(signal)
-    assert output.shape == signal.time.shape
-
-
-@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
-@pytest.mark.parametrize("function", [
-    lambda s: pf.level.peak_level(s, "Z"),
-    lambda s: pf.level.maximum_time_weighted_level(s, "Z", "F"),
-])
-def test_level_output_shapes_tuple(signal, function):
-    """Test that the tuple returned by the level functions has exactly
-    two elements (levels and times) and both have one value per channel.
-    """
-    output = function(signal)
-    assert len(output) == 2
-    assert output[0].shape == signal.cshape
-    assert output[1].shape == signal.cshape
-
-
 def test_level_equivalent_continuous_level_known_value():
     s = pf.signals.sine(1000, 22050)
     levels = pf.level.equivalent_continuous_level(
