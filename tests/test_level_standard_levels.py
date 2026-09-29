@@ -1,9 +1,10 @@
 """
 Test for the standard-conform level functions.
 
-Note that the tests for the shared parameters of these functions are in
-`test_level_common_parameters.py`, so this file ony contains tests
-against known values or other tests that are specific to a single function.
+Note that the tests for the shared behavior (parameters, output)
+of these functions are in `test_level_common_behavior.py`,
+so this file ony contains tests against known values or other tests that are
+specific to individual functions.
 """
 
 import pytest
