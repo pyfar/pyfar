@@ -190,7 +190,8 @@ def test_times():
     npt.assert_allclose(signal.times, [0., 0.5, 1., 1.5])
 
 
-@pytest.mark.parametrize(("data", "n_samples", "domain", "fft_norm", "desired"), [
+@pytest.mark.parametrize(("data", "n_samples", "domain", "fft_norm",
+                          "desired"), [
     ([1, 2, 3], 3, 'time', 'none', np.array([[1., 2., 3.]])),
     ([1, 2, 3, 4], 6, 'freq', 'amplitude', np.array([[1/6, 4/6, 3/6]]))])
 def test_getter_time_freq(data, n_samples, domain, fft_norm, desired):
