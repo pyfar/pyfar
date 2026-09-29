@@ -33,8 +33,7 @@ def test_signal_init_time():
     ([1, 2, 3], 4, "amplitude", False, np.array([[1., 2./2, 3.]])*4),
     ([1, 2, 3], 3, "amplitude", True, np.array([[1., 2., 3.]])*3),
     ([1], None, 'none', False, np.array([[1]]))])
-def test_signal_init_freq(data, n_samples, fft_norm, is_complex,
-                          desired):
+def test_signal_init_freq(data, n_samples, fft_norm, is_complex, desired):
     """Test initializing a Signal with spectrum."""
     if n_samples is None:
         with pytest.warns(UserWarning, match="Number of samples not given"):
@@ -191,13 +190,12 @@ def test_times():
     npt.assert_allclose(signal.times, [0., 0.5, 1., 1.5])
 
 
-@pytest.mark.parametrize(("data", "domain", "fft_norm", "desired"), [
-    ([1, 2, 3], 'time', 'none', np.array([[1., 2., 3.]])),
-    ([1, 2, 3, 4], 'freq', 'amplitude', np.array([[0.25, 1., 0.75]]))])
-def test_getter_time_freq(data, domain, fft_norm, desired):
+@pytest.mark.parametrize(("data", "n_samples", "domain", "fft_norm", "desired"), [
+    ([1, 2, 3], 3, 'time', 'none', np.array([[1., 2., 3.]])),
+    ([1, 2, 3, 4], 6, 'freq', 'amplitude', np.array([[1/6, 4/6, 3/6]]))])
+def test_getter_time_freq(data, n_samples, domain, fft_norm, desired):
     """Test if attribute time/freq is accessed correctly."""
-    signal = Signal(data, 44100, domain='time', fft_norm=fft_norm)
-    signal._domain = domain
+    signal = Signal(data, 44100, n_samples, domain, fft_norm)
     signal._data = np.array([[1., 2., 3.]])
     actual = getattr(signal, domain)
     npt.assert_allclose(actual, desired)
@@ -539,24 +537,20 @@ def test_freq_raw():
     npt.assert_allclose(signal.freq_raw, np.array([[1., 1., 1.]]))
 
 
-@pytest.mark.parametrize(("data", "n_samples"), [(np.array([[1., 2., 3.]]), 4),
-                                                 (np.array([[1.]]), None)])
-def test_setter_freq_raw(data, n_samples):
-    """Test if attribute freq_raw is set correctly."""
-    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude',
-                    n_samples=n_samples)
+def test_freq_raw_changes_domain():
+    """Test if attribute freq_raw changes the domain to 'freq'."""
+    signal = Signal([1, 2, 3], 44100, fft_norm='amplitude')
     with pytest.warns(UserWarning, match="Number of samples not given"):
-        signal.freq_raw = data
+        signal.freq_raw = np.array([[1., 2., 3.]])
     assert signal.domain == 'freq'
-    npt.assert_allclose(signal._data, data)
 
 
 @pytest.mark.parametrize(("data"), [([1, 2, 3]), ([1.0, 2.0, 3.0]),
                                     ([1+1j, 2+2j, 3+3j])])
 def test_setter_freq_raw_dtype(data):
     """
-    Test casting and assertions of dtype (not tested during initialization
-    because that calls the `freq` setter).
+    Test if attribute freq_raw is set correctly and test the casting of dtype
+    (not tested during initialization because that calls the `freq` setter).
     """
     signal = Signal([0, 1, 2], 44100, 4, "freq")
     signal.freq_raw = data
