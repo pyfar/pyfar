@@ -2,6 +2,13 @@
 History
 =======
 
+Unreleased
+----------
+
+Changed
+^^^^^^^
+- Removed the test files `test_audio_time_data.py` and `test_audio_frequency_data.py` and replaced them with the new test file `test_audio_time_and_frequency_data.py` (PR #973)
+
 0.8.1 (2026-08-14)
 ------------------
 
