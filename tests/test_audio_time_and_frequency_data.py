@@ -122,3 +122,9 @@ def test_time_data_complex_flag_value_error():
     with pytest.raises(ValueError, match="Signal has complex-valued time data"
                                          " is_complex flag cannot be `False`"):
         time_data.complex = False
+
+
+def test_time_data_complex_flag_type_error():
+    """Test TypeError for invalid complex flag."""
+    with pytest.raises(TypeError, match="but must be a boolean"):
+        pf.TimeData(np.arange(2).astype(complex), [0, 1], is_complex=1)

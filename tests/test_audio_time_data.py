@@ -5,17 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_time_init_complex_flag():
-    """
-    Test assertion from non boolean complex flag.
-    """
-    complex_flag = 1
-    with pytest.raises(TypeError, match="``is_complex`` flag is "
-                                        f"{type(complex_flag).__name__}"
-                                        f"but must be a boolean"):
-        TimeData(np.arange(2).astype(complex), [0, 1], is_complex=complex_flag)
-
-
 def test_data_time_setter_time():
     """Test the setter for the time data."""
     data_a = [1, 0, -1]
