@@ -183,3 +183,18 @@ def test_reshape_exceptions(data_type, new_shape, match):
     signal_in = data_type(x, range(256))
     with pytest.raises(ValueError, match=match):
         signal_in.reshape(new_shape)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+def test_transpose(data_type):
+    """Test the transpose method for TimeData and FrequencyData."""
+    rng = np.random.default_rng(seed=1111)
+    x = rng.random((6, 2, 5, 256))
+    signal_in = data_type(x, range(256))
+    signal_out = np.transpose(signal_in)
+    expected = getattr(signal_out, signal_out.domain)
+    npt.assert_allclose(
+        getattr(signal_in.T, signal_in.domain), expected)
+    npt.assert_allclose(
+        getattr(signal_in, signal_in.domain).transpose(2, 1, 0, 3),
+        expected)

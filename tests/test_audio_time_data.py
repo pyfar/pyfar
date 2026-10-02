@@ -5,16 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_transpose():
-    rng = np.random.default_rng()
-    rand = rng.random((6, 2, 5, 256))
-    signal_in = TimeData(rand, range(256))
-    signal_out = signal_in.transpose()
-    npt.assert_allclose(signal_in.T._data, signal_out._data)
-    npt.assert_allclose(
-        signal_in._data.transpose(2, 1, 0, 3), signal_out._data)
-
-
 @pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
 def test_transpose_args(taxis):
     rng = np.random.default_rng()
