@@ -62,3 +62,24 @@ def test_with_non_monotonically_increasing_freqs_times(data_type, match):
 
     with pytest.raises(ValueError, match=match):
         data_type(data, freqs_times)
+
+
+@pytest.mark.parametrize(("data", "is_complex", "dtype"), [
+    ([1, 2, 3], False, "f"),
+    ([1., 2., 3.], False, "f"),
+    ([1, 2, 3], True, "c"),
+    ([1+1j, 2+2j, 3+3j], True, "c")])
+def test_time_data_init_dtype(data, is_complex, dtype):
+    """Test TimeData dtype casting."""
+    signal = pf.TimeData(data, [0, .1, .3], is_complex=is_complex)
+    assert signal.time.dtype.kind == dtype
+
+
+@pytest.mark.parametrize(("data", "dtype"), [
+    ([1, 2, 3], "f"),
+    ([1., 2., 3.], "f"),
+    ([1+1j, 2+2j, 3+3j], "c")])
+def test_frequency_data_init_dtype(data, dtype):
+    """Test FrequencyData dtype casting."""
+    signal = pf.FrequencyData(data, [0, .1, .3])
+    assert signal.freq.dtype.kind == dtype

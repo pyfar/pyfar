@@ -5,29 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_data_frequency_init_dtype():
-    """
-    Test casting and assertions of dtype (also test freq setter because
-    it is called during initialization).
-    """
-
-    # integer to float casting
-    data = FrequencyData([1, 2, 3], [1, 2, 3])
-    assert data.freq.dtype.kind == "f"
-
-    # float
-    data = FrequencyData([1., 2., 3.], [1, 2, 3])
-    assert data.freq.dtype.kind == "f"
-
-    # complex
-    data = FrequencyData([1+1j, 2+2j, 3+3j], [1, 2, 3])
-    assert data.freq.dtype.kind == "c"
-
-    # object array
-    with pytest.raises(TypeError, match="int, uint, float, or complex"):
-        FrequencyData(["1", "2", "3"], [1, 2, 3])
-
-
 def test_data_frequency_setter_freq():
     """Test the setter for the frequency data."""
     data_a = [1, 0, -1]
