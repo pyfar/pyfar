@@ -5,19 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_data_time_init_wrong_dtype():
-    """
-    Test assertion from non integer/float data (also test time setter because
-    it is called during initialization).
-    """
-    with pytest.raises(ValueError, match="time data is complex"):
-        TimeData(np.arange(2).astype(complex), [0, 1])
-
-    # pass array of invalid type
-    with pytest.raises(TypeError, match="int, uint, float, or complex"):
-        TimeData(['1', '2'], [0, 1])
-
-
 def test_time_init_complex_flag():
     """
     Test assertion from non boolean complex flag.

@@ -83,3 +83,20 @@ def test_frequency_data_init_dtype(data, dtype):
     """Test FrequencyData dtype casting."""
     signal = pf.FrequencyData(data, [0, .1, .3])
     assert signal.freq.dtype.kind == dtype
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+def test_init_dtype_type_error(data_type):
+    """Test TypeError for invalid time/frequency data."""
+    with pytest.raises(TypeError, match="int, uint, float, or complex"):
+        data_type(['1', '2'], [0, 1])
+
+
+@pytest.mark.parametrize("data", [
+    np.arange(2).astype(complex),
+    [1+1j, 2+2j]])
+def test_time_data_init_dtype_value_error(data):
+    """Test ValueError for invalid time data."""
+    with pytest.raises(ValueError, match="time data is complex,"
+                       " set is_complex flag"):
+        pf.TimeData(data, [0, 1])
