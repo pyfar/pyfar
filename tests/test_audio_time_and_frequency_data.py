@@ -151,3 +151,22 @@ def test_setter_wrong_length_error(data_type, match):
     signal = data_type([1, 0, -1], [0, .1, .3])
     with pytest.raises(ValueError, match=match):
         setattr(signal, signal.domain, 1)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize(("input_shape", "reshape_arg", "expected_shape"), [
+    ((6, 256), (3, 2), (3, 2, -1)),
+    ((6, 256), (3, -1), (3, 2, -1)),
+    ((3, 2, 256), 6, (6, -1))])
+def test_reshape(data_type, input_shape, reshape_arg, expected_shape):
+    """Test the reshape method with tuple and int arguments."""
+    rng = np.random.default_rng(seed=1111)
+    x = rng.random(input_shape)
+    signal_in = data_type(x, range(256))
+    signal_out = signal_in.reshape(reshape_arg)
+    signal_in_data = getattr(signal_in, signal_in.domain)
+    signal_out_data = getattr(signal_out, signal_out.domain)
+
+    npt.assert_allclose(
+        signal_in_data.reshape(expected_shape), signal_out_data)
+    assert id(signal_in) != id(signal_out)

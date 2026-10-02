@@ -5,29 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_reshape():
-
-    # test reshape with tuple
-    rng = np.random.default_rng()
-    rand = rng.random((6, 256))
-    data_in = TimeData(rand, range(256))
-    data_out = data_in.reshape((3, 2))
-    npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
-    assert id(data_in) != id(data_out)
-
-    data_out = data_in.reshape((3, -1))
-    npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
-    assert id(data_in) != id(data_out)
-
-    # test reshape with int
-    rng = np.random.default_rng()
-    rand = rng.random((3, 2, 256))
-    data_in = TimeData(rand, range(256))
-    data_out = data_in.reshape(6)
-    npt.assert_allclose(data_in._data.reshape(6, -1), data_out._data)
-    assert id(data_in) != id(data_out)
-
-
 def test_reshape_exceptions():
     rng = np.random.default_rng()
     rand = rng.random((6, 256))
