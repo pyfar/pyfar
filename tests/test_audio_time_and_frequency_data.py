@@ -264,3 +264,18 @@ def test_magic_getitem_slicing_indexing(data_type, index):
     actual = getattr(signal[index], signal.domain)
 
     npt.assert_allclose(actual, expected)
+
+
+@pytest.mark.parametrize("index", [0, -1, slice(None)])
+def test_time_data_magic_getitem_complex(index):
+    """Test that indexing keeps complex-valued TimeData complex."""
+    data = np.array([[1+1j, 0+2j, -1-1j], [2-1j, 0+1j, -2+3j]])
+    times = [0, .1, .3]
+    time_data = pf.TimeData(data, times, is_complex=True)
+
+    actual = time_data[index]
+
+    assert actual.complex
+    assert actual.time.dtype.kind == "c"
+    npt.assert_allclose(actual.time, np.atleast_2d(data[index]))
+    npt.assert_allclose(actual.times, times)

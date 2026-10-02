@@ -5,16 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_magic_getitem_complex():
-    """Test slicing operations by the magic function __getitem__."""
-    data = np.array([[1, 0, -1], [2, 0, -2]], dtype=complex)
-    times = [0, .1, .3]
-    time = TimeData(data, times, is_complex=True)
-    assert time[0].complex
-    npt.assert_allclose(TimeData(data[0], times, is_complex=True)._data,
-                        time[0]._data)
-
-
 def test_magic_setitem():
     """Test the setimtem for TimeData."""
     times = [0, .1, .3]
