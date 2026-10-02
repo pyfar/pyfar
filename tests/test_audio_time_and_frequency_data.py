@@ -198,3 +198,20 @@ def test_transpose(data_type):
     npt.assert_allclose(
         getattr(signal_in, signal_in.domain).transpose(2, 1, 0, 3),
         expected)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
+@pytest.mark.parametrize('unpacking', [False, True])
+def test_transpose_args(data_type, taxis, unpacking):
+    """Test the transpose method with argument unpacking."""
+    rng = np.random.default_rng(seed=1111)
+    x = rng.random((6, 2, 5, 256))
+    signal_in = data_type(x, range(256))
+    if unpacking:
+        signal_out = signal_in.transpose(*taxis)
+    else:
+        signal_out = signal_in.transpose(taxis)
+    npt.assert_allclose(
+        getattr(signal_in, signal_in.domain).transpose(2, 0, 1, 3),
+        getattr(signal_out, signal_out.domain))

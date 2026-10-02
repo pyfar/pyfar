@@ -5,19 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
-def test_transpose_args(taxis):
-    rng = np.random.default_rng()
-    rand = rng.random((6, 2, 5, 256))
-    signal_in = TimeData(rand, range(256))
-    signal_out = signal_in.transpose(taxis)
-    npt.assert_allclose(
-        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
-    signal_out = signal_in.transpose(*taxis)
-    npt.assert_allclose(
-        signal_in._data.transpose(2, 0, 1, 3), signal_out._data)
-
-
 def test_flatten():
 
     # test 2D signal (flatten should not change anything)
