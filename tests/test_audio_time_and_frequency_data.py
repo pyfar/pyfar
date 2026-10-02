@@ -352,3 +352,23 @@ def test_attribute_separation(data_type, attributes):
     for attribute in attributes:
         with pytest.raises(AttributeError):
             getattr(signal, attribute)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+def test___eq___equal(data_type):
+    """Test the eq magic method for equal objects."""
+    signal = data_type([1, 2, 3], [1, 2, 3])
+    actual = signal.copy()
+    assert signal == actual
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize(("time_freq", "times_freqs", "comment"), [
+    ([2, 3, 4], [1, 2, 3], ""),
+    ([1, 2, 3], [2, 3, 4], ""),
+    ([1, 2, 3], [1, 2, 3], "A completely different thing")])
+def test___eq___notEqual(data_type, time_freq, times_freqs, comment):
+    """Test the eq magic method for non-equal objects."""
+    signal = data_type([1, 2, 3], [1, 2, 3])
+    actual = data_type(time_freq, times_freqs, comment=comment)
+    assert signal != actual
