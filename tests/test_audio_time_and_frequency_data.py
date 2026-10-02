@@ -372,3 +372,12 @@ def test___eq___notEqual(data_type, time_freq, times_freqs, comment):
     signal = data_type([1, 2, 3], [1, 2, 3])
     actual = data_type(time_freq, times_freqs, comment=comment)
     assert signal != actual
+
+
+@pytest.mark.parametrize(("data_type", "expected"), [
+    (pf.FrequencyData, "FrequencyData:\n(1,) channels with 3 frequencies\n"),
+    (pf.TimeData, "TimeData:\n(1,) channels with 3 samples")])
+def test__repr__(data_type, expected):
+    """Test string representation."""
+    signal = data_type([1, 2, 3], [1, 2, 3])
+    assert repr(signal) == expected
