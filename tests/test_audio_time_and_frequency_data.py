@@ -303,3 +303,18 @@ def test_magic_setitem(data_type):
     signal_a_data = getattr(signal_a, signal_a.domain)
 
     npt.assert_allclose(signal_a_data, np.asarray([[2, 0, -2], [1, 0, -1]]))
+
+
+@pytest.mark.parametrize(("data_type", "match"), [
+    (pf.TimeData, 'The number of samples does not match'),
+    (pf.FrequencyData, 'The number of frequency bins does not match')])
+def test_magic_setitem_wrong_n_samples_n_bins(data_type, match):
+    """
+    Test the setitem for FrequencyData and TimeData with wrong number
+    of bins/samples.
+    """
+    signal_a = data_type([1, 0, -1], [0, .1, .3])
+    signal_b = data_type([2, 0, -2, 0], [0, .1, .3, .7])
+
+    with pytest.raises(ValueError, match=match):
+        signal_a[0] = signal_b

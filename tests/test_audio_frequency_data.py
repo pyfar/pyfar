@@ -5,17 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_magic_setitem_wrong_n_bins():
-    """Test the setitem for FrequencyData with wrong number of bins."""
-
-    freq_a = FrequencyData([1, 0, -1], [0, .1, .3])
-    freq_b = FrequencyData([2, 0, -2, 0], [0, .1, .3, .7])
-
-    match = 'The number of frequency bins does not match'
-    with pytest.raises(ValueError, match=match):
-        freq_a[0] = freq_b
-
-
 @pytest.mark.parametrize("audio", [
     pf.TimeData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)])
 def test_magic_setitem_wrong_type(audio):

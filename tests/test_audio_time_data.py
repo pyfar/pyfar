@@ -5,16 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_magic_setitem_wrong_n_samples():
-    """Test the setimtem for TimeData with wrong number of samples."""
-
-    time_a = TimeData([1, 0, -1], [0, .1, .3])
-    time_b = TimeData([2, 0, -2, 0], [0, .1, .3, .7])
-    match = 'The number of samples does not match'
-    with pytest.raises(ValueError, match=match):
-        time_a[0] = time_b
-
-
 @pytest.mark.parametrize("audio", [
     pf.FrequencyData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)])
 def test_magic_setitem_wrong_type(audio):
