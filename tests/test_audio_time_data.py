@@ -5,27 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_flatten():
-
-    # test 2D signal (flatten should not change anything)
-    rng = np.random.default_rng()
-    x = rng.random((2, 256))
-    data_in = TimeData(x, range(256))
-    data_out = data_in.flatten()
-
-    npt.assert_allclose(data_in._data, data_out._data)
-    assert id(data_in) != id(data_out)
-
-    # test 3D signal
-    rng = np.random.default_rng()
-    x = rng.random((3, 2, 256))
-    data_in = TimeData(x, range(256))
-    data_out = data_in.flatten()
-
-    npt.assert_allclose(data_in._data.reshape((6, -1)), data_out._data)
-    assert id(data_in) != id(data_out)
-
-
 def test_data_time_find_nearest():
     """Test the find nearest function for a single number and list entry."""
     data = [1, 0, -1]

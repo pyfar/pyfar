@@ -215,3 +215,21 @@ def test_transpose_args(data_type, taxis, unpacking):
     npt.assert_allclose(
         getattr(signal_in, signal_in.domain).transpose(2, 0, 1, 3),
         getattr(signal_out, signal_out.domain))
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize(("input_shape", "expected_shape"), [
+    ((2, 256), (2, -1)),
+    ((3, 2, 256), (6, -1))])
+def test_flatten(data_type, input_shape, expected_shape):
+    """Test the flatten method for 2D and 3D input shapes."""
+    rng = np.random.default_rng(seed=1111)
+    x = rng.random(input_shape)
+    signal_in = data_type(x, range(256))
+    signal_out = signal_in.flatten()
+    signal_in_data = getattr(signal_in, signal_in.domain)
+    signal_out_data = getattr(signal_out, signal_out.domain)
+
+    npt.assert_allclose(signal_in_data.reshape(expected_shape),
+                        signal_out_data)
+    assert id(signal_in) != id(signal_out)
