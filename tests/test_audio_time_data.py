@@ -5,17 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_data_time_setter_time():
-    """Test the setter for the time data."""
-    data_a = [1, 0, -1]
-    data_b = [2, 0, -2]
-    times = [0, .1, .3]
-
-    time = TimeData(data_a, times)
-    time.time = data_b
-    npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data_b)))
-
-
 def test_reshape():
 
     # test reshape with tuple

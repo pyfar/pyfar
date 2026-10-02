@@ -128,3 +128,26 @@ def test_time_data_complex_flag_type_error():
     """Test TypeError for invalid complex flag."""
     with pytest.raises(TypeError, match="but must be a boolean"):
         pf.TimeData(np.arange(2).astype(complex), [0, 1], is_complex=1)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+def test_setter_time_freq(data_type):
+    """Test the setter for the time/frequency data."""
+    data_a = [1, 0, -1]
+    data_b = [2, 0, -2]
+
+    signal = data_type(data_a, [0, .1, .3])
+    setattr(signal, signal.domain, data_b)
+    npt.assert_allclose(getattr(signal, signal.domain),
+                         np.atleast_2d(np.asarray(data_b)))
+
+
+@pytest.mark.parametrize(("data_type", "match"), [
+    pytest.param(pf.TimeData, "...", marks=pytest.mark.xfail(reason="The"
+    " ValueError is not yet implemented in the file pyfar/classes/audio.py.")),
+    (pf.FrequencyData, 'Number of frequency values')])
+def test_setter_wrong_length_error(data_type, match):
+    """Test that setting invalid number of time/freq raises a ValueError."""
+    signal = data_type([1, 0, -1], [0, .1, .3])
+    with pytest.raises(ValueError, match=match):
+        setattr(signal, signal.domain, 1)

@@ -5,20 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_data_frequency_setter_freq():
-    """Test the setter for the frequency data."""
-    data_a = [1, 0, -1]
-    data_b = [2, 0, -2]
-    freqs = [0, .1, .3]
-
-    freq = FrequencyData(data_a, freqs)
-    freq.freq = data_b
-    npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data_b)))
-
-    with pytest.raises(ValueError, match="Number of frequency values"):
-        freq.freq = 1
-
-
 def test_reshape():
 
     # test reshape with tuple
