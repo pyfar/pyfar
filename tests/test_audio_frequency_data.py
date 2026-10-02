@@ -5,14 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-@pytest.mark.parametrize("audio", [
-    pf.TimeData([1, 2], [1, 2]), pf.Signal([1, 2], 44100)])
-def test_magic_setitem_wrong_type(audio):
-    frequency_data = FrequencyData([1, 2, 3, 4], [1, 2, 3, 4])
-    with pytest.raises(ValueError, match="Comparison only valid"):
-        frequency_data[0] = audio
-
-
 def test_separation_from_time_data():
     """Check if attributes from FrequencyData are really not available."""
     data = [1, 0, -1]

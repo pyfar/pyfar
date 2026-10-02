@@ -318,3 +318,15 @@ def test_magic_setitem_wrong_n_samples_n_bins(data_type, match):
 
     with pytest.raises(ValueError, match=match):
         signal_a[0] = signal_b
+
+
+@pytest.mark.parametrize(("data_type", "audio"), [
+    (pf.FrequencyData, pf.TimeData([1, 2], [1, 2])),
+    (pf.FrequencyData, pf.Signal([1, 2], 44100)),
+    (pf.TimeData, pf.FrequencyData([1, 2], [1, 2])),
+    (pf.TimeData, pf.Signal([1, 2], 44100))])
+def test_magic_setitem_wrong_type(data_type, audio):
+    """Test the setitem for FrequencyData and TimeData with wrong type."""
+    signal = data_type([1, 2], [1, 2])
+    with pytest.raises(ValueError, match="Comparison only valid"):
+        signal[0] = audio
