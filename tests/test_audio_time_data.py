@@ -27,29 +27,6 @@ def test_data_time_setter_time():
     npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data_b)))
 
 
-def test_data_time_setter_complex_casting():
-    time = TimeData(data=[1, 0, -1], times=[0, .1, .3], is_complex=True)
-    assert time.time.dtype.kind == "c"
-
-
-def test_setter_complex():
-    # test setting complex flag from False to True
-    time = TimeData(data=[1, 0, -1], times=[0, .1, .3])
-    time.complex = True
-    assert time.time.dtype.kind == "c"
-
-    # test setting complex flag from True to False
-    time = TimeData(data=[1, 0, -1], times=[0, .1, .3], is_complex=True)
-    time.complex = False
-    assert time.time.dtype.kind == "f"
-
-    time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
-                    is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be `False`"):
-        time.complex = False
-
-
 def test_reshape():
 
     # test reshape with tuple

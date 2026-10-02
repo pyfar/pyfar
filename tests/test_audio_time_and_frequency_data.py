@@ -100,3 +100,25 @@ def test_time_data_init_dtype_value_error(data):
     with pytest.raises(ValueError, match="time data is complex,"
                        " set is_complex flag"):
         pf.TimeData(data, [0, 1])
+
+
+@pytest.mark.parametrize(("data", "is_complex", "complex_flag", "dtype"), [
+    ([1, 0, -1], False, True, "c"),
+    ([1, 0, -1], True, False, "f"),
+    ([1+1j, 2+2j, 3+3j], True, True, "c")])
+def test_time_data_complex_flag_setter(data, is_complex, complex_flag, dtype):
+    """Test the setter for the complex flag of TimeData."""
+    time_data = pf.TimeData(data, times=[0, .1, .3], is_complex=is_complex)
+    time_data.complex = complex_flag
+    assert time_data.complex == complex_flag
+    assert time_data.time.dtype.kind == dtype
+    npt.assert_allclose(time_data.time, np.atleast_2d(data))
+
+
+def test_time_data_complex_flag_value_error():
+    """Test ValueError for invalid complex flag when data is complex."""
+    time_data = pf.TimeData(data = [1+1j, 0+1j, -1+2j], times=[0, .1, .3],
+                       is_complex=True)
+    with pytest.raises(ValueError, match="Signal has complex-valued time data"
+                                         " is_complex flag cannot be `False`"):
+        time_data.complex = False
