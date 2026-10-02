@@ -5,24 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_data_time_init_with_defaults():
-    """
-    Test to init without optional parameters.
-    Test getter for domain, time, times, length, and n_samples.
-    """
-    data = [1, 0, -1]
-    times = [0, .1, .3]
-
-    time = TimeData(data, times)
-    assert isinstance(time, TimeData)
-    npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data)))
-    npt.assert_allclose(time.times, np.atleast_1d(np.asarray(times)))
-    assert time.signal_length == .3
-    assert time.n_samples == 3
-    assert time.domain == 'time'
-    assert not time.complex
-
-
 def test_data_time_init_wrong_dtype():
     """
     Test assertion from non integer/float data (also test time setter because

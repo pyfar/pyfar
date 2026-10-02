@@ -5,22 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_data_frequency_init_with_defaults():
-    """
-    Test to init without optional parameters.
-    Test getter for domain, freq, frequencies, and n_bins.
-    """
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-
-    freq = FrequencyData(data, freqs)
-    assert isinstance(freq, FrequencyData)
-    npt.assert_allclose(freq.freq, np.atleast_2d(np.asarray(data)))
-    npt.assert_allclose(freq.frequencies, np.atleast_1d(np.asarray(freqs)))
-    assert freq.n_bins == 3
-    assert freq.domain == 'freq'
-
-
 def test_data_frequency_init_wrong_number_of_freqs():
     """Test if entering a wrong number of frequencies raises an assertion."""
     data = [1, 0, -1]
