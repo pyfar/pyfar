@@ -33,3 +33,17 @@ def test_frequency_data_init_with_defaults():
         signal.frequencies, np.atleast_1d(np.asarray(freqs)))
     assert signal.n_bins == 3
     assert signal.domain == 'freq'
+
+
+@pytest.mark.parametrize(("data_type", "match"), [
+    (pf.TimeData, 'The length of times must be data.shape'),
+    (pf.FrequencyData, 'Number of frequency values')])
+def test_init_wrong_number_of_times_freqs(data_type, match):
+    """
+    Test that entering a wrong number of times/frequencies raises a ValueError.
+    """
+    data = [1, 0, -1]
+    times_freqs = [0, .1]
+
+    with pytest.raises(ValueError, match=match):
+        data_type(data, times_freqs)

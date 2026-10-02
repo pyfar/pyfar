@@ -29,16 +29,6 @@ def test_time_init_complex_flag():
         TimeData(np.arange(2).astype(complex), [0, 1], is_complex=complex_flag)
 
 
-def test_data_time_init_wrong_number_of_times():
-    """Test if entering a wrong number of times raises an assertion."""
-    data = [1, 0, -1]
-    times = [0, .1]
-
-    match = 'The length of times must be data.shape'
-    with pytest.raises(ValueError, match=match):
-        TimeData(data, times)
-
-
 def test_data_time_with_non_monotonously_increasing_time():
     """Test if non monotnously increasing of times raises an assertion."""
     data = [1, 0, -1]

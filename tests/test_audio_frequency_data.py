@@ -5,16 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_data_frequency_init_wrong_number_of_freqs():
-    """Test if entering a wrong number of frequencies raises an assertion."""
-    data = [1, 0, -1]
-    freqs = [0, .1]
-
-    match = 'Number of frequency values does not match the number'
-    with pytest.raises(ValueError, match=match):
-        FrequencyData(data, freqs)
-
-
 def test_data_frequency_with_non_monotonously_increasing_frequencies():
     """Test if non monotnously increasing frequencies raises an assertion."""
     data = [1, 0, -1]
