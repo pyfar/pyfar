@@ -330,3 +330,25 @@ def test_magic_setitem_wrong_type(data_type, audio):
     signal = data_type([1, 2], [1, 2])
     with pytest.raises(ValueError, match="Comparison only valid"):
         signal[0] = audio
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+def test_domain_attribute_has_no_setter(data_type):
+    """Test that the domain attribute cannot be set to the other domain."""
+    signal = data_type([1, 0, -1], [0, .1, .3])
+    with pytest.raises(AttributeError, match="object has no setter"):
+        signal.domain = 'freq'
+
+
+@pytest.mark.parametrize(("data_type", "attributes"), [
+    (pf.TimeData, ["sampling_rate", "freq", "frequencies", "n_bins",
+                   "find_nearest_frequency"]),
+    (pf.FrequencyData, ["sampling_rate", "time", "times", "n_samples",
+                         "signal_length", "find_nearest_time"])])
+def test_attribute_separation(data_type, attributes):
+    """Test that attributes of other audio classes are not available."""
+    signal = data_type([1, 0, -1], [0, .1, .3])
+
+    for attribute in attributes:
+        with pytest.raises(AttributeError):
+            getattr(signal, attribute)

@@ -5,36 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_separation_from_time_data():
-    """Check if attributes from FrequencyData are really not available."""
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-    freq = FrequencyData(data, freqs)
-
-    with pytest.raises(AttributeError):
-        assert freq.time
-    with pytest.raises(AttributeError):
-        assert freq.times
-    with pytest.raises(AttributeError):
-        assert freq.n_samples
-    with pytest.raises(AttributeError):
-        assert freq.signal_length
-    with pytest.raises(AttributeError):
-        assert freq.find_nearest_time
-
-
-def test_separation_from_signal():
-    """Check if attributes from Signal are really not available."""
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-    freq = FrequencyData(data, freqs)
-
-    with pytest.raises(AttributeError):
-        assert freq.sampling_rate
-    with pytest.raises(AttributeError):
-        freq.domain = 'freq'
-
-
 def test___eq___equal():
     """Check if copied FrequencyData is equal."""
     frequency_data = FrequencyData([1, 2, 3], [1, 2, 3])
