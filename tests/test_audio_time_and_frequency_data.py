@@ -250,3 +250,17 @@ def test_find_nearest_time_frequency(data_type, method, value, expected_idx):
     idx = getattr(signal, method)(value)
     npt.assert_array_equal(idx, expected_idx)
     assert np.ndim(idx) == np.ndim(expected_idx)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize("index", [0, -1, slice(None), slice(0, 1), (0, 1)])
+def test_magic_getitem_slicing_indexing(data_type, index):
+    """Test indexing and slicing of the channel dimensions."""
+    rng = np.random.default_rng(seed=1111)
+    data = rng.random((6, 2, 5, 256))
+    signal = data_type(data, range(256))
+
+    expected = np.atleast_2d((getattr(signal, signal.domain))[index])
+    actual = getattr(signal[index], signal.domain)
+
+    npt.assert_allclose(actual, expected)

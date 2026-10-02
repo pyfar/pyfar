@@ -5,14 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_magic_getitem_slice():
-    """Test slicing operations by the magic function __getitem__."""
-    data = np.array([[1, 0, -1], [2, 0, -2]])
-    freqs = [0, .1, .3]
-    freq = FrequencyData(data, freqs)
-    npt.assert_allclose(FrequencyData(data[0], freqs)._data, freq[0]._data)
-
-
 def test_magic_getitem_error():
     """
     Test if indexing that would return a subset of the frequency bins raises a
