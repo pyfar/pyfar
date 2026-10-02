@@ -5,21 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_data_frequency_find_nearest():
-    """Test the find nearest function for a single number and list entry."""
-    data = [1, 0, -1]
-    freqs = [0, .1, .3]
-    freq = FrequencyData(data, freqs)
-
-    # test for a single number
-    idx = freq.find_nearest_frequency(.15)
-    assert idx == 1
-
-    # test for a list
-    idx = freq.find_nearest_frequency([.15, .4])
-    npt.assert_allclose(idx, np.asarray([1, 2]))
-
-
 def test_magic_getitem_slice():
     """Test slicing operations by the magic function __getitem__."""
     data = np.array([[1, 0, -1], [2, 0, -2]])

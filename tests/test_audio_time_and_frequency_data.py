@@ -233,3 +233,20 @@ def test_flatten(data_type, input_shape, expected_shape):
     npt.assert_allclose(signal_in_data.reshape(expected_shape),
                         signal_out_data)
     assert id(signal_in) != id(signal_out)
+
+
+@pytest.mark.parametrize(("data_type", "method"), [
+    (pf.TimeData, "find_nearest_time"),
+    (pf.FrequencyData, "find_nearest_frequency")])
+@pytest.mark.parametrize(("value", "expected_idx"), [
+    (.15, 1),
+    ([.15, .4], [1, 2])])
+def test_find_nearest_time_frequency(data_type, method, value, expected_idx):
+    """
+    Test that find_nearest_time/frequency returns the index of the
+    closest value.
+    """
+    signal = data_type([1, 0, -1], [0, .1, .3])
+    idx = getattr(signal, method)(value)
+    npt.assert_array_equal(idx, expected_idx)
+    assert np.ndim(idx) == np.ndim(expected_idx)

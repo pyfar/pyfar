@@ -5,21 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_data_time_find_nearest():
-    """Test the find nearest function for a single number and list entry."""
-    data = [1, 0, -1]
-    times = [0, .1, .3]
-    time = TimeData(data, times)
-
-    # test for a single number
-    idx = time.find_nearest_time(.15)
-    assert idx == 1
-
-    # test for a list
-    idx = time.find_nearest_time([.15, .4])
-    npt.assert_allclose(idx, np.asarray([1, 2]))
-
-
 def test_magic_getitem_slice():
     """Test slicing operations by the magic function __getitem__."""
     data = np.array([[1, 0, -1], [2, 0, -2]])
