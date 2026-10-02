@@ -29,16 +29,6 @@ def test_time_init_complex_flag():
         TimeData(np.arange(2).astype(complex), [0, 1], is_complex=complex_flag)
 
 
-def test_data_time_with_non_monotonously_increasing_time():
-    """Test if non monotnously increasing of times raises an assertion."""
-    data = [1, 0, -1]
-    times = [0, .2, .1]
-
-    match = 'Times must be monotonously increasing'
-    with pytest.raises(ValueError, match=match):
-        TimeData(data, times)
-
-
 def test_data_time_setter_time():
     """Test the setter for the time data."""
     data_a = [1, 0, -1]

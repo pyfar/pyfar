@@ -5,16 +5,6 @@ import pyfar as pf
 from pyfar import FrequencyData
 
 
-def test_data_frequency_with_non_monotonously_increasing_frequencies():
-    """Test if non monotnously increasing frequencies raises an assertion."""
-    data = [1, 0, -1]
-    freqs = [0, .2, .1]
-
-    match = 'Frequencies must be monotonously increasing'
-    with pytest.raises(ValueError, match=match):
-        FrequencyData(data, freqs)
-
-
 def test_data_frequency_init_dtype():
     """
     Test casting and assertions of dtype (also test freq setter because

@@ -47,3 +47,18 @@ def test_init_wrong_number_of_times_freqs(data_type, match):
 
     with pytest.raises(ValueError, match=match):
         data_type(data, times_freqs)
+
+
+@pytest.mark.parametrize(("data_type", "match"), [
+    (pf.TimeData, 'Times must be monotonously increasing'),
+    (pf.FrequencyData, 'Frequencies must be monotonously increasing')])
+def test_with_non_monotonically_increasing_freqs_times(data_type, match):
+    """
+    Test that non-monotonically increasing times/frequencies raise
+    a ValueError.
+    """
+    data = [1, 0, -1]
+    freqs_times = [0, .2, .1]
+
+    with pytest.raises(ValueError, match=match):
+        data_type(data, freqs_times)
