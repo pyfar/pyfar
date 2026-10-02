@@ -170,3 +170,16 @@ def test_reshape(data_type, input_shape, reshape_arg, expected_shape):
     npt.assert_allclose(
         signal_in_data.reshape(expected_shape), signal_out_data)
     assert id(signal_in) != id(signal_out)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize(("new_shape", "match"), [
+    ([3, 2], 'newshape must be an integer or tuple'),
+    ((3, 4), 'Cannot reshape audio object')])
+def test_reshape_exceptions(data_type, new_shape, match):
+    """Test error handling of the reshape method with invalid arguments."""
+    rng = np.random.default_rng(seed=1111)
+    x = rng.random((6, 256))
+    signal_in = data_type(x, range(256))
+    with pytest.raises(ValueError, match=match):
+        signal_in.reshape(new_shape)

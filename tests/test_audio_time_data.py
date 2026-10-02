@@ -5,22 +5,6 @@ import pyfar as pf
 from pyfar import TimeData
 
 
-def test_reshape_exceptions():
-    rng = np.random.default_rng()
-    rand = rng.random((6, 256))
-    data_in = TimeData(rand, range(256))
-    data_out = data_in.reshape((3, 2))
-    npt.assert_allclose(data_in._data.reshape(3, 2, -1), data_out._data)
-    # test assertion for non-tuple input
-    match = 'newshape must be an integer or tuple'
-    with pytest.raises(ValueError, match=match):
-        data_out = data_in.reshape([3, 2])
-
-    # test assertion for wrong dimension
-    with pytest.raises(ValueError, match='Cannot reshape audio object'):
-        data_out = data_in.reshape((3, 4))
-
-
 def test_transpose():
     rng = np.random.default_rng()
     rand = rng.random((6, 2, 5, 256))
