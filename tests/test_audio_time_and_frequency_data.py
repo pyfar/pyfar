@@ -279,3 +279,15 @@ def test_time_data_magic_getitem_complex(index):
     assert actual.time.dtype.kind == "c"
     npt.assert_allclose(actual.time, np.atleast_2d(data[index]))
     npt.assert_allclose(actual.times, times)
+
+
+@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
+@pytest.mark.parametrize("indices", [(0, 1), (0, 0, ..., 1)])
+def test_magic_getitem_error(data_type, indices):
+    """
+    Test if indexing that would return a subset of the frequency bins/
+    time samples raises an index error.
+    """
+    signal = data_type([[0, 0, 0], [1, 1, 1]], [0, 1, 3])
+    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
+        signal[indices]
