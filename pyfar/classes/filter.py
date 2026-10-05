@@ -14,6 +14,7 @@ import warnings
 
 import numpy as np
 import scipy.signal as spsignal
+import scipy.linalg as spla
 
 import pyfar as pf
 from copy import deepcopy
@@ -1140,3 +1141,279 @@ class FilterSOS(Filter):
         """Representation of the filter object."""
         return _repr_string(
             "SOS", self.n_sections, self.n_channels, self.sampling_rate)
+
+
+class StateSpaceModel(_LTISystem):
+    r"""
+    Class for discrete-time state-space models.
+
+    A state-space model is defined by the matrices :math:`A`, :math:`B`,
+    :math:`C`, and :math:`D`. Contrary to an impulse response or filter model,
+    a state-space model can represent multi-input multi-output (MIMO) linear
+    time-invariant (LTI) systems in a numerically stable and efficient way. The
+    system is described by the following equations (discrete-time):
+
+    .. math::
+
+        \begin{aligned}
+        x_{t+1} &= A x_t + B u_t,\\
+        y_t   &= C x_t + D u_t,
+        \end{aligned}
+
+    where :math:`x_t` is the state, :math:`u_t` the input, and :math:`y_t` the
+    output at time step :math:`t`.
+
+    The matrix :math:`A` is the state matrix, defining the internal dynamics of
+    the system, i.e. how the internal state evolves on its own; :math:`B` is
+    the input matrix, defining the action of the input :math:`u` on the state;
+    :math:`C` is the output matrix, defining the action of the state :math:`x`
+    on the output :math:`y`; and :math:`D` is the feedthrough matrix, defining
+    the direct action of the input :math:`u` on the output :math:`y`.
+
+    Note that, unlike an impulse response or transfer function representation,
+    the state-space representation is not unique. Different state-space models
+    can represent the same input-output
+    behaviour.
+
+    For a short introduction, see: https://ccrma.stanford.edu/~jos/StateSpace/
+
+    Parameters
+    ----------
+    A : array_like
+        The state matrix :math:`A` with dimensions ``(order, order)``.
+    B : array_like
+        The input matrix :math:`B` with dimensions ``(order, n_inputs)``.
+    C : array_like
+        The output matrix :math:`C` with dimensions ``(n_outputs, order)``.
+    D : array_like, optional
+        The feedthrough matrix :math:`D` with dimensions ``(n_outputs,
+        n_inputs)``. The default is ``None``, which initializes an all-zero
+        matrix.
+    sampling_rate : number, optional
+        The sampling rate of the system in Hz. The default is ``None``.
+    state : array_like, optional
+        The initial state vector with dimensions ``(order,)``. If ``None``,
+        the state is initialized to zero on first processing.
+    dtype : np.dtype, optional
+        The data type of the system matrices. Can be used to set the precision
+        of the response calculation. If ``None``, ``np.result_type`` is used
+        to infer a common dtype from ``A``, ``B``, ``C``, and ``D``.
+    comment : str, optional
+        A comment. The default is ``''``.
+
+    Examples
+    --------
+    Converting a Butterworth SOS filter into state-space representation:
+
+    .. plot::
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> fs = 48000
+        >>> butter = pf.dsp.filter.butterworth(None, 2, 1000, 'lowpass', fs)
+        >>> sos = butter.coefficients.squeeze()
+        >>> b, a = sos[:3] / sos[3], sos[3:] / sos[3]  # convert sos  to (b,a)
+        >>> A = np.array([[-a[1], -a[2]], [1., 0.]])
+        >>> B = np.array([[1.], [0.]])
+        >>> C = np.array([[b[1] - a[1] * b[0], b[2] - a[2] * b[0]]])
+        >>> D = np.array([[b[0]]])
+        >>> ssm = pf.classes.filter.StateSpaceModel(A, B, C, D,
+        ...     sampling_rate=fs)
+        >>> ax = pf.plot.time(butter.impulse_response(100),
+        ...     label='Butter FilterSOS', marker='x')
+        >>> ax = pf.plot.time(ssm.impulse_response(100),
+        ...     label='Butter StateSpaceModel', ax=ax)
+        >>> ax.legend(loc='right')
+
+    """
+
+    def __init__(self, A, B, C, D=None, sampling_rate=None, state=None,
+            dtype=None, comment=""):
+        A = np.asarray(A)
+        B = np.asarray(B)
+        C = np.asarray(C)
+        D = np.zeros((C.shape[0], B.shape[1])) if D is None else np.asarray(D)
+        assert all(M.ndim == 2 for M in (A, B, C, D))
+        assert A.shape[1] == A.shape[0], "A needs to be square."
+        assert B.shape[0] == A.shape[0], (
+            f"B needs to be of shape ({A.shape[0]}, m)."
+        )
+        assert C.shape[1] == A.shape[0], (
+            f"C needs to be of shape (p, {A.shape[0]})."
+        )
+        assert D.shape == (C.shape[0], B.shape[1]), (
+            f"D needs to be of shape ({C.shape[0], B.shape[1]})."
+        )
+        dtype = np.result_type(A, B, C, D) if dtype is None else dtype
+        A = A.astype(dtype, order='F')
+        B = B.astype(dtype, order='F')
+        C = C.astype(dtype, order='F')
+        D = D.astype(dtype, order='F')
+        super().__init__(
+            sampling_rate=sampling_rate, state=None, comment=comment,
+        )
+        self._A, self._B, self._C, self._D, self._dtype = A, B, C, D, dtype
+        self.state = state
+
+    @property
+    def A(self):
+        """Get the state matrix :math:`A` (internal dynamics of the system)."""
+        return self._A
+
+    @property
+    def B(self):
+        """Get the input matrix :math:`B` (input-to-state mapping)."""
+        return self._B
+
+    @property
+    def C(self):
+        """Get the output matrix :math:`C` (state-to-output mapping)."""
+        return self._C
+
+    @property
+    def D(self):
+        """Get the feedthrough matrix :math:`D` (instant in-out dynamics)."""
+        return self._D
+
+    @property
+    def dtype(self):
+        """Get the data type of the system matrices."""
+        return self._dtype
+
+    @property
+    def n_inputs(self):
+        """Get the number of inputs :math:`m` of the system."""
+        return self.B.shape[1]
+
+    @property
+    def n_outputs(self):
+        """Get the number of outputs :math:`p` of the system."""
+        return self.C.shape[0]
+
+    @property
+    def order(self):
+        """Get the order :math:`n` of the state-space system."""
+        return self.A.shape[0]
+
+    @property
+    def state(self):
+        """Get or set the internal state :math:`x` of the system.
+
+        The state can be used to set the initial condition of the system and to
+        save the system's state after processing a signal.
+
+        Parameters
+        ----------
+        state : array_like, optional
+            The internal state of the system with dimensions ``(order,)``.
+        """
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if state is None:
+            self._state = None
+            return
+
+        state = np.asarray(state, dtype=self.dtype)
+        if state.shape != (self.order,):
+            raise ValueError(
+                f"state must have shape ({self.order},), got {state.shape}.",
+            )
+        self._state = state
+
+    def init_state(self):
+        """Initialize the internal state :math:`x` of the system to zero."""
+        self._state = np.zeros(self.order, self.dtype)
+
+    def process(self, signal, reset=False):
+        """Apply the state-space model to a signal.
+
+        Parameters
+        ----------
+        signal : Signal
+            The input signal to be processed. `signal.cshape` must be
+            broadcastable to `(self.n_inputs,)`.
+        reset : bool, optional
+            If ``True``, the internal state of the system is reset before
+            processing the signal. The default is ``False``.
+
+        Returns
+        -------
+        out : Signal
+            The processed output signal with `out.cshape = (self.n_ouputs,)`.
+        """
+        assert signal.sampling_rate == self.sampling_rate, (
+            "The sampling rates of the signal and the state-space model"
+            "need to match."
+        )
+        u = np.ascontiguousarray(
+            np.reshape(np.squeeze(signal.time), (-1, signal.n_samples)).T,
+            dtype=self.dtype,
+        )
+        assert u.shape[1] == self.n_inputs, (
+            f"The input signal ({u.shape[::-1]}) needs to be compatible with"
+            f" the number of inputs to the state-space system"
+            f" ({self.n_inputs})."
+        )
+        if self.state is None or reset:
+            self.init_state()
+
+        return pf.Signal(self._process(u), self.sampling_rate)
+
+    def _process(self, u):
+        y = np.empty((u.shape[0], self.n_outputs), self.dtype)
+        gemv = spla.get_blas_funcs("gemv", dtype=self.dtype)
+        for i, ui in enumerate(u):
+            y[i] = gemv(
+                1.,
+                self._C,
+                self._state,
+                beta=1,
+                y=gemv(1., self._D, ui, beta=0, y=y[i]),
+            )
+            self._state = gemv(
+                1.,
+                self._B,
+                ui,
+                beta=1,
+                y=gemv(1., self._A, self._state, beta=0, y=self._state),
+            )
+        return np.ascontiguousarray(y.T)
+
+    def impulse_response(self, n_samples):
+        """Compute the impulse response of the system.
+
+        Parameters
+        ----------
+        n_samples : int
+            The number of samples up to which to compute the impulse response.
+
+        Returns
+        -------
+        impulse_response : Signal
+            The impulse response of the state-space system with ``cshape =
+            (n_inputs, n_outputs)``. Note that, somewhat unintuitively, the
+            mathematical definition is different and would be ``(n_outputs,
+            n_inputs)``.
+        """
+        y = np.zeros((self.n_inputs, self.n_outputs, n_samples), self.dtype)
+        y[..., 0] = self.D.T
+        x = self.B
+        for i in range(1, n_samples):
+            y[..., i] = (self.C @ x).T
+            x = self.A @ x
+        return pf.Signal(y, self.sampling_rate)
+
+    @classmethod
+    def _decode(cls, obj_dict):
+        """Decode object based on its respective object dictionary."""
+        obj = cls(*np.zeros((3, 1, 1)), D=None, sampling_rate=None,
+                  state=None, comment="")
+        obj.__dict__.update(obj_dict)
+        return obj
+
+    def __repr__(self):
+        """Representation of the state-space model."""
+        return (f'StateSpaceModel (n={self.order}, '
+                'I/O={self.n_inputs}/{self.n_outputs})')
