@@ -102,16 +102,16 @@ def test_time_data_init_dtype_value_error(data):
         pf.TimeData(data, [0, 1])
 
 
-@pytest.mark.parametrize(("data", "is_complex", "complex_flag", "dtype"), [
-    ([1, 0, -1], False, True, "c"),
-    ([1, 0, -1], True, False, "f"),
-    ([1+1j, 2+2j, 3+3j], True, True, "c")])
-def test_time_data_complex_flag_setter(data, is_complex, complex_flag, dtype):
+@pytest.mark.parametrize(("data", "is_complex", "complex_flag"), [
+    ([1, 0, -1], False, True),
+    ([1, 0, -1], True, False),
+    ([1+1j, 2+2j, 3+3j], True, True)])
+def test_time_data_complex_flag_setter(data, is_complex, complex_flag):
     """Test the setter for the complex flag of TimeData."""
     time_data = pf.TimeData(data, times=[0, .1, .3], is_complex=is_complex)
     time_data.complex = complex_flag
     assert time_data.complex == complex_flag
-    assert time_data.time.dtype.kind == dtype
+    assert time_data.time.dtype.kind == "c" if complex_flag else "f"
     npt.assert_allclose(time_data.time, np.atleast_2d(data))
 
 
@@ -124,10 +124,11 @@ def test_time_data_complex_flag_value_error():
         time_data.complex = False
 
 
-def test_time_data_complex_flag_type_error():
+@pytest.mark.parametrize("is_complex", [0, 1, "True", "", None])
+def test_time_data_complex_flag_type_error(is_complex):
     """Test TypeError for invalid complex flag."""
     with pytest.raises(TypeError, match="but must be a boolean"):
-        pf.TimeData(np.arange(2).astype(complex), [0, 1], is_complex=1)
+        pf.TimeData(np.arange(2).astype(complex), [0, 1], is_complex=is_complex)
 
 
 @pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
@@ -143,8 +144,6 @@ def test_setter_time_freq(data_type):
 
 
 @pytest.mark.parametrize(("data_type", "match"), [
-    pytest.param(pf.TimeData, "...", marks=pytest.mark.xfail(reason="The"
-    " ValueError is not yet implemented in the file pyfar/classes/audio.py.")),
     (pf.FrequencyData, 'Number of frequency values')])
 def test_setter_wrong_length_error(data_type, match):
     """Test that setting invalid number of time/freq raises a ValueError."""
@@ -186,35 +185,26 @@ def test_reshape_exceptions(data_type, new_shape, match):
 
 
 @pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
-def test_transpose(data_type):
-    """Test the transpose method for TimeData and FrequencyData."""
+@pytest.mark.parametrize(("mode", "taxis", "np_axes"), [
+    ("T",        None,        (2, 1, 0, 3)),
+    ("tuple",    (2, 0, 1),   (2, 0, 1, 3)),
+    ("unpacked", (2, 0, 1),   (2, 0, 1, 3)),
+    ("tuple",    (-1, 0, -2), (2, 0, 1, 3)),
+    ("unpacked", (-1, 0, -2), (2, 0, 1, 3)),
+])
+def test_transpose(data_type, mode, taxis, np_axes):
+    """Test .T and .transpose() with and without unpacking."""
     rng = np.random.default_rng(seed=1111)
     x = rng.random((6, 2, 5, 256))
     signal_in = data_type(x, range(256))
-    signal_out = np.transpose(signal_in)
-    expected = getattr(signal_out, signal_out.domain)
-    npt.assert_allclose(
-        getattr(signal_in.T, signal_in.domain), expected)
-    npt.assert_allclose(
-        getattr(signal_in, signal_in.domain).transpose(2, 1, 0, 3),
-        expected)
-
-
-@pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
-@pytest.mark.parametrize('taxis', [(2, 0, 1), (-1, 0, -2)])
-@pytest.mark.parametrize('unpacking', [False, True])
-def test_transpose_args(data_type, taxis, unpacking):
-    """Test the transpose method with argument unpacking."""
-    rng = np.random.default_rng(seed=1111)
-    x = rng.random((6, 2, 5, 256))
-    signal_in = data_type(x, range(256))
-    if unpacking:
+    if mode == "T":
+        signal_out = signal_in.T
+    elif mode == "unpacked":
         signal_out = signal_in.transpose(*taxis)
     else:
         signal_out = signal_in.transpose(taxis)
     npt.assert_allclose(
-        getattr(signal_in, signal_in.domain).transpose(2, 0, 1, 3),
-        getattr(signal_out, signal_out.domain))
+        getattr(signal_out, signal_out.domain), np.transpose(x, np_axes))
 
 
 @pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
