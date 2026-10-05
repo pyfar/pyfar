@@ -128,7 +128,8 @@ def test_time_data_complex_flag_value_error():
 def test_time_data_complex_flag_type_error(is_complex):
     """Test TypeError for invalid complex flag."""
     with pytest.raises(TypeError, match="but must be a boolean"):
-        pf.TimeData(np.arange(2).astype(complex), [0, 1], is_complex=is_complex)
+        pf.TimeData(np.arange(2).astype(complex), [0, 1],
+                    is_complex=is_complex)
 
 
 @pytest.mark.parametrize("data_type", [pf.TimeData, pf.FrequencyData])
