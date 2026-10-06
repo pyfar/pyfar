@@ -46,10 +46,14 @@ def test_signal_init_freq(data, n_samples, fft_norm, is_complex, desired):
     npt.assert_allclose(signal.freq, np.atleast_2d(data), atol=1e-15)
 
 
-def test_signal_init_invalid_fft_norm():
+@pytest.mark.parametrize(("is_complex", "fft_norm", "match"), [
+    (False, "funky", "Invalid FFT normalization"),
+    (True, "rms", "'rms', 'power', and psd FFT normalization is not valid"
+    " for complex time signals")])
+def test_signal_init_invalid_fft_norm(is_complex, fft_norm, match):
     """Test that an invalid fft_norm raises an error."""
-    with pytest.raises(ValueError, match="Invalid FFT normalization"):
-        Signal(1, 44100, fft_norm="funky")
+    with pytest.raises(ValueError, match=match):
+        Signal(1, 44100, is_complex=is_complex, fft_norm=fft_norm)
 
 
 def test_signal_init_invalid_domain():
@@ -65,11 +69,14 @@ def test_signal_init_invalid_n_samples(is_complex):
         Signal(1, 44100, n_samples=10, domain="freq", is_complex=is_complex)
 
 
-def test_signal_init_invalid_is_complex():
+@pytest.mark.parametrize(("error_type", "is_complex", "match"), [
+    (ValueError, False, "time data is complex, set is_complex flag or pass"
+    " real-valued data."),
+    (TypeError, "True", "but must be a boolean")])
+def test_signal_init_invalid_is_complex(error_type, is_complex, match):
     """Test that complex time data requires the is_complex flag."""
-    with pytest.raises(ValueError, match="time data is complex, set "
-                       "is_complex flag or pass real-valued data."):
-        Signal([1+1j, 2+2j, 3+3j], 44100)
+    with pytest.raises(error_type, match=match):
+        Signal([1+1j, 2+2j, 3+3j], 44100, is_complex=is_complex)
 
 
 @pytest.mark.parametrize(("data", "dtype", "n_samples", "domain",
@@ -248,12 +255,29 @@ def test_sampling_rate_parsing(fs, pass_as_array):
 
 
 @pytest.mark.parametrize(("sampling_rate", "match"), [
+    ([], "Sampling rate cannot be empty!"),
     ([1, 2], "Multirate signals are not supported."),
     ('string', "Sampling rate needs to be a number.")])
 def test_sampling_rate_errors(sampling_rate, match):
     """Test error handling of the sampling rate setter."""
     with pytest.raises(ValueError, match=match):
         Signal(1, sampling_rate)
+
+
+@pytest.mark.parametrize('is_complex', [False, True])
+def test_complex_setter(is_complex):
+    """Test if attribute complex is set correctly."""
+    signal = Signal([1, 2, 3], 44100)
+    signal.complex = is_complex
+    assert signal._complex is is_complex
+
+
+def test_complex_setter_value_error():
+    """Test error handling of the complex setter."""
+    signal = Signal([1, 2, 3], 44100, fft_norm='rms')
+    with pytest.raises(ValueError, match="'rms', 'power', and 'psd' FFT"
+                    " normalization is not valid for complex time signals"):
+        signal.complex = True
 
 
 @pytest.mark.parametrize(('fft_norm', 'desired'), [
@@ -369,20 +393,20 @@ def test_magic_getitem_ellipsis():
     assert signal[..., 0].time.shape == (1, 3)
 
 
+@pytest.mark.parametrize(("indices", "match"), [
+    ((0, 1), "Indexed dimensions must not exceed"),
+    ((0, 0, ..., 1), "Indexed dimensions must not exceed"),
+    ((3), None)])
 @pytest.mark.parametrize('domain', ['time', 'freq'])
-def test_magic_getitem_error(domain):
+def test_magic_getitem_error(indices, match, domain):
     """
-    Test if indexing that would return a subset of the samples or frequency
-    bins raises a key error.
+    Test if wrong indexing raises an index error.
     """
     signal = pf.Signal([[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]], 1)
     signal.domain = domain
-    # manually indexing too many dimensions
-    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
-        signal[0, 1]
     # indexing too many dimensions with ellipsis operator
-    with pytest.raises(IndexError, match='Indexed dimensions must not exceed'):
-        signal[0, 0, ..., 1]
+    with pytest.raises(IndexError, match=match):
+        signal[indices]
 
 
 def test_magic_setitem():
