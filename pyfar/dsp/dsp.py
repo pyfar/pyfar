@@ -565,15 +565,22 @@ def time_window(signal, interval, window='hann', shape='symmetric',
         return signal_win
 
 
-def time_crop(signal, interval: Union[list[float], tuple[float, float],
-                                       np.ndarray],
-              unit: Literal["samples", "s"]='samples'):
+def time_crop(signal,
+              interval: Union[list[float],
+                    tuple[float, float], np.ndarray],
+              unit: Literal["samples", "s"]='samples',
+              endpoint: bool=True,
+              ):
     r"""Crop a :py:class:`Signal <pyfar.Signal>` or a
     :py:class:`TimeData <pyfar.TimeData>` object in time.
 
     Returns the signal :math:`x(t)` defined for all :math:`t` within the
-    interval :math:`interval[0] \le t \le interval[1]`, where :math:`t`
-    can be time or samples.
+    interval :math:`interval[0] \le t \le interval[1]`
+    (or :math:`interval[0] \le t < interval[1]` when `endpoint` is
+    ``False``), where :math:`t` can be time or samples.
+
+    The original signal is not modified. Instead, the cropped signal is
+    a partial copy of the original signal.
 
     Parameters
     ----------
@@ -590,6 +597,11 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
         Unit of `interval`. Can be set to ``'samples'`` or ``'s'`` (seconds).
         Values in seconds are rounded to the nearest sample within the
         specified `interval` range. The default is ``'samples'``.
+
+    endpoint : bool, optional
+        The default is ``True``, in which case the end of the interval is
+        included in the cropped signal.
+        If ``False``, the end of the interval is exclusive.
 
     Returns
     -------
@@ -670,7 +682,7 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
 
     interval = np.array(interval)
 
-    if np.diff(interval) <= 0:
+    if np.diff(interval) < 0:
         raise ValueError("The interval start point must be smaller " \
         "than the end point.")
     if np.any(interval < 0):
@@ -684,8 +696,12 @@ def time_crop(signal, interval: Union[list[float], tuple[float, float],
     else:
         raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
 
-    mask = ((indices >= interval[0]) & (
+    if endpoint:
+        mask = ((indices >= interval[0]) & (
             indices <= interval[1]))
+    else:
+        mask = ((indices >= interval[0]) & (
+            indices < interval[1]))
 
     # If there are no True values in the mask, the interval lies
     # outside the boundaries of signal.times.

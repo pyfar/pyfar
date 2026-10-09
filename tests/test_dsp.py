@@ -793,6 +793,37 @@ def test_time_crop_unit_seconds_error(signal):
     ' the boundaries'):
         dsp.time_crop(signal, interval=[2, 3], unit='s')
 
+@pytest.mark.parametrize("signal", [
+    pf.signals.sine(100, 50000, sampling_rate=48000),
+    pf.TimeData(np.ones(96000), np.linspace(0, 2, 96000, endpoint=False)),
+])
+@pytest.mark.parametrize(("interval", "unit"), [
+    ([0, 1], 's'),
+    ([0, 48000], 'samples'),
+])
+def test_time_crop_endpoint_signal(signal, interval, unit):
+    """
+    Test that `time_crop` has one more sample when the endpoint is
+    included versus excluded.
+    """
+    cropped_incl = pf.dsp.time_crop(signal, interval, unit)
+    cropped_excl = pf.dsp.time_crop(signal, interval, unit,
+                                    endpoint=False)
+    assert cropped_incl.n_samples == 48001
+    assert cropped_excl.n_samples == 48000
+
+def test_time_crop_endpoint_between_samples():
+    """
+    endpoint should make no difference when the boundary
+    lies between two samples.
+    """
+    time_data = pf.TimeData([1, 2, 3, 4], [0, 1, 2, 3])
+    cropped_incl = pf.dsp.time_crop(time_data, interval=(0, 2.5), unit='s')
+    cropped_excl = pf.dsp.time_crop(time_data, interval=(0, 2.5), unit='s',
+                                    endpoint=False)
+    assert cropped_incl.n_samples == 3
+    assert cropped_excl.n_samples == 3
+
 @pytest.mark.parametrize("signal", [pyfar.Signal(np.ones((1,1,10)), 2),
                                      pf.TimeData(np.ones((1,1,3)), [1, 2, 3])])
 def test_time_crop_multidim(signal):
