@@ -7,7 +7,7 @@ Unreleased
 
 Fixed
 ^^^^^
-- The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` - #976
+- The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` (PR #976).
 - A bug in `pyfar.dsp.average` that raised errors when trying to use `magnitude_phase` mode with weights (PR #962).
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
 
