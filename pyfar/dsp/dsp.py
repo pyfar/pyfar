@@ -576,7 +576,7 @@ def time_crop(signal,
 
     Returns the signal :math:`x(t)` defined for all :math:`t` within the
     interval :math:`interval[0] \le t \le interval[1]`
-    (or :math:`interval[0] < t < interval[1]` when `endpoint` is
+    (or :math:`interval[0] \le t < interval[1]` when `endpoint` is
     ``False``), where :math:`t` can be time or samples.
 
     The original signal is not modified. Instead, the cropped signal is
