@@ -444,7 +444,10 @@ def _assert_and_match_data_to_side(data, signal, side):
         raise ValueError('Invalid `side` parameter, pass either `left` or '
                          '`right`.')
 
-    if mask.sum() < 2:
+    # The left sided spectrum is only defined for complex signals and the mask
+    # must not be empty.
+    if  (type(signal) is Signal and not signal.complex and side == 'left') or \
+            not mask.sum():
         raise ValueError(f'The {side} side of the spectrum is not defined.')
 
     # get corresponding data
