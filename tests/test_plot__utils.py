@@ -159,12 +159,6 @@ def test_assert_and_match_data_to_side_wrong_parameter():
 def test_assert_and_match_data_to_side():
     signal = pf.signals.sine(20, 32)
 
-    with pytest.raises(
-            ValueError, match='The left side of the spectrum is not '
-            'defined.'):
-        plot._utils._assert_and_match_data_to_side(
-            signal.freq, signal, side='left')
-
     signal.fft_norm = 'none'
     signal.complex = True
 
@@ -187,12 +181,6 @@ def test_assert_and_match_data_to_side_freq():
     signal = pf.FrequencyData([3, 4, 5, 6, 7],
                               [1, 2, 3, 4, 5])
 
-    with pytest.raises(
-            ValueError, match='The left side of the spectrum is not '
-            'defined.'):
-        plot._utils._assert_and_match_data_to_side(
-            signal.freq, signal, side='left')
-
     data, frequencies, _ = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='right')
 
@@ -201,15 +189,29 @@ def test_assert_and_match_data_to_side_freq():
 
     signal = pf.FrequencyData([3, 4, 5, 6, 7],
                               [-5, -4, -3, -2, -1])
-    with pytest.raises(ValueError, match='The right side of the spectrum '
-                       'is not defined.'):
-        plot._utils._assert_and_match_data_to_side(
-            signal.freq, signal, side='right')
 
     data, frequencies, _ = plot._utils._assert_and_match_data_to_side(
         signal.freq, signal, side='left')
     assert not np.any(frequencies < 0.0)
     assert data.shape[-1] == frequencies.shape[0]
+
+
+@pytest.mark.parametrize(('signal', 'side', 'error_message'), [
+        (pf.Signal(1, 1), 'left', 'for real-valued signals'),
+        (pf.Signal(1, 1), 'middle', 'Invalid `side` parameter'),
+        (pf.FrequencyData(1, 1), 'left',
+         'The left side of the spectrum is empty'),
+        (pf.FrequencyData(1, -1), 'right',
+         'The right side of the spectrum is empty'),
+])
+def test_assert_and_match_data_to_side_errors(signal, side, error_message):
+    """
+    Test errors of _assert_and_match_data_to_side for Signal and FrequencyData.
+    """
+
+    with pytest.raises(ValueError, match=error_message):
+            plot._utils._assert_and_match_data_to_side(
+                signal.freq, signal, side=side)
 
 
 @pytest.mark.parametrize(("mode", "ylabel"), [('real', 'Amplitude'),
