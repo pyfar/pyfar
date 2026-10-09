@@ -355,16 +355,7 @@ class TimeData(_Audio):
     def time(self, value):
         """Return or set the time data."""
         # check and set the data and meta data
-        data = np.atleast_2d(np.asarray(value))
-        self._check_input_type_is_numeric(data)
-        if self.complex:
-            data = np.atleast_2d(np.asarray(value, dtype=complex))
-        else:
-            if data.dtype.kind in ["i", "u"]:
-                data = np.atleast_2d(np.asarray(value, dtype=float))
-            elif data.dtype.kind == "c":
-                raise ValueError("time data is complex, set is_complex "
-                                 "flag or pass real-valued data.")
+        data = _check_time_data(self, value)
         # match shape of times
         if self._times.size != data.shape[-1]:
             raise ValueError(
@@ -843,16 +834,7 @@ class Signal(FrequencyData, TimeData):
     def time(self, value):
         """Return or set the data in the time domain."""
 
-        data = np.atleast_2d(np.asarray(value))
-        self._check_input_type_is_numeric(data)
-        if self.complex:
-            data = np.atleast_2d(np.asarray(value, dtype=complex))
-        else:
-            if data.dtype.kind in ["i", "u"]:
-                data = np.atleast_2d(np.asarray(value, dtype=float))
-            elif data.dtype.kind == "c":
-                raise ValueError("time data is complex, set is_complex "
-                                 "flag or pass real-valued data.")
+        data = _check_time_data(self, value)
 
         self._data = data
         self._n_samples = data.shape[-1]
@@ -1916,3 +1898,35 @@ def _match_fft_norm(fft_norm_1, fft_norm_2, division=False):
                               f"they are {fft_norm_1} and {fft_norm_2}."))
 
     return fft_norm_result
+
+
+def _check_time_data(signal, value):
+    """
+    Private helper function to convert and validate input data for the
+    time setter.
+
+    Parameters
+    ----------
+    signal : Signal, TimeData
+        The object for which the time data is set.
+    value : array like
+        The new time data.
+
+    Returns
+    -------
+    data : array
+        The data stored as at least a two-dimensional array, which
+        can be set as time data.
+    """
+
+    data = np.atleast_2d(np.asarray(value))
+    signal._check_input_type_is_numeric(data)
+    if signal.complex:
+        data = np.atleast_2d(np.asarray(value, dtype=complex))
+    else:
+        if data.dtype.kind in ["i", "u"]:
+            data = np.atleast_2d(np.asarray(value, dtype=float))
+        elif data.dtype.kind == "c":
+            raise ValueError("time data is complex, set is_complex "
+                             "flag or pass real-valued data.")
+    return data
