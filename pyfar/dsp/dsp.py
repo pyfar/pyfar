@@ -569,16 +569,15 @@ def time_crop(signal,
               interval: Union[list[float],
                     tuple[float, float], np.ndarray],
               unit: Literal["samples", "s"]='samples',
-              exclude_end: bool=False,
+              endpoint: bool=True,
               ):
     r"""Crop a :py:class:`Signal <pyfar.Signal>` or a
     :py:class:`TimeData <pyfar.TimeData>` object in time.
 
     Returns the signal :math:`x(t)` defined for all :math:`t` within the
     interval :math:`interval[0] \le t \le interval[1]`
-    (or :math:`interval[0] < t < interval[1]` when `exclude_end` is
-    ``True``), where :math:`t`
-    can be time or samples.
+    (or :math:`interval[0] < t < interval[1]` when `endpoint` is
+    ``False``), where :math:`t` can be time or samples.
 
     The original signal is not modified. Instead, the cropped signal is
     a partial copy of the original signal.
@@ -599,10 +598,10 @@ def time_crop(signal,
         Values in seconds are rounded to the nearest sample within the
         specified `interval` range. The default is ``'samples'``.
 
-    exclude_end : bool, optional
-        If ``True``, the end of the interval is exclusive, i.e., the sample
-        at the end of the interval is not included in the cropped signal.
-        The default is ``False``.
+    endpoint : bool, optional
+        The default is ``True``, in which case the end of the interval is
+        included in the cropped signal.
+        If ``False``, the end of the interval is exclusive.
 
     Returns
     -------
@@ -697,12 +696,12 @@ def time_crop(signal,
     else:
         raise ValueError(f"unit is {unit} but has to be 'samples' or 's'.")
 
-    if exclude_end:
-        mask = ((indices >= interval[0]) & (
-            indices < interval[1]))
-    else:
+    if endpoint:
         mask = ((indices >= interval[0]) & (
             indices <= interval[1]))
+    else:
+        mask = ((indices >= interval[0]) & (
+            indices < interval[1]))
 
     # If there are no True values in the mask, the interval lies
     # outside the boundaries of signal.times.
