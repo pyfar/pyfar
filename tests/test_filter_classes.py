@@ -155,6 +155,41 @@ def test_filter_impulse_response_length(filter_object, actual_length, unit):
     assert estimated_length.dtype == int
 
 
+@pytest.mark.parametrize(('coefficients', 'tolerance', 'lengths'), [
+    ([1, -.5, 0], None, [2]),
+    ([-1, -.5, 0], None, [2]),
+    ([[1, 2, 3, 0], [0, 0, 0, 1]], None, [3, 4]),
+    ([[1, 0, 0, 0], [1, 2, 3, 4]], None, [1, 4]),
+    ([0, 0, 0], None, [1]),
+    ([[0, 0, 0], [0, 0, -1]], None, [1, 3]),
+    ([1e-20, -1e-20], None, [1]),
+    ([[-1, 0, -.5, -.0001], [2, 0, 0, -.5]], .001, [3, 4]),
+    ([[0, 0, 0], [1, -.1, 0]], .1, [1, 1]),
+])
+def test_fir_impulse_response_support(coefficients, tolerance, lengths):
+    """Find signed support independently in each channel, including silence."""
+    filt = pf.FilterFIR(coefficients, 44100)
+    npt.assert_array_equal(
+        filt.minimum_impulse_response_length(tolerance=tolerance), lengths)
+
+
+@pytest.mark.parametrize('coefficients', [
+    [1, -.5, 0],
+    [-1, -.5, 0],
+    [[1, 0, 0, 0], [1, 2, 3, 0]],
+    [[1, 0, 0, 0], [1, 2, 3, 4]],
+    [0, 0, 0],
+    [[0, 0, 0], [0, 0, -1]],
+])
+def test_fir_impulse_response_retains_coefficients(coefficients):
+    """Automatic response length must retain every non-zero FIR tap."""
+    filt = pf.FilterFIR(coefficients, 44100)
+    response = filt.impulse_response()
+    padded = np.zeros_like(filt.coefficients, dtype=float)
+    padded[:, :response.n_samples] = response.time.reshape(filt.n_channels, -1)
+    npt.assert_allclose(padded, filt.coefficients, atol=1e-15)
+
+
 @pytest.mark.parametrize('filter_object', [
     # FIR filter, single-channel
     fo.FilterFIR(np.array([[1, -1, .1, -.1]]), 48000),
