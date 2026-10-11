@@ -99,7 +99,24 @@ def test_filter_comment():
     with pytest.raises(TypeError, match="comment has to be of type string."):
         pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
-@pytest.mark.parametrize('unit', [('samples'), ('s')])
+@pytest.mark.parametrize('unit', ['samples', 's'])
+@pytest.mark.parametrize('sampling_rate', [16000, 44100, 48000])
+@pytest.mark.parametrize(('coefficients', 'sample_lengths'), [
+    ([[1, 0, 1]], [3]),
+    ([[1, 1, 0]], [2]),
+    ([[1, 0, 1], [1, 1, 0]], [3, 2]),
+])
+def test_fir_impulse_response_length_units(
+        coefficients, sample_lengths, sampling_rate, unit):
+    """FIR lengths retain their shape and use the requested unit and dtype."""
+    filt = pf.FilterFIR(coefficients, sampling_rate)
+    actual = filt.minimum_impulse_response_length(unit=unit)
+    divisor = 1 if unit == 'samples' else sampling_rate
+    expected = np.asarray(sample_lengths) / divisor
+    npt.assert_equal(actual, expected)
+    assert actual.dtype == (int if unit == 'samples' else float)
+
+
 @pytest.mark.parametrize(('filter_object', 'actual_length'), [
     # FIR filter ---------------------------------------------
     # single-channel filter
@@ -141,16 +158,14 @@ def test_filter_comment():
     (pf.FilterSOS([[[1, 0, 0, 1, 0, .5]],
                    [[1, 0, 0, 1, 0, .9]]], 44100), np.array([28, 187])),
 ])
-def test_filter_impulse_response_length(filter_object, actual_length, unit):
+def test_filter_impulse_response_length(filter_object, actual_length):
     """
     Test minimum_impulse_response_length class method for all classes and
     cases.
     """
 
-    length_divisor = 1 if unit == 'samples' else 44100
     estimated_length = filter_object.minimum_impulse_response_length()
-    npt.assert_equal(estimated_length / length_divisor,
-                     actual_length / length_divisor)
+    npt.assert_equal(estimated_length, actual_length)
     assert estimated_length.shape == actual_length.shape
     assert estimated_length.dtype == int
 

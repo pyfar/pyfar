@@ -9,6 +9,7 @@ Fixed
 ^^^^^
 - A bug in `pyfar.dsp.average` that raised errors when trying to use `magnitude_phase` mode with weights (PR #962).
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
+- Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'`.
 
 0.8.1 (2026-08-14)
 ------------------

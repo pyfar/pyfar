@@ -527,8 +527,9 @@ class FilterFIR(Filter):
         Returns
         -------
         minimum_impulse_response_length : array
-            An integer array of shape(n_channels, ) containing the length in
-            samples with the number of filter channels :py:func:`~n_channels`.
+            An array of shape(n_channels, ) containing the length as integer
+            samples or floating-point seconds, depending on `unit`, with the
+            number of filter channels :py:func:`~n_channels`.
         """
 
         # get filter coefficients
@@ -546,7 +547,7 @@ class FilterFIR(Filter):
 
         # convert to desired unit
         if unit == 's':
-            estimated_length /= self.sampling_rate
+            estimated_length = estimated_length / self.sampling_rate
         elif unit == 'samples':
             estimated_length = estimated_length.astype(int)
         else:
