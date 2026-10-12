@@ -64,7 +64,7 @@ def test_level_sliding_equivalent_continuous_level_known_value():
 def test_level_peak_level_known_value(oversampling):
     delay = 5432
     s = pf.signals.impulse(10000, delay)
-    levels, times = pf.level.peak_level(s, "Z", oversampling, 1)
+    levels, times = pf.level.peak_level(s, "Z", None, oversampling, 1)
     assert np.isclose(levels[0], 0, atol=0.01)   # peak is 1, so 0 dbFS
     assert np.isclose(times[0], delay / s.sampling_rate, atol=0.001)
 
@@ -76,8 +76,8 @@ def test_level_peak_level_intersample_peak():
     """
     s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
 
-    level_no_over, time_no_over = pf.level.peak_level(s, "Z", None)
-    level_with_over, time_with_over = pf.level.peak_level(s, "Z", 2)
+    level_no_over, time_no_over = pf.level.peak_level(s, "Z", None, None)
+    level_with_over, time_with_over = pf.level.peak_level(s, "Z", None, 2)
 
     assert level_with_over > level_no_over
     # peak must be at the 4th sample (0-indexed)
@@ -88,14 +88,14 @@ def test_level_peak_level_intersample_peak():
 
 
 @pytest.mark.parametrize("time_weighting", ["F", "S"])
-def test_level_max_time_weighted_level_known_value(time_weighting):
+def test_level_peak_level_time_weighted_known_value(time_weighting):
     """A single impulse should result in a peak level that is equal to the
     level of the impulse dampened by the exponential smoothing parameters,
     which are the sampling rate and the time constant of the time weighting.
     """
     delay = 5432
     s = pf.signals.impulse(10000, delay)
-    levels, times = pf.level.maximum_time_weighted_level(
+    levels, times = pf.level.peak_level(
         s, "Z", time_weighting, None, 1)
     time_constant = 0.125 if time_weighting == "F" else 1
     expected_peak_energy = 1 / s.sampling_rate / time_constant
@@ -105,7 +105,7 @@ def test_level_max_time_weighted_level_known_value(time_weighting):
 
 
 @pytest.mark.parametrize("time_w", ["F", "S"])
-def test_level_peak_and_max_two_sample_peak(time_w):
+def test_level_peak_level_two_sample_peak(time_w):
     """Unlike the regular peak level, when two loud samples appear
     right next to each other and the first one is only slightly louder,
     the maximum time-weighted level should be at the second sample, since
@@ -113,7 +113,7 @@ def test_level_peak_and_max_two_sample_peak(time_w):
     into the output for the second sample.
     """
     s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
-    _, times_peak = pf.level.peak_level(s, "Z", None)
-    _, times_max = pf.level.maximum_time_weighted_level(s, "Z", time_w, None)
+    _, times_peak = pf.level.peak_level(s, "Z", None, None)
+    _, times_max = pf.level.peak_level(s, "Z", time_w, None)
     assert np.isclose(times_peak[0], 0.03)  # at the first sample of the peak
     assert np.isclose(times_max[0], 0.04)  # at the second sample of the peak
