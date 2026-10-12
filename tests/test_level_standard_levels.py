@@ -117,3 +117,29 @@ def test_level_peak_level_two_sample_peak(time_w):
     _, times_max = pf.level.peak_level(s, "Z", time_w, None)
     assert np.isclose(times_peak[0], 0.03)  # at the first sample of the peak
     assert np.isclose(times_max[0], 0.04)  # at the second sample of the peak
+
+
+@pytest.mark.parametrize("oversampling", [None, 2, 3.5, 8])
+@pytest.mark.parametrize("time_weighting", [None, "F", "S"])
+def test_level_peak_level_oversampling_shape(oversampling, time_weighting):
+    """Test that the oversampling parameter does not change the shape
+    of the output.
+    """
+    s = pf.signals.impulse(1000, sampling_rate=48000)
+    levels, times = pf.level.peak_level(s, "Z", time_weighting, oversampling)
+    assert levels.shape == s.cshape
+    assert times.shape == s.cshape
+
+
+@pytest.mark.parametrize(("oversampling", "error_type", "match"), [
+    ("4", TypeError, "number"),
+    (np.array([1, 2]), TypeError, "number"),
+    (-1, ValueError, "greater"),
+    (0, ValueError, "greater"),
+])
+def test_level_peak_level_oversampling_errors(
+    oversampling, error_type, match):
+    """Test that an invalid oversampling factor raises an error."""
+    s = pf.signals.sine(1000, 22050)
+    with pytest.raises(error_type, match=match):
+        pf.level.peak_level(s, "Z", None, oversampling)

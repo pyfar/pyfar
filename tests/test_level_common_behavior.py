@@ -211,41 +211,6 @@ def test_level_common_reference_pressure_errors(function):
         function(s, 0)
 
 
-### oversampling parameter tests ###
-
-FUNCTION_WRAPPERS_OVERSAMPLING = [
-    lambda s, o: pf.level.peak_level(s, "Z", None, o),
-    lambda s, o: pf.level.peak_level(s, "Z", "F", o),
-]
-
-
-@pytest.mark.parametrize("oversampling", [None, 2, 3.5, 8])
-@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_OVERSAMPLING)
-def test_level_common_oversampling_shape(function, oversampling):
-    """Test that the oversampling parameter does not change the shape
-    of the output.
-    """
-    s = pf.signals.impulse(1000, sampling_rate=48000)
-    levels, times = function(s, oversampling)
-    assert levels.shape == s.cshape
-    assert times.shape == s.cshape
-
-
-@pytest.mark.parametrize(("oversampling", "error_type", "match"), [
-    ("4", TypeError, "number"),
-    (np.array([1, 2]), TypeError, "number"),
-    (-1, ValueError, "greater"),
-    (0, ValueError, "greater"),
-])
-@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_OVERSAMPLING)
-def test_level_common_oversampling_errors(
-    function, oversampling, error_type, match):
-    """Test that an invalid oversampling factor raises an error."""
-    s = pf.signals.sine(1000, 22050)
-    with pytest.raises(error_type, match=match):
-        function(s, oversampling)
-
-
 ### time_weighting parameter tests ###
 
 FUNCTION_WRAPPERS_TIME_WEIGHTING = [
