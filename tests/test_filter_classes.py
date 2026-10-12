@@ -166,7 +166,7 @@ def test_filter_impulse_response_length(filter_object, actual_length, unit):
     ([[-1, 0, -.5, -.0001], [2, 0, 0, -.5]], .001, [3, 4]),
     ([[0, 0, 0], [1, -.1, 0]], .1, [1, 1]),
 ])
-def test_fir_impulse_response_support(coefficients, tolerance, lengths):
+def test_filter_fir_impulse_response_signed(coefficients, tolerance, lengths):
     """Find signed support independently in each channel, including silence."""
     filt = pf.FilterFIR(coefficients, 44100)
     npt.assert_array_equal(
@@ -181,7 +181,7 @@ def test_fir_impulse_response_support(coefficients, tolerance, lengths):
     [0, 0, 0],
     [[0, 0, 0], [0, 0, -1]],
 ])
-def test_fir_impulse_response_retains_coefficients(coefficients):
+def test_filter_fir_impulse_response_retains_coefficients(coefficients):
     """Automatic response length must retain every non-zero FIR tap."""
     filt = pf.FilterFIR(coefficients, 44100)
     response = filt.impulse_response()
