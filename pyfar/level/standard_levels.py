@@ -597,7 +597,7 @@ def peak_level(
     else:
         time_constant = _time_weighting_to_constant(time_weighting)
         time_weighted = time_weighted_pressure(signal, time_constant)
-        
+
     maxima = np.max(time_weighted.time, axis=-1)
     levels = _energies_to_levels(maxima**2, reference_pressure)
     indexes = np.argmax(time_weighted.time, axis=-1)
