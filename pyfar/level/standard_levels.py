@@ -593,12 +593,12 @@ def peak_level(
     signal = _apply_frequency_weighting(signal, frequency_weighting)
     signal = _apply_oversampling(signal, oversampling)
     if time_weighting is None:
-        time_weighted = np.abs(signal.time)
+        time_weighted = signal
     else:
         time_constant = _time_weighting_to_constant(time_weighting)
         time_weighted = time_weighted_pressure(signal, time_constant)
 
-    maxima = np.max(time_weighted.time, axis=-1)
+    maxima = np.max(np.abs(time_weighted.time), axis=-1)
     levels = _energies_to_levels(maxima**2, reference_pressure)
     indexes = np.argmax(time_weighted.time, axis=-1)
     times = indexes / signal.sampling_rate
