@@ -272,7 +272,6 @@ def test_level_common_time_weighting_errors(weighting, error_type, function):
         function(s, weighting)
 
 
-
 ### replace_zeros parameter tests ###
 
 FUNCTION_WRAPPERS_REPLACE_ZEROS = [
