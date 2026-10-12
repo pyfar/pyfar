@@ -213,24 +213,19 @@ def test_level_common_reference_pressure_errors(function):
 
 ### time_weighting parameter tests ###
 
-FUNCTION_WRAPPERS_TIME_WEIGHTING = [
-    lambda s, t: pf.level.time_weighted_level(s, "Z", t),
-    lambda s, t: pf.level.peak_level(s, "Z", t),
-]
-
-
-@pytest.mark.parametrize(("weighting", "error_type"), [
-    #TODO split tests because peak allows None
-    #(None, TypeError),
-    (123, TypeError),
-    ("X", ValueError),
+@pytest.mark.parametrize(("weighting", "error_type", "function"), [
+    (123, TypeError, pf.level.time_weighted_level),
+    (123, TypeError, pf.level.peak_level),
+    ("X", ValueError, pf.level.time_weighted_level),
+    ("X", ValueError, pf.level.peak_level),
+    # None is allowed for peak level, but not for time-weighted level
+    (None, TypeError, pf.level.time_weighted_level),
 ])
-@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_TIME_WEIGHTING)
 def test_level_common_time_weighting_errors(weighting, error_type, function):
     """Test that an invalid time weighting raises an error."""
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(error_type, match="Time weighting"):
-        function(s, weighting)
+        function(s, "Z", weighting)
 
 
 ### replace_zeros parameter tests ###
