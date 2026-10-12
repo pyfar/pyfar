@@ -816,7 +816,7 @@ def test_time_crop_endpoint_signal(signal, interval, unit):
 
 def test_time_crop_endpoint_between_samples():
     """
-    endpoint should make no difference when the boundary
+    The `endpoint` parameter should make no difference when the boundary
     lies between two samples.
     """
     time_data = pf.TimeData([1, 2, 3, 4], [0, 1, 2, 3])

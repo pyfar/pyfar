@@ -601,7 +601,7 @@ def time_crop(signal,
     endpoint : bool, optional
         The default is ``True``, in which case the end of the interval is
         included in the cropped signal.
-        If ``False``, the end of the interval is exclusive.
+        If ``False``, the end of the interval is excluded.
 
     Returns
     -------
