@@ -1,6 +1,6 @@
 """
-The standard-conform level functions have shared parameters that
-can and should be tested under the exact same conditions.
+The standard-conform level functions have shared parameters and output
+shapes that can and should be tested under the exact same conditions.
 All tests that apply to multiple of these functions are grouped
 in this file to avoid code duplication or accidentally
 testing the same parameter in different ways for different functions.
@@ -13,6 +13,56 @@ return type and shape, if necessary.
 import pyfar as pf
 import numpy as np
 import pytest
+
+
+### output shape tests ###
+
+SHAPE_TEST_SIGNALS = [
+    pf.signals.impulse(1000, 0),
+    pf.signals.impulse(1000, (0, 0)),
+    pf.signals.impulse(1000, [(0, 0), (0, 0), (0, 0)]),
+]
+
+@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
+@pytest.mark.parametrize("function", [
+    lambda s: pf.level.equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.exposure_level(s, "Z"),
+])
+def test_level_output_shapes_one_per_channel(signal, function):
+    """Test that the output of the level functions that return one value
+    per channel has the correct shape.
+    """
+    output = function(signal)
+    assert output.shape == signal.cshape
+
+
+@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
+@pytest.mark.parametrize("function", [
+    lambda s: pf.level.sliding_equivalent_continuous_level(s, "Z"),
+    lambda s: pf.level.time_weighted_level(s, "Z", "F"),
+])
+def test_level_output_shapes_one_per_sample(signal, function):
+    """Test that the output of the level functions that return one value
+    per sample has the same shape as the signal's time data.
+    """
+    output = function(signal)
+    assert output.shape == signal.time.shape
+
+
+@pytest.mark.parametrize("signal", SHAPE_TEST_SIGNALS)
+@pytest.mark.parametrize("function", [
+    lambda s: pf.level.peak_level(s, "Z"),
+    lambda s: pf.level.maximum_time_weighted_level(s, "Z", "F"),
+])
+def test_level_output_shapes_tuple(signal, function):
+    """Test that the tuple returned by the level functions has exactly
+    two elements (levels and times) and both have one value per channel.
+    """
+    output = function(signal)
+    assert len(output) == 2
+    assert output[0].shape == signal.cshape
+    assert output[1].shape == signal.cshape
+
 
 ### signal parameter tests ###
 
@@ -102,10 +152,10 @@ FUNCTION_WRAPPERS_BAND_FRACTIONS = [
 ])
 @pytest.mark.parametrize("num_fractions", [1, 3, 6])
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_BAND_FRACTIONS)
-def test_level_common_num_octave_band_fractions_dimensions(
+def test_level_common_num_octave_band_fractions_shape(
         signal, function, num_fractions):
     """Test that the number of octave band fractions is applied correctly
-    by checking the dimensions of the output.
+    by checking the shape of the output.
     """
     band_freqs, _, _ = pf.constants.fractional_octave_frequencies_exact(
         num_fractions)
@@ -214,8 +264,44 @@ FUNCTION_WRAPPERS_TIME_WEIGHTING = [
     (123, TypeError),
     ("X", ValueError),
 ])
-def test_level_common_time_weighting_errors(weighting, error_type):
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_TIME_WEIGHTING)
+def test_level_common_time_weighting_errors(weighting, error_type, function):
     """Test that an invalid time weighting raises an error."""
     s = pf.signals.sine(1000, 22050)
     with pytest.raises(error_type, match="Time weighting"):
-        FUNCTION_WRAPPERS_TIME_WEIGHTING[0](s, weighting)
+        function(s, weighting)
+
+
+
+### replace_zeros parameter tests ###
+
+FUNCTION_WRAPPERS_REPLACE_ZEROS = [
+    lambda s, r: pf.level.time_weighted_level(
+        s, "Z", "F", None, replace_zeros=r),
+    lambda s, r: pf.level.sliding_equivalent_continuous_level(
+        s, "Z", None, 1, replace_zeros=r),
+]
+
+
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_REPLACE_ZEROS)
+def test_level_time_weighted_level_replace_zeros_false(function):
+    """Test that setting replace_zeros to False returns -inf
+    and raises a warning from numpy.
+    """
+    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
+    with pytest.warns(RuntimeWarning, match="divide by zero"):
+        levels_no_replace = function(s, False)
+    assert np.all(levels_no_replace == -np.inf)
+
+
+@pytest.mark.parametrize("function", FUNCTION_WRAPPERS_REPLACE_ZEROS)
+def test_level_time_weighted_level_replace_zeros_true(function):
+    """Test that setting replace_zeros to True replaces zeros with the
+    array type's epsilon to avoid -inf values and numpy warnings.
+    """
+    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
+    levels_replace = function(s, True)
+
+    # since there are only zeros in the signal, all values must be epsilon
+    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
+    assert np.allclose(levels_replace, expected_value)
