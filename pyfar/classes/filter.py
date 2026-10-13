@@ -508,18 +508,20 @@ class FilterFIR(Filter):
         Get the minimum length of the filter impulse response.
 
         The length is computed from the last non-zero coefficient per channel.
+        Channels with no coefficients above the threshold have a length of one
+        sample.
 
         Parameters
         ----------
         tolerance : float, optional
             Tolerance for estimating the minimum length of noisy FIR filters.
             The length is estimated by finding the last coefficient with an
-            absolute value greater or equal to the absolute maximum of the
+            absolute value greater than the absolute maximum of the
             filter coefficients per channel multiplied by `tolerance`. For
             example if ``tolerance = 0.001`` trailing values below
             :math:`20 \log_{10}(0.001)=-60` dB would be ignored in the length
             estimation. The default ``None`` uses the numerical precision
-            ``2 * numpy.finfo(float).resolution`` as a strict threshold.
+            ``2 * numpy.finfo(float).eps`` as a strict threshold.
         unit : string, optional
             The unit in which the length is returned. Can be ``'samples'`` or
             ``'s'`` (seconds). The default is ``'samples'``.
@@ -540,9 +542,10 @@ class FilterFIR(Filter):
             thresholds = np.max(np.abs(b), -1) * tolerance
 
         # find last entry above tolerance per channel
-        above_threshold = b > np.repeat(thresholds[..., None], b.shape[-1], -1)
-        estimated_length = np.where(above_threshold)[1].reshape(b.shape[0], -1)
-        estimated_length = np.max(estimated_length, -1) + 1
+        above_threshold = np.abs(b) > thresholds[..., None]
+        sample_lengths = np.arange(1, b.shape[-1] + 1)
+        estimated_length = np.max(
+            np.where(above_threshold, sample_lengths, 1), axis=-1)
 
         # convert to desired unit
         if unit == 's':
