@@ -573,9 +573,11 @@ def peak_level(
     Returns
     -------
     levels: np.ndarray
-        The peak sound pressure levels in dB, one per channel.
+        The peak sound pressure levels in dB
+        with a shape identical to ``signal.cshape``.
     times: np.ndarray
-        The times of the peak levels in seconds, one per channel. If
+        The times of the peak levels in seconds 
+        with the same shape as ``levels``. If
         `oversampling` is ``None``, the times match sample times of the input.
         Otherwise, `times` may contain inter-sample times.
 
