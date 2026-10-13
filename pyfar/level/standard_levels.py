@@ -516,8 +516,8 @@ def peak_level(
     defined in the standard, which is the maximum instantaneous level
     of the signal. With time weighting, the calculated value corresponds to
     the maximum time-weighted level of the signal, defined in the standard
-    as i.e. :math:`L_{\text{AFmax}}` for the ``A`` frequency weighting and
-    ``F`` time weighting.
+    as i.e. :math:`L_{\text{AFmax}}` for the A frequency weighting and
+    fast time weighting.
     Note that the timing of the peak may differ between the different
     time weighting (and unweighted) options due to the integration step
     of the time-weighting filters.
