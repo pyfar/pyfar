@@ -87,6 +87,20 @@ def test_level_peak_level_intersample_peak():
     assert time_with_over == 0.035 # at 7th oversampled sample
 
 
+@pytest.mark.parametrize("oversampling", [2, 6, 20])
+def test_level_peak_level_oversampling_known_value(oversampling):
+    """Test that the peak level of a sinc function originally sampled half
+    a sample away from the peak is roughly 0 dBFS after oversampling.
+    """
+    data = np.sinc(np.arange(-999.5, 999.5, 1))
+    s = pf.Signal(data, sampling_rate=100)
+    levels, times = pf.level.peak_level(s, "Z", None, oversampling, 1)
+    # peak is 1, so 0 dbFS. High tolerance necessary, because the sinc
+    # function has significant energy near nyquist, so the alias filter
+    # cuts off some energy
+    assert np.isclose(levels[0], 0, atol=0.5)
+
+
 @pytest.mark.parametrize("time_weighting", ["F", "S"])
 def test_level_peak_level_time_weighted_known_value(time_weighting):
     """A single impulse should result in a peak level that is equal to the
