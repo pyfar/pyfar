@@ -154,7 +154,7 @@ def test_filter_impulse_response_length(filter_object, actual_length, unit):
         tolerance = (1 / filter_object.sampling_rate
                      if isinstance(filter_object, pf.FilterIIR) else 0)
         npt.assert_allclose(estimated_length, actual_length, atol=tolerance,
-                           rtol=0)
+                            rtol=0)
     else:
         npt.assert_equal(estimated_length, actual_length)
     assert estimated_length.shape == actual_length.shape
