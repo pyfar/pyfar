@@ -203,6 +203,7 @@ workflows:
               only:
                 - main
                 - develop
+                - ci/slack-notifications
           requires:
             - build_and_test
 
