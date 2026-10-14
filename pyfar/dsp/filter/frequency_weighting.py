@@ -87,7 +87,8 @@ def frequency_weighting_filter(
 
     **kwargs: dict
         Keyword args that are passed to the
-        :py:func:`scipy.optimize.least_squares` call.
+        :py:func:`scipy.optimize.least_squares` call. The convergence
+        tolerance of the cost function ``ftol`` defaults to ``1e-10``.
 
     Returns
     -------
@@ -296,6 +297,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
     # Bounds are necessary to keep poles inside the unit circle,
     # ensuring the resulting filter is stable.
     kwargs.setdefault("bounds", (-1, 1))
+    kwargs.setdefault("ftol", 1e-10)
     # The actual optimization happens here. This iteratively moves
     # zeros and poles along the real axis on the z-plane until
     # a local optimum is reached.
@@ -411,5 +413,4 @@ def _check_filter(sampling_rate: float,
     max_diff = np.max(np.abs(mag_diffs))
     mean_diff = np.mean(np.abs(mag_diffs))
     return is_class_1, max_diff, mean_diff
-
 
