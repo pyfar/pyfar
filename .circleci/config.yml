@@ -113,7 +113,7 @@ jobs:
                                   # to be replaced with the maint channel-ID
           event: fail
           template: basic_fail_1
-          branch_pattern: "main,develop,ci/slack-notifications"
+          branch_pattern: "main,develop"
 
   test_pypi_publish:
     parameters:
@@ -203,7 +203,6 @@ workflows:
               only:
                 - main
                 - develop
-                - ci/slack-notifications
           requires:
             - build_and_test
 
