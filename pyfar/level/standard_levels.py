@@ -509,7 +509,7 @@ def peak_level(
     r"""Calculate the (true) peak sound pressure level with or without
     time weighting.
 
-    The levels are calculated per channel; and according to IEC 61672-1 [#]_.
+    The levels are calculated per channel and according to IEC 61672-1 [#]_.
 
     If this function is called with `time_weighting` set to ``None``,
     the calculated value corresponds to the peak sound level
@@ -574,7 +574,7 @@ def peak_level(
     -------
     levels: np.ndarray
         The peak sound pressure levels in dB
-        with a shape identical to ``signal.cshape``.
+        with a shape identical to :py:attr:`signal.cshape <pyfar.Signal.cshape>`.
     times: np.ndarray
         The times of the peak levels in seconds
         with the same shape as `levels`. If
