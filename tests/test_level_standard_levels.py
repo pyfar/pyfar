@@ -1,9 +1,10 @@
 """
 Test for the standard-conform level functions.
 
-Note that the tests for the shared parameters of these functions are in
-`test_level_common_parameters.py`, so this file ony contains tests
-against known values or other tests that are specific to a single function.
+Note that the tests for the shared behavior (parameters, output)
+of these functions are in `test_level_common_behavior.py`,
+so this file ony contains tests against known values or other tests that are
+specific to individual functions.
 """
 
 import pytest
@@ -59,17 +60,11 @@ def test_level_sliding_equivalent_continuous_level_known_value():
     assert np.isclose(levels[0][-1], ONE_PA - SINE_PAPR, atol=0.001)
 
 
-def test_level_sliding_equivalent_continuous_level_shape():
-    s = pf.signals.impulse(1000, sampling_rate=48000)
-    levels = pf.level.sliding_equivalent_continuous_level(s, "Z")
-    assert levels.shape == s.time.shape
-
-
 @pytest.mark.parametrize("oversampling", [None, 4, 8])
 def test_level_peak_level_known_value(oversampling):
     delay = 5432
     s = pf.signals.impulse(10000, delay)
-    levels, times = pf.level.peak_level(s, "Z", oversampling, 1)
+    levels, times = pf.level.peak_level(s, "Z", None, oversampling, 1)
     assert np.isclose(levels[0], 0, atol=0.01)   # peak is 1, so 0 dbFS
     assert np.isclose(times[0], delay / s.sampling_rate, atol=0.001)
 
@@ -81,8 +76,8 @@ def test_level_peak_level_intersample_peak():
     """
     s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
 
-    level_no_over, time_no_over = pf.level.peak_level(s, "Z", None)
-    level_with_over, time_with_over = pf.level.peak_level(s, "Z", 2)
+    level_no_over, time_no_over = pf.level.peak_level(s, "Z", None, None)
+    level_with_over, time_with_over = pf.level.peak_level(s, "Z", None, 2)
 
     assert level_with_over > level_no_over
     # peak must be at the 4th sample (0-indexed)
@@ -92,35 +87,73 @@ def test_level_peak_level_intersample_peak():
     assert time_with_over == 0.035 # at 7th oversampled sample
 
 
-def test_level_time_weighted_level_replace_zeros_false():
-    """Test that setting replace_zeros to False returns -inf
-    and raises a warning from numpy.
+@pytest.mark.parametrize("oversampling", [2, 6, 20])
+def test_level_peak_level_oversampling_known_value(oversampling):
+    """Test that the peak level of a sinc function originally sampled half
+    a sample away from the peak is roughly 0 dBFS after oversampling.
     """
-    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
-    with pytest.warns(RuntimeWarning, match="divide by zero"):
-        levels_no_replace = pf.level.time_weighted_level(
-            s, "Z", "F", replace_zeros=False)
-    assert np.all(levels_no_replace == -np.inf)
+    data = np.sinc(np.arange(-999.5, 999.5, 1))
+    s = pf.Signal(data, sampling_rate=100)
+    levels, times = pf.level.peak_level(s, "Z", None, oversampling, 1)
+    # peak is 1, so 0 dbFS. High tolerance is necessary, because the sinc
+    # function has significant energy near nyquist, so the alias filter
+    # in the resampling function cuts off some energy
+    assert np.isclose(levels[0], 0, atol=0.5)
 
 
-def test_level_time_weighted_level_replace_zeros_true():
-    """Test that setting replace_zeros to True replaces zeros with the
-    array type's epsilon to avoid -inf values and numpy warnings.
+@pytest.mark.parametrize("time_weighting", ["F", "S"])
+def test_level_peak_level_time_weighted_known_value(time_weighting):
+    """A single impulse should result in a peak level that is equal to the
+    level of the impulse dampened by the exponential smoothing parameters,
+    which are the sampling rate and the time constant of the time weighting.
     """
-    s = pf.Signal(np.zeros(1000), sampling_rate=48000)
-    levels_replace = pf.level.time_weighted_level(
-        s, "Z", "F", replace_zeros=True)
+    delay = 5432
+    s = pf.signals.impulse(10000, delay)
+    levels, times = pf.level.peak_level(
+        s, "Z", time_weighting, None, 1)
+    time_constant = 0.125 if time_weighting == "F" else 1
+    expected_peak_energy = 1 / s.sampling_rate / time_constant
+    expected_peak_level = 10 * np.log10(expected_peak_energy)
+    assert np.isclose(levels[0], expected_peak_level, atol=0.01)
+    assert np.isclose(times[0], delay / s.sampling_rate, atol=0.001)
 
-    # since there are only zeros in the signal, all values must be epsilon
-    expected_value = 10 * np.log10(np.finfo(s.time.dtype).eps / 2e-5**2)
-    assert np.allclose(levels_replace, expected_value)
+
+@pytest.mark.parametrize("time_w", ["F", "S"])
+def test_level_peak_level_two_sample_peak(time_w):
+    """Unlike the regular peak level, when two loud samples appear
+    right next to each other and the first one is only slightly louder,
+    the maximum time-weighted level should be at the second sample, since
+    the time-weighting will integrate most of the first sample's energy
+    into the output for the second sample.
+    """
+    s = pf.Signal([0, 0, 0, 1, 0.99, 0, 0, 0], sampling_rate=100)
+    _, times_peak = pf.level.peak_level(s, "Z", None, None)
+    _, times_max = pf.level.peak_level(s, "Z", time_w, None)
+    assert np.isclose(times_peak[0], 0.03)  # at the first sample of the peak
+    assert np.isclose(times_max[0], 0.04)  # at the second sample of the peak
 
 
-@pytest.mark.parametrize(("time_weighting", "err_type"), [
-    (None, TypeError), ("X", ValueError)])
-def test_level_time_weighted_level_time_weighting_error(
-    time_weighting, err_type,
-):
+@pytest.mark.parametrize("oversampling", [None, 2, 3.5, 8])
+@pytest.mark.parametrize("time_weighting", [None, "F", "S"])
+def test_level_peak_level_oversampling_shape(oversampling, time_weighting):
+    """Test that the oversampling parameter does not change the shape
+    of the output.
+    """
+    s = pf.signals.impulse(1000, sampling_rate=48000)
+    levels, times = pf.level.peak_level(s, "Z", time_weighting, oversampling)
+    assert levels.shape == s.cshape
+    assert times.shape == s.cshape
+
+
+@pytest.mark.parametrize(("oversampling", "error_type", "match"), [
+    ("4", TypeError, "number"),
+    (np.array([1, 2]), TypeError, "number"),
+    (-1, ValueError, "greater"),
+    (0, ValueError, "greater"),
+])
+def test_level_peak_level_oversampling_errors(
+    oversampling, error_type, match):
+    """Test that an invalid oversampling factor raises an error."""
     s = pf.signals.sine(1000, 22050)
-    with pytest.raises(err_type, match="Time weighting"):
-        pf.level.time_weighted_level(s, "Z", time_weighting)
+    with pytest.raises(error_type, match=match):
+        pf.level.peak_level(s, "Z", None, oversampling)
