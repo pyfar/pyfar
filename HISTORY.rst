@@ -22,6 +22,10 @@ Maintenance
 ^^^^^^^^^^^
 - Restricted deprecation tests to main and develop; added Slack notifications for scheduled job failures on main and develop (PR #982)
 
+Maintenance
+^^^^^^^^^^^
+- Add Python 3.15
+
 0.8.1 (2026-08-14)
 ------------------
 
