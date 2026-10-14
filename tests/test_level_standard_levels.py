@@ -95,9 +95,9 @@ def test_level_peak_level_oversampling_known_value(oversampling):
     data = np.sinc(np.arange(-999.5, 999.5, 1))
     s = pf.Signal(data, sampling_rate=100)
     levels, times = pf.level.peak_level(s, "Z", None, oversampling, 1)
-    # peak is 1, so 0 dbFS. High tolerance necessary, because the sinc
+    # peak is 1, so 0 dbFS. High tolerance is necessary, because the sinc
     # function has significant energy near nyquist, so the alias filter
-    # cuts off some energy
+    # in the resampling function cuts off some energy
     assert np.isclose(levels[0], 0, atol=0.5)
 
 
