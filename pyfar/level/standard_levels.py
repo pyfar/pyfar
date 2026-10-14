@@ -573,8 +573,8 @@ def peak_level(
     Returns
     -------
     levels: np.ndarray
-        The peak sound pressure levels in dB
-        with a shape identical to :py:attr:`signal.cshape <pyfar.Signal.cshape>`.
+        The peak sound pressure levels in dB with a shape identical to
+        :py:attr:`signal.cshape <pyfar.Signal.cshape>`.
     times: np.ndarray
         The times of the peak levels in seconds
         with the same shape as `levels`. If
