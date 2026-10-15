@@ -99,7 +99,7 @@ def test_filter_comment():
     with pytest.raises(TypeError, match="comment has to be of type string."):
         pf.Signal([1, 2, 3], 44100, comment=[1, 2, 3])
 
-@pytest.mark.parametrize('unit', [('samples'), ('s')])
+@pytest.mark.parametrize('unit', ['samples', 's'])
 @pytest.mark.parametrize(('filter_object', 'actual_length'), [
     # FIR filter ---------------------------------------------
     # single-channel filter
@@ -147,12 +147,18 @@ def test_filter_impulse_response_length(filter_object, actual_length, unit):
     cases.
     """
 
-    length_divisor = 1 if unit == 'samples' else 44100
-    estimated_length = filter_object.minimum_impulse_response_length()
-    npt.assert_equal(estimated_length / length_divisor,
-                     actual_length / length_divisor)
+    estimated_length = filter_object.minimum_impulse_response_length(unit=unit)
+    if unit == 's':
+        actual_length = actual_length / filter_object.sampling_rate
+        # IIR seconds retain fractions; sample counts truncate the estimate.
+        tolerance = (1 / filter_object.sampling_rate
+                     if isinstance(filter_object, pf.FilterIIR) else 0)
+        npt.assert_allclose(estimated_length, actual_length, atol=tolerance,
+                            rtol=0)
+    else:
+        npt.assert_equal(estimated_length, actual_length)
     assert estimated_length.shape == actual_length.shape
-    assert estimated_length.dtype == int
+    assert estimated_length.dtype == (int if unit == 'samples' else float)
 
 
 @pytest.mark.parametrize(('coefficients', 'tolerance', 'lengths'), [
