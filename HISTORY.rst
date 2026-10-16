@@ -11,6 +11,7 @@ Fixed
 - FIR impulse response lengths now account for negative coefficients and unequal support across filter channels, including silent channels (PR #979).
 - A bug in `pyfar.dsp.average` that raised errors when trying to use `magnitude_phase` mode with weights (PR #962).
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
+- A bug causing an error that claimed that the right (or left) sided spectrum does not exist for a `pyfar.FrequencyData` object containing a single, positive (or negative) frequency (PR #978).
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
 
 0.8.1 (2026-08-14)
