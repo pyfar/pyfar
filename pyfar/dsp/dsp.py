@@ -2051,7 +2051,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     --------
     >>> import pyfar as pf
     >>> signal = pf.signals.noise(41000, rms=[1, 1])
-    >>> decibel_data = decibel(signal, domain='time')
+    >>> decibel_data = pf.dsp.decibel(signal, domain='time')
     """
     if log_prefix is None:
         if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
