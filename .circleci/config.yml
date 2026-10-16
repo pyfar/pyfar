@@ -10,6 +10,7 @@ orbs:
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
+  slack:  circleci/slack@6.1.3
 
 
 executors:
@@ -107,6 +108,12 @@ jobs:
       - run:
           name: Run tests
           command: pytest tests -W error::DeprecationWarning
+      - slack/notify:
+          channel: "C0BCS9GK2LE"  # this currently points to pyfar and needs
+                                  # to be replaced with the maint channel-ID
+          event: fail
+          template: basic_fail_1
+          branch_pattern: "main,develop"
 
   test_pypi_publish:
     parameters:
@@ -186,10 +193,16 @@ workflows:
             - build_and_test
 
       - test_deprecation_warnings:
+          context: slack-secrets
           matrix:
             parameters:
               version:
                 - "3.14"
+          filters:
+            branches:
+              only:
+                - main
+                - develop
           requires:
             - build_and_test
 
@@ -251,6 +264,7 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
       - test_deprecation_warnings:
+          context: slack-secrets
           matrix:
             parameters:
               version:
