@@ -7,6 +7,7 @@ Unreleased
 
 Fixed
 ^^^^^
+- The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` (PR #976).
 - FIR impulse response lengths now account for negative coefficients and unequal support across filter channels, including silent channels (PR #979).
 - A bug in `pyfar.dsp.average` that raised errors when trying to use `magnitude_phase` mode with weights (PR #962).
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
