@@ -12,6 +12,10 @@ Fixed
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
 
+Maintenance
+^^^^^^^^^^^
+- Add Python 3.15
+
 0.8.1 (2026-08-14)
 ------------------
 
