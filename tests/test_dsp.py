@@ -1217,6 +1217,29 @@ def test_convolve_mode_and_method_real_complex(method, mode, desired):
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
 
 
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode", ['full', 'cut', 'cyclic'])
+@pytest.mark.parametrize("swap", [False, True])
+@pytest.mark.parametrize("n_samples", [1, 4])
+@pytest.mark.parametrize("is_complex", [False, True])
+def test_convolve_single_sample(method, mode, swap, n_samples, is_complex):
+    """Test all convolution modes where one signal has a single sample."""
+    data = np.array([1., -.5, .25, 2.])[:n_samples]
+    data = np.stack((data, -data))[:, np.newaxis, :]
+    gains = np.array([[0.], [1.], [.25]])
+    if is_complex:
+        gains = gains * (1 + 1j)
+    signal = pf.Signal(data, 44100, fft_norm='unitary')
+    kernel = pf.Signal(gains, 44100, is_complex=is_complex)
+    operands = (kernel, signal) if swap else (signal, kernel)
+    result = dsp.convolve(*operands, mode=mode, method=method)
+    np.testing.assert_allclose(result.time, data * gains, atol=1e-14)
+    assert result.n_samples == n_samples
+    assert result.sampling_rate == signal.sampling_rate
+    assert result.fft_norm == signal.fft_norm
+    assert result.complex == is_complex
+
+
 def test_convolve_mismatching_cdims():
     """
     Test if convolve works with broadcastable signals with different cdims.
