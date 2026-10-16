@@ -5,6 +5,7 @@ between many of the standardized level functions.
 import numpy as np
 import pyfar as pf
 import scipy.ndimage
+from typing import Literal
 
 
 def _check_signal_type(signal):
@@ -138,3 +139,20 @@ def _moving_average(array: np.ndarray,
     result = scipy.ndimage.uniform_filter1d(
         array, size=window_size, axis=axis, mode=mode, origin=origin)
     return result
+
+
+def _combine_levels(levels, axis: int | None,
+                    operation: Literal["mean", "sum"]):
+    levels = np.asarray(levels)
+    if np.issubdtype(levels.dtype, np.complexfloating):
+        raise ValueError("Levels must be real-valued.")
+
+    energies = 10 ** (levels / 10)
+    if operation == "mean":
+        combined_energy = np.mean(energies, axis=axis)
+    elif operation == "sum":
+        combined_energy = np.sum(energies, axis=axis)
+    else:
+        raise ValueError("Operation must be 'mean' or 'sum'.")
+    combined_level = 10 * np.log10(combined_energy)
+    return combined_level
