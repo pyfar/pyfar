@@ -12,6 +12,10 @@ Fixed
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
 
+Changed
+^^^^^^^
+- Changed the default convergence tolerance `ftol` for the least squares optimization of the filter coefficients in `pf.dsp.filter.frequency_weighting_filter` from 1e-8 to 1e-10 (PR #985)
+
 0.8.1 (2026-08-14)
 ------------------
 
