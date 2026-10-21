@@ -125,6 +125,4 @@ docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
 docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
 
 # custom
-tests/test_plot_data/output/*.png
-pyfar/signals/files/*
-
+pyfar/plot/docs/plot_shortcuts.rst
