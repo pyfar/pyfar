@@ -9,7 +9,8 @@ copyright_statement: 2020, The pyfar developers
 dependencies: numpy>=1.23.0,scipy>=1.5.0,matplotlib,sofar>=0.1.2,urllib3,deepdiff,soundfile>=0.11.0
 docs_custom_import: ''
 git_username: pyfar
-gitignore_custom: pyfar/plot/docs/plot_shortcuts.rst
+gitignore_custom: 'tests/test_plot_data/output/*.png, pyfar/signals/files/*, # ignore
+    generated files by sphinx, pyfar/plot/docs/plot_shortcuts.rst'
 intersphinx_mapping:
 - numpy
 - scipy
