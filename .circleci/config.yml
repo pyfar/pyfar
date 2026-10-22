@@ -26,10 +26,27 @@ commands:
                   - equal: [develop, << pipeline.git.branch >>]
                   - equal: [ci/slack-notifications, << pipeline.git.branch >>]
           steps:
+            - run:
+                name: Prepare Slack failure details
+                when: on_fail
+                environment:
+                  SLACK_REPORT_PIPELINE: << pipeline.number >>
+                  SLACK_REPORT_SCHEDULE: << pipeline.schedule.name >>
+                command: |
+                  subject=$(git log -1 --format=%s)
+                  author=$(git log -1 --format=%an)
+                  python_version=$(python --version)
+                  template=$(cat .circleci/slack_failure.json)
+                  printf 'export SCHEDULED_FAILURE_TEMPLATE=%q\n' "$template" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_PIPELINE=%q\n' "$SLACK_REPORT_PIPELINE" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_SCHEDULE=%q\n' "$SLACK_REPORT_SCHEDULE" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_SUBJECT=%q\n' "${subject:0:1000}" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_AUTHOR=%q\n' "${author:0:200}" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_PYTHON=%q\n' "$python_version" >> "$BASH_ENV"
             - slack/notify:
                 channel: "C0BCS9GK2LE"  # Replace with the maint channel ID.
                 event: fail
-                template: basic_fail_1
+                template: SCHEDULED_FAILURE_TEMPLATE
                 ignore_errors: false
 
 executors:
