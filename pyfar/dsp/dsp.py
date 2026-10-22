@@ -1963,7 +1963,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     elif mode == 'cyclic':
         n_min = np.min((signal1.n_samples, signal2.n_samples))
         n_max = np.max((signal1.n_samples, signal2.n_samples))
-        res[..., :n_min-1] += res[..., -n_min+1:]
+        res[..., :n_min-1] += res[..., n_max:]
         res = res[..., :n_max]
 
     is_result_complex = True if res.dtype.kind == 'c' else False
