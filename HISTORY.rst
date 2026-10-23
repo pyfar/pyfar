@@ -15,6 +15,10 @@ Fixed
 - A bug causing an error that claimed that the right (or left) sided spectrum does not exist for a `pyfar.FrequencyData` object containing a single, positive (or negative) frequency (PR #978).
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
 
+Changed
+^^^^^^^
+- Changed the default convergence tolerance `ftol` for the least squares optimization of the filter coefficients in `pf.dsp.filter.frequency_weighting_filter` from 1e-8 to 1e-10 (PR #985)
+
 0.8.1 (2026-08-14)
 ------------------
 
