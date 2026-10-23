@@ -2,12 +2,34 @@
 History
 =======
 
-unreleased
+Unreleased
 ----------
 
 Added
 ^^^^^
 - The methods `find_nearest_frequency()` and `find_nearest_time()` were extended with a new parameter `method`. (PR #947)
+- Added an `endpoint` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to numpy's `linspace` function (PR #963)
+
+0.8.1 (2026-08-14)
+------------------
+
+Fixed
+^^^^^
+- A bug in `pyfar.dsp.dsp.find_impulse_response_delay` that lead to failed delay searches for certain signals (Issue #940).
+- Removed orphaned page in the documentation (PR #932)
+- Fixed deprecated Matplotlib subplot behavior (PR #942)
+- `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
+- A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
+- Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
+- Limit Sphinx versions to < 0.9.0 to avoid invalid references for type annotations (PR #929)
+
+Added
+^^^^^
+- Added example to `find_impulse_response_delay` plotting the inter-sample delay estimation accuracy. (PR #950)
+
+Maintenance
+^^^^^^^^^^^
+- Replaced strict CircleCI deprecation warning workflow with manual approval for release workflow. (PR #959)
 
 0.8.0 (2026-03-16)
 ------------------

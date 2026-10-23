@@ -288,11 +288,29 @@ def test_getter_sampling_rate():
     assert signal.sampling_rate == 1000
 
 
-def test_setter_sampligrate():
+def test_setter_sampling_rate():
     """Test if attribute sampling rate is set correctly."""
     signal = Signal([1, 2, 3], 44100)
     signal.sampling_rate = 1000
     assert signal._sampling_rate == 1000
+
+
+@pytest.mark.parametrize('fs', [1, [1], [[1]], [[[1]]]])
+def test_sampling_rate_parsing(fs):
+    Signal([0], fs)
+    Signal([0], np.array(fs))
+
+
+def test_sampling_rate_multirate():
+    match="Multirate signals are not supported."
+    with pytest.raises(ValueError, match=match):
+        Signal(1, [1,2])
+
+
+def test_sampling_rate_is_a_number():
+    match="Sampling rate needs to be a number."
+    with pytest.raises(ValueError, match=match):
+        Signal(1, 'string')
 
 
 def test_getter_signal_type():

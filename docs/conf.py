@@ -201,6 +201,8 @@ html_theme_options['header_links_before_dropdown'] = count_gallery_headings+1
 
 # write shortcuts to sphinx readable format
 _, shortcuts = pyfar.plot.shortcuts(show=False, report=True, layout="sphinx")
-shortcuts_path = os.path.join("resources", "plot_shortcuts.rst")
+folder = os.path.join("..", "pyfar", "plot", "docs")
+os.makedirs(folder, exist_ok=True)
+shortcuts_path = os.path.join(folder, "plot_shortcuts.rst")
 with open(shortcuts_path, "w") as f_id:
     f_id.writelines(shortcuts)

@@ -264,16 +264,29 @@ workflows:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
+      - wait_for_approval:
+          # This job is a placeholder for manual approval before publishing to PyPI.
+          # It will give maintainers the chance to inspect the deprecation watnings before publishing.
+          type: approval
+          requires:
+            - build_and_test
+            - ruff
+            - test_documentation_build
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
+
       - run_pypi_publish:
           matrix:
             parameters:
               version:
                 - "3.14"
           requires:
-            - build_and_test
-            - ruff
-            - test_documentation_build
-            - test_deprecation_warnings
+            - wait_for_approval
           filters:
             branches:
               ignore: /.*/
