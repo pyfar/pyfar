@@ -80,6 +80,9 @@ Several tools exist that were all developed at a single institution or are no lo
 - [`python-acoustics`](https://github.com/python-acoustics/python-acoustics) [@python_acoustics]
   - Comprehensive functionality, modular structure
   - Archived in 2024 and no longer maintained
+
+Additionally, the following general purpose packages are relevant and often used in acoustics research
+
 - [`scipy`](https://www.scipy.org/) [@virtanen_2020_SciPy10Fundamental]
   - General purpose scientific computing library
   - Not specifically designed for acoustics and audio signal processing, but provides relevant functionality
@@ -98,6 +101,7 @@ structure and to be more user-friendly and intuitive to use.
 Integration into or extension of existing packages was not considered a
 viable option as existing packages were built at single institutions and
 therefore not designed to be sufficiently modular and flexible.
+
 It should be noted that `pyfar` relies on `scipy` for some underlying
 functionality, it extends and adapts SciPy's general-purpose tools with
 features tailored to acoustics and audio signal processing.
@@ -163,7 +167,7 @@ At the time of writing, the pyfar ecosystem also comprised the `pyrato` package 
 
 # AI usage disclosure
 
-GitHub Copilot was used as an auto-completion engine and occasionally to review GitHub pull requests. No generative AI tools were used in the writing of this manuscript, or the preparation of supporting materials.
+GitHub Copilot was used as an auto-completion engine and occasionally to review GitHub pull requests. Generative AI tools were used for spell-checking during the writing of this manuscript.
 
 # Acknowledgements
 
