@@ -172,5 +172,13 @@ GitHub Copilot was used as an auto-completion engine and occasionally to review 
 # Acknowledgements
 
 We gratefully acknowledge contributions by the open-source community in the form of bug-fixes, functionality additions, and usability or documentation improvements.
+For a full list please see the [contributors section](https://github.com/pyfar/pyfar/graphs/contributors?all=1).
+
+We would further like to thank the following institutions for their support of the `pyfar` developer team:
+
+- Department of the Built Environment, Technical University of Eindhoven, The Netherlands
+- Audio Communication Group, Technische Universität Berlin, Germany
+- Institute for Hearing Technology and Acoustics, RWTH Aachen, Germany
+- Technical Acoustics, Institute of Computer and Communication Technology, TH Köln, Germany
 
 # References
