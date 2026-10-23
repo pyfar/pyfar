@@ -14,6 +14,7 @@ Fixed
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
 - A bug causing an error that claimed that the right (or left) sided spectrum does not exist for a `pyfar.FrequencyData` object containing a single, positive (or negative) frequency (PR #978).
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
+- Catch deprecation warnings for `pyfar.Orientations`, `pyfar.dsp.regularized_spectrum_inversion` and `pyfar.dsp.deconvolve`` in tests (PR #989).
 
 0.8.1 (2026-08-14)
 ------------------
