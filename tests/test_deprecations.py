@@ -155,7 +155,9 @@ def test_deprecations_freq_range_parameter_warnings():
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
-            pf.dsp.deconvolve(sweep, sweep, 256, freq_range=(20, 20e3))
+            with pytest.warns(PyfarDeprecationWarning,
+                              match="will be deprecated"):
+                pf.dsp.deconvolve(sweep, sweep, 256, freq_range=(20, 20e3))
 
     if version.parse(pf.__version__) >= version.parse('0.8.0'):
         with pytest.raises(TypeError):
@@ -331,8 +333,11 @@ def test_deprecations_regularized_spectrum_inversion():
 def test_deprecations_deconvolve():
     message = re.escape(
         "`pyfar.dsp.deconvolve` will be deprecated in pyfar v0.10.0.")
-    with pytest.warns(PyfarDeprecationWarning, match=message):
-        pf.dsp.deconvolve(pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
+    # deconvolve internally calls deprecated regularized_spectrum_inversion
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        with pytest.warns(PyfarDeprecationWarning, match=message):
+            pf.dsp.deconvolve(
+                pf.Signal([9, 0, 9], 1), pf.Signal([8, 0, 8], 1))
 
     # function will stay in pyfar for documentation
     message = re.escape("module 'pyfar.dsp' has no attribute 'deconvolve'")
