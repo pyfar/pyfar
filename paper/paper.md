@@ -77,9 +77,17 @@ Several tools exist that were all developed at a single institution or are no lo
 - [`pytta`](https://github.com/PyTTaMaster/PyTTa) [@Fonseca_2019_PyTTaOpenSource]
   - Development has slowed down and maintenance is not guaranteed
   - Developed at single institution
-- [`python-acoustics`](https://github.com/python-acoustics/python-acoustics)
-  - Comprehensive, modular structure
-  - Archived and no longer maintained
+- [`python-acoustics`](https://github.com/python-acoustics/python-acoustics) [@python_acoustics]
+  - Comprehensive functionality, modular structure
+  - Archived in 2024 and no longer maintained
+- [`scipy`](https://www.scipy.org/) [@virtanen_2020_SciPy10Fundamental]
+  - General purpose scientific computing library
+  - Not specifically designed for acoustics and audio signal processing, but provides relevant functionality
+  - Lacks encapsulated data structures and relevant operators
+- [`librosa`](https://librosa.org/) [@McFee_2015_LibrosaAudioMusic]
+  - Provides tools for audio signal analysis and feature extraction
+  - Does not provide encapsulated data structures and relevant operators
+  - Well-documented with extensive examples and tutorials
 
 Development of `Pyfar` was started with the primary idea to combine the efforts
 of multiple working groups and institutions into a shared codebase and
