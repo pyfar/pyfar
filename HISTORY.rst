@@ -15,6 +15,10 @@ Fixed
 - A bug causing an error that claimed that the right (or left) sided spectrum does not exist for a `pyfar.FrequencyData` object containing a single, positive (or negative) frequency (PR #978).
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
 
+Maintenance
+^^^^^^^^^^^
+- Add Python 3.15
+
 0.8.1 (2026-08-14)
 ------------------
 
