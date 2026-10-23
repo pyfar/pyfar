@@ -98,6 +98,9 @@ structure and to be more user-friendly and intuitive to use.
 Integration into or extension of existing packages was not considered a
 viable option as existing packages were built at single institutions and
 therefore not designed to be sufficiently modular and flexible.
+It should be noted that `pyfar` relies on `scipy` for some underlying
+functionality, it extends and adapts SciPy's general-purpose tools with
+features tailored to acoustics and audio signal processing.
 
 # Software design
 
