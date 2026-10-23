@@ -7,6 +7,7 @@ Unreleased
 
 Added
 ^^^^^
+- The methods `find_nearest_frequency()` and `find_nearest_time()` were extended with a new parameter `method`. (PR #947)
 - Added an `endpoint` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to numpy's `linspace` function (PR #963)
 
 0.8.1 (2026-08-14)
