@@ -33,6 +33,7 @@ from numbers import Number
 import numpy as np
 import numpy.testing as npt
 from pyfar.classes.audio import FrequencyData
+from pyfar.constants import reference_air_impedance
 
 
 class TransmissionMatrix(FrequencyData):
@@ -873,6 +874,233 @@ class TransmissionMatrix(FrequencyData):
         return TransmissionMatrix.from_abcd(
             A, B, C, D, kl.frequencies)
 
+    @staticmethod
+    def _calculate_horn_geometry_parameters(
+        area_narrow_end: Number,
+        area_wide_end: Number,
+        horn_length: Number,
+    ) -> tuple[Number, Number, Number]:
+        """Calculate the geometry parameters of a conical horn.
+
+        Parameters
+        ----------
+        area_narrow_end : Number
+            Cross-sectional area at the narrow end of the horn.
+        area_wide_end : Number
+            Cross-sectional area at the wide end of the horn.
+        horn_length : Number
+            Length of the horn.
+
+        Returns
+        -------
+        Omega : Number
+            The area constant.
+        a : Number
+            The distance from the narrow end to the virtual apex of the cone.
+        b : Number
+            The distance from the wide end to the same virtual apex.
+        """
+        if not isinstance(area_narrow_end, Number) \
+            or isinstance(area_narrow_end, complex) or area_narrow_end <= 0:
+            raise ValueError("The input area_narrow_end "
+                             "must be a positive real number.")
+        if not isinstance(area_wide_end, Number) \
+            or isinstance(area_wide_end, complex) or area_wide_end <= 0:
+            raise ValueError("The input area_wide_end "
+                             "must be a positive real number.")
+        if not isinstance(horn_length, Number) \
+            or isinstance(horn_length, complex) or horn_length <= 0:
+            raise ValueError("The input horn_length "
+                             "must be a positive real number.")
+        if area_narrow_end >= area_wide_end:
+            raise ValueError(
+                "For a conical horn area_narrow_end "
+                "must be strictly smaller than area_wide_end."
+                "If area_narrow_end == area_wide_end, "
+                "use :fun:`create_transmission_line` instead.",
+            )
+
+        r0 = np.sqrt(area_narrow_end / np.pi)
+        r1 = np.sqrt(area_wide_end / np.pi)
+
+        a = r0 * horn_length / (r1 - r0)
+        b = a + horn_length
+
+        Omega = area_narrow_end / a**2   # equal to S1 / b**2
+
+        return Omega, a, b
+
+    @staticmethod
+    def create_conical_horn(
+        area_narrow_end: Number,
+        area_wide_end: Number,
+        horn_length: Number,
+        wave_number: Number | FrequencyData,
+        medium_impedance: Number | FrequencyData = reference_air_impedance,
+        propagation_direction: str = "expanding",
+    ) -> np.ndarray | TransmissionMatrix:
+        r"""Create a transmission matrix representing a conical horn.
+        It expresses sound pressure and volume velocity at one end of the horn
+        as a function of sound pressure and volume velocity at the other end.
+
+        The transmission matrix is determined based on the surface
+        area of the horn's narrow end, the surface area of the
+        horn's wide end, the horn's length, wavenumber, and
+        medium impedance. The surface areas are internally
+        transformed into starting point :math:`a`,
+        end point :math:`b`, and area constant :math:`\Omega`
+        of the horn to calculate the transmission
+        matrix following Equation (5-18) of Reference [1]_:
+
+        .. math::
+            \begin{bmatrix}
+            p_1\quad[Pa] \\
+            q_1\quad[m^3/s]
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+            \frac{b}{a}\cos(kl) - \frac{1}{ka}\sin(kl) &
+            \frac{jZ_0}{ab\Omega}\sin(kl) \\[6pt]
+            \frac{j\Omega}{k^2Z_0}\left(
+                (1 + k^2ab)\sin(kl) - kl\cos(kl) \right) &
+            \frac{a}{b}\cos(kl) - \frac{1}{kb}\sin(kl)
+            \end{bmatrix}
+            \begin{bmatrix}
+            p_2\quad[Pa] \\
+            q_2\quad[m^3/s]
+            \end{bmatrix}
+
+        Parameters
+        ----------
+        area_narrow_end : Number
+            The surface area of the horn's narrow end.
+        area_wide_end : Number
+            The surface area of the horn's wide end.
+        horn_length : Number
+            The distance between the narrow and wide end of the horn,
+            i.e. the horn's length.
+        wave_number : FrequencyData, scalar
+            Wavenumber.
+        medium_impedance : FrequencyData, scalar
+            The impedance of the medium filling the horn. Default is
+            ``pyfar.constants.reference_air_impedance``
+        propagation_direction : {'expanding', 'tapering'}, optional
+            Defines the direction of sound propagation through the horn,
+            where ``'expanding'`` means from narrow to wide end
+            and ``'tapering'`` means from wide to narrow end.
+            Default is ``'expanding'``.
+
+        Returns
+        -------
+        pf.TransmissionMatrix
+            Transmission matrix for the conical horn section.
+
+        Example
+        -------
+        Arbitrarily sized lossless conical horn section.
+
+        .. plot::
+
+            >>> import pyfar as pf
+            >>> import numpy as np
+            >>> # Horn parameters
+            >>> S0 = 0.003
+            >>> S1 = 0.005
+            >>> L = 0.3
+            >>> frequencies = np.linspace(20, 20e3, 1000)
+            >>> omega = 2 * np.pi * frequencies
+            >>> k = pf.FrequencyData(
+            >>>    omega / pf.constants.reference_speed_of_sound, frequencies)
+            >>> Z0 = pf.constants.reference_air_impedance
+            >>> # Create the transmission matrix
+            >>> T = pf.TransmissionMatrix.create_conical_horn(
+            >>>    S0, S1, L, k, Z0, 'tapering')
+            >>> # Plot the transmission matrix
+            >>> pf.plot.freq(T.input_impedance(np.inf))
+
+        """
+        if isinstance(wave_number, FrequencyData):
+            frequencies = wave_number.frequencies
+            k = wave_number.freq
+            singular_frequency = False
+        elif isinstance(wave_number, complex) \
+            or isinstance(wave_number, Number):
+            k = wave_number
+            frequencies = []
+            singular_frequency = True
+        else:
+            raise TypeError(
+                "wave_number must be a float, complex, "
+                "or FrequencyData object.",
+            )
+        if isinstance(medium_impedance, FrequencyData):
+            if not np.allclose(
+                medium_impedance.frequencies,
+                frequencies,
+                atol=1e-15,
+            ):
+                raise ValueError(
+                    "The frequencies of medium_impedance must "
+                    "match those of wave_number.",
+                )
+            else:
+                Z = medium_impedance.freq
+        elif not isinstance(medium_impedance, Number):
+            raise TypeError(
+                "The input medium_impedance must be a number "
+                "or a FrequencyData object.",
+            )
+        else:
+            Z = medium_impedance
+        if not isinstance(propagation_direction, str):
+            raise TypeError(
+            "The input propagation_direction must be a string"
+            "with value 'expanding' or 'tapering'.",
+            )
+        if propagation_direction not in ("expanding", "tapering"):
+            raise ValueError(
+                "The string propagation_direction must either be "
+                "'expanding' or 'tapering'.",
+            )
+
+        if propagation_direction == "tapering":
+            Omega, a, b = (
+                TransmissionMatrix._calculate_horn_geometry_parameters(
+                    area_narrow_end,
+                    area_wide_end,
+                    horn_length,
+                )
+            )  # Error handling inside the helper function
+        else:
+            Omega, b, a = (
+                TransmissionMatrix._calculate_horn_geometry_parameters(
+                    area_narrow_end,
+                    area_wide_end,
+                    horn_length,
+                )
+            )  # Error handling inside the helper function
+            horn_length = -1 * horn_length
+
+        # Calculate T-matrix entries according to Equation (5-18) of [1]
+        A = (b / a * np.cos(k * horn_length)
+            - 1 / (k * a) * np.sin(k * horn_length))
+        B = (1j * Z
+            / (a * b * Omega) * np.sin(k * horn_length))
+        C = (
+            1j * Omega
+            / (k ** 2 * Z)
+            * ((1 + k ** 2 * a * b)
+            * np.sin(k * horn_length) - k * horn_length
+            * np.cos(k * horn_length))
+        )
+        D = (a / b * np.cos(k * horn_length)
+            + 1 / (k * b) * np.sin(k * horn_length))
+
+        if not singular_frequency:
+            return TransmissionMatrix.from_abcd(A, B, C, D, frequencies)
+        else:
+            return TransmissionMatrix.\
+                        create_frequency_independent_abcd(A, B, C, D)
 
     def __repr__(self):
         """String representation of TransmissionMatrix class."""
