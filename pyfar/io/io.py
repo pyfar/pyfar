@@ -35,6 +35,10 @@ from . import _codec as codec
 import pyfar.classes.filter as fo
 
 
+_COMSOL_NUMBER_PATTERN = (
+    r'[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?')
+
+
 def read_sofa(filename, verify=True, verbose=True):
     """
     Import a SOFA file as pyfar object.
@@ -713,8 +717,8 @@ def read_comsol(filename, expressions=None, parameters=None):
 
     # Define pattern for regular expressions, see test files for examples
     exp_pattern = r'([\w\/\^\*\(\)\[\]\-_.]+) \('
-    domain_pattern = domain_str + r'=([0-9.]+)'
-    value_pattern = r'=([0-9.]+)'
+    value_pattern = rf'=({_COMSOL_NUMBER_PATTERN})'
+    domain_pattern = domain_str + value_pattern
 
     # read parameter and header data
     expressions_header = np.array(re.findall(exp_pattern, header))
@@ -879,12 +883,14 @@ def read_comsol_header(filename):
     unit_pattern = r'\(([\w\/\^\* .]+)\) @'
     # domain (e.g., time or freq) is the first term after @
     domain_pattern = r'@ ([a-zA-Z]+)='
-    # values are numeric characters, after =
-    value_pattern = r'=([0-9.]+)'
+    # values are signed decimal or scientific-notation numbers, after =
+    value_pattern = rf'=({_COMSOL_NUMBER_PATTERN})'
     # parameters contain arbitrary characters, before =
     param_pattern = r'([\w\/\^_.]+)='
     # parameter values are numeric, sometimes given with their units
-    param_unit_pattern = r'=[0-9.]+([a-zA-Z]+)'
+    # Do not interpret an exponent as a unit if the numeric match backtracks.
+    param_unit_pattern = (
+        rf'={_COMSOL_NUMBER_PATTERN}(?![eE][+-]?[0-9])([a-zA-Z]+)')
 
     # read expressions
     expressions_with_unit = re.findall(exp_unit_pattern, header)
@@ -904,9 +910,8 @@ def read_comsol_header(filename):
     else:
         raise ValueError(
             f"Domain can be 'time' or 'freq', but is {domain_str}.")
-    domain_data = _unique_strings(
-            re.findall(domain_str + value_pattern, header))
-    domain_data = [float(d) for d in domain_data]
+    domain_data = _unique_strings([
+        float(d) for d in re.findall(domain_str + value_pattern, header)])
 
     # create parameters dict
     parameter_names = _unique_strings(re.findall(param_pattern, header))
@@ -915,9 +920,8 @@ def read_comsol_header(filename):
     for para_name in parameter_names:
         unit = _unique_strings(
             re.findall(para_name + param_unit_pattern, header))
-        values = _unique_strings(
-            re.findall(para_name + value_pattern, header))
-        values = [float(v) for v in values]
+        values = _unique_strings([
+            float(v) for v in re.findall(para_name + value_pattern, header)])
         parameters[para_name] = [x+unit for x in values] if unit else values
 
     return expressions, units, parameters, domain, domain_data

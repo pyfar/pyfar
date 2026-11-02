@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 
 import os.path
+import pathlib
+import re
 
 from pyfar import io
 
@@ -362,3 +364,63 @@ def test_read_comsol_check_specific_combination(filename, suffix):
         assert all(~np.isnan(data.freq[:, :, i, i, :]).flatten())
         data.freq[:, :, i, i, :] = np.nan
     assert all(np.isnan(data.freq.flatten()))
+
+
+@pytest.mark.parametrize('suffix', ['.txt', '.dat', '.csv'])
+@pytest.mark.parametrize('filename', [
+    'pressure_parametric', 'pressure_acceleration_parametric_time',
+])
+@pytest.mark.parametrize('notation', ['e', 'E', 'mixed'])
+def test_read_comsol_numeric_notation(tmp_path, suffix, filename, notation):
+    """Numeric formatting must preserve simulation axes and acoustic data."""
+    source = (pathlib.Path(__file__).parent / 'test_io_data'
+              / (filename + suffix))
+    expected_header = io.read_comsol_header(source)
+    expected, expected_coordinates = io.read_comsol(source)
+    count = 0
+
+    def format_number(match):
+        nonlocal count
+        count += 1
+        if notation == 'mixed' and count % 2:
+            return match[0]
+        value = format(float(match[0]), '+.17e')
+        return value.upper() if notation == 'E' else value
+
+    # Change only header assignments, retaining all recorded data bytes.
+    path = tmp_path / source.name
+    path.write_text(re.sub(
+        r'(?<==)[0-9.]+', format_number, source.read_text()))
+    assert io.read_comsol_header(path) == expected_header
+    actual, coordinates = io.read_comsol(path)
+    axis = 'frequencies' if expected.domain == 'freq' else 'times'
+    np.testing.assert_array_equal(
+        getattr(actual, axis), getattr(expected, axis))
+    np.testing.assert_array_equal(getattr(actual, actual.domain),
+                                  getattr(expected, expected.domain))
+    np.testing.assert_array_equal(coordinates.cartesian,
+                                  expected_coordinates.cartesian)
+
+    parameters = {
+        key: values[-1:] for key, values in expected_header[2].items()}
+    actual, _ = io.read_comsol(path, parameters=parameters)
+    expected, _ = io.read_comsol(source, parameters=parameters)
+    np.testing.assert_array_equal(getattr(actual, actual.domain),
+                                  getattr(expected, expected.domain))
+
+
+def test_read_comsol_signed_header_values(tmp_path):
+    """Check explicit numeric axes and column placement independently."""
+    path = tmp_path / 'signed.csv'
+    path.write_text(
+        '% Dimension,0\n% Nodes,1\n% Expressions,4\n'
+        '% p (Pa) @ t=-1E-3, a=-.5,'
+        'p (Pa) @ t=+0., a=-5e-1,'
+        'p (Pa) @ t=-.001, a=+1E+1,'
+        'p (Pa) @ t=0e0, a=10.\n'
+        '1,2,3,4\n')
+    assert io.read_comsol_header(path) == (
+        ['p'], ['Pa'], {'a': [-0.5, 10.]}, 'time', [-0.001, 0.])
+    data = io.read_comsol(path)
+    np.testing.assert_array_equal(data.times, [-0.001, 0.])
+    np.testing.assert_array_equal(data.time, [[[[1., 2.], [3., 4.]]]])
