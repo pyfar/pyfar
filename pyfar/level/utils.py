@@ -142,6 +142,7 @@ def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
     --------
     Calculate the average level across two channels of a stereo signal.
 
+    >>> import pyfar as pf
     >>> signal = pf.signals.noise(48000, rms=(0.01, 0.02), seed=0)
     >>> level_per_channel = pf.level.equivalent_continuous_level(signal, "A")
     >>> mean_level = pf.level.energetic_mean(level_per_channel)
