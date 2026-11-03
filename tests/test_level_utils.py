@@ -130,14 +130,15 @@ def test_level_energetic_helpers_axis_1d(levels, axis, expected):
     assert np.isclose(e_sum, expected + TIMES_TWO_IN_DB)
 
 
-@pytest.mark.parametrize(("levels", "axis", "expected"), [
-    ([[40, 40], [50, 50]], 1, np.array([40, 50])),
-    ([[40, 40], [50, 50]], -1, np.array([40, 50])),
-    ([[40, 50], [40, 50]], 0, np.array([40, 50])),
-    ([[40, 50], [40, 50]], -2, np.array([40, 50])),
+@pytest.mark.parametrize(("levels", "axis"), [
+    ([[40, 40], [50, 50]], 1),
+    ([[40, 40], [50, 50]], -1),
+    ([[40, 50], [40, 50]], 0),
+    ([[40, 50], [40, 50]], -2),
 ])
-def test_level_energetic_helpers_axis_2d(levels, axis, expected):
+def test_level_energetic_helpers_axis_2d(levels, axis):
     """Test that the axis argument works like in numpy.mean and numpy.sum."""
+    expected = np.array([40, 50])
     e_mean = pf.level.energetic_mean(levels, axis=axis)
     e_sum = pf.level.energetic_sum(levels, axis=axis)
 
