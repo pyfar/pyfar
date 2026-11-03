@@ -1,10 +1,12 @@
 """Public utility functions related to sound level calculations."""
 
+from typing import Literal, assert_never
 import numpy as np
 import scipy.signal
 import pyfar as pf
 
-from ._utils import _check_signal_type, _combine_levels
+from ._utils import _check_signal_type, _check_reference_pressure
+
 
 def time_weighted_pressure(signal, time_constant: float = 0.125):
     r"""
@@ -119,6 +121,172 @@ def time_weighted_pressure(signal, time_constant: float = 0.125):
     return pf.TimeData(time_weighted_pressure, signal.times)
 
 
+def to_decibels(
+        data,
+        quantity: Literal["power", "amplitude"],
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+        replace_zeros: bool = False,
+) -> np.ndarray | float:
+    r"""Convert power or amplitude quantities to decibels (dB).
+
+    Power quantities, such as energies or squared sound pressures, are
+    converted by
+
+    .. math::
+        L = 10 \log_{10} \left( \frac{x}{p_0^2} \right) \text{ dB},
+
+    and amplitude quantities (root-power quantities), such as sound
+    pressures, by
+
+    .. math::
+        L = 20 \log_{10} \left( \frac{|x|}{p_0} \right) \text{ dB},
+
+    where :math:`x` is the input data and :math:`p_0` is the
+    `reference_pressure`. Both are equivalent for :math:`x_\text{power} =
+    |x_\text{amplitude}|^2`. Note that the reference is always given as a
+    pressure (amplitude), even when converting power quantities.
+
+    Parameters
+    ----------
+    data : array-like
+        The data to convert. Must be a numpy array or a type that can be
+        converted to one. Power quantities must be real-valued and
+        non-negative. Amplitude quantities can be negative or complex, in
+        which case their absolute value is used.
+    quantity : str
+        The type of the input data:
+
+        ``'power'``
+            Power quantities, e.g., energies or squared sound pressures.
+        ``'amplitude'``
+            Amplitude quantities, e.g., sound pressures or magnitude spectra.
+
+    reference_pressure : float, optional
+        The reference pressure :math:`p_0`. Must be positive. The default is
+        :py:attr:`~pyfar.constants.reference_sound_pressure` (20 µPa). Use
+        ``1`` to obtain levels in dB full scale (dBFS).
+    replace_zeros : bool, optional
+        If ``True``, zeros in the data are replaced by the float epsilon to
+        avoid ``-inf`` values and resulting numpy warnings. Amplitude
+        quantities are squared before replacing zeros. The default is
+        ``False``.
+
+    Returns
+    -------
+    np.ndarray or scalar
+        The levels in dB. This is a scalar for scalar input and an array
+        otherwise.
+
+    Examples
+    --------
+    Convert a sound pressure of 1 Pa to its sound pressure level.
+
+    >>> import pyfar as pf
+    >>> level = pf.level.to_decibels(1, "amplitude")
+    >>> print(level)  # 93.97940008672037
+
+    Convert a magnitude spectrum to dBFS.
+
+    >>> import pyfar as pf
+    >>> signal = pf.signals.impulse(64, amplitude=0.5)
+    >>> spectrum = pf.level.to_decibels(
+    >>>     signal.freq, "amplitude", reference_pressure=1)
+    """
+    _check_reference_pressure(reference_pressure)
+    data = np.asarray(data)
+
+    # np.finfo does not support integers, integer data would otherwise
+    # remain integer after replacing zeros, and squaring large integers
+    # could overflow
+    if np.issubdtype(data.dtype, np.integer):
+        data = data.astype(np.float64)
+
+    if quantity == "power":
+        if np.iscomplexobj(data):
+            raise ValueError("Power quantities must be real-valued.")
+        if np.any(data < 0):
+            raise ValueError("Power quantities must not be negative.")
+    elif quantity == "amplitude":
+        # 20 log10(|x| / p0) equals 10 log10(|x|^2 / p0^2), so amplitudes
+        # can be handled as power quantities after squaring
+        data = np.abs(data)**2
+    else:
+        raise ValueError("Quantity must be 'power' or 'amplitude'.")
+
+    if replace_zeros:
+        data = np.where(data == 0, np.finfo(data.dtype).eps, data)
+
+    return 10 * np.log10(data / reference_pressure**2)
+
+
+def from_decibels(
+        levels,
+        quantity: Literal["power", "amplitude"],
+        reference_pressure: float = pf.constants.reference_sound_pressure,
+) -> np.ndarray | float:
+    r"""Convert levels in decibels (dB) to power or amplitude quantities.
+
+    This is the inverse of :py:func:`~pyfar.level.to_decibels`. Levels are
+    converted to power quantities by
+
+    .. math::
+        x = p_0^2 \cdot 10^{L / 10},
+
+    and to amplitude quantities (root-power quantities) by
+
+    .. math::
+        x = p_0 \cdot 10^{L / 20},
+
+    where :math:`L` is the level in dB and :math:`p_0` is the
+    `reference_pressure`. Note that the sign and phase of amplitude
+    quantities are lost when converting them to decibels, so the returned
+    amplitudes are always non-negative.
+
+    Parameters
+    ----------
+    levels : array-like
+        The levels in dB. Must be a real-valued numpy array or a type that
+        can be converted to one.
+    quantity : str
+        The type of the output data:
+
+        ``'power'``
+            Power quantities, e.g., energies or squared sound pressures.
+        ``'amplitude'``
+            Amplitude quantities, e.g., sound pressures or magnitude spectra.
+
+    reference_pressure : float, optional
+        The reference pressure :math:`p_0` that was used to calculate the
+        levels. Must be positive. The default is
+        :py:attr:`~pyfar.constants.reference_sound_pressure` (20 µPa).
+
+    Returns
+    -------
+    np.ndarray or scalar
+        The power or amplitude quantities. This is a scalar for scalar input
+        and an array otherwise.
+
+    Examples
+    --------
+    Convert a sound pressure level of 94 dB to its sound pressure in Pa.
+
+    >>> import pyfar as pf
+    >>> pressure = pf.level.from_decibels(94, "amplitude")
+    >>> print(pressure)  # 1.0023744672545452
+    """
+    _check_reference_pressure(reference_pressure)
+    levels = np.asarray(levels)
+    if np.iscomplexobj(levels):
+        raise ValueError("Levels must be real-valued.")
+
+    if quantity == "power":
+        return reference_pressure**2 * 10 ** (levels / 10)
+    elif quantity == "amplitude":
+        return reference_pressure * 10 ** (levels / 20)
+    else:
+        raise ValueError("Quantity must be 'power' or 'amplitude'.")
+
+
 def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
     """Average levels energetically across channels or time.
     The input levels must be in dB and use the same reference pressure.
@@ -181,3 +349,24 @@ def energetic_sum(levels, axis: int | None = None) -> np.ndarray | float | int:
     >>> print(total_level)  # 72.9099969445094
     """
     return _combine_levels(levels, axis=axis, operation="sum")
+
+
+def _combine_levels(levels, axis: int | None,
+                    operation: Literal["mean", "sum"]):
+    levels = np.asarray(levels)
+    if levels.size == 0:
+        raise ValueError("Levels must not be empty.")
+
+    # The reference cancels out when combining energies, so any value works
+    reference_pressure = 1
+    energies = from_decibels(levels, "power", reference_pressure)
+    if operation == "mean":
+        combined_energy = np.mean(energies, axis=axis)
+    elif operation == "sum":
+        combined_energy = np.sum(energies, axis=axis)
+    else:
+        # This is unreachable from the public API, so assert, not raise.
+        # `pragma: no cover` is necessary so `coverage` doesn't complain
+        assert_never(operation) # pragma: no cover
+    combined_level = to_decibels(combined_energy, "power", reference_pressure)
+    return combined_level

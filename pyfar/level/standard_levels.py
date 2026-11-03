@@ -4,14 +4,13 @@ from typing import Literal
 import numpy as np
 import pyfar as pf
 
-from .utils import time_weighted_pressure
+from .utils import time_weighted_pressure, to_decibels
 from ._utils import (
     _check_signal_type,
     _apply_frequency_weighting,
     _apply_multi_band,
     _apply_oversampling,
     _time_weighting_to_constant,
-    _energies_to_levels,
     _moving_average,
 )
 
@@ -91,7 +90,8 @@ def equivalent_continuous_level(
     signal = _apply_frequency_weighting(signal, frequency_weighting)
     signal = _apply_multi_band(signal, num_octave_band_fractions)
     mean_energy_per_channel = np.mean(signal.time**2, axis=-1)
-    levels = _energies_to_levels(mean_energy_per_channel, reference_pressure)
+    levels = to_decibels(
+        mean_energy_per_channel, "power", reference_pressure)
     return levels
 
 
@@ -349,8 +349,8 @@ def sliding_equivalent_continuous_level(
     energies = signal.time**2
     mean_energies = _moving_average(energies, window_size, cyclic=cyclic,
                                     center_window=center_window)
-    levels = _energies_to_levels(
-        mean_energies, reference_pressure, replace_zeros)
+    levels = to_decibels(
+        mean_energies, "power", reference_pressure, replace_zeros)
     return levels
 
 
@@ -428,7 +428,7 @@ def peak_level(
 
     maxima = np.max(energies, axis=-1)
     indexes = np.argmax(energies, axis=-1)
-    levels = _energies_to_levels(maxima, reference_pressure)
+    levels = to_decibels(maxima, "power", reference_pressure)
     times: np.ndarray = indexes / signal.sampling_rate
     return levels, times
 
@@ -574,5 +574,6 @@ def time_weighted_level(signal,
     time_constant = _time_weighting_to_constant(time_weighting)
     weighted = time_weighted_pressure(signal, time_constant)
     energies = weighted.time**2
-    levels = _energies_to_levels(energies, reference_pressure, replace_zeros)
+    levels = to_decibels(
+        energies, "power", reference_pressure, replace_zeros)
     return levels
