@@ -5,7 +5,7 @@ between many of the standardized level functions.
 import numpy as np
 import pyfar as pf
 import scipy.ndimage
-from typing import Literal
+from typing import Literal, assert_never
 
 
 def _check_signal_type(signal):
@@ -155,6 +155,8 @@ def _combine_levels(levels, axis: int | None,
     elif operation == "sum":
         combined_energy = np.sum(energies, axis=axis)
     else:
-        raise ValueError("Operation must be 'mean' or 'sum'.")
+        # This is unreachable from the public API, so assert, not raise.
+        # `pragma: no cover` is necessary so `coverage` doesn't complain
+        assert_never(operation) # pragma: no cover
     combined_level = 10 * np.log10(combined_energy)
     return combined_level
