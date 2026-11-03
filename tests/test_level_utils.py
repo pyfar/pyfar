@@ -91,7 +91,7 @@ def test_level_energetic_helpers_known_values(levels, function, expected):
     pf.level.energetic_sum,
 ])
 def test_level_energetic_helpers_empty_input(function):
-    """Test that the energetic helpers raises for empty input arrays."""
+    """Test that the energetic helpers raise for empty input arrays."""
     with pytest.raises(ValueError, match="Levels must not be empty."):
         function([])
 
