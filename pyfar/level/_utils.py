@@ -146,6 +146,8 @@ def _combine_levels(levels, axis: int | None,
     levels = np.asarray(levels)
     if np.issubdtype(levels.dtype, np.complexfloating):
         raise ValueError("Levels must be real-valued.")
+    if levels.size == 0:
+        raise ValueError("Levels must not be empty.")
 
     energies = 10 ** (levels / 10)
     if operation == "mean":

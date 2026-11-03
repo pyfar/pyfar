@@ -86,11 +86,14 @@ def test_level_energetic_helpers_known_values(levels, function, expected):
     assert np.allclose(result, expected, atol=1e-5)
 
 
-def test_level_energetic_helpers_empty_input():
-    """Test that the energetic helpers return an empty array for empty input.
-    """
-    assert np.allclose(pf.level.energetic_mean([]), np.array([]))
-    assert np.allclose(pf.level.energetic_sum([]), np.array([]))
+@pytest.mark.parametrize("function", [
+    pf.level.energetic_mean,
+    pf.level.energetic_sum,
+])
+def test_level_energetic_helpers_empty_input(function):
+    """Test that the energetic helpers raises for empty input arrays."""
+    with pytest.raises(ValueError, match="Levels must not be empty."):
+        function([])
 
 
 @pytest.mark.parametrize("function", [
