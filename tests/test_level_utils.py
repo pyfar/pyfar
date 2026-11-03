@@ -167,6 +167,6 @@ def test_level_energetic_helpers_input_types(input_type, function):
     pf.level.energetic_mean,
     pf.level.energetic_sum,
 ])
-def test_sum_levels_complex_raises(function):
+def test_levels_complex_input_raises_error(function):
     with pytest.raises(ValueError, match="real-valued"):
         function([1+2j, 3+4j])
