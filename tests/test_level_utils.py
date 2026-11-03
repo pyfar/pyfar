@@ -169,5 +169,8 @@ def test_level_energetic_helpers_input_types(input_type, function):
     pf.level.energetic_sum,
 ])
 def test_levels_complex_input_raises_error(function):
+    """Test that the energetic helpers raise an error
+    for input arrays with complex values, since levels must be real-valued.
+    """
     with pytest.raises(ValueError, match="real-valued"):
         function([1+2j, 3+4j])
