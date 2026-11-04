@@ -1,3 +1,4 @@
+import warnings
 import pytest
 import pyfar as pf
 import numpy as np
@@ -174,3 +175,288 @@ def test_levels_complex_input_raises_error(function):
     """
     with pytest.raises(ValueError, match="real-valued"):
         function([1+2j, 3+4j])
+
+
+DECIBEL_FUNCTIONS = [pf.level.to_decibels, pf.level.from_decibels]
+QUANTITIES = ["power", "amplitude"]
+P0 = pf.constants.reference_sound_pressure
+SPL_OF_ONE_PASCAL = 20 * np.log10(1 / P0)
+
+
+@pytest.mark.parametrize(("data", "quantity", "reference", "expected"), [
+    (1, "amplitude", P0, SPL_OF_ONE_PASCAL),
+    (1, "power", P0, SPL_OF_ONE_PASCAL),
+    (2, "amplitude", 1, 20 * np.log10(2)),
+    (2, "power", 1, 10 * np.log10(2)),
+    (10, "amplitude", 1, 20),
+    (10, "power", 1, 10),
+    (1, "amplitude", 0.5, 20 * np.log10(2)),
+    (1, "power", 0.5, 20 * np.log10(2)),
+])
+def test_level_decibels_known_values(data, quantity, reference, expected):
+    """Test that both conversions return the expected values for known
+    inputs, with the reference always given as a pressure.
+    """
+    levels = pf.level.to_decibels(data, quantity, reference)
+    data_from_levels = pf.level.from_decibels(expected, quantity, reference)
+    assert np.isclose(levels, expected)
+    assert np.isclose(data_from_levels, data)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_default_reference(quantity):
+    """Test that the default reference is the reference sound pressure,
+    so that 1 Pa or 1 Pa² correspond to ~94 dB SPL.
+    """
+    levels = pf.level.to_decibels(1, quantity)
+    data = pf.level.from_decibels(SPL_OF_ONE_PASCAL, quantity)
+    assert np.isclose(levels, SPL_OF_ONE_PASCAL)
+    assert np.isclose(data, 1)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("reference", [1, 0.5])
+def test_level_decibels_zero_decibels_is_reference(quantity, reference):
+    """Test that 0 dB is converted to the reference pressure for amplitudes
+    and to the squared reference pressure for power quantities.
+    """
+    expected = reference if quantity == "amplitude" else reference**2
+    result = pf.level.from_decibels(0, quantity, reference)
+    assert np.isclose(result, expected)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("reference", [1, P0])
+@pytest.mark.parametrize("data", [
+    0.3,
+    [1e-3, 1, 1e3],
+    [[0.1, 0.2], [3, 40]],
+])
+def test_level_decibels_round_trip_data(quantity, reference, data):
+    """Test that from_decibels inverts to_decibels for non-negative
+    real data.
+    """
+    levels = pf.level.to_decibels(data, quantity, reference)
+    result = pf.level.from_decibels(levels, quantity, reference)
+    assert np.allclose(result, data)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("reference", [1, P0])
+@pytest.mark.parametrize("levels", [
+    -20.5,
+    [-100, 0, 94],
+    [[-3, 6], [60, 120]],
+])
+def test_level_decibels_round_trip_levels(quantity, reference, levels):
+    """Test that to_decibels inverts from_decibels for any real levels."""
+    data = pf.level.from_decibels(levels, quantity, reference)
+    result = pf.level.to_decibels(data, quantity, reference)
+    assert np.allclose(result, levels)
+
+
+@pytest.mark.parametrize("data", [0.5, -2, 1j, 3+4j, [1e-3, 7]])
+def test_level_decibels_amplitude_matches_power(data):
+    """Test that converting amplitudes is equivalent to converting their
+    squared absolute values as power quantities.
+    """
+    from_amplitude = pf.level.to_decibels(data, "amplitude")
+    from_power = pf.level.to_decibels(np.abs(data)**2, "power")
+    assert np.allclose(from_amplitude, from_power)
+
+
+@pytest.mark.parametrize("data", [-2, 2j, 3+4j, [-1, 1j, -3-4j]])
+def test_level_decibels_amplitude_ignores_sign_and_phase(data):
+    """Test that negative and complex amplitudes are converted by their
+    absolute value.
+    """
+    result = pf.level.to_decibels(data, "amplitude")
+    expected = pf.level.to_decibels(np.abs(data), "amplitude")
+    assert np.allclose(result, expected)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("data", [0.1, 1, 10])
+def test_level_decibels_to_decibels_reference_relative(quantity, data):
+    """Test that to_decibels uses the reference pressure correctly by
+    comparing the norm SPL to dBFS, which must be ~94 dB apart.
+    """
+    db_spl = pf.level.to_decibels(data, quantity, P0)
+    db_fs = pf.level.to_decibels(data, quantity, 1)
+    assert np.isclose(db_spl - db_fs, SPL_OF_ONE_PASCAL)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("levels", [0, 60])
+def test_level_decibels_from_decibels_reference_relative(quantity, levels):
+    """Test that from_decibels uses the reference pressure correctly. The
+    same level in dB SPL must correspond to data ~94 dB weaker than in dBFS.
+    """
+    from_spl = pf.level.from_decibels(levels, quantity, P0)
+    from_fs = pf.level.from_decibels(levels, quantity, 1)
+    ratio_in_db = pf.level.to_decibels(from_spl / from_fs, quantity, 1)
+    assert np.isclose(ratio_in_db, -SPL_OF_ONE_PASCAL)
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("shape", [(3,), (2, 3), (2, 3, 4)])
+def test_level_decibels_output_shape(function, quantity, shape):
+    """Test that the output has the same shape as the input."""
+    result = function(np.ones(shape), quantity)
+    assert isinstance(result, np.ndarray)
+    assert result.shape == shape
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_scalar_output(function, quantity):
+    """Test that scalar input returns a scalar."""
+    result = function(2, quantity)
+    assert isinstance(result, np.number)
+
+
+@pytest.mark.parametrize("input_type", [list, tuple, np.array])
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_input_types(input_type, function, quantity):
+    """Test that the conversions can handle different array-like input
+    types.
+    """
+    result = function(input_type([1, 2]), quantity)
+    expected = function(np.array([1., 2.]), quantity)
+    assert isinstance(result, np.ndarray)
+    assert np.allclose(result, expected)
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_integer_input(function, quantity):
+    """Test that integer input returns float output."""
+    result = function(np.array([1, 2, 3]), quantity)
+    assert np.issubdtype(result.dtype, np.floating)
+
+
+def test_level_decibels_large_integer_amplitude():
+    """Test that squaring large integer amplitudes does not overflow."""
+    result = pf.level.to_decibels(2**40, "amplitude", 1)
+    assert np.isclose(result, 20 * np.log10(2**40))
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("reference", [
+    1, 1.0, np.float64(1), np.float32(1), np.int64(1),
+])
+def test_level_decibels_reference_types(function, reference):
+    """Test that the reference pressure can be any real number, including
+    numpy scalars.
+    """
+    result = function(10, "power", reference)
+    assert np.isclose(result, function(10, "power", 1))
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_zeros_without_replacing(quantity):
+    """Test that zeros result in -inf and a numpy warning if they are not
+    replaced.
+    """
+    with pytest.warns(RuntimeWarning, match="divide by zero"):
+        result = pf.level.to_decibels([0, 1], quantity, 1)
+    assert result[0] == -np.inf
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.int64])
+def test_level_decibels_replace_zeros(quantity, dtype):
+    """Test that zeros are replaced by the float epsilon without warnings,
+    using the epsilon of the data type after squaring amplitudes.
+    """
+    reference = 0.5
+    data = np.array([0, 1], dtype=dtype)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error") # turn warnings into errors
+        result = pf.level.to_decibels(
+            data, quantity, reference, replace_zeros=True)
+
+    # integers are converted to float64 before replacing zeros
+    eps_dtype = np.float64 if dtype == np.int64 else dtype
+    expected = 10 * np.log10(np.finfo(eps_dtype).eps / reference**2)
+    assert np.isclose(result[0], expected)
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_replace_zeros_keeps_non_zeros(quantity):
+    """Test that replacing zeros does not change any other values."""
+    data = [1e-10, 0.5, 2]
+    replaced = pf.level.to_decibels(data, quantity, replace_zeros=True)
+    unchanged = pf.level.to_decibels(data, quantity, replace_zeros=False)
+    assert np.array_equal(replaced, unchanged)
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("quantity", ["energy", "Power", "", None])
+def test_level_decibels_invalid_quantity(function, quantity):
+    """Test that invalid quantities raise an error."""
+    with pytest.raises(ValueError, match="Quantity"):
+        function(1, quantity)
+
+
+@pytest.mark.parametrize(("data", "match"), [
+    ([1j], "real-valued"),
+    ([1+0j], "real-valued"),
+    ([-1], "negative"),
+    ([1, -1], "negative"),
+])
+def test_level_decibels_invalid_power_input(data, match):
+    """Test that complex and negative power quantities raise an error.
+    Complex data must raise even if the imaginary part is zero.
+    """
+    with pytest.raises(ValueError, match=match):
+        pf.level.to_decibels(data, "power")
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_complex_levels(quantity):
+    """Test that complex levels raise an error, since levels must be
+    real-valued.
+    """
+    with pytest.raises(ValueError, match="real-valued"):
+        pf.level.from_decibels([1+2j], quantity)
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize(("reference", "error"), [
+    (0, ValueError),
+    (-1, ValueError),
+    (True, TypeError),
+    (False, TypeError),
+    ("1", TypeError),
+    (1j, TypeError),
+    (np.array([1., 2]), TypeError),
+    (None, TypeError),
+])
+def test_level_decibels_invalid_reference(function, reference, error):
+    """Test that invalid reference pressures raise an error."""
+    with pytest.raises(error, match="Reference pressure"):
+        function(1, "power", reference)
+
+
+@pytest.mark.parametrize("function", DECIBEL_FUNCTIONS)
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_empty_input(function, quantity):
+    """Test that empty input returns an empty array. Unlike for the
+    energetic helpers, this is a valid conversion.
+    """
+    result = function([], quantity)
+    assert isinstance(result, np.ndarray)
+    assert result.size == 0
+
+
+@pytest.mark.parametrize("quantity", QUANTITIES)
+def test_level_decibels_non_finite_values(quantity):
+    """Test that infinite and nan values are passed through."""
+    assert pf.level.to_decibels(np.inf, quantity) == np.inf
+    assert np.isnan(pf.level.to_decibels(np.nan, quantity))
+    assert pf.level.from_decibels(-np.inf, quantity) == 0
+    assert pf.level.from_decibels(np.inf, quantity) == np.inf
+    assert np.isnan(pf.level.from_decibels(np.nan, quantity))
