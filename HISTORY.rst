@@ -13,7 +13,7 @@ Added
     - `level.sliding_continuous_level` for the Leq with a sliding window (PR #952)
     - `level.peak_level` for (true) peak level detection (PR #955)
     - `level.time_weighted_level` and `level.time_weighted_pressure` for time-weighting (PR #954)
-    - helper functions for working with levels (PR #988)
+    - helper functions for working with levels energetically (PR #988) and converting to and from decibels (PR #995)
 
 Fixed
 ^^^^^
