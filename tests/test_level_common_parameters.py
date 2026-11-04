@@ -159,11 +159,16 @@ def test_level_common_reference_pressure_relative(function):
 
 
 @pytest.mark.parametrize("function", FUNCTION_WRAPPERS_REFERENCE_PRESSURE)
-def test_level_common_reference_pressure_errors(function):
+@pytest.mark.parametrize(("reference", "error"), [
+    (0, ValueError),
+    (-1, ValueError),
+    (True, TypeError),
+])
+def test_level_common_reference_pressure_errors(function, reference, error):
     """Test that an invalid reference pressure raises an error."""
     s = pf.signals.sine(1000, 22050)
-    with pytest.raises(ValueError, match="Reference pressure"):
-        function(s, 0)
+    with pytest.raises(error, match="Reference pressure"):
+        function(s, reference)
 
 
 ### oversampling parameter tests ###
