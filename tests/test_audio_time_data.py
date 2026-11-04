@@ -199,6 +199,74 @@ def test_data_time_find_nearest():
     npt.assert_allclose(idx, np.asarray([1, 2]))
 
 
+def test_data_time_find_nearest_empty_time_data():
+    """
+    Test whether the function correctly raises an error when the TimeData
+     object is empty.
+    """
+    time = TimeData([], [])
+
+    with pytest.raises(ValueError, match='must not be empty'):
+        time.find_nearest_time([.1])
+
+
+@pytest.mark.parametrize(("method", "expected"),
+                         [("nearest", 2), ("floor", 1), ("ceil", 2)])
+def test_data_time_find_nearest_argument_method(method, expected):
+    """Test the function with a single number as value."""
+    data = [1, 0, -1]
+    times = [0, .1, .3]
+    time = TimeData(data, times)
+
+    idx = time.find_nearest_time(0.25, method)
+    assert idx == expected
+
+
+@pytest.mark.parametrize(("method", "expected"), [("nearest", [0, 2, 4, 5]),
+                             ("floor", [0, 1, 4, 4]), ("ceil", [1, 2, 4, 5])])
+def test_data_time_find_nearest_argument_method_list(method, expected):
+    """Test the function with a list of values."""
+    data = [1, 0, -1, 1, 1, 0]
+    times = [0, .1, .2, .3, .4, .5]
+    time = TimeData(data, times)
+
+    idx = time.find_nearest_time([0.03, 0.16, 0.4, 0.49], method)
+    npt.assert_array_equal(idx, expected)
+
+
+@pytest.mark.parametrize("method", ["nearest", "floor", "ceil"])
+def test_data_time_find_nearest_argument_method_out_of_range(method):
+    """Test the function against returning indices out of time range."""
+    data = [1, 0, -1]
+    times = [0.1, 0.2, 0.3]
+    time = TimeData(data, times)
+
+    idx = time.find_nearest_time([0.09, 0.31], method)
+    npt.assert_array_equal(idx, [0, 2])
+
+
+@pytest.mark.parametrize(("method", "expected"), [("nearest", [1, 2]),
+                                 ("floor", [1, 2]), ("ceil", [1, 2])])
+def test_data_time_find_nearest_argument_method_equal_times(method, expected):
+    """Test the function with values exactly equal to time instances."""
+    data = [1, 0, -1]
+    times = [0, .1, .3]
+    time = TimeData(data, times)
+
+    idx = time.find_nearest_time([0.1, 0.3], method)
+    npt.assert_array_equal(idx, expected)
+
+
+def test_data_time_find_nearest_argument_method_error():
+    """Test the function for correct error handling."""
+    data = [1, 0, -1]
+    times = [0, .1, .3]
+    time = TimeData(data, times)
+
+    with pytest.raises(ValueError, match="Invalid value for the parameter"):
+        time.find_nearest_time([0.1, 0.3], "fix")
+
+
 def test_magic_getitem_slice():
     """Test slicing operations by the magic function __getitem__."""
     data = np.array([[1, 0, -1], [2, 0, -2]])
