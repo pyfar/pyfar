@@ -101,14 +101,17 @@ def plot_frequency_weighting_coefficients(
             plt.title(f"fs = {fs:g} Hz (C shifted by +{c_offset} dB)")
             plt.ylabel("Filter - reference in dB")
             plt.ylim(-y_margin, c_offset + y_margin)
+            plt.legend(fontsize=6, loc="upper left")
         else:
             plt.title(f"fs = {fs:g} Hz")
             plt.ylabel("Magnitude in dB")
+            plt.xlim(20, fs / 2)
+            plt.ylim(np.min(plotted) - 5, np.max(plotted) + 5)
+            plt.legend(fontsize=6, loc="lower center")
         plt.xlabel("Frequency in Hz")
         plt.gca().xaxis.set_major_formatter(
             mticker.FuncFormatter(lambda x, _: f"{x:g}"))
         plt.grid(which="both", alpha=.3)
-        plt.legend(fontsize=6, loc="upper left")
         plt.tight_layout()
         plt.show()
 
