@@ -94,7 +94,7 @@ def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
 @pytest.mark.parametrize("errwgt", [lambda nf: 100**nf, lambda nf: 1 + nf])
 def test_frequency_weighting_filter_errwgt(weighting, fs, errwgt):
     without = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs)
+        None, weighting, n_bins=100, sampling_rate=fs)
     with_errwgt = pffilt.frequency_weighting_filter(
         None, weighting, sampling_rate=fs, error_weighting=errwgt)
     # they should produce different results with different weightings
@@ -105,7 +105,7 @@ def test_frequency_weighting_filter_errwgt(weighting, fs, errwgt):
 @pytest.mark.parametrize("fs", [48000, 44100, 16000])
 def test_frequency_weighting_filter_errwgt_passthrough(weighting, fs):
     with_none = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs)
+        None, weighting, n_bins=100, sampling_rate=fs)
     # weights every frequency with 1, so same as without any error weighting
     with_passthrough = pffilt.frequency_weighting_filter(
         None, weighting, sampling_rate=fs, error_weighting=lambda _: 1)
@@ -118,7 +118,7 @@ def test_frequency_weighting_filter_errwgt_recommended(weighting, fs):
     # the function comment mentions lambda nf: 100**nf to produce good
     # results for common sample rates, so make sure that is true
     without = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs)
+        None, weighting, n_bins=100, sampling_rate=fs)
     with_errwgt = pffilt.frequency_weighting_filter(
         None, weighting, sampling_rate=fs, error_weighting=lambda nf: 100**nf)
     stats_without = pffilt.frequency_weighting._check_filter(
@@ -131,7 +131,8 @@ def test_frequency_weighting_filter_errwgt_recommended(weighting, fs):
 
 
 def test_frequency_weighting_filter_kwargs():
-    without = pffilt.frequency_weighting_filter(None, "A", sampling_rate=44100)
+    without = pffilt.frequency_weighting_filter(
+        None, "A", n_bins=100, sampling_rate=44100)
     # jac= is a parameter for scipy's least_squares method
     with_kwarg = pffilt.frequency_weighting_filter(
         None, "A", sampling_rate=44100, jac="3-point")

@@ -10,6 +10,8 @@ import pyfar.constants as pfc
 import scipy.signal as sps
 import scipy.optimize as spo
 from pyfar.constants.frequency_weighting import _F_1, _F_2, _F_3, _F_4
+from pyfar.dsp.filter._frequency_weighting_coefficients import (
+    _FREQUENCY_WEIGHTING_SOS)
 from functools import lru_cache, wraps
 
 
@@ -22,7 +24,7 @@ _C_WEIGHTING_POLES = [_F_1, _F_1, _F_4, _F_4]
 def frequency_weighting_filter(
         signal,
         target_weighting: Literal["A", "C"]="A",
-        n_bins=100,
+        n_bins: Optional[int] = None,
         error_weighting: Optional[Callable[[
             np.ndarray], np.ndarray]] = None,
         sampling_rate: Optional[float] = None,
@@ -35,22 +37,24 @@ def frequency_weighting_filter(
     in IEC 61672-1 [#]_.
 
     .. note::
-        This function will run a least-squares algorithm to iteratively
-        approach the filter coefficients for the target weighting curve.
+        When using default parameters for `n_bins` and `error_weighting`
+        and no `kwargs`, precomputed filter coefficients are used for the
+        sampling rates 48 kHz, 44.1 kHz, 16 kHz as well as these sampling
+        rates multiplied by 2, 1/2, 4, 1/4, 8, and 1/8 each.
+        These filters are compliant with a class 1 sound level meter as
+        described in the standard.
+
+    .. note::
+        For other arguments or sampling rates, this function will run a
+        least-squares algorithm to iteratively approach the filter
+        coefficients for the target weighting curve. The results of the
+        optimization may depend on the platform and the returned filter may
+        not comply with class 1 requirements, in which case a warning will be
+        printed.
         The coefficients are cached, but only when the `error_weighting`
         and `kwargs` arguments are unused, which are unhashable.
         When using these parameters, it is faster to create the filter once
         and reuse it than calling this function repeatedly.
-
-    .. note::
-        When using default parameters for `n_bins` and `error_weighting`
-        and no `kwargs`, the returned filter is compliant with a class 1 sound
-        level meter as described in the standard for the sampling rates
-        48 kHz, 44.1 kHz, 16 kHz as well as these sampling rates multiplied by
-        2, 1/2, 4, 1/4, 8, and 1/8 each.
-        For other arguments or sampling rates, the returned filter may not
-        comply with class 1 requirements, in which case a warning will be
-        printed.
 
     Parameters
     ----------
@@ -62,12 +66,14 @@ def frequency_weighting_filter(
         Specifies which frequency weighting curve to approximate.
         Must be either ``"A"`` or ``"C"``. The default is ``"A"``.
 
-    n_bins: int, optional
+    n_bins: None or int, optional
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
         logarithmically spaced between 10 Hz and the Nyquist frequency.
-        The default is ``100``.
+        The default ``None`` uses precomputed coefficients if available
+        (see notes above) and ``100`` frequencies otherwise. Pass ``100`` to
+        always run the optimization.
 
     error_weighting: callable
         A function that can be used to emphasize the approximation errors in
@@ -126,8 +132,10 @@ def frequency_weighting_filter(
         >>> plt.legend()
 
     Use the ``error_weighting`` parameter to emphasize filter accuracy
-    near the Nyquist frequency. Note that the results depend on the
-    sampling rate and your device (operating system, hardware).
+    near the Nyquist frequency. Passing ``n_bins=100`` makes the filter
+    without error weighting also run the optimization instead of using the
+    precomputed coefficients. Note that the optimization results depend on
+    the sampling rate and your device (operating system, hardware).
 
     .. plot::
 
@@ -135,7 +143,8 @@ def frequency_weighting_filter(
         >>> import matplotlib.pyplot as plt
         >>> import numpy as np
         >>> impulse = pf.signals.impulse(1000, sampling_rate=48000)
-        >>> no_weighting = pf.dsp.filter.frequency_weighting_filter(impulse)
+        >>> no_weighting = pf.dsp.filter.frequency_weighting_filter(
+        ...     impulse, n_bins=100)
         >>> with_weighting = pf.dsp.filter.frequency_weighting_filter(
         ...     impulse, error_weighting=lambda nf: 100**nf)
         >>> pf.plot.freq(no_weighting, c="b", label="without weighting")
@@ -157,13 +166,25 @@ def frequency_weighting_filter(
     if sampling_rate is None:
         sampling_rate: float = signal.sampling_rate
 
-    # cache when possible (does not work on functions and dicts)
-    if error_weighting is None and not kwargs:
-        sos = _design_frequency_weighting_filter_cached(
-            sampling_rate, target_weighting, n_bins)
-    else:
-        sos = _design_frequency_weighting_filter(
-            sampling_rate, target_weighting, n_bins, error_weighting, **kwargs)
+    # error_weighting and kwargs customize the optimization and are
+    # unhashable, so they rule out both precomputed and cached coefficients
+    is_cacheable = error_weighting is None and not kwargs
+
+    sos = None
+    if n_bins is None:
+        if is_cacheable:
+            sos = _get_precomputed_sos(target_weighting, sampling_rate)
+        # lookup failed, we need a default number of bins for the optimization
+        n_bins = 100
+
+    if sos is None:
+        if is_cacheable:
+            sos = _design_frequency_weighting_filter_cached(
+                sampling_rate, target_weighting, n_bins)
+        else:
+            sos = _design_frequency_weighting_filter(
+                sampling_rate, target_weighting, n_bins, error_weighting,
+                **kwargs)
 
     filt = pf.FilterSOS([sos], sampling_rate)
     filt.comment = (f"Frequency weighting SOS filter of order {filt.order} "
@@ -176,6 +197,20 @@ def frequency_weighting_filter(
     else:
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+def _get_precomputed_sos(target_weighting: Literal["A", "C"],
+                         sampling_rate: float) -> Optional[np.ndarray]:
+    """
+    Returns a new array of the precomputed SOS coefficients that minimize the
+    mean error for the given weighting and sampling rate, or ``None`` if no
+    coefficients are available.
+    """
+    candidates = _FREQUENCY_WEIGHTING_SOS.get(
+        (target_weighting, sampling_rate))
+    if candidates is None:
+        return None
+    return np.array(candidates["mean"])
 
 
 def _cache_and_copy(function):
