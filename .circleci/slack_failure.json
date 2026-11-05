@@ -1,0 +1,51 @@
+{
+  "text": "Scheduled CircleCI job failed: ${CIRCLE_PROJECT_REPONAME} / ${CIRCLE_JOB} on ${CIRCLE_BRANCH}",
+  "attachments": [
+    {
+      "color": "#d32f2f",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Failed: ${CIRCLE_PROJECT_REPONAME} / ${CIRCLE_JOB}"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {"type": "plain_text", "text": "Repository: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"},
+            {"type": "plain_text", "text": "Branch: ${CIRCLE_BRANCH}"},
+            {"type": "plain_text", "text": "Pipeline: #${SLACK_REPORT_PIPELINE}"},
+            {"type": "plain_text", "text": "${SLACK_REPORT_PYTHON}"},
+            {"type": "plain_text", "text": "Trigger: scheduled pipeline"},
+            {"type": "plain_text", "text": "Schedule: ${SLACK_REPORT_SCHEDULE}"}
+          ]
+        },
+        {"type": "divider"},
+        {
+          "type": "section",
+          "text": {
+            "type": "plain_text",
+            "text": "Commit: ${CIRCLE_SHA1}\n${SLACK_REPORT_SUBJECT}\nAuthored by ${SLACK_REPORT_AUTHOR}"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {"type": "plain_text", "text": "View failed job"},
+              "url": "${CIRCLE_BUILD_URL}"
+            },
+            {
+              "type": "button",
+              "text": {"type": "plain_text", "text": "View workflow"},
+              "url": "https://app.circleci.com/pipelines/workflows/${CIRCLE_WORKFLOW_ID}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

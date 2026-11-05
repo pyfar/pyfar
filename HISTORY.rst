@@ -16,6 +16,11 @@ Fixed
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
 - Replaced `matplotlib.transforms.nonsingular`, which was deprecated in Matplotlib 3.11, with `matplotlib.ticker.Locator().nonsigular` in `pyfar.plot.ticker.LogFormatterITAToolbox` and require Matplotlib >= 3.2 (PR #990).
 
+
+Maintenance
+^^^^^^^^^^^
+- Restricted deprecation tests to main and develop; added Slack notifications for scheduled job failures on main and develop (PR #982)
+
 0.8.1 (2026-08-14)
 ------------------
 
