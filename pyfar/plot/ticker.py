@@ -1,11 +1,11 @@
 """Custom tick locators and formatters for matplotlib."""
 import numpy as np
-from matplotlib import transforms as mtransforms
 from matplotlib.ticker import (
     FixedFormatter,
     FixedLocator,
     LogFormatter,
     LogLocator,
+    Locator,
     MultipleLocator,
     Formatter)
 
@@ -108,7 +108,7 @@ class LogFormatterITAToolbox(LogFormatter):
         x = x
 
         vmin, vmax = self.axis.get_view_interval()
-        vmin, vmax = mtransforms.nonsingular(vmin, vmax, expander=0.05)
+        vmin, vmax = Locator().nonsingular(vmin, vmax)
         s = self._num_to_string(x, vmin, vmax)
         return self.fix_minus(s)
 
