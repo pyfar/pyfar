@@ -119,7 +119,9 @@ def time_weighted_pressure(signal, time_constant: float = 0.125):
     return pf.TimeData(time_weighted_pressure, signal.times)
 
 
-def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
+def energetic_mean(
+        levels, axis: int | tuple[int, ...] | None = None,
+        ) -> np.ndarray | float:
     r"""Average levels energetically across channels or time.
 
     The input levels must be in dB and use the same reference pressure.
@@ -137,8 +139,10 @@ def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
     levels : array-like
         The levels in dB. Must be a numpy array or a type that can be
         converted to one.
-    axis : int or None, optional
-        Axis along which to average. If ``None`` (default), the average is
+    axis : None or int or tuple of int, optional
+        Axis or axes along which to average. If a tuple of ints is given,
+        the average is taken over all of the specified axes, as in
+        :py:func:`numpy.mean`. If ``None`` (default), the average is
         taken over all values.
 
     Returns
@@ -161,7 +165,9 @@ def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
     return _combine_levels(levels, axis=axis, operation="mean")
 
 
-def energetic_sum(levels, axis: int | None = None) -> np.ndarray | float | int:
+def energetic_sum(
+        levels, axis: int | tuple[int, ...] | None = None,
+        ) -> np.ndarray | float | int:
     r"""Sum levels energetically across channels or time.
 
     The input levels must be in dB and use the same reference pressure.
@@ -179,9 +185,11 @@ def energetic_sum(levels, axis: int | None = None) -> np.ndarray | float | int:
     levels : array-like
         The levels in dB. Must be a numpy array or a type that can be
         converted to one.
-    axis : int or None, optional
-        Axis along which to sum. If ``None`` (default), the sum is taken over
-        all values.
+    axis : None or int or tuple of int, optional
+        Axis or axes along which to sum. If a tuple of ints is given,
+        the sum is taken over all of the specified axes, as in
+        :py:func:`numpy.sum`. If ``None`` (default), the sum is taken
+        over all values.
 
     Returns
     -------

@@ -141,7 +141,7 @@ def _moving_average(array: np.ndarray,
     return result
 
 
-def _combine_levels(levels, axis: int | None,
+def _combine_levels(levels, axis: int | tuple[int, ...] | None,
                     operation: Literal["mean", "sum"]):
     levels = np.asarray(levels)
     if np.issubdtype(levels.dtype, np.complexfloating):

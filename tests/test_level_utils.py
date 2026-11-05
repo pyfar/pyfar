@@ -150,6 +150,21 @@ def test_level_energetic_helpers_axis_2d(levels, axis):
     assert np.allclose(e_sum, expected + TIMES_TWO_IN_DB)
 
 
+@pytest.mark.parametrize("axis", [(0, 1), (1, 0), (-3, -2)])
+def test_level_energetic_helpers_axis_tuple(axis):
+    """Test that a tuple of axes works like in numpy.mean and numpy.sum."""
+    levels = [[[40, 50], [40, 50]], [[40, 50], [40, 50]]]
+    expected = np.array([40, 50])
+    times_four_in_db = 10 * np.log10(4)
+    e_mean = pf.level.energetic_mean(levels, axis=axis)
+    e_sum = pf.level.energetic_sum(levels, axis=axis)
+
+    assert e_mean.shape == expected.shape
+    assert e_sum.shape == expected.shape
+    assert np.allclose(e_mean, expected)
+    assert np.allclose(e_sum, expected + times_four_in_db)
+
+
 @pytest.mark.parametrize("input_type", [list, tuple, np.array])
 @pytest.mark.parametrize("function", [
     pf.level.energetic_mean,
