@@ -119,7 +119,7 @@ def time_weighted_pressure(signal, time_constant: float = 0.125):
     return pf.TimeData(time_weighted_pressure, signal.times)
 
 
-def average(levels, axis: int | None = None) -> np.ndarray | float:
+def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
     r"""Average levels energetically across channels or time.
 
     The input levels must be in dB and use the same reference pressure.
@@ -161,7 +161,7 @@ def average(levels, axis: int | None = None) -> np.ndarray | float:
     return _combine_levels(levels, axis=axis, operation="mean")
 
 
-def sum(levels, axis: int | None = None) -> np.ndarray | float | int:
+def energetic_sum(levels, axis: int | None = None) -> np.ndarray | float | int:
     r"""Sum levels energetically across channels or time.
 
     The input levels must be in dB and use the same reference pressure.
