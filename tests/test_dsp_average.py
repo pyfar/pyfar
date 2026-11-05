@@ -49,12 +49,27 @@ def test_caxis_averaging(caxis, answer):
     npt.assert_equal(ave_sig.time, answer)
 
 
-def test_weighted_averaging():
+def test_weighted_averaging_known_value():
     """Tests averaging Signal with weighted channels."""
     signal = pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)
     ave_sig = pf.dsp.average(signal, weights=(0.8, 0.2))
     answer = [[1*0.8+4*0.2, 2*0.8+5*0.2, 3*0.8+6*0.2]]
     npt.assert_almost_equal(ave_sig.time, answer, decimal=15)
+
+
+@pytest.mark.parametrize("mode", [
+    'linear',
+    'magnitude_zerophase',
+    'magnitude_phase',
+    'power',
+    'log_magnitude_zerophase',
+])
+def test_weighted_averaging_all_modes(mode):
+    """Tests that weights can be handled by all modes."""
+    signal = pf.Signal([[1, 2, 3], [4, 5, 6]], 44100)
+    ave_sig_equal = pf.dsp.average(signal, mode, weights=(0.5, 0.5))
+    ave_sig_none = pf.dsp.average(signal, mode)
+    npt.assert_almost_equal(ave_sig_equal.time, ave_sig_none.time, decimal=15)
 
 
 def test_complex_weighted_averaging():

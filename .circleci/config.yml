@@ -10,7 +10,56 @@ orbs:
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
+  # The slack orb implements event-based notifications across all CI pipelines.
+  # The Slack orb makes use of OAuth to post messages to your Slack workspace.
+  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/slack
+  slack:  circleci/slack@6.1.3
 
+
+commands:
+# Define reusable commands
+  notify_scheduled_failure:
+  # CircleCI is connected to Slack via a custom Slack app called
+  # 'CircleCI Notifications'. This app is installed in the pyfar workspace
+  # and provides access to the Slack-space via a OAuth Token. This token
+  # is stored as an environment variable (SLACK_ACCESS_TOKEN) inside an
+  # organization context (slack-secrets) on CircleCI. The 'slack-secrets' are
+  # passed to the workflows as a context to grant access to the Slack-space
+  # when being executed.
+    description: Notify Slack only for scheduled tests on selected branches.
+    steps:
+      - when:
+          condition:
+            and:
+              - equal: [scheduled_pipeline, << pipeline.trigger_source >>]  # Send notifications only from scheduled runs
+              - or:
+                  - equal: [main, << pipeline.git.branch >>]
+                  - equal: [develop, << pipeline.git.branch >>]
+          steps:
+            - run:
+            # Get details on failing workflow and load notification template
+                name: Prepare Slack failure details
+                when: on_fail
+                environment:
+                  SLACK_REPORT_PIPELINE: << pipeline.number >>
+                  SLACK_REPORT_SCHEDULE: << pipeline.schedule.name >>
+                command: |
+                  subject=$(git log -1 --format=%s)
+                  author=$(git log -1 --format=%an)
+                  python_version=$(python --version)
+                  template=$(cat .circleci/slack_failure.json)
+                  printf 'export SCHEDULED_FAILURE_TEMPLATE=%q\n' "$template" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_PIPELINE=%q\n' "$SLACK_REPORT_PIPELINE" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_SCHEDULE=%q\n' "$SLACK_REPORT_SCHEDULE" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_SUBJECT=%q\n' "${subject:0:1000}" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_AUTHOR=%q\n' "${author:0:200}" >> "$BASH_ENV"
+                  printf 'export SLACK_REPORT_PYTHON=%q\n' "$python_version" >> "$BASH_ENV"
+            - slack/notify:
+            # Send notification on failing workflow to Slack channel
+                channel: "C0BCS9GK2LE"  # Points to pyfar Slack channel
+                event: fail
+                template: SCHEDULED_FAILURE_TEMPLATE
+                ignore_errors: false
 
 executors:
   python-docker: # declares a reusable executor
@@ -45,6 +94,7 @@ jobs:
       - run:
           name: Run tests
           command: pytest
+      - notify_scheduled_failure
 
   ruff:
     parameters:
@@ -84,6 +134,7 @@ jobs:
             pip install ".[docs]"
             cd docs/
             make html SPHINXOPTS="-W"
+      - notify_scheduled_failure
 
   test_deprecation_warnings:
     parameters:
@@ -107,6 +158,7 @@ jobs:
       - run:
           name: Run tests
           command: pytest tests -W error::DeprecationWarning
+      - notify_scheduled_failure
 
   test_pypi_publish:
     parameters:
@@ -130,6 +182,7 @@ jobs:
           command: |  # create whl, install twine and publish to Test PyPI
             python -m build
             twine check dist/*
+      - notify_scheduled_failure
 
   run_pypi_publish:
     parameters:
@@ -162,6 +215,7 @@ workflows:
     jobs:
       # Run tests for all python versions
       - build_and_test:
+          context: slack-secrets
           matrix:
             parameters:
               version:
@@ -178,6 +232,7 @@ workflows:
             - build_and_test
 
       - test_documentation_build:
+          context: slack-secrets
           matrix:
             parameters:
               version:
@@ -186,14 +241,21 @@ workflows:
             - build_and_test
 
       - test_deprecation_warnings:
+          context: slack-secrets
           matrix:
             parameters:
               version:
                 - "3.14"
+          filters:
+            branches:
+              only:
+                - main
+                - develop
           requires:
             - build_and_test
 
       - test_pypi_publish:
+          context: slack-secrets
           matrix:
             parameters:
               version:
@@ -264,16 +326,29 @@ workflows:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
 
+      - wait_for_approval:
+          # This job is a placeholder for manual approval before publishing to PyPI.
+          # It will give maintainers the chance to inspect the deprecation watnings before publishing.
+          type: approval
+          requires:
+            - build_and_test
+            - ruff
+            - test_documentation_build
+          filters:
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+
+
       - run_pypi_publish:
           matrix:
             parameters:
               version:
                 - "3.14"
           requires:
-            - build_and_test
-            - ruff
-            - test_documentation_build
-            - test_deprecation_warnings
+            - wait_for_approval
           filters:
             branches:
               ignore: /.*/

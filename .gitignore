@@ -127,3 +127,6 @@ docs/_static/favicon.ico
 docs/_static/header.rst
 docs/_static/css/custom.css
 docs/resources/logos/pyfar_logos_fixed_size_pyfar.png
+
+# ignore generated files by sphinx
+pyfar/plot/docs/plot_shortcuts.rst

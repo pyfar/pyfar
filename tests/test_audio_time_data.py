@@ -52,7 +52,7 @@ def test_data_time_init_wrong_number_of_times():
     data = [1, 0, -1]
     times = [0, .1]
 
-    match = 'The length of times must be data.shape'
+    match = 'Number of time values does not match the number of time samples.'
     with pytest.raises(ValueError, match=match):
         TimeData(data, times)
 
@@ -76,6 +76,15 @@ def test_data_time_setter_time():
     time = TimeData(data_a, times)
     time.time = data_b
     npt.assert_allclose(time.time, np.atleast_2d(np.asarray(data_b)))
+
+
+def test_time_data_time_setter_wrong_number_of_times():
+    """Test if entering a wrong number of times raises an assertion."""
+    time_data = TimeData([1, 0, -1], [0, .1, .3])
+
+    match = 'Number of time values does not match the number of time samples.'
+    with pytest.raises(ValueError, match=match):
+        time_data.time = [1, 0]
 
 
 def test_data_time_setter_complex_casting():

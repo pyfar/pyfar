@@ -3,6 +3,7 @@ import numpy.testing as npt
 import scipy.signal as sgn
 import pytest
 import pyfar
+import warnings
 
 from pyfar.signals import impulse
 from pyfar import dsp
@@ -903,6 +904,44 @@ def test_impulse_response_delay_sinc(sign):
     npt.assert_allclose(start_samples, delay_samples, atol=1e-3, rtol=1e-4)
 
 
+def test_impulse_response_delay_issue_940() -> None:
+    """Tests for RankWarning in find_impulse_response_delay."""
+
+    # Excerpt of FABIAN data: hato=0, impulse_response[6062,1], samples 27:34
+    FABIAN_RANKWARNING_EXCERPT = [
+        0.3407039517121523,
+        1.1500420942968828,
+        0.585657128821697,
+        0.6286972629823807,
+        0.49017625565202205,
+        -1.0273296093527513,
+        -0.4464563950932513,
+    ]
+
+    ir = pf.Signal(FABIAN_RANKWARNING_EXCERPT, 44100)
+
+    with warnings.catch_warnings(record=True) as utils_warnings:
+        warnings.simplefilter("always")
+        delay = pf.dsp.find_impulse_response_delay(ir)
+
+    assert not any(
+        type(w.message).__name__ == "RankWarning" for w in utils_warnings
+    ), "RankWarning should not be emitted for this data!"
+    assert delay.shape == (1,)
+
+
+def test_impulse_response_delay_ignores_negative_gradient_crossing():
+    """Zero crossing search uses the nearest positive-gradient crossing."""
+    from pyfar.dsp.dsp import _estimate_zero_crossing
+
+    lags = np.arange(5)
+    values = np.array([1, -1, -0.5, 0.5, 1])
+
+    root = _estimate_zero_crossing(lags, values, argmax=1, order=1)
+
+    npt.assert_allclose(root, 2.5)
+
+
 def test_impulse_response_delay_multidim():
     """Ideal multi-dimensional Signal of ideal impulses."""
     n_samples = 2**10
@@ -1176,6 +1215,29 @@ def test_convolve_mode_and_method_real_complex(method, mode, desired):
     y = pf.Signal([1, -1, 0.1], 44100, is_complex=True)
     res = dsp.convolve(x, y, mode=mode, method=method)
     np.testing.assert_allclose(res.time, desired, atol=1e-10)
+
+
+@pytest.mark.parametrize("method", ['overlap_add', 'fft'])
+@pytest.mark.parametrize("mode", ['full', 'cut', 'cyclic'])
+@pytest.mark.parametrize("swap", [False, True])
+@pytest.mark.parametrize("n_samples", [1, 4])
+@pytest.mark.parametrize("is_complex", [False, True])
+def test_convolve_single_sample(method, mode, swap, n_samples, is_complex):
+    """Test all convolution modes where one signal has a single sample."""
+    data = np.array([1., -.5, .25, 2.])[:n_samples]
+    data = np.stack((data, -data))[:, np.newaxis, :]
+    gains = np.array([[0.], [1.], [.25]])
+    if is_complex:
+        gains = gains * (1 + 1j)
+    signal = pf.Signal(data, 44100, fft_norm='unitary')
+    kernel = pf.Signal(gains, 44100, is_complex=is_complex)
+    operands = (kernel, signal) if swap else (signal, kernel)
+    result = dsp.convolve(*operands, mode=mode, method=method)
+    np.testing.assert_allclose(result.time, data * gains, atol=1e-14)
+    assert result.n_samples == n_samples
+    assert result.sampling_rate == signal.sampling_rate
+    assert result.fft_norm == signal.fft_norm
+    assert result.complex == is_complex
 
 
 def test_convolve_mismatching_cdims():
