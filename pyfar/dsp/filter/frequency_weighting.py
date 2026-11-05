@@ -247,7 +247,7 @@ def _design_frequency_weighting_filter_cached(
 
 def _design_frequency_weighting_filter(sampling_rate: float,
                                        target_weighting: Literal["A", "C"],
-                                       n_bins,
+                                       n_bins: int,
                                        error_weighting: Optional[Callable[[
                                            np.ndarray], np.ndarray]] = None,
                                        **kwargs,
@@ -266,7 +266,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
         Specifies which frequency weighting curve to approximate.
         Must be either "A" or "C".
 
-    n_bins: int, optional
+    n_bins: int
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
