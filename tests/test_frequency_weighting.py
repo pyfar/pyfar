@@ -81,7 +81,7 @@ def test_frequeny_weighting_curve_errors():
 @pytest.mark.parametrize("base_rate", [48000, 44100, 16000])
 @pytest.mark.parametrize("rate_factor", [1, 2, 1/2, 4, 1/4, 8, 1/8])
 def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
-    """ Test that the default parameters are class 1 compliant as promised
+    """Test that the default parameters are class 1 compliant as promised
     for the promised sample rates.
     """
     fs = base_rate * rate_factor
@@ -95,7 +95,7 @@ def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
 @pytest.mark.parametrize("weighting", ["A", "C"])
 @pytest.mark.parametrize("fs", [48000, 44100, 96000])
 def test_frequency_weighting_filter_precomputed(weighting, fs):
-    """ Test that filters for common sample rates are actually precomputed."""
+    """Test that filters for common sample rates are actually precomputed."""
     precomputed = pffilt.frequency_weighting_filter(
         None, weighting, sampling_rate=fs)
     expected = pffilt._frequency_weighting_coefficients. \
