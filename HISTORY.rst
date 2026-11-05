@@ -21,6 +21,7 @@ Fixed
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
 - Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
 - Limit Sphinx versions to < 0.9.0 to avoid invalid references for type annotations (PR #929)
+- `pyfar.dsp.filter.frequency_weighting_filter` now uses precomputed filter coefficients for common sampling rates to meet filter class requirements from the docstring (PR #992)
 
 Added
 ^^^^^
