@@ -90,6 +90,22 @@ def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
 
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
+@pytest.mark.parametrize("fs", [48000, 44100, 96000])
+def test_frequency_weighting_filter_precomputed(weighting, fs):
+    """ Test that filters for common sample rates are actually precomputed."""
+    precomputed = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs)
+    expected = pffilt._frequency_weighting_coefficients. \
+        _FREQUENCY_WEIGHTING_SOS[(weighting, fs)]["mean"]
+    npt.assert_array_equal(precomputed.coefficients[0], expected)
+
+    # any non-default parameter should run the optimization instead
+    optimized = pffilt.frequency_weighting_filter(
+        None, weighting, n_bins=100, sampling_rate=fs)
+    assert not np.array_equal(optimized.coefficients, precomputed.coefficients)
+
+
+@pytest.mark.parametrize("weighting", ["A", "C"])
 @pytest.mark.parametrize("fs", [48000, 44100])
 @pytest.mark.parametrize("errwgt", [lambda nf: 100**nf, lambda nf: 1 + nf])
 def test_frequency_weighting_filter_errwgt(weighting, fs, errwgt):
