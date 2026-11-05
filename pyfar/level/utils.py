@@ -120,9 +120,17 @@ def time_weighted_pressure(signal, time_constant: float = 0.125):
 
 
 def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
-    """Average levels energetically across channels or time.
+    r"""Average levels energetically across channels or time.
 
     The input levels must be in dB and use the same reference pressure.
+    The energetic mean is calculated as
+
+    .. math::
+        L_\text{mean} = 10 \log_{10} \left( \frac{1}{N} \sum_{i=1}^{N}
+        10^{L_i / 10} \right) \text{ dB}
+
+    where :math:`L_i` are the input levels and :math:`N` is the number of
+    levels along the averaged axis.
 
     Parameters
     ----------
@@ -154,9 +162,17 @@ def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
 
 
 def energetic_sum(levels, axis: int | None = None) -> np.ndarray | float | int:
-    """Sum levels energetically across channels or time.
+    r"""Sum levels energetically across channels or time.
 
     The input levels must be in dB and use the same reference pressure.
+    The energetic sum is calculated as
+
+    .. math::
+        L_\text{sum} = 10 \log_{10} \left( \sum_{i=1}^{N}
+        10^{L_i / 10} \right) \text{ dB}
+
+    where :math:`L_i` are the input levels and :math:`N` is the number of
+    levels along the summed axis.
 
     Parameters
     ----------
