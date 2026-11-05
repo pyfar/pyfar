@@ -143,7 +143,7 @@ def energetic_mean(levels, axis: int | None = None) -> np.ndarray | float:
 
     Returns
     -------
-    np.ndarray or scalar
+    NDArray or scalar
         Average level(s) in dB. This is a scalar when averaging over all axes
         and an array otherwise.
 
@@ -185,7 +185,7 @@ def energetic_sum(levels, axis: int | None = None) -> np.ndarray | float | int:
 
     Returns
     -------
-    np.ndarray or scalar
+    NDArray or scalar
         Sum level(s) in dB. This is a scalar when summing over all axes
         and an array otherwise.
 
