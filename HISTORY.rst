@@ -9,6 +9,12 @@ Added
 ^^^^^
 - Added an `endpoint` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to numpy's `linspace` function (PR #963)
 
+Fixed
+^^^^^
+
+- `pyfar.dsp.filter.frequency_weighting_filter` now uses precomputed filter coefficients for common sampling rates to meet filter class requirements from the docstring (PR #992)
+
+
 0.8.1 (2026-08-14)
 ------------------
 
@@ -21,7 +27,6 @@ Fixed
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
 - Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
 - Limit Sphinx versions to < 0.9.0 to avoid invalid references for type annotations (PR #929)
-- `pyfar.dsp.filter.frequency_weighting_filter` now uses precomputed filter coefficients for common sampling rates to meet filter class requirements from the docstring (PR #992)
 
 Added
 ^^^^^
