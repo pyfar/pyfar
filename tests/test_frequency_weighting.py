@@ -81,6 +81,9 @@ def test_frequeny_weighting_curve_errors():
 @pytest.mark.parametrize("base_rate", [48000, 44100, 16000])
 @pytest.mark.parametrize("rate_factor", [1, 2, 1/2, 4, 1/4, 8, 1/8])
 def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
+    """ Test that the default parameters are class 1 compliant as promised
+    for the promised sample rates.
+    """
     fs = base_rate * rate_factor
     filt = pffilt.frequency_weighting_filter(None, weighting, sampling_rate=fs)
     assert isinstance(filt, pyfar.FilterSOS)
