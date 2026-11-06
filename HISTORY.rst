@@ -8,6 +8,7 @@ Unreleased
 Added
 ^^^^^
 - Added an `endpoint` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to numpy's `linspace` function (PR #963)
+- Added the `pyfar.io.read_ita` function for reading `.ita` files created using the ITA-Toolbox (PR #839).
 
 0.8.1 (2026-08-14)
 ------------------
