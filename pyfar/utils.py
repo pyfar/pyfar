@@ -1,9 +1,10 @@
 """
 The utilities contain functions that are helpful when working with multiple
-pyfar audio objects. The pyfar gallery gives background information to
-:ref:`work with audio objects </gallery/interactive/pyfar_audio_objects.ipynb>`
-including an introduction to the channel shape (`cshape`), channel axis
-(`caxis`), and channel dimension (`cdim`).
+pyfar audio and coordinates objects. The pyfar gallery gives background
+information to :ref:`work with audio objects
+</gallery/interactive/pyfar_audio_objects.ipynb>` including an introduction to
+the channel shape (`cshape`), channel axis (`caxis`), and channel dimension
+(`cdim`).
 """
 import pyfar as pf
 import numpy as np
@@ -13,30 +14,37 @@ def broadcast_cshape(signal, cshape):
     """
     Broadcast a signal to a certain cshape.
 
-    The channel shape (`cshape`) gives the shape of the audio data excluding
-    the last dimension, which is ``n_samples`` for time domain objects and
-    ``n_bins`` for frequency domain objects. The broadcasting follows the
+    The channel shape (`cshape`) gives the shape of the audio or coordinates
+    data excluding the last dimension, which is ``n_samples`` for time domain
+    objects, ``n_bins`` for frequency domain objects and always equals ``3``
+    for coordinates. The broadcasting follows the
     :doc:`numpy broadcasting rules <numpy:user/basics.broadcasting>`.
 
     Parameters
     ----------
-    signal : Signal, TimeData, FrequencyData
+    signal : Signal, TimeData, FrequencyData, Coordinates
         The signal to be broadcasted.
     cshape : tuple
         The cshape to which `signal` is broadcasted.
 
     Returns
     -------
-    signal : Signal, TimeData, FrequencyData
+    signal : Signal, TimeData, FrequencyData, Coordinates
         Broadcasted copy of the input signal
     """
 
-    if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData)):
-        raise TypeError("Input data must be a pyfar audio object")
+    if not isinstance(signal, (pf.Signal, pf.TimeData, pf.FrequencyData,
+                               pf.Coordinates)):
+        raise TypeError("Input data must be a pyfar audio object or a" \
+        " pyfar coordinates object ")
 
     signal = signal.copy()
-    signal._data = np.broadcast_to(
-        signal._data, cshape + (signal._data.shape[-1], ))
+    if isinstance(signal, (pf.Coordinates)):
+        signal.cartesian = np.broadcast_to(
+                signal.cartesian, cshape + (signal.cartesian.shape[-1], ))
+    else:
+        signal._data = np.broadcast_to(
+            signal._data, cshape + (signal._data.shape[-1], ))
     return signal
 
 
