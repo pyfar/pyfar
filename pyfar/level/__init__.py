@@ -10,6 +10,8 @@ from .standard_levels import (
 
 from .utils import (
     time_weighted_pressure,
+    energetic_mean,
+    energetic_sum,
 )
 
 __all__ = [
@@ -19,4 +21,6 @@ __all__ = [
     "peak_level",
     "time_weighted_pressure",
     "time_weighted_level",
+    "energetic_mean",
+    "energetic_sum",
 ]

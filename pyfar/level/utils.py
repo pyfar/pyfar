@@ -4,7 +4,7 @@ import numpy as np
 import scipy.signal
 import pyfar as pf
 
-from ._utils import _check_signal_type
+from ._utils import _check_signal_type, _combine_levels
 
 def time_weighted_pressure(signal, time_constant: float = 0.125):
     r"""
@@ -117,3 +117,93 @@ def time_weighted_pressure(signal, time_constant: float = 0.125):
     # convert energy back to pressure
     time_weighted_pressure = np.sqrt(normalized)
     return pf.TimeData(time_weighted_pressure, signal.times)
+
+
+def energetic_mean(
+        levels, axis: int | tuple[int, ...] | None = None,
+        ) -> np.ndarray | float:
+    r"""Average levels energetically across channels or time.
+
+    The input levels must be in dB and use the same reference pressure.
+    The energetic mean is calculated as
+
+    .. math::
+        L_\text{mean} = 10 \log_{10} \left( \frac{1}{N} \sum_{i=1}^{N}
+        10^{L_i / 10} \right) \text{ dB}
+
+    where :math:`L_i` are the input levels and :math:`N` is the number of
+    levels along the averaged axis.
+
+    Parameters
+    ----------
+    levels : array-like
+        The levels in dB. Must be a numpy array or a type that can be
+        converted to one.
+    axis : None or int or tuple of int, optional
+        Axis or axes along which to average. If a tuple of ints is given,
+        the average is taken over all of the specified axes, as in
+        :py:func:`numpy.mean`. If ``None`` (default), the average is
+        taken over all values.
+
+    Returns
+    -------
+    NDArray or scalar
+        Average level(s) in dB. This is a scalar when averaging over all axes
+        and an array otherwise.
+
+    Examples
+    --------
+    Calculate the average level across two channels of a stereo signal.
+
+    >>> import pyfar as pf
+    >>> signal = pf.signals.noise(48000, rms=(0.01, 0.02), seed=0)
+    >>> level_per_channel = pf.level.equivalent_continuous_level(signal, "A")
+    >>> mean_level = pf.level.energetic_mean(level_per_channel)
+    >>> print(level_per_channel)    # [51.57310831 57.61345662]
+    >>> print(mean_level)           # 55.56831429364634
+    """
+    return _combine_levels(levels, axis=axis, operation="mean")
+
+
+def energetic_sum(
+        levels, axis: int | tuple[int, ...] | None = None,
+        ) -> np.ndarray | float | int:
+    r"""Sum levels energetically across channels or time.
+
+    The input levels must be in dB and use the same reference pressure.
+    The energetic sum is calculated as
+
+    .. math::
+        L_\text{sum} = 10 \log_{10} \left( \sum_{i=1}^{N}
+        10^{L_i / 10} \right) \text{ dB}
+
+    where :math:`L_i` are the input levels and :math:`N` is the number of
+    levels along the summed axis.
+
+    Parameters
+    ----------
+    levels : array-like
+        The levels in dB. Must be a numpy array or a type that can be
+        converted to one.
+    axis : None or int or tuple of int, optional
+        Axis or axes along which to sum. If a tuple of ints is given,
+        the sum is taken over all of the specified axes, as in
+        :py:func:`numpy.sum`. If ``None`` (default), the sum is taken
+        over all values.
+
+    Returns
+    -------
+    NDArray or scalar
+        Sum level(s) in dB. This is a scalar when summing over all axes
+        and an array otherwise.
+
+    Examples
+    --------
+    Calculate the total level from levels measured in octave bands.
+
+    >>> import pyfar as pf
+    >>> levels_in_bands = [70.2, 63.4, 55.2, 56.1, 67.8, 50.8]
+    >>> total_level = pf.level.energetic_sum(levels_in_bands)
+    >>> print(total_level)  # 72.9099969445094
+    """
+    return _combine_levels(levels, axis=axis, operation="sum")
