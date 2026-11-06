@@ -7,6 +7,8 @@ Unreleased
 
 Fixed
 ^^^^^
+- Scale spherical-to-Cartesian rounding tolerance for radii above one,
+  preserving the existing tolerance for smaller radii (Issue #921).
 - The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` (PR #976).
 - Fixed cyclic convolution with one-sample filters in `pyfar.dsp.convolve` (PR #987).
 - FIR impulse response lengths now account for negative coefficients and unequal support across filter channels, including silent channels (PR #979).

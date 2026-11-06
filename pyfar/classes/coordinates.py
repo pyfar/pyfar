@@ -1766,9 +1766,12 @@ def sph2cart(azimuth, colatitude, radius):
     y = r_sin_cola * np.sin(azimuth)
     z = radius * np.cos(colatitude)
 
-    x[np.abs(x) < np.finfo(x.dtype).eps] = 0
-    y[np.abs(y) < np.finfo(y.dtype).eps] = 0
-    z[np.abs(z) < np.finfo(x.dtype).eps] = 0
+    # Scale the tolerance with radius, retaining the existing epsilon floor.
+    atol = np.finfo(x.dtype).eps * np.maximum(
+        1, np.abs(radius.astype(x.dtype, copy=False)))
+    x[np.abs(x) < atol] = 0
+    y[np.abs(y) < atol] = 0
+    z[np.abs(z) < atol] = 0
 
     return x, y, z
 
