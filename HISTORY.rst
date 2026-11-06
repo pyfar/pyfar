@@ -2,7 +2,7 @@
 History
 =======
 
-unreleased
+Unreleased
 ----------
 
 Added
@@ -11,17 +11,46 @@ Added
     - `level.equivalent_continuous_level` for the Leq (PR #948)
     - `level.exposure_level` for the sound exposure level (PR #951)
     - `level.sliding_continuous_level` for the Leq with a sliding window (PR #952)
-    - `level.peak_level` for (true) peak level detection (PR #955)
+    - `level.peak_level` for (true) peak level detection (PR #955) with optional time weighting (PR #970)
     - `level.time_weighted_level` and `level.time_weighted_pressure` for time-weighting (PR #954)
     - helper functions for working with levels energetically (PR #988) and converting to and from decibels (PR #995)
 
 Fixed
 ^^^^^
+- The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` (PR #976).
+- Fixed cyclic convolution with one-sample filters in `pyfar.dsp.convolve` (PR #987).
+- FIR impulse response lengths now account for negative coefficients and unequal support across filter channels, including silent channels (PR #979).
+- A bug in `pyfar.dsp.average` that raised errors when trying to use `magnitude_phase` mode with weights (PR #962).
+- Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
+- A bug causing an error that claimed that the right (or left) sided spectrum does not exist for a `pyfar.FrequencyData` object containing a single, positive (or negative) frequency (PR #978).
+- Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
+- Replaced `matplotlib.transforms.nonsingular`, which was deprecated in Matplotlib 3.11, with `matplotlib.ticker.Locator().nonsigular` in `pyfar.plot.ticker.LogFormatterITAToolbox` and require Matplotlib >= 3.2 (PR #990).
+
+
+Maintenance
+^^^^^^^^^^^
+- Restricted deprecation tests to main and develop; added Slack notifications for scheduled job failures on main and develop (PR #982)
+
+0.8.1 (2026-08-14)
+------------------
+
+Fixed
+^^^^^
+- A bug in `pyfar.dsp.dsp.find_impulse_response_delay` that lead to failed delay searches for certain signals (Issue #940).
+- Removed orphaned page in the documentation (PR #932)
 - Fixed deprecated Matplotlib subplot behavior (PR #942)
 - `pyfar.dsp.time_crop` did not work correctly for higher channel dimensional inputs (PR #944)
 - A bug where a numpy array being passed as a `pyfar.audio.classes.Signal.sampling_rate` raised `TypeError`.
 - Normalization in `pyfar.dsp.correlate` now works correctly for multi-channel signals (PR #945)
+- Limit Sphinx versions to < 0.9.0 to avoid invalid references for type annotations (PR #929)
 
+Added
+^^^^^
+- Added example to `find_impulse_response_delay` plotting the inter-sample delay estimation accuracy. (PR #950)
+
+Maintenance
+^^^^^^^^^^^
+- Replaced strict CircleCI deprecation warning workflow with manual approval for release workflow. (PR #959)
 
 0.8.0 (2026-03-16)
 ------------------

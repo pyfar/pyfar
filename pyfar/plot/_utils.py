@@ -436,6 +436,11 @@ def _phase_label(unwrap, deg):
 def _assert_and_match_data_to_side(data, signal, side):
     """Adjust data and frequency vector for plotting as specified by side."""
 
+    # The left sided spectrum is only defined for complex signals.
+    if type(signal) is Signal and not signal.complex and side == 'left':
+        raise ValueError('The left side of the spectrum is not defined '
+                         'for real-valued signals')
+
     if side == 'left':
         mask = signal.frequencies <= 0
     elif side == 'right':
@@ -444,8 +449,9 @@ def _assert_and_match_data_to_side(data, signal, side):
         raise ValueError('Invalid `side` parameter, pass either `left` or '
                          '`right`.')
 
-    if mask.sum() < 2:
-        raise ValueError(f'The {side} side of the spectrum is not defined.')
+    # The mask must not be empty.
+    if not mask.sum():
+        raise ValueError(f'The {side} side of the spectrum is empty.')
 
     # get corresponding data
     frequencies = signal.frequencies[mask]

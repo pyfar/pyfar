@@ -6,6 +6,7 @@ import numbers
 import numpy as np
 import pyfar as pf
 import scipy.ndimage
+from typing import Literal
 
 
 def _check_signal_type(signal):

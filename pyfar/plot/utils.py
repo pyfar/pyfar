@@ -201,7 +201,7 @@ def shortcuts(show=True, report=False, layout="console"):
     `Matplotlib backend
     <https://matplotlib.org/stable/users/explain/backends.html>`_
 
-    .. include:: ../../docs/resources/plot_shortcuts.rst
+    .. include:: ../../pyfar/plot/docs/plot_shortcuts.rst
 
     Parameters
     ----------

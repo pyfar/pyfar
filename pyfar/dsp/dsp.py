@@ -7,6 +7,7 @@ from pyfar.dsp import fft
 from pyfar.classes.warnings import PyfarDeprecationWarning
 import warnings
 import scipy.fft as sfft
+from numpy.polynomial import Polynomial
 from typing import Literal
 from typing import Union
 
@@ -1345,6 +1346,68 @@ def time_shift(
     return shifted
 
 
+def _estimate_zero_crossing(lags, values, argmax, order):
+    """Estimate the nearest positive-gradient zero crossing.
+
+    Parameters
+    ----------
+    lags : numpy.ndarray
+        Lag values corresponding to ``values``.
+    values : numpy.ndarray
+        Values in which to search for zero crossings.
+    argmax : int
+        Index of the correlation maximum. The closest zero crossing to this
+        lag is returned.
+    order : int
+        Polynomial order used for root finding. ``order=1`` uses linear
+        interpolation between the adjacent samples around the zero crossing.
+
+    Returns
+    -------
+    root : float or None
+        Estimated zero-crossing lag, or ``None`` if no positive-gradient zero
+        crossing is found.
+    """
+    if values[argmax] == 0:
+        return lags[argmax]
+
+    # integer indices after which a zero crossing with positive gradient occurs
+    left = np.flatnonzero(
+        (values[:-1] * values[1:] < 0) & (values[1:] > values[:-1]))
+    if not left.size:
+        return None
+
+    right = left + 1
+    x_1, x_2 = lags[left], lags[right]
+    y_1, y_2 = values[left], values[right]
+    linear_roots = x_1 - y_1 * (x_2 - x_1) / (y_2 - y_1)
+    idx = np.argmin(np.abs(linear_roots - lags[argmax]))
+
+    if order == 1:
+        return linear_roots[idx]
+
+    degree = min(order, values.size - 1)
+    # set starting point for higher order fit and make sure that
+    # the fitting region is cenetered around the expected root and
+    # the end point does not exceed array size
+    start = min(max(0, left[idx] - (degree - 1) // 2),
+                values.size - (degree + 1))
+    roots = Polynomial.fit(
+        lags[start:start + degree + 1],
+        values[start:start + degree + 1],
+        degree,
+    ).convert().roots()
+    roots = np.real(roots[np.isreal(roots)])
+    # root must within the samples at which the zero crossing
+    # with positive gradient occurs
+    roots = roots[(roots >= x_1[idx]) & (roots <= x_2[idx])]
+    # return None if no positive-gradient zero crossing exists
+    if roots.size:
+        return roots[np.argmin(np.abs(roots - linear_roots[idx]))]
+    else:
+        return None
+
+
 def find_impulse_response_delay(impulse_response, N=1):
     """Find the delay in sub-sample values of an impulse response.
 
@@ -1368,7 +1431,8 @@ def find_impulse_response_delay(impulse_response, N=1):
     impulse_response : Signal
         The impulse response.
     N : int, optional
-        The order of the polynom used for root finding, by default 1.
+        The order of the polynomial used for root finding, by default 1
+        (original Tamim et al. method).
 
     Returns
     -------
@@ -1390,6 +1454,7 @@ def find_impulse_response_delay(impulse_response, N=1):
     starting sample of the impulse and plot.
 
     .. plot::
+        :context: close-figs
 
         >>> import pyfar as pf
         >>> import numpy as np
@@ -1404,9 +1469,36 @@ def find_impulse_response_delay(impulse_response, N=1):
         ...     color='k', linestyle='-.', label='start sample')
         >>> ax.legend()
 
-    """
-    n = int(np.ceil((N+2)/2))
+    Plot the estimation error for a sinc function shifted
+    by a fractional number of samples. The plot illustrates the expected
+    sub-sample precision of the delay estimation method for this example.
 
+    .. plot::
+        :context: close-figs
+
+        >>> import pyfar as pf
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> n_samples = 2**10
+        >>> frac_delays = np.linspace(0, 1, 100, endpoint=True)
+        >>> err = []
+        >>> for frac_delay in frac_delays:
+        ...     samples = np.arange(n_samples)
+        ...     # center the sinc peak
+        ...     true_delay = n_samples // 2 + frac_delay
+        ...     sinc = np.sinc(samples - true_delay)
+        ...     ir = pf.Signal(sinc, 44.1e3)
+        ...     ir = pf.dsp.time_window(ir, (0, n_samples), shape='left')
+        ...     est_delay = pf.dsp.find_impulse_response_delay(ir)
+        ...     err.append(true_delay - est_delay[0])
+        >>> # Plot the estimation error
+        >>> plt.figure(figsize=(7, 4))
+        >>> plt.plot(frac_delays, err)
+        >>> plt.ylabel('Error in Samples')
+        >>> plt.xlabel('Fractional Delay in Samples')
+        >>> plt.axhline(0, color='k', linewidth=0.8)
+        >>> plt.title('Delay estimation error for a shifted sinc')
+    """
     start_samples = np.zeros(impulse_response.cshape)
     modes = ['real', 'complex'] if impulse_response.complex else ['real']
     start_sample = np.zeros((len(modes), 1), dtype=float)
@@ -1414,14 +1506,14 @@ def find_impulse_response_delay(impulse_response, N=1):
     for ch in np.ndindex(impulse_response.cshape):
         # Calculate the correlation between the impulse response and its
         # minimum phase equivalent. This requires a minimum phase equivalent
-        # in the strict sense, instead of the appriximation implemented in
+        # in the strict sense, instead of the approximation implemented in
         # pyfar.
         n_samples = impulse_response.n_samples
         for idx, mode in enumerate(modes):
             ir = impulse_response.time[ch]
             ir = np.real(ir) if mode == 'real' else np.imag(ir)
 
-            #Check absolute amximum, because peaks can be positive or negative.
+            #Check absolute maximum, because peaks can be positive or negative.
             if np.max(np.abs(ir)) > 1e-16:
                 # minimum phase warns if the input signal is not symmetric,
                 # which is not critical for this application
@@ -1442,38 +1534,29 @@ def find_impulse_response_delay(impulse_response, N=1):
                 correlation_analytic = sgn.hilbert(correlation)
 
                 # find the maximum of the analytic part of the correlation
-                # function and define the search range around the maximum
+                # function and interpolate the nearest zero crossing
                 argmax = np.argmax(np.abs(correlation_analytic))
-                search_region_range = np.arange(argmax-n, argmax+n)
-                search_region = np.imag(
-                    correlation_analytic[search_region_range])
+                search_region = np.imag(correlation_analytic)
 
-                # If this is true, it indicates that `correlation_analytic` has
-                # a negative peak, which can happen if the absolute maximum of
-                # `impulse_response` is negative. Changing the sign of the
-                # search region makes sure that the `mask` generated below
-                # works as intended. Fixing it this way is safer because it is
-                # theoretically possible that the absolute maximum of
-                # `impulse_response` is negative but
-                # `correlation_analytic[argmax].real` is positive.
-                search_region *= np.sign(correlation_analytic[argmax].real)
+                # If the correlation has a negative peak, flip the search
+                # region so the valid zero crossing has a positive gradient.
+                # A zero real part means the maximum itself is the delay.
+                sign = np.sign(correlation_analytic[argmax].real)
+                if sign == 0:
+                    root = lags[argmax]
+                else:
+                    search_region *= sign
+                    root = _estimate_zero_crossing(
+                        lags, search_region, argmax, N)
 
-                # mask values with a negative gradient
-                mask = np.gradient(search_region, search_region_range) > 0
-
-                # fit a polygon and estimate its roots
-                search_region_poly = np.polyfit(
-                    search_region_range[mask]-argmax, search_region[mask], N)
-                roots = np.roots(search_region_poly)
-
-                # Use only real-valued roots
-                if np.all(np.isreal(roots)):
-                    root = roots[np.abs(roots) == np.min(np.abs(roots))]
-                    start_sample[idx] = np.squeeze(lags[argmax] + root)
+                if root is not None:
+                    start_sample[idx] = root
                 else:
                     start_sample[idx] = np.nan
-                    warnings.warn('Starting sample not found for channel '
-                                  f'{ch}', stacklevel=2)
+                    warnings.warn(
+                        f'Delay sample not found for channel {ch}',
+                        stacklevel=2,
+                    )
             else:
                 start_sample[idx] = np.nan
 
@@ -1880,7 +1963,7 @@ def convolve(signal1, signal2, mode='full', method='overlap_add'):
     elif mode == 'cyclic':
         n_min = np.min((signal1.n_samples, signal2.n_samples))
         n_max = np.max((signal1.n_samples, signal2.n_samples))
-        res[..., :n_min-1] += res[..., -n_min+1:]
+        res[..., :n_min-1] += res[..., n_max:]
         res = res[..., :n_max]
 
     is_result_complex = True if res.dtype.kind == 'c' else False
@@ -1968,7 +2051,7 @@ def decibel(signal, domain='freq', log_prefix=None, log_reference=1,
     --------
     >>> import pyfar as pf
     >>> signal = pf.signals.noise(41000, rms=[1, 1])
-    >>> decibel_data = decibel(signal, domain='time')
+    >>> decibel_data = pf.dsp.decibel(signal, domain='time')
     """
     if log_prefix is None:
         if isinstance(signal, pyfar.Signal) and signal.fft_norm in ('power',
@@ -2511,7 +2594,8 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
     elif mode == 'magnitude_zerophase':
         data = np.abs(signal.freq)
     elif mode == 'magnitude_phase':
-        data = [np.abs(signal.freq), pyfar.dsp.phase(signal, unwrap=True)]
+        data = np.abs(signal.freq)
+        phase_data = pyfar.dsp.phase(signal, unwrap=True)
     elif mode == 'power':
         data = np.abs(signal.freq)**2
     elif mode == 'log_magnitude_zerophase':
@@ -2533,12 +2617,13 @@ def average(signal, mode='linear', caxis=None, weights=None, keepdims=False,
         weights = np.broadcast_to(np.array(weights)[..., None],
                                   data.shape)
     # average the data
+    data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
     if mode == 'magnitude_phase':
-        data = [np.average(d, axis=axis, weights=weights,
-                           keepdims=keepdims) for d in data]
-        data = data[0] * np.exp(1j * data[1])
-    else:
-        data = np.average(data, axis=axis, weights=weights, keepdims=keepdims)
+        # for this mode, also average and reapply the phase
+        phase_data = np.average(phase_data, axis=axis, weights=weights,
+                                keepdims=keepdims)
+        data = data * np.exp(1j * phase_data)
+
     # reconstruct frequency data
     if mode == 'power':
         data = np.sqrt(data)
