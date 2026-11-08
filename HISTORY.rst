@@ -7,6 +7,7 @@ Unreleased
 
 Fixed
 ^^^^^
+- Clarified the array shape and component order returned by the coordinate system properties of `pyfar.Coordinates` (Issue #994).
 - The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` (PR #976).
 - Fixed cyclic convolution with one-sample filters in `pyfar.dsp.convolve` (PR #987).
 - FIR impulse response lengths now account for negative coefficients and unequal support across filter channels, including silent channels (PR #979).
