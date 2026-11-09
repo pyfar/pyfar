@@ -494,9 +494,8 @@ def time_weighted_level(signal,
     signal = _apply_multi_band(signal, num_octave_band_fractions)
     time_constant = _time_weighting_to_constant(time_weighting)
     weighted = time_weighted_pressure(signal, time_constant)
-    energies = weighted.time**2
-    levels = to_decibels(
-        energies, "power", reference_pressure, replace_zeros)
+    levels = to_decibels(weighted.time, "amplitude",
+                         reference_pressure, replace_zeros)
     return levels
 
 
@@ -602,7 +601,7 @@ def peak_level(
         time_weighted = time_weighted_pressure(signal, time_constant)
 
     maxima = np.max(np.abs(time_weighted.time), axis=-1)
-    levels = to_decibels(maxima**2, "power", reference_pressure)
+    levels = to_decibels(maxima, "amplitude", reference_pressure)
     indexes = np.argmax(time_weighted.time, axis=-1)
     times = indexes / signal.sampling_rate
     return levels, times
