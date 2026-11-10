@@ -701,6 +701,24 @@ def test_setter_complex_(domain, is_complex, kind):
     assert signal.time.dtype.kind == kind
 
 
+@pytest.mark.parametrize("domain", ["time", "freq"])
+@pytest.mark.parametrize("value", ["False", 0, 1, None])
+def test_setter_complex_non_boolean(domain, value):
+    """Test that the complex setter rejects non-boolean values."""
+    signal = Signal([1, 0, -1], 44100)
+    signal.domain = domain
+    with pytest.raises(TypeError, match=f"complex flag is "
+                                        f"{type(value).__name__} but must "
+                                        "be a boolean"):
+        signal.complex = value
+
+    assert signal.complex is False
+
+    # example from issue #975
+    signal.fft_norm = "rms"
+    assert signal.fft_norm == "rms"
+
+
 def test_setter_complex_assert():
     """Test setting complex flag of time and frequency domain signals."""
 

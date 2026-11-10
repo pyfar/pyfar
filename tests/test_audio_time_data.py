@@ -110,6 +110,19 @@ def test_setter_complex():
         time.complex = False
 
 
+@pytest.mark.parametrize('value', ["False", 0, 1, None])
+def test_setter_complex_non_boolean(value):
+    """Test that the complex setter rejects non-boolean values."""
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3])
+    with pytest.raises(TypeError, match=f"complex flag is "
+                                        f"{type(value).__name__} but must "
+                                        "be a boolean"):
+        time.complex = value
+
+    assert time.complex is False
+    assert time.time.dtype.kind == "f"
+
+
 def test_reshape():
 
     # test reshape with tuple

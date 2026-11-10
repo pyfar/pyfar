@@ -372,6 +372,11 @@ class TimeData(_Audio):
 
     @complex.setter
     def complex(self, value):
+        # truthiness checks below would accept e.g. the string "False"
+        if not isinstance(value, bool):
+            raise TypeError(f"complex flag is {type(value).__name__} "
+                            "but must be a boolean")
+
         # set from complex=True to complex=False
         if self._complex and not value:
             if np.all(np.abs(np.imag(self._data))) >= 1e-14:
@@ -974,6 +979,12 @@ class Signal(FrequencyData, TimeData):
 
     @complex.setter
     def complex(self, value):
+        # check here, because the TimeData setter is not called if the
+        # domain is 'freq'
+        if not isinstance(value, bool):
+            raise TypeError(f"complex flag is {type(value).__name__} "
+                            "but must be a boolean")
+
         # from complex=True to complex=False
         if self._complex and not value:
             if self._domain == 'time':
