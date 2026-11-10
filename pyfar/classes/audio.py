@@ -379,8 +379,8 @@ class TimeData(_Audio):
 
         # set from complex=True to complex=False
         if self._complex and not value:
-            if np.all(np.abs(np.imag(self._data))) >= 1e-14:
-                raise ValueError("Signal has complex-valued time data"
+            if np.any(np.abs(np.imag(self._data)) >= 1e-14):
+                raise ValueError("Signal has complex-valued time data, so"
                                  " is_complex flag cannot be `False`.")
             self._complex = value
             self._data = np.real(self._data).astype(float)

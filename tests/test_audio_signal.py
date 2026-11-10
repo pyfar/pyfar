@@ -719,14 +719,26 @@ def test_setter_complex_non_boolean(domain, value):
     assert signal.fft_norm == "rms"
 
 
+def test_setter_complex_assert_partially_complex_time_data():
+    """
+    Test that setting complex to False raises if only some time samples have
+    an imaginary part.
+    """
+    data = [1 + 1j, 0, 0, 0]
+    signal = Signal(data, 44100, is_complex=True)
+    with pytest.raises(ValueError, match="complex-valued time data"):
+        signal.complex = False
+
+    assert signal.complex is True
+    npt.assert_equal(signal.time, np.atleast_2d(data))
+
+
 def test_setter_complex_assert():
     """Test setting complex flag of time and frequency domain signals."""
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be "
-                                         "`False`."):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         signal.complex = False
 
     signal.domain = "freq"
@@ -756,9 +768,7 @@ def test_setter_complex_even():
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j], 44100, 4, "time",
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be "
-                                         "`False`."):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         signal.complex = False
 
     # test setting complex from False to True
@@ -806,9 +816,7 @@ def test_setter_complex_odd():
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 44100, 5, "time",
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be "
-                                         "`False`."):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         signal.complex = False
 
     # test setting complex from False to True
