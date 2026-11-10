@@ -997,6 +997,12 @@ class Signal(FrequencyData, TimeData):
                 self._complex = value
         # from complex=False to complex=True
         if not self._complex and value:
+            # check fft norm before changing any data to not leave the object
+            # in an invalid state if the check fails
+            if self.fft_norm in ["rms", "power", "psd"]:
+                raise ValueError(("'rms', 'power', and 'psd' FFT "
+                                  "normalization is not valid for complex "
+                                  "time signals"))
             if self._domain == 'time':
                 # call complex setter of timeData
                 super(Signal, self.__class__).complex.fset(self, value)
@@ -1006,12 +1012,6 @@ class Signal(FrequencyData, TimeData):
                                                      not fft._is_odd(
                                                       self.n_samples))
                 self._complex = value
-        # check fft norm if complex flag was set
-        if self._complex:
-            if self.fft_norm in ["rms", "power", "psd"]:
-                raise ValueError(("'rms', 'power', and 'psd' FFT "
-                                  "normalization is not valid for complex "
-                                  "time signals"))
 
     @property
     def times(self):

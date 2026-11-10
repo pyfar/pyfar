@@ -719,6 +719,27 @@ def test_setter_complex_non_boolean(domain, value):
     assert signal.fft_norm == "rms"
 
 
+@pytest.mark.parametrize("domain", ["time", "freq"])
+@pytest.mark.parametrize("fft_norm", ["rms", "power", "psd"])
+def test_setter_complex_invalid_fft_norm(domain, fft_norm):
+    """
+    Test that setting complex to True raises for FFT normalizations that are
+    invalid for complex signals and leaves the signal unchanged.
+    """
+    signal = Signal([1, 0, -1, 0], 44100, fft_norm=fft_norm)
+    signal.domain = domain
+    data = signal._data.copy()
+
+    with pytest.raises(ValueError, match="'rms', 'power', and 'psd' FFT "
+                                         "normalization is not valid for "
+                                         "complex time signals"):
+        signal.complex = True
+
+    assert signal.complex is False
+    assert signal.domain == domain
+    npt.assert_equal(signal._data, data)
+
+
 def test_setter_complex_assert_partially_complex_time_data():
     """
     Test that setting complex to False raises if only some time samples have
