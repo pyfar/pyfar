@@ -963,8 +963,14 @@ class Signal(FrequencyData, TimeData):
             elif len(value) != 1:
                 raise ValueError("Multirate signals are not supported.")
             value = value[0]
-        if not isinstance(value, (int, float, np.integer, np.floating)):
+        # bool must be excluded explicitly because it is a subclass of int
+        if not isinstance(value, (int, float, np.integer, np.floating)) \
+                or isinstance(value, bool):
             raise ValueError("Sampling rate needs to be a number.")
+        if not np.isfinite(value) or value <= 0:
+            raise ValueError(
+                "Sampling rate must be a finite positive number but is "
+                f"{value}.")
         self._sampling_rate = value
 
     @property
