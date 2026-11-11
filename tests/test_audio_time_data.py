@@ -105,9 +105,52 @@ def test_setter_complex():
 
     time = TimeData(data=[1 + 1j, 0 + 1j, -1 + 2j], times=[0, .1, .3],
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be `False`"):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         time.complex = False
+
+
+@pytest.mark.parametrize('data', [
+    [1 + 1j, 0, -1],      # only one sample with imaginary part
+    [1, 0 + 1e-13j, -1],  # imaginary part just above the tolerance
+    [1 + 1j, 0 + 1j, 0],  # only one sample without imaginary part
+])
+def test_setter_complex_partially_complex_data(data):
+    """
+    Test that setting complex to False raises if any sample has a
+    non-negligible imaginary part.
+    """
+    time = TimeData(data=data, times=[0, .1, .3], is_complex=True)
+    with pytest.raises(ValueError, match="complex-valued time data"):
+        time.complex = False
+
+    assert time.complex is True
+    npt.assert_equal(time.time, np.atleast_2d(data))
+
+
+def test_setter_complex_negligible_imaginary_part():
+    """
+    Test that imaginary parts below the tolerance are discarded when setting
+    complex to False.
+    """
+    time = TimeData(data=[1 + 1e-15j, 0, -1], times=[0, .1, .3],
+                    is_complex=True)
+    time.complex = False
+
+    assert time.complex is False
+    npt.assert_equal(time.time, [[1., 0., -1.]])
+
+
+@pytest.mark.parametrize('value', ["False", 0, 1, None])
+def test_setter_complex_non_boolean(value):
+    """Test that the complex setter rejects non-boolean values."""
+    time = TimeData(data=[1, 0, -1], times=[0, .1, .3])
+    with pytest.raises(TypeError, match=f"complex flag is "
+                                        f"{type(value).__name__} but must "
+                                        "be a boolean"):
+        time.complex = value
+
+    assert time.complex is False
+    assert time.time.dtype.kind == "f"
 
 
 def test_reshape():

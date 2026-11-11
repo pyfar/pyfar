@@ -701,14 +701,61 @@ def test_setter_complex_(domain, is_complex, kind):
     assert signal.time.dtype.kind == kind
 
 
+@pytest.mark.parametrize("domain", ["time", "freq"])
+@pytest.mark.parametrize("value", ["False", 0, 1, None])
+def test_setter_complex_non_boolean(domain, value):
+    """Test that the complex setter rejects non-boolean values."""
+    signal = Signal([1, 0, -1], 44100)
+    signal.domain = domain
+    with pytest.raises(TypeError, match=f"complex flag is "
+                                        f"{type(value).__name__} but must "
+                                        "be a boolean"):
+        signal.complex = value
+
+    assert signal.complex is False
+
+
+@pytest.mark.parametrize("domain", ["time", "freq"])
+@pytest.mark.parametrize("fft_norm", ["rms", "power", "psd"])
+def test_setter_complex_invalid_fft_norm(domain, fft_norm):
+    """
+    Test that setting complex to True raises errors for FFT normalizations
+    that are invalid for complex signals and leaves the signal unchanged.
+    """
+    signal = Signal([1, 0, -1, 0], 44100, fft_norm=fft_norm)
+    signal.domain = domain
+    data = signal._data.copy()
+
+    with pytest.raises(ValueError, match="'rms', 'power', and 'psd' FFT "
+                                         "normalization is not valid for "
+                                         "complex time signals"):
+        signal.complex = True
+
+    assert signal.complex is False
+    assert signal.domain == domain
+    npt.assert_equal(signal._data, data)
+
+
+def test_setter_complex_assert_partially_complex_time_data():
+    """
+    Test that setting complex to False raises if only some time samples have
+    an imaginary part.
+    """
+    data = [1 + 1j, 0, 0, 0]
+    signal = Signal(data, 44100, is_complex=True)
+    with pytest.raises(ValueError, match="complex-valued time data"):
+        signal.complex = False
+
+    assert signal.complex is True
+    npt.assert_equal(signal.time, np.atleast_2d(data))
+
+
 def test_setter_complex_assert():
     """Test setting complex flag of time and frequency domain signals."""
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j], 44100, 4, "time",
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be "
-                                         "`False`."):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         signal.complex = False
 
     signal.domain = "freq"
@@ -738,9 +785,7 @@ def test_setter_complex_even():
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j], 44100, 4, "time",
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be "
-                                         "`False`."):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         signal.complex = False
 
     # test setting complex from False to True
@@ -788,9 +833,7 @@ def test_setter_complex_odd():
 
     signal = Signal([0 + 1j, 1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j], 44100, 5, "time",
                     is_complex=True)
-    with pytest.raises(ValueError, match="Signal has complex-valued time data"
-                                         " is_complex flag cannot be "
-                                         "`False`."):
+    with pytest.raises(ValueError, match="complex-valued time data"):
         signal.complex = False
 
     # test setting complex from False to True
