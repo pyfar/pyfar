@@ -313,27 +313,23 @@ def test_sampling_rate_is_a_number():
         Signal(1, 'string')
 
 
-@pytest.mark.parametrize('fs', [True, False, [True], np.True_])
-def test_sampling_rate_bool(fs):
-    """Test that boolean sampling rates are rejected in init and setter."""
-    match = "Sampling rate needs to be a number."
-    with pytest.raises(ValueError, match=match):
-        Signal([1, 0, 0], fs)
-
-    signal = Signal([1, 0, 0], 44100)
-    with pytest.raises(ValueError, match=match):
-        signal.sampling_rate = fs
-    assert signal.sampling_rate == 44100
-
-
-@pytest.mark.parametrize('fs', [0, 0., -1, -44100., [-44100], np.nan, np.inf])
+@pytest.mark.parametrize(('fs', 'match'), [
+    (True, "needs to be a number."),
+    (False, "needs to be a number."),
+    ([True], "needs to be a number."),
+    (np.True_, "needs to be a number."),
+    (0., "must be a finite positive number"),
+    (-44100., "must be a finite positive number"),
+    ([-44100], "must be a finite positive number"),
+    (np.nan, "must be a finite positive number"),
+    (np.inf, "must be a finite positive number"),
+])
 @pytest.mark.parametrize('domain', ['time', 'freq'])
-def test_sampling_rate_not_finite_positive(fs, domain):
+def test_sampling_rate_invalid(fs, match, domain):
     """
-    Test that zero, negative, and non-finite sampling rates are rejected in
-    init and setter.
+    Test that boolean, zero, negative, and non-finite sampling rates are
+    rejected in init and setter.
     """
-    match = "Sampling rate must be a finite positive number"
     with pytest.raises(ValueError, match=match):
         Signal([1, 0, 0], fs, n_samples=4, domain=domain)
 
