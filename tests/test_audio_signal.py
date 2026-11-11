@@ -723,7 +723,7 @@ def test_setter_complex_non_boolean(domain, value):
 @pytest.mark.parametrize("fft_norm", ["rms", "power", "psd"])
 def test_setter_complex_invalid_fft_norm(domain, fft_norm):
     """
-    Test that setting complex to True raises for FFT normalizations that are
+    Test that setting complex to True raises errors for FFT normalizations that are
     invalid for complex signals and leaves the signal unchanged.
     """
     signal = Signal([1, 0, -1, 0], 44100, fft_norm=fft_norm)
