@@ -306,7 +306,7 @@ def test_sampling_rate_parsing(fs):
     ([], "cannot be empty"),
     ("string", "needs to be a number."),
     (None, "needs to be a number."),
-    (True, "needs to be a number."),
+    (1+1j, "needs to be a number."),
     (False, "needs to be a number."),
     ([True], "needs to be a number."),
     (np.True_, "needs to be a number."),
