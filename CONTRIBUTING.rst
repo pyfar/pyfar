@@ -46,7 +46,7 @@ Ready to contribute? Here's how to set up `pyfar` for local development using th
 
     $ conda create --name pyfar python
     $ conda activate pyfar
-    $ pip install -e ".[dev]"
+    $ pip install --group dev .
 
 4. Create a branch for local development. Indicate the intention of your branch in its respective name (i.e. `feature/branch-name` or `bugfix/branch-name`)::
 
