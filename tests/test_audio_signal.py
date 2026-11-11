@@ -301,19 +301,11 @@ def test_sampling_rate_parsing(fs):
     Signal([0], np.array(fs))
 
 
-def test_sampling_rate_multirate():
-    match="Multirate signals are not supported."
-    with pytest.raises(ValueError, match=match):
-        Signal(1, [1,2])
-
-
-def test_sampling_rate_is_a_number():
-    match="Sampling rate needs to be a number."
-    with pytest.raises(ValueError, match=match):
-        Signal(1, 'string')
-
-
 @pytest.mark.parametrize(('fs', 'match'), [
+    ([1, 2], "Multirate signals are not supported"),
+    ([], "cannot be empty"),
+    ("string", "needs to be a number."),
+    (None, "needs to be a number."),
     (True, "needs to be a number."),
     (False, "needs to be a number."),
     ([True], "needs to be a number."),
@@ -327,8 +319,8 @@ def test_sampling_rate_is_a_number():
 @pytest.mark.parametrize('domain', ['time', 'freq'])
 def test_sampling_rate_invalid(fs, match, domain):
     """
-    Test that boolean, zero, negative, and non-finite sampling rates are
-    rejected in init and setter.
+    Test that various invalid types and values for sampling rates
+    raise their respective errors.
     """
     with pytest.raises(ValueError, match=match):
         Signal([1, 0, 0], fs, n_samples=4, domain=domain)
