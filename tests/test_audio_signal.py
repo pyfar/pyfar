@@ -714,10 +714,6 @@ def test_setter_complex_non_boolean(domain, value):
 
     assert signal.complex is False
 
-    # example from issue #975
-    signal.fft_norm = "rms"
-    assert signal.fft_norm == "rms"
-
 
 @pytest.mark.parametrize("domain", ["time", "freq"])
 @pytest.mark.parametrize("fft_norm", ["rms", "power", "psd"])
