@@ -402,7 +402,8 @@ def test_level_decibels_replace_zeros(quantity, dtype):
 @pytest.mark.parametrize("quantity", QUANTITIES)
 def test_level_decibels_replace_zeros_keeps_non_zeros(quantity):
     """Test that `replace_zeros` does not accidentally
-    change non-zero values."""
+    change non-zero values.
+    """
     data = [1e-10, 0.5, 2]
     replaced = pf.level.to_decibels(data, quantity, replace_zeros=True)
     unchanged = pf.level.to_decibels(data, quantity, replace_zeros=False)
