@@ -125,7 +125,7 @@ def to_decibels(
         data,
         quantity: Literal["power", "amplitude"],
         reference_pressure: float = pf.constants.reference_sound_pressure,
-        replace_zeros: bool = False,
+        replace_zeros: bool = True,
 ) -> np.ndarray | float:
     r"""Convert power or amplitude quantities to decibels (dB).
 
@@ -169,7 +169,7 @@ def to_decibels(
         If ``True``, zeros in the data are replaced by the float epsilon to
         avoid ``-inf`` values and resulting numpy warnings. Amplitude
         quantities are squared before replacing zeros. The default is
-        ``False``.
+        ``True``.
 
     Returns
     -------

@@ -376,7 +376,7 @@ def test_level_decibels_zeros_without_replacing(quantity):
     replaced.
     """
     with pytest.warns(RuntimeWarning, match="divide by zero"):
-        result = pf.level.to_decibels([0, 1], quantity, 1)
+        result = pf.level.to_decibels([0, 1], quantity, 1, False)
     assert result[0] == -np.inf
 
 
