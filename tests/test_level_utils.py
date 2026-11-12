@@ -422,7 +422,7 @@ def test_level_decibels_invalid_quantity(function, quantity):
     ([-1], "negative"),
     ([1, -1], "negative"),
 ])
-def test_level_decibels_invalid_power_input(data, match):
+def test_level_decibels_to_decibels_invalid_power_input(data, match):
     """Test that complex and negative power quantities raise an error.
     Complex data must raise even if the imaginary part is zero.
     """
@@ -431,7 +431,7 @@ def test_level_decibels_invalid_power_input(data, match):
 
 
 @pytest.mark.parametrize("quantity", QUANTITIES)
-def test_level_decibels_complex_levels(quantity):
+def test_level_decibels_from_decibels_invalid_input(quantity):
     """Test that complex levels raise an error, since levels must be
     real-valued.
     """
