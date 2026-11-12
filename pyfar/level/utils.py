@@ -1,6 +1,6 @@
 """Public utility functions related to sound level calculations."""
 
-from typing import Literal, assert_never
+from typing import Literal
 import numpy as np
 import scipy.signal
 import pyfar as pf
