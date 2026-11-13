@@ -498,24 +498,6 @@ class Coordinates():
             Array of shape ``cshape + (3,)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`x`, :py:func:`y`, and
             :py:func:`z`, in that order.
-
-        Examples
-        --------
-        The coordinates of each point are stored along the last axis:
-
-        >>> import pyfar as pf
-        >>> coordinates = pf.Coordinates([1, 2], [3, 4], [5, 6])
-        >>> coordinates.cartesian
-        array([[1., 3., 5.],
-               [2., 4., 6.]])
-
-        Multi-dimensional channel shapes are preserved:
-
-        >>> coordinates = pf.Coordinates([[1, 2], [3, 4]], 0, 0)
-        >>> coordinates.cshape
-        (2, 2)
-        >>> coordinates.cartesian.shape
-        (2, 2, 3)
         """
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
