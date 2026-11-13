@@ -25,9 +25,7 @@ generating, and plotting audio signals.
         :link: readme.html
         :text-align: center
         :padding: 0 0 3 3
-
-        **Getting Started**
-        ^^^^
+        :header: **Getting Started**
 
         .. raw:: html
 
@@ -39,9 +37,7 @@ generating, and plotting audio signals.
         :link-type: ref
         :text-align: center
         :padding: 0 0 3 3
-
-        **API Reference**
-        ^^^^
+        :header: **API Reference**
 
         .. raw:: html
 
@@ -52,9 +48,7 @@ generating, and plotting audio signals.
         :link: contributing.html
         :text-align: center
         :padding: 0 0 3 3
-
-        **Contributing**
-        ^^^^
+        :header: **Contributing**
 
         .. raw:: html
 
@@ -64,9 +58,7 @@ generating, and plotting audio signals.
         :link: history.html
         :text-align: center
         :padding: 0 0 3 3
-
-        **History**
-        ^^^^
+        :header: **History**
 
         .. raw:: html
 
