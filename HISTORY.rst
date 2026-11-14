@@ -7,7 +7,7 @@ Unreleased
 
 Fixed
 ^^^^^
-- Scale spherical-to-Cartesian rounding tolerance for radii above one,
+- Scale spherical- and cylindrical-to-Cartesian rounding tolerance for radii above one,
   preserving the existing tolerance for smaller radii (Issue #921).
 - The `TimeData.time` setter now raises a ValueError if the number of time data does not match the length of `TimeData.times` (PR #976).
 - Fixed cyclic convolution with one-sample filters in `pyfar.dsp.convolve` (PR #987).
@@ -16,6 +16,13 @@ Fixed
 - Added missing deprecation note in docs for `pyfar.dsp.filter.fractional_octave_frequencies` (PR #961)
 - A bug causing an error that claimed that the right (or left) sided spectrum does not exist for a `pyfar.FrequencyData` object containing a single, positive (or negative) frequency (PR #978).
 - Fixed `FilterFIR.minimum_impulse_response_length` raising an error for `unit='s'` (PR #980).
+- Catch deprecation warnings for `pyfar.Orientations`, `pyfar.dsp.regularized_spectrum_inversion` and `pyfar.dsp.deconvolve`` in tests (PR #989).
+- Replaced `matplotlib.transforms.nonsingular`, which was deprecated in Matplotlib 3.11, with `matplotlib.ticker.Locator().nonsigular` in `pyfar.plot.ticker.LogFormatterITAToolbox` and require Matplotlib >= 3.2 (PR #990).
+- Updated docs to match the new card-header syntax from sphinx-build v0.8.0 (PR #1001).
+
+Maintenance
+^^^^^^^^^^^
+- Restricted deprecation tests to main and develop; added Slack notifications for scheduled job failures on main and develop (PR #982)
 
 0.8.1 (2026-08-14)
 ------------------

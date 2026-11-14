@@ -4,6 +4,7 @@ import numpy.testing as npt
 import pytest
 from unittest.mock import patch
 import pyfar
+from pyfar.classes.warnings import PyfarDeprecationWarning
 from pyfar.testing.stub_utils import stub_str_to_type, stub_is_pyfar_type
 
 import os.path
@@ -208,7 +209,8 @@ def test_write_read_orientations(orientations, tmpdir):
     """
     filename = os.path.join(tmpdir, 'orientations.far')
     io.write(filename, orientations=orientations)
-    actual = io.read(filename)['orientations']
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        actual = io.read(filename)['orientations']
     assert isinstance(actual, Orientations)
     assert actual == orientations
 
@@ -424,7 +426,8 @@ def test_write_read_multiplePyfarObjects(
         signal=sine,
         matrix_2d_int=matrix_2d_int,
         **dict_of_builtins)
-    actual = io.read(filename)
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filterObject
     assert isinstance(actual['filterFIR'], fo.FilterFIR)
@@ -490,7 +493,8 @@ def test_write_read_multiplePyfarObjectsWithCompression(
         signal=sine,
         matrix_2d_int=matrix_2d_int,
         **dict_of_builtins)
-    actual = io.read(filename)
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        actual = io.read(filename)
     assert isinstance(actual['filter'], fo.Filter)
     assert actual['filter'] == filterObject
     assert isinstance(actual['filterFIR'], fo.FilterFIR)

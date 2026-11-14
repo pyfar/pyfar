@@ -9,6 +9,7 @@ from pyfar import Rotation
 from pyfar import Coordinates
 from pyfar import FrequencyData, TimeData
 import pyfar.classes.filter as fo
+from pyfar.classes.warnings import PyfarDeprecationWarning
 import pyfar.signals
 
 from pyfar.testing import stub_utils
@@ -753,7 +754,8 @@ def positions():
 def orientations(views, ups):
     """Orientations object uses fixtures `views` and `ups`.
     """
-    return Orientations.from_view_up(views, ups)
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        return Orientations.from_view_up(views, ups)
 
 
 @pytest.fixture()

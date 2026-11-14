@@ -728,14 +728,6 @@ def test_sph2cart_radius_scaled_axis_zeros(
                            * dtype(radius))
 
 
-@pytest.mark.parametrize('radius', [0.1, 0.5])
-def test_sph2cart_small_radius_zero_tolerance(radius):
-    x, y, z = sph2cart(2 * np.pi, np.pi / 2, radius)
-    npt.assert_array_equal(x, [radius])
-    npt.assert_array_equal(y, [0])
-    npt.assert_array_equal(z, [0])
-
-
 def test_sph2cart_mixed_radii_broadcast():
     radius = np.array([[0.5], [2], [1e6]])
     x, y, z = sph2cart(
@@ -759,6 +751,34 @@ def test_sph2cart_radius_scaled_integer_radii():
     npt.assert_array_equal(x, -radius.astype(float))
     npt.assert_array_equal(y, np.zeros(3))
     npt.assert_array_equal(z, np.zeros(3))
+
+
+@pytest.mark.parametrize('converter', ['spherical', 'cylindrical'])
+@pytest.mark.parametrize('radius', [0.5, 1.])
+def test_coordinate_zero_tolerance_floor(converter, radius):
+    eps = np.finfo(float).eps
+    azimuth = np.array([0.75, 1.5]) * eps / radius
+    if converter == 'spherical':
+        _, y, _ = sph2cart(azimuth, np.pi / 2, radius)
+    else:
+        _, y, _ = cyl2cart(azimuth, 1, radius)
+    assert y[0] == 0
+    assert y[1] > eps
+
+
+@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize('radius', [0.5, 2, -2, 1e20])
+def test_cyl2cart_radius_scaled_axis_zeros(dtype, radius):
+    height = np.array([1e-4, 0, -1e-4, 2], dtype=dtype)
+    original = height.copy()
+    x, y, z = cyl2cart(
+        np.array([0, np.pi / 2, np.pi, 3 * np.pi / 2], dtype=dtype),
+        height, dtype(radius))
+    npt.assert_array_equal(x, dtype(radius) * np.array([1, 0, -1, 0]))
+    npt.assert_array_equal(y, dtype(radius) * np.array([0, 1, 0, -1]))
+    npt.assert_array_equal(z, original)
+    npt.assert_array_equal(height, original)
+    assert x.dtype == y.dtype == z.dtype == dtype
 
 
 @pytest.mark.parametrize(('convention', 'angles', 'direction'), [

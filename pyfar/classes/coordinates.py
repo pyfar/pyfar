@@ -1889,8 +1889,11 @@ def cyl2cart(azimuth, height, radius):
     else:
         z = height
 
-    x[np.abs(x) < np.finfo(x.dtype).eps] = 0
-    y[np.abs(y) < np.finfo(y.dtype).eps] = 0
+    # Only radial components inherit roundoff proportional to radius.
+    atol = np.finfo(x.dtype).eps * np.maximum(
+        1, np.abs(radius.astype(x.dtype, copy=False)))
+    x[np.abs(x) < atol] = 0
+    y[np.abs(y) < atol] = 0
     z[np.abs(z) < np.finfo(x.dtype).eps] = 0
 
     return x, y, z

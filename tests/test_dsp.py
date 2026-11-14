@@ -6,6 +6,7 @@ import pyfar
 import warnings
 
 from pyfar.signals import impulse
+from pyfar.classes.warnings import PyfarDeprecationWarning
 from pyfar import dsp
 import pyfar as pf
 
@@ -265,7 +266,8 @@ def test__cross_fade():
 
 def test_regularized_spectrum_inversion(impulse):
     """Test regularized_spectrum_inversion."""
-    res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        res = dsp.regularized_spectrum_inversion(impulse * 2, [200, 10e3])
 
     ind = impulse.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(
@@ -278,7 +280,9 @@ def test_regularized_spectrum_inversion(impulse):
 
 def test_regularized_spectrum_inversion_complex(impulse_complex):
     """Test regularized_spectrum_inversion for complex input signals."""
-    res = dsp.regularized_spectrum_inversion(impulse_complex * 2, [200, 10e3])
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        res = dsp.regularized_spectrum_inversion(
+            impulse_complex * 2, [200, 10e3])
 
     ind = impulse_complex.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(
@@ -293,15 +297,19 @@ def test_regularized_spectrum_inversion_assertions(impulse):
     """Test regularized_spectrum_inversion errors."""
     with pytest.raises(
             ValueError, match='needs to be of type pyfar.Signal'):
-        dsp.regularized_spectrum_inversion('error', (1, 2))
+        with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+            dsp.regularized_spectrum_inversion('error', (1, 2))
 
     with pytest.raises(
             ValueError, match='lower and upper limits'):
-        dsp.regularized_spectrum_inversion(impulse, (2))
+        with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+            dsp.regularized_spectrum_inversion(impulse, (2))
 
     with pytest.raises(
             TypeError, match="The normalized parameter"):
-        dsp.regularized_spectrum_inversion(impulse, [200, 10e3], normalized=1)
+        with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+            dsp.regularized_spectrum_inversion(
+                impulse, [200, 10e3], normalized=1)
 
 
 def test_regularized_spectrum_inversion_normalized(impulse):
@@ -309,15 +317,17 @@ def test_regularized_spectrum_inversion_normalized(impulse):
     impulse.fft_norm = 'amplitude'
 
     # normalized -> True
-    res = dsp.regularized_spectrum_inversion(
-        impulse * 2, [200, 10e3], normalized=True)
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        res = dsp.regularized_spectrum_inversion(
+            impulse * 2, [200, 10e3], normalized=True)
     ind = impulse.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(
         res.freq[:, ind[0]:ind[1]],
         np.ones((1, ind[1]-ind[0]), dtype=complex)*0.5*0.5*impulse.n_samples)
     # normalized -> False
-    res = dsp.regularized_spectrum_inversion(
-        impulse * 2, [200, 10e3], normalized=False)
+    with pytest.warns(PyfarDeprecationWarning, match="will be deprecated"):
+        res = dsp.regularized_spectrum_inversion(
+            impulse * 2, [200, 10e3], normalized=False)
     ind = impulse.find_nearest_frequency([200, 10e3])
     npt.assert_allclose(
         res.freq[:, ind[0]:ind[1]],
