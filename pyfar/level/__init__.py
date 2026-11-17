@@ -12,6 +12,8 @@ from .utils import (
     time_weighted_pressure,
     energetic_mean,
     energetic_sum,
+    to_decibels,
+    from_decibels,
 )
 
 __all__ = [
@@ -23,4 +25,6 @@ __all__ = [
     "time_weighted_level",
     "energetic_mean",
     "energetic_sum",
+    "to_decibels",
+    "from_decibels",
 ]

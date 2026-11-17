@@ -2,10 +2,10 @@
 between many of the standardized level functions.
 """
 
+import numbers
 import numpy as np
 import pyfar as pf
 import scipy.ndimage
-from typing import Literal
 
 
 def _check_signal_type(signal):
@@ -16,6 +16,17 @@ def _check_signal_type(signal):
         raise TypeError("'signal' parameter must be a pyfar.Signal")
     signal: pf.Signal = signal
     return signal
+
+
+def _check_reference_pressure(reference_pressure):
+    """Raises an error if the reference pressure is not a positive number."""
+    # numbers.Real also covers numpy scalars such as np.float32 and np.int64,
+    # but also bool, which is a subclass of int
+    if (not isinstance(reference_pressure, numbers.Real)
+            or isinstance(reference_pressure, bool)):
+        raise TypeError("Reference pressure must be a number.")
+    if reference_pressure <= 0:
+        raise ValueError("Reference pressure must be positive.")
 
 
 def _apply_frequency_weighting(signal, frequency_weighting):
@@ -73,22 +84,6 @@ def _time_weighting_to_constant(time_weighting: str):
     return time_constant
 
 
-def _energies_to_levels(energies: np.ndarray,
-                        reference_pressure: float,
-                        replace_zeros: bool = False):
-    """Converts energies to levels in dB relative to the reference pressure.
-    Raises an error if the reference pressure is zero.
-    If `replace_zeros` is ``True``, zeros in the energies are replaced with
-    the float epsilon to avoid ``-inf`` values and resulting numpy warnings.
-    """
-    if reference_pressure == 0:
-        raise ValueError("Reference pressure must not be zero.")
-    if replace_zeros:
-        energies = np.where(
-            energies == 0, np.finfo(energies.dtype).eps, energies)
-    return 10 * np.log10(energies / reference_pressure**2)
-
-
 def _moving_average(array: np.ndarray,
                     window_size: int,
                     axis: int = -1,
@@ -140,20 +135,3 @@ def _moving_average(array: np.ndarray,
         array, size=window_size, axis=axis, mode=mode, origin=origin)
     return result
 
-
-def _combine_levels(levels, axis: int | tuple[int, ...] | None,
-                    operation: Literal["mean", "sum"]):
-    levels = np.asarray(levels)
-    if np.issubdtype(levels.dtype, np.complexfloating):
-        raise ValueError("Levels must be real-valued.")
-    if levels.size == 0:
-        raise ValueError("Levels must not be empty.")
-
-    energies = 10 ** (levels / 10)
-    if operation == "mean":
-        combined_energy = np.mean(energies, axis=axis)
-    elif operation == "sum":
-        combined_energy = np.sum(energies, axis=axis)
-
-    combined_level = 10 * np.log10(combined_energy)
-    return combined_level
