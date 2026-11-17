@@ -151,8 +151,8 @@ def to_decibels(
     data : array-like
         The data to convert. Must be a numpy array or a type that can be
         converted to one. Power quantities must be real-valued and
-        non-negative. Amplitude quantities can be negative or complex, in
-        which case their absolute value is used.
+        non-negative. For amplitude quantities, the absolute value
+        (magnitude) is used.
     quantity : str
         The type of the input data:
 
