@@ -90,7 +90,7 @@ jobs:
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
       - run:
           name: install dependencies
-          command: pip install ".[tests]"
+          command: pip install --group tests .
       - run:
           name: Run tests
           command: pytest
@@ -109,7 +109,7 @@ jobs:
       - checkout
       - run:
           name: install dependencies
-          command: pip install ".[tests]"
+          command: pip install --group tests .
       - run:
           name: Ruff
           command: ruff check
@@ -131,7 +131,7 @@ jobs:
       - run:
           name: Sphinx
           command: |
-            pip install ".[docs]"
+          command: pip install --group docs .
             cd docs/
             make html SPHINXOPTS="-W"
       - notify_scheduled_failure
@@ -152,7 +152,7 @@ jobs:
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
       - run:
           name: install dependencies
-          command: pip install ".[tests]"
+          command: pip install --group tests .
       - run: |
           python --version
       - run:
@@ -176,7 +176,7 @@ jobs:
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
       - run:
           name: install dependencies
-          command: pip install ".[deploy]"
+          command: pip install --group deploy .
       - run:
           name: deploy
           command: |  # create whl, install twine and publish to Test PyPI
@@ -200,7 +200,7 @@ jobs:
           command: sudo apt-get update && sudo apt-get install -y libsndfile1
       - run:
           name: install dependencies
-          command: pip install ".[deploy]"
+          command: pip install --group deploy .
       - run:
           name: deploy
           command: |  # create whl, install twine and publish to Test PyPI
