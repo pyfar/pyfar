@@ -36,6 +36,7 @@ Modules
    modules/pyfar.dsp.filter
    modules/pyfar.io
    modules/pyfar.plot
+   modules/pyfar.plot.ticker
    modules/pyfar.signals
    modules/pyfar.signals.files
    modules/pyfar.utils
