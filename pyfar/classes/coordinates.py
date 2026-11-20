@@ -495,7 +495,7 @@ class Coordinates():
         Returns
         -------
         cartesian : numpy.ndarray
-            Array of shape ``cshape + (3,)``, where `cshape` is the channel
+            Array of shape ``(cshape, 3)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`x`, :py:func:`y`, and
             :py:func:`z`, in that order.
         """
@@ -517,7 +517,7 @@ class Coordinates():
         Returns
         -------
         spherical_elevation : numpy.ndarray
-            Array of shape ``cshape + (3,)``, where `cshape` is the channel
+            Array of shape ``(cshape, 3)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`azimuth`,
             :py:func:`elevation`, and :py:func:`radius`, in that order.
         """
@@ -545,7 +545,7 @@ class Coordinates():
         Returns
         -------
         spherical_colatitude : numpy.ndarray
-            Array of shape ``cshape + (3,)``, where `cshape` is the channel
+            Array of shape ``(cshape, 3)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`azimuth`,
             :py:func:`colatitude`, and :py:func:`radius`, in that order.
         """
@@ -571,7 +571,7 @@ class Coordinates():
         Returns
         -------
         spherical_side : numpy.ndarray
-            Array of shape ``cshape + (3,)``, where `cshape` is the channel
+            Array of shape ``(cshape, 3)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`lateral`, :py:func:`polar`,
             and :py:func:`radius`, in that order.
         """
@@ -600,7 +600,7 @@ class Coordinates():
         Returns
         -------
         spherical_front : numpy.ndarray
-            Array of shape ``cshape + (3,)``, where `cshape` is the channel
+            Array of shape ``(cshape, 3)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`frontal`, :py:func:`upper`,
             and :py:func:`radius`, in that order.
         """
@@ -627,7 +627,7 @@ class Coordinates():
         Returns
         -------
         cylindrical : numpy.ndarray
-            Array of shape ``cshape + (3,)``, where `cshape` is the channel
+            Array of shape ``(cshape, 3)``, where `cshape` is the channel
             shape. The last axis contains :py:func:`azimuth`, :py:func:`z`,
             and :py:func:`rho`, in that order.
         """
