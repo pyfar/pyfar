@@ -70,8 +70,8 @@ def test_coordinates_init_val_and_weights():
     npt.assert_allclose(coords.weights, [.5, .5])
 
     # incorrect number of weights
-    with pytest.raises(AssertionError):
-        Coordinates([1, 2], 0, 0, weights=.5)
+    with pytest.raises(ValueError, match="weights cannot be broadcasted"):
+        Coordinates([1], 0, 0, weights=[.5, 0.5])
 
 
 def test_show():
@@ -704,9 +704,9 @@ def test__repr__dim():
 @pytest.mark.parametrize('z', [0, 1, -1.])
 def test_coordinates_init_from_cartesian(x, y, z):
     coords = Coordinates.from_cartesian(x, y, z)
-    npt.assert_allclose(coords._x, x)
-    npt.assert_allclose(coords._y, y)
-    npt.assert_allclose(coords._z, z)
+    npt.assert_allclose(coords._data[..., 0], x)
+    npt.assert_allclose(coords._data[..., 1], y)
+    npt.assert_allclose(coords._data[..., 2], z)
 
 
 @pytest.mark.parametrize('x', [0, 1, -1.])
@@ -716,9 +716,9 @@ def test_coordinates_init_from_cartesian(x, y, z):
 @pytest.mark.parametrize('comment', ['0'])
 def test_coordinates_init_from_cartesian_with(x, y, z, weights, comment):
     coords = Coordinates.from_cartesian(x, y, z, weights, comment)
-    npt.assert_allclose(coords._x, x)
-    npt.assert_allclose(coords._y, y)
-    npt.assert_allclose(coords._z, z)
+    npt.assert_allclose(coords._data[..., 0], x)
+    npt.assert_allclose(coords._data[..., 1], y)
+    npt.assert_allclose(coords._data[..., 2], z)
     assert coords.comment == comment
     assert coords.weights == weights
 
@@ -731,9 +731,9 @@ def test_coordinates_init_from_spherical_colatitude(x, y, z):
     coords = Coordinates.from_spherical_colatitude(upper, frontal, rad)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
 
 
 @pytest.mark.parametrize('x', [0, 1, -1.])
@@ -748,9 +748,9 @@ def test_coordinates_init_from_spherical_colatitude_with(
         upper, frontal, rad, weights, comment)
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
     assert coords.comment == comment
     assert coords.weights == weights
 
@@ -767,9 +767,9 @@ def test_coordinates_init_from_spherical_elevation_with(
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
     assert coords.comment == comment
     assert coords.weights == weights
 
@@ -786,9 +786,9 @@ def test_coordinates_init_from_spherical_side_with(
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
     assert coords.comment == comment
     assert coords.weights == weights
 
@@ -805,9 +805,9 @@ def test_coordinates_init_from_spherical_front_with(
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     y, z, x = sph2cart(frontal, upper, radius)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
     assert coords.comment == comment
     assert coords.weights == weights
 
@@ -824,9 +824,9 @@ def test_coordinates_init_from_cylindrical_with(
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     x, y, z = cyl2cart(azimuth, z, rho)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
     assert coords.comment == comment
     assert coords.weights == weights
 
@@ -839,9 +839,9 @@ def test_coordinates_init_from_spherical_elevation(azimuth, elevation, radius):
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     x, y, z = sph2cart(azimuth, np.pi / 2 - elevation, radius)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
 
 
 @pytest.mark.parametrize('lateral', [0, np.pi/2, -np.pi/2])
@@ -852,9 +852,9 @@ def test_coordinates_init_from_spherical_side(lateral, polar, radius):
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     x, z, y = sph2cart(polar, np.pi / 2 - lateral, radius)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
 
 
 @pytest.mark.parametrize('frontal', [0, np.pi, -np.pi, 3*np.pi])
@@ -865,9 +865,9 @@ def test_coordinates_init_from_spherical_front(frontal, upper, radius):
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     y, z, x = sph2cart(frontal, upper, radius)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
 
 
 @pytest.mark.parametrize('azimuth', [0, np.pi, -np.pi, 3*np.pi])
@@ -878,9 +878,9 @@ def test_coordinates_init_from_cylindrical(azimuth, z, radius_z):
     # use atol here because of numerical rounding issues introduced in
     # the coordinate conversion
     x, y, z = cyl2cart(azimuth, z, radius_z)
-    npt.assert_allclose(coords._x, x, atol=1e-15)
-    npt.assert_allclose(coords._y, y, atol=1e-15)
-    npt.assert_allclose(coords._z, z, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 0], x, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 1], y, atol=1e-15)
+    npt.assert_allclose(coords._data[..., 2], z, atol=1e-15)
 
 
 def test_angle_conversion_wrong_input():
@@ -959,3 +959,11 @@ def test__repr__weights():
     coords = Coordinates(0, 0, 0, weights=1)
     x = coords.__repr__()
     assert 'Contains sampling weights' in x
+
+
+def test_change_points_after_weights():
+    coords = Coordinates(np.ones((2, 2)), 0, 0, weights=1)
+    npt.assert_allclose(coords.weights, np.ones((2, 2)))
+    coords.x = 0
+    npt.assert_allclose(coords.weights, np.ones((2, 2)))
+
