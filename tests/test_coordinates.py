@@ -452,6 +452,19 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
 
 
 @pytest.mark.parametrize(
+    "convention", [
+        "spherical_elevation", "spherical_colatitude",
+        "spherical_side", "spherical_front",
+    ])
+def test_spherical_setter_multidimensional(convention):
+    """Assigning a spherical grid preserves the Cartesian points and shape."""
+    original = Coordinates([[1, 2, 3], [4, 5, 6]], 1, -1)
+    result = Coordinates()
+    setattr(result, convention, getattr(original, convention))
+    npt.assert_allclose(result.cartesian, original.cartesian)
+
+
+@pytest.mark.parametrize(
     ("x", "actual"), [
         (0, np.array([0])),
         (np.ones((1,)), np.ones((1,))),
