@@ -1235,10 +1235,10 @@ class StateSpaceModel(_LTISystem):
         assert all(M.ndim == 2 for M in (A, B, C, D))
         assert A.shape[1] == A.shape[0], "A needs to be square."
         assert B.shape[0] == A.shape[0], (
-            f"B needs to be of shape ({A.shape[0]}, m)."
+            f"B needs to be of shape ({A.shape[0]}, n_inputs)."
         )
         assert C.shape[1] == A.shape[0], (
-            f"C needs to be of shape (p, {A.shape[0]})."
+            f"C needs to be of shape (n_outputs, {A.shape[0]})."
         )
         assert D.shape == (C.shape[0], B.shape[1]), (
             f"D needs to be of shape ({C.shape[0], B.shape[1]})."
