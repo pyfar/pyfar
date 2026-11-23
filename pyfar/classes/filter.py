@@ -1172,8 +1172,7 @@ class StateSpaceModel(_LTISystem):
 
     Note that, unlike an impulse response or transfer function representation,
     the state-space representation is not unique. Different state-space models
-    can represent the same input-output
-    behaviour.
+    can represent the same input-output behaviour.
 
     For a short introduction, see: https://ccrma.stanford.edu/~jos/StateSpace/
 
@@ -1341,7 +1340,7 @@ class StateSpaceModel(_LTISystem):
         Returns
         -------
         out : Signal
-            The processed output signal with `out.cshape = (self.n_ouputs,)`.
+            The processed output signal with `out.cshape = (self.n_outputs,)`.
         """
         assert signal.sampling_rate == self.sampling_rate, (
             "The sampling rates of the signal and the state-space model"
@@ -1416,4 +1415,4 @@ class StateSpaceModel(_LTISystem):
     def __repr__(self):
         """Representation of the state-space model."""
         return (f'StateSpaceModel (n={self.order}, '
-                'I/O={self.n_inputs}/{self.n_outputs})')
+                f'I/O={self.n_inputs}/{self.n_outputs})')
