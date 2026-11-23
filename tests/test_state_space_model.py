@@ -88,6 +88,16 @@ def test_state_space_process_matches_convolution():
     npt.assert_allclose(y_ss, expected, atol=1e-12)
 
 
+def test_state_space_process_updates_state():
+    A, B, C, D = _fir_state_space([0.2, 0.3, 0.5])
+    ss = StateSpaceModel(A, B, C, D, sampling_rate=44100)
+
+    ss.process(pf.Signal([1, 2, 3], 44100))
+
+    # The FIR state stores the two most recent inputs, newest first.
+    npt.assert_allclose(ss.state, [3, 2])
+
+
 def test_state_space_accepts_array_like_matrices_and_state():
     b = np.array([0.2, 0.3, 0.5])
     A, B, C, D = _fir_state_space(b)
