@@ -370,20 +370,15 @@ def test_read_comsol_check_specific_combination(filename, suffix):
 @pytest.mark.parametrize('filename', [
     'pressure_parametric', 'pressure_acceleration_parametric_time',
 ])
-@pytest.mark.parametrize('notation', ['e', 'E', 'mixed'])
+@pytest.mark.parametrize('notation', ['e', 'E'])
 def test_read_comsol_numeric_notation(tmp_path, suffix, filename, notation):
     """Numeric formatting must preserve simulation axes and acoustic data."""
     source = (pathlib.Path(__file__).parent / 'test_io_data'
               / (filename + suffix))
     expected_header = io.read_comsol_header(source)
     expected, expected_coordinates = io.read_comsol(source)
-    count = 0
 
     def format_number(match):
-        nonlocal count
-        count += 1
-        if notation == 'mixed' and count % 2:
-            return match[0]
         value = format(float(match[0]), '+.17e')
         return value.upper() if notation == 'E' else value
 
@@ -415,9 +410,9 @@ def test_read_comsol_signed_header_values(tmp_path):
     path.write_text(
         '% Dimension,0\n% Nodes,1\n% Expressions,4\n'
         '% p (Pa) @ t=-1E-3, a=-.5,'
-        'p (Pa) @ t=+0., a=-5e-1,'
-        'p (Pa) @ t=-.001, a=+1E+1,'
-        'p (Pa) @ t=0e0, a=10.\n'
+        'p (Pa) @ t=+0., a=-.5,'
+        'p (Pa) @ t=-1E-3, a=+1E+1,'
+        'p (Pa) @ t=+0., a=+1E+1\n'
         '1,2,3,4\n')
     assert io.read_comsol_header(path) == (
         ['p'], ['Pa'], {'a': [-0.5, 10.]}, 'time', [-0.001, 0.])

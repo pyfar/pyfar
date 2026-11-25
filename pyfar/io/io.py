@@ -35,6 +35,10 @@ from . import _codec as codec
 import pyfar.classes.filter as fo
 
 
+# A number in a COMSOL header, such as 100, -0.5, .25, 1e2 or 7.854E-1:
+# an optional sign, then digits with an optional decimal point and fraction
+# (or a fraction alone, like .25), then an optional exponent: e or E, an
+# optional sign and digits.
 _COMSOL_NUMBER_PATTERN = (
     r'[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?')
 
@@ -910,8 +914,9 @@ def read_comsol_header(filename):
     else:
         raise ValueError(
             f"Domain can be 'time' or 'freq', but is {domain_str}.")
-    domain_data = _unique_strings([
-        float(d) for d in re.findall(domain_str + value_pattern, header)])
+    domain_data = _unique_strings(
+            re.findall(domain_str + value_pattern, header))
+    domain_data = [float(d) for d in domain_data]
 
     # create parameters dict
     parameter_names = _unique_strings(re.findall(param_pattern, header))
@@ -920,8 +925,9 @@ def read_comsol_header(filename):
     for para_name in parameter_names:
         unit = _unique_strings(
             re.findall(para_name + param_unit_pattern, header))
-        values = _unique_strings([
-            float(v) for v in re.findall(para_name + value_pattern, header)])
+        values = _unique_strings(
+            re.findall(para_name + value_pattern, header))
+        values = [float(v) for v in values]
         parameters[para_name] = [x+unit for x in values] if unit else values
 
     return expressions, units, parameters, domain, domain_data
