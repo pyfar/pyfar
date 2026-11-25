@@ -451,6 +451,38 @@ def test_getter_sph_side_from_cart(x, y, z, lateral, polar):
     np.testing.assert_allclose(coords.z, z, atol=1e-15)
 
 
+# index and upper limit of the bounded angle for each spherical convention
+SPHERICAL_LIMITED_ANGLES = [
+    ("spherical_elevation", 1, np.pi/2, "elevation angle"),
+    ("spherical_colatitude", 1, np.pi, "colatitude angle"),
+    ("spherical_side", 0, np.pi/2, "lateral angle"),
+    ("spherical_front", 1, np.pi, "upper angle"),
+]
+
+
+@pytest.mark.parametrize(
+    ("convention", "index", "upper_limit", "_name"), SPHERICAL_LIMITED_ANGLES)
+def test_spherical_setter_does_not_modify_input(
+        convention, index, upper_limit, _name):
+    """Clipping the bounded angle must not write into the assigned array."""
+    value = np.array([[0.5, 0.5, 1.]])
+    value[0, index] = np.nextafter(upper_limit, 4)
+    original = value.copy()
+    setattr(Coordinates(), convention, value)
+    npt.assert_equal(value, original)
+
+
+@pytest.mark.parametrize(
+    ("convention", "index", "upper_limit", "name"), SPHERICAL_LIMITED_ANGLES)
+def test_spherical_setter_error_names_angle(
+        convention, index, upper_limit, name):
+    """The error message names the angle that is out of range."""
+    value = np.array([[0.5, 0.5, 1.]])
+    value[0, index] = upper_limit + 0.1
+    with pytest.raises(ValueError, match=f"one or more {name} are above"):
+        setattr(Coordinates(), convention, value)
+
+
 @pytest.mark.parametrize(
     ("x", "actual"), [
         (0, np.array([0])),

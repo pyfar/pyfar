@@ -515,10 +515,10 @@ class Coordinates():
 
     @spherical_elevation.setter
     def spherical_elevation(self, value):
-        value[..., 1] = _check_array_limits(
+        elevation = _check_array_limits(
             value[..., 1], -np.pi/2, np.pi/2, 'elevation angle')
         x, y, z = sph2cart(
-            value[..., 0], np.pi / 2 - value[..., 1], value[..., 2])
+            value[..., 0], np.pi / 2 - elevation, value[..., 2])
         self._set_points(x, y, z)
 
     @property
@@ -537,9 +537,9 @@ class Coordinates():
 
     @spherical_colatitude.setter
     def spherical_colatitude(self, value):
-        value[..., 1] = _check_array_limits(
+        colatitude = _check_array_limits(
             value[..., 1], 0, np.pi, 'colatitude angle')
-        x, y, z = sph2cart(value[..., 0], value[..., 1], value[..., 2])
+        x, y, z = sph2cart(value[..., 0], colatitude, value[..., 2])
         self._set_points(x, y, z)
 
     @property
@@ -558,10 +558,10 @@ class Coordinates():
 
     @spherical_side.setter
     def spherical_side(self, value):
-        value[..., 0] = _check_array_limits(
-            value[..., 0], -np.pi/2, np.pi/2, 'polar angle')
+        lateral = _check_array_limits(
+            value[..., 0], -np.pi/2, np.pi/2, 'lateral angle')
         x, z, y = sph2cart(
-            value[..., 1], np.pi / 2 - value[..., 0], value[..., 2])
+            value[..., 1], np.pi / 2 - lateral, value[..., 2])
         self._set_points(x, y, z)
 
     @property
@@ -579,9 +579,9 @@ class Coordinates():
 
     @spherical_front.setter
     def spherical_front(self, value):
-        value[..., 1] = _check_array_limits(
-            value[..., 1], 0, np.pi, 'frontal angle')
-        y, z, x = sph2cart(value[..., 0], value[..., 1], value[..., 2])
+        upper = _check_array_limits(
+            value[..., 1], 0, np.pi, 'upper angle')
+        y, z, x = sph2cart(value[..., 0], upper, value[..., 2])
         self._set_points(x, y, z)
 
     @property
@@ -1980,8 +1980,8 @@ def _convert_angles(coordinates, domain, factor):
 
 def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
     """
-    Values will be clipped to its range if deviations are below 2 eps
-    for 32 bit float numbers otherwise Error is raised.
+    Values will be clipped to their range if deviations are within 2 eps
+    for 64 bit float numbers, otherwise a ValueError is raised.
 
     Notes
     -----
@@ -1996,29 +1996,26 @@ def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
     upper_limit : float
         Upper limit for angle definition
     variable_name : string
-        Name of variable, just relevant for error message. 'value' by default.
+        Name of variable, just relevant for error message. 'values' by
+        default.
 
     Returns
     -------
     values : np.ndarray
-        Clipped input values
+        Clipped copy of the input values
     """
     if variable_name is None:
         variable_name = 'values'
-    if any(values < lower_limit):
-        mask = values < lower_limit
-        eps = np.finfo(float).eps
-        if any(values[mask]+2*eps < lower_limit):
-            raise ValueError(
-                f'one or more {variable_name} are below '
-                f'{lower_limit} including 2 eps')
-        values[mask] = lower_limit
-    if any(values > upper_limit):
-        mask = values > upper_limit
-        eps = np.finfo(float).eps
-        if any(values[mask] + 2*eps > upper_limit):
-            raise ValueError(
-                f'one or more {variable_name} are above '
-                f'{upper_limit} including 2 eps')
-        values[mask] = upper_limit
-    return values
+    eps = np.finfo(float).eps
+
+    if np.any(values + 2*eps < lower_limit):
+        raise ValueError(
+            f'one or more {variable_name} are below '
+            f'{lower_limit} including 2 eps')
+    if np.any(values - 2*eps > upper_limit):
+        raise ValueError(
+            f'one or more {variable_name} are above '
+            f'{upper_limit} including 2 eps')
+
+    # np.clip returns a new array, so the caller's array is not modified
+    return np.clip(values, lower_limit, upper_limit)
