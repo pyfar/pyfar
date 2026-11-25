@@ -1980,8 +1980,8 @@ def _convert_angles(coordinates, domain, factor):
 
 def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
     """
-    Values will be clipped to its range if deviations are below 2 eps
-    for 32 bit float numbers otherwise Error is raised.
+    Values will be clipped to their range if deviations are within 2 eps
+    for 64 bit float numbers, otherwise a ValueError is raised.
 
     Notes
     -----
