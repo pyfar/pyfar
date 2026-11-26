@@ -18,6 +18,18 @@ def _check_signal_type(signal):
     return signal
 
 
+def _check_finite_number(value, name: str, positive: bool = False):
+    """Raises an error if `value` is not a finite real number
+    or, if `positive` is ``True``, not greater than zero.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise TypeError(f"'{name}' must be a number.")
+    if not np.isfinite(value):
+        raise ValueError(f"'{name}' must be finite.")
+    if positive and value <= 0:
+        raise ValueError(f"'{name}' must be positive.")
+
+
 def _apply_frequency_weighting(signal, frequency_weighting):
     """Applies frequency weighting to the signal
     or raises a ValueError if the weighting name is invalid.

@@ -8,6 +8,8 @@ from .standard_levels import (
     time_weighted_level,
 )
 
+from .calibration import sensitivity_correction
+
 from .utils import (
     time_weighted_pressure,
     energetic_mean,
@@ -23,4 +25,5 @@ __all__ = [
     "time_weighted_level",
     "energetic_mean",
     "energetic_sum",
+    "sensitivity_correction",
 ]
