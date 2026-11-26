@@ -1232,6 +1232,9 @@ class StateSpaceModel(_LTISystem):
         B = np.asarray(B)
         C = np.asarray(C)
         D = np.zeros((C.shape[0], B.shape[1])) if D is None else np.asarray(D)
+        list(map(
+            pf.classes.audio._Audio._check_input_type_is_numeric,
+            (A, B, C, D)))
         assert all(M.ndim == 2 for M in (A, B, C, D))
         assert A.shape[1] == A.shape[0], "A needs to be square."
         assert B.shape[0] == A.shape[0], (
