@@ -487,10 +487,14 @@ class Coordinates():
     @property
     def cartesian(self):
         """
-        Returns :py:func:`x`, :py:func:`y`, :py:func:`z`.
-        Right handed cartesian coordinate system. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information.
+        Get or set Cartesian coordinates.
+
+        The returned NumPy array has shape ``(cshape, 3)``, where `cshape` is
+        the channel shape. The last axis contains
+        :py:attr:`x`, :py:attr:`y`, and :py:attr:`z`, in that order.
+
+        See :ref:`coordinate_systems` and :ref:`coordinates` for more
+        information about the right handed cartesian coordinate system.
         """
         return np.atleast_2d(np.moveaxis(
             np.array([self.x, self.y, self.z]), 0, -1))
@@ -502,11 +506,15 @@ class Coordinates():
     @property
     def spherical_elevation(self):
         """
-        Spherical coordinates according to the top pole elevation coordinate
-        system. :py:func:`azimuth`, :py:func:`elevation`,
-        :py:func:`radius`. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information.
+        Get or set spherical elevation coordinates.
+
+        The returned NumPy array has shape ``(cshape, 3)``, where `cshape` is
+        the channel shape. The last axis contains
+        :py:attr:`azimuth`, :py:attr:`elevation`, and
+        :py:attr:`radius`, in that order.
+
+        See :ref:`coordinate_systems` and :ref:`coordinates` for more
+        information about the top pole elevation coordinate system.
         """
         azimuth, elevation, radius = cart2sph(self.x, self.y, self.z)
         elevation = np.pi / 2 - elevation
@@ -524,12 +532,15 @@ class Coordinates():
     @property
     def spherical_colatitude(self):
         """
-        Spherical coordinates according to the top pole colatitude coordinate
-        system.
-        Returns :py:func:`azimuth`, :py:func:`colatitude`,
-        :py:func:`radius`. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information.
+        Get or set spherical colatitude coordinates.
+
+        The returned NumPy array has shape ``(cshape, 3)``, where `cshape` is
+        the channel shape. The last axis contains
+        :py:attr:`azimuth`, :py:attr:`colatitude`, and
+        :py:attr:`radius`, in that order.
+
+        See :ref:`coordinate_systems` and :ref:`coordinates` for more
+        information about the top pole colatitude coordinate system.
         """
         azimuth, colatitude, radius = cart2sph(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
@@ -545,10 +556,15 @@ class Coordinates():
     @property
     def spherical_side(self):
         """
-        Spherical coordinates according to the side pole coordinate system.
-        Returns :py:func:`lateral`, :py:func:`polar`, :py:func:`radius`. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information.
+        Get or set spherical side coordinates.
+
+        The returned NumPy array has shape ``(cshape, 3)``, where `cshape` is
+        the channel shape. The last axis contains
+        :py:attr:`lateral`, :py:attr:`polar`, and
+        :py:attr:`radius`, in that order.
+
+        See :ref:`coordinate_systems` and :ref:`coordinates` for more
+        information about the side pole coordinate system.
         """
         polar, lateral, radius = cart2sph(self.x, self.z, -self.y)
         lateral = lateral - np.pi / 2
@@ -567,10 +583,15 @@ class Coordinates():
     @property
     def spherical_front(self):
         """
-        Spherical coordinates according to the frontal pole coordinate system.
-        Returns :py:func:`frontal`, :py:func:`upper`, :py:func:`radius`. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information.
+        Get or set spherical front coordinates.
+
+        The returned NumPy array has shape ``(cshape, 3)``, where `cshape` is
+        the channel shape. The last axis contains
+        :py:attr:`frontal`, :py:attr:`upper`, and
+        :py:attr:`radius`, in that order.
+
+        See :ref:`coordinate_systems` and :ref:`coordinates` for more
+        information about the frontal pole coordinate system.
         """
 
         frontal, upper, radius = cart2sph(self.y, self.z, self.x)
@@ -587,10 +608,14 @@ class Coordinates():
     @property
     def cylindrical(self):
         """
-        Cylindrical coordinates.
-        Returns :py:func:`azimuth`, :py:func:`z`, :py:func:`rho`. See
-        see :ref:`coordinate_systems` and :ref:`coordinates` for
-        more information.
+        Get or set cylindrical coordinates.
+
+        The returned NumPy array has shape ``(cshape, 3)``, where `cshape` is
+        the channel shape. The last axis contains
+        :py:attr:`azimuth`, :py:attr:`z`, and :py:attr:`rho`, in that order.
+
+        See :ref:`coordinate_systems` and :ref:`coordinates` for more
+        information.
         """
         azimuth, z, rho = cart2cyl(self.x, self.y, self.z)
         return np.atleast_2d(np.moveaxis(
