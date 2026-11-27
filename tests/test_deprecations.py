@@ -352,3 +352,35 @@ def test_deprecations_Orientations():
     if version.parse(pf.__version__) >= version.parse('0.10.0'):
         with pytest.raises(AttributeError):
             pf.Orientations([1, 0, 0, 0])
+
+
+# deprecate in 0.9.0 ----------------------------------------------------------
+@pytest.mark.parametrize("kwargs", [
+    {"n_bins": 200},
+    {"error_weighting": lambda nf: 100**nf},
+    {"jac": "3-point"},
+])
+@pytest.mark.parametrize("fs", [48000, 47000])
+def test_deprecations_frequency_weighting_filter_precomputed(kwargs, fs):
+    name = next(iter(kwargs))
+    message = re.escape(
+        f"Using {name} with precomputed=True is deprecated and will raise an "
+        "error in pyfar v0.11.0.")
+    with pytest.warns(PyfarDeprecationWarning, match=message) as record:
+        deprecated = pfilt.frequency_weighting_filter(
+            None, "A", sampling_rate=fs, **kwargs)
+
+    # the optimization is requested anyway, so warning about missing
+    # precomputed coefficients would be misleading
+    assert not any("No precomputed" in str(w.message) for w in record)
+
+    # until the deprecation is over, the optimization arguments are honored
+    optimized = pfilt.frequency_weighting_filter(
+        None, "A", sampling_rate=fs, precomputed=False, **kwargs)
+    npt.assert_array_equal(deprecated.coefficients, optimized.coefficients)
+
+    # raise an error from pyfar 0.11.0!
+    if version.parse(pf.__version__) >= version.parse('0.11.0'):
+        with pytest.raises(ValueError, match="precomputed=True"):
+            pfilt.frequency_weighting_filter(
+                None, "A", sampling_rate=fs, **kwargs)

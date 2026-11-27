@@ -9,6 +9,7 @@ import pyfar as pf
 import pyfar.constants as pfc
 import scipy.signal as sps
 import scipy.optimize as spo
+from pyfar.classes.warnings import PyfarDeprecationWarning
 from pyfar.constants.frequency_weighting import _F_1, _F_2, _F_3, _F_4
 from pyfar.dsp.filter._frequency_weighting_coefficients import (
     _FREQUENCY_WEIGHTING_SOS)
@@ -24,10 +25,11 @@ _C_WEIGHTING_POLES = [_F_1, _F_1, _F_4, _F_4]
 def frequency_weighting_filter(
         signal,
         target_weighting: Literal["A", "C"]="A",
-        n_bins: Optional[int] = None,
+        n_bins: int = 100,
         error_weighting: Optional[Callable[[
             np.ndarray], np.ndarray]] = None,
         sampling_rate: Optional[float] = None,
+        precomputed: bool = True,
         **kwargs,
         ):
     """
@@ -37,16 +39,15 @@ def frequency_weighting_filter(
     in IEC 61672-1 [#]_.
 
     .. note::
-        When using default parameters for `n_bins` and `error_weighting`
-        and no `kwargs`, precomputed filter coefficients are used for the
-        sampling rates 48 kHz, 44.1 kHz, 16 kHz as well as these sampling
-        rates multiplied by 2, 1/2, 4, 1/4, 8, and 1/8 each.
+        By default (``precomputed=True``), precomputed filter coefficients
+        are used for the sampling rates 48 kHz, 44.1 kHz, 16 kHz as well as
+        these sampling rates multiplied by 2, 1/2, 4, 1/4, 8, and 1/8 each.
         These filters are compliant with a class 1 sound level meter as
         described in the standard.
 
     .. note::
-        For other arguments or sampling rates, this function will run a
-        least-squares algorithm to iteratively approach the filter
+        For ``precomputed=False`` or other sampling rates, this function will
+        run a least-squares algorithm to iteratively approach the filter
         coefficients for the target weighting curve. The results of the
         optimization may depend on the platform and the returned filter may
         not comply with class 1 requirements, in which case a warning will be
@@ -66,14 +67,14 @@ def frequency_weighting_filter(
         Specifies which frequency weighting curve to approximate.
         Must be either ``"A"`` or ``"C"``. The default is ``"A"``.
 
-    n_bins: None or int, optional
+    n_bins: int, optional
         At how many frequencies to evaluate the filter coefficients during
         optimization. Less frequencies means faster iterations, but
         potentially worse results. The evaluation frequencies are
         logarithmically spaced between 10 Hz and the Nyquist frequency.
-        The default ``None`` uses precomputed coefficients if available
-        (see notes above) and ``100`` frequencies otherwise. Pass ``100`` to
-        always run the optimization.
+        Values other than the default should only be used with
+        ``precomputed=False`` (see `precomputed`).
+        The default is ``100``.
 
     error_weighting: callable
         A function that can be used to emphasize the approximation errors in
@@ -86,14 +87,27 @@ def frequency_weighting_filter(
         usually leads to larger errors for higher frequencies. By passing
         a function that emphasizes high frequencies, it is possible to reduce
         this effect and get a filter potentially closer to the target curve
-        (see examples below). The default is ``None``.
+        (see examples below). Should only be used with
+        ``precomputed=False`` (see `precomputed`).
+        The default is ``None``.
 
     sampling_rate: float, conditionally optional
         The sampling rate of the returned filter. The default is ``None``.
 
+    precomputed: bool, optional
+        If ``True``, precomputed filter coefficients are used for the
+        sampling rates listed in the notes above. For other sampling rates,
+        a warning is printed and the optimization is run with default
+        parameters. If ``False``, the optimization is always run.
+        Using `n_bins`, `error_weighting` or `kwargs` with
+        ``precomputed=True`` is deprecated: the optimization is run with a
+        warning, and from pyfar v0.11.0 on, this will raise an error.
+        The default is ``True``.
+
     **kwargs: dict
         Keyword args that are passed to the
         :py:func:`scipy.optimize.least_squares` call.
+        Should only be used with ``precomputed=False`` (see `precomputed`).
 
     Returns
     -------
@@ -132,10 +146,9 @@ def frequency_weighting_filter(
         >>> plt.legend()
 
     Use the ``error_weighting`` parameter to emphasize filter accuracy
-    near the Nyquist frequency. Passing ``n_bins=100`` makes the filter
-    without error weighting also run the optimization instead of using the
-    precomputed coefficients. Note that the optimization results depend on
-    the sampling rate and your device (operating system, hardware).
+    near the Nyquist frequency. This requires running the optimization with
+    ``precomputed=False``. Note that the optimization results depend on the
+    sampling rate and your device (operating system, hardware).
 
     .. plot::
 
@@ -144,9 +157,10 @@ def frequency_weighting_filter(
         >>> import numpy as np
         >>> impulse = pf.signals.impulse(1000, sampling_rate=48000)
         >>> no_weighting = pf.dsp.filter.frequency_weighting_filter(
-        ...     impulse, n_bins=100)
+        ...     impulse, precomputed=False)
         >>> with_weighting = pf.dsp.filter.frequency_weighting_filter(
-        ...     impulse, error_weighting=lambda nf: 100**nf)
+        ...     impulse, error_weighting=lambda nf: 100**nf,
+        ...     precomputed=False)
         >>> pf.plot.freq(no_weighting, c="b", label="without weighting")
         >>> pf.plot.freq(with_weighting, c="o", label="with weighting")
         >>> f = np.logspace(1, 4.4, 100)
@@ -166,19 +180,23 @@ def frequency_weighting_filter(
     if sampling_rate is None:
         sampling_rate: float = signal.sampling_rate
 
-    # error_weighting and kwargs customize the optimization and are
-    # unhashable, so they rule out both precomputed and cached coefficients
-    is_cacheable = error_weighting is None and not kwargs
+    # checked here already, so that an invalid weighting raises an error
+    # instead of a warning about missing precomputed coefficients
+    _check_target_weighting(target_weighting)
 
     sos = None
-    if n_bins is None:
-        if is_cacheable:
-            sos = _get_precomputed_sos(target_weighting, sampling_rate)
-        # lookup failed, we need a default number of bins for the optimization
-        n_bins = 100
+    if precomputed and _is_precomputed_compatible(
+            n_bins, error_weighting, kwargs):
+        sos = _get_precomputed_sos(target_weighting, sampling_rate)
+        if sos is None:
+            warnings.warn(
+                f"No precomputed {target_weighting} weighting filter is "
+                f"available for a sampling rate of {sampling_rate} Hz. "
+                "Running the optimization instead.", stacklevel=2)
 
     if sos is None:
-        if is_cacheable:
+        # caching does not work with the unhashable error_weighting and kwargs
+        if error_weighting is None and not kwargs:
             sos = _design_frequency_weighting_filter_cached(
                 sampling_rate, target_weighting, n_bins)
         else:
@@ -197,6 +215,42 @@ def frequency_weighting_filter(
     else:
         signal_filt = filt.process(signal)
         return signal_filt
+
+
+def _check_target_weighting(target_weighting: Literal["A", "C"]):
+    """Raises an error if the target weighting is neither "A" nor "C"."""
+    if target_weighting not in ["A", "C"]:
+        raise ValueError("Allowed literals for weighting are 'A' and 'C'")
+
+
+def _is_precomputed_compatible(
+        n_bins: int,
+        error_weighting: Optional[Callable[[np.ndarray], np.ndarray]],
+        kwargs: dict,
+        ) -> bool:
+    """
+    Returns ``False`` and warns if any of the optimization arguments is used
+    together with ``precomputed=True``, since they would be ignored otherwise.
+    """
+    incompatible = [name for name, is_used in [
+        ("n_bins", n_bins != 100),
+        ("error_weighting", error_weighting is not None)] if is_used]
+    incompatible += list(kwargs)
+
+    if not incompatible:
+        return True
+
+    # Until the deprecation is over, the optimization arguments are honored to
+    # keep the results of existing code. From pyfar v0.11.0 on, this must
+    # raise a ValueError instead (see tests/test_deprecations.py).
+    warnings.warn(
+        f"Using {', '.join(incompatible)} with precomputed=True is "
+        "deprecated and will raise an error in pyfar v0.11.0. These "
+        "arguments only affect the optimization, which is run instead of "
+        "using precomputed coefficients. Pass precomputed=False to run the "
+        "optimization without this warning.",
+        PyfarDeprecationWarning, stacklevel=3)
+    return False
 
 
 def _get_precomputed_sos(target_weighting: Literal["A", "C"],
@@ -291,8 +345,7 @@ def _design_frequency_weighting_filter(sampling_rate: float,
         The coefficients of the designed filter in scipy's sos format.
     """
 
-    if target_weighting not in ["A", "C"]:
-        raise ValueError("Allowed literals for weighting are 'A' and 'C'")
+    _check_target_weighting(target_weighting)
 
     # Build the initial guess x0 (the variables to optimize) from
     # zeros, poles and gain. Use the poles from the bilinear filter,
