@@ -2005,16 +2005,16 @@ def _check_array_limits(values, lower_limit, upper_limit, variable_name=None):
     """
     if variable_name is None:
         variable_name = 'values'
-    if any(values < lower_limit):
-        mask = values < lower_limit
+    mask = values < lower_limit
+    if mask.any():
         eps = np.finfo(float).eps
         if any(values[mask]+2*eps < lower_limit):
             raise ValueError(
                 f'one or more {variable_name} are below '
                 f'{lower_limit} including 2 eps')
         values[mask] = lower_limit
-    if any(values > upper_limit):
-        mask = values > upper_limit
+    mask = values > upper_limit
+    if mask.any():
         eps = np.finfo(float).eps
         if any(values[mask] + 2*eps > upper_limit):
             raise ValueError(

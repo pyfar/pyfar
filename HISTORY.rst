@@ -18,6 +18,7 @@ Fixed
 - Replaced `matplotlib.transforms.nonsingular`, which was deprecated in Matplotlib 3.11, with `matplotlib.ticker.Locator().nonsigular` in `pyfar.plot.ticker.LogFormatterITAToolbox` and require Matplotlib >= 3.2 (PR #990).
 - Added additional input checks preventing invalid values to be set for `sampling_rate` in audio classes (PR #999).
 - Updated docs to match the new card-header syntax from sphinx-build v0.8.0 (PR #1001).
+- Fixed assigning multidimensional grids to the spherical properties of `pyfar.Coordinates` (PR #1004).
 
 Maintenance
 ^^^^^^^^^^^
