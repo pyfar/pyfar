@@ -9,6 +9,17 @@ Added
 ^^^^^
 - Added an `endpoint` parameter to `pyfar.dsp.time_crop` to allow for exclusive cropping of the end of the interval similar to numpy's `linspace` function (PR #963)
 
+Fixed
+^^^^^
+
+- `pyfar.dsp.filter.frequency_weighting_filter` now uses precomputed filter coefficients for common sampling rates to meet filter class requirements from the docstring. The new parameter `precomputed` can be set to `False` to run the optimization instead (PR #992)
+
+Deprecated
+^^^^^^^^^^
+
+- Using the optimization parameters `n_bins`, `error_weighting` or `kwargs` of `pyfar.dsp.filter.frequency_weighting_filter` together with `precomputed=True` is deprecated and will raise an error in pyfar v0.11.0. Until then, the optimization is run as before (PR #992)
+
+
 0.8.1 (2026-08-14)
 ------------------
 

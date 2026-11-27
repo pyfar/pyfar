@@ -81,6 +81,9 @@ def test_frequeny_weighting_curve_errors():
 @pytest.mark.parametrize("base_rate", [48000, 44100, 16000])
 @pytest.mark.parametrize("rate_factor", [1, 2, 1/2, 4, 1/4, 8, 1/8])
 def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
+    """Test that the default parameters are class 1 compliant as promised
+    for the promised sample rates.
+    """
     fs = base_rate * rate_factor
     filt = pffilt.frequency_weighting_filter(None, weighting, sampling_rate=fs)
     assert isinstance(filt, pyfar.FilterSOS)
@@ -90,13 +93,40 @@ def test_frequency_weighting_filter_default(weighting, base_rate, rate_factor):
 
 
 @pytest.mark.parametrize("weighting", ["A", "C"])
+@pytest.mark.parametrize("fs", [48000, 44100, 96000])
+def test_frequency_weighting_filter_precomputed(weighting, fs):
+    """Test that filters for common sample rates are actually precomputed."""
+    precomputed = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs)
+    expected = pffilt._frequency_weighting_coefficients. \
+        _FREQUENCY_WEIGHTING_SOS[(weighting, fs)]["mean"]
+    npt.assert_array_equal(precomputed.coefficients[0], expected)
+
+    optimized = pffilt.frequency_weighting_filter(
+        None, weighting, sampling_rate=fs, precomputed=False)
+    assert not np.array_equal(optimized.coefficients, precomputed.coefficients)
+
+
+def test_frequency_weighting_filter_precomputed_unavailable():
+    """Uncommon sample rates fall back to the default optimization."""
+    match = "No precomputed A weighting filter is available"
+    with pytest.warns(UserWarning, match=match):
+        fallback = pffilt.frequency_weighting_filter(
+            None, "A", sampling_rate=47000)
+    optimized = pffilt.frequency_weighting_filter(
+        None, "A", sampling_rate=47000, precomputed=False)
+    npt.assert_array_equal(fallback.coefficients, optimized.coefficients)
+
+
+@pytest.mark.parametrize("weighting", ["A", "C"])
 @pytest.mark.parametrize("fs", [48000, 44100])
 @pytest.mark.parametrize("errwgt", [lambda nf: 100**nf, lambda nf: 1 + nf])
 def test_frequency_weighting_filter_errwgt(weighting, fs, errwgt):
     without = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs)
+        None, weighting, sampling_rate=fs, precomputed=False)
     with_errwgt = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs, error_weighting=errwgt)
+        None, weighting, sampling_rate=fs, error_weighting=errwgt,
+        precomputed=False)
     # they should produce different results with different weightings
     assert not np.allclose(without.coefficients, with_errwgt.coefficients)
 
@@ -105,10 +135,11 @@ def test_frequency_weighting_filter_errwgt(weighting, fs, errwgt):
 @pytest.mark.parametrize("fs", [48000, 44100, 16000])
 def test_frequency_weighting_filter_errwgt_passthrough(weighting, fs):
     with_none = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs)
+        None, weighting, sampling_rate=fs, precomputed=False)
     # weights every frequency with 1, so same as without any error weighting
     with_passthrough = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs, error_weighting=lambda _: 1)
+        None, weighting, sampling_rate=fs, error_weighting=lambda _: 1,
+        precomputed=False)
     npt.assert_allclose(with_none.coefficients, with_passthrough.coefficients)
 
 
@@ -118,9 +149,10 @@ def test_frequency_weighting_filter_errwgt_recommended(weighting, fs):
     # the function comment mentions lambda nf: 100**nf to produce good
     # results for common sample rates, so make sure that is true
     without = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs)
+        None, weighting, sampling_rate=fs, precomputed=False)
     with_errwgt = pffilt.frequency_weighting_filter(
-        None, weighting, sampling_rate=fs, error_weighting=lambda nf: 100**nf)
+        None, weighting, sampling_rate=fs, error_weighting=lambda nf: 100**nf,
+        precomputed=False)
     stats_without = pffilt.frequency_weighting._check_filter(
         fs, without.coefficients[0], weighting)
     stats_with = pffilt.frequency_weighting._check_filter(
@@ -131,11 +163,12 @@ def test_frequency_weighting_filter_errwgt_recommended(weighting, fs):
 
 
 def test_frequency_weighting_filter_kwargs():
-    without = pffilt.frequency_weighting_filter(None, "A", sampling_rate=44100)
+    without = pffilt.frequency_weighting_filter(
+        None, "A", sampling_rate=44100, precomputed=False)
     # jac= is a parameter for scipy's least_squares method
     with_kwarg = pffilt.frequency_weighting_filter(
-        None, "A", sampling_rate=44100, jac="3-point")
-    assert not np.allclose(without.coefficients, with_kwarg.coefficients)
+        None, "A", sampling_rate=44100, precomputed=False, jac="3-point")
+    assert np.any(without.coefficients != with_kwarg.coefficients)
 
 
 def test_frequency_weighting_filter_on_signal():
@@ -167,10 +200,12 @@ def test_frequency_weighting_filter_errors():
     regex = r"The generated A weighting filter is not class 1 compliant.*"
     with pytest.warns(UserWarning, match=re.compile(regex)):
         pffilt.frequency_weighting_filter(signal, "A",
-                                          error_weighting=lambda _: 0)
+                                          error_weighting=lambda _: 0,
+                                          precomputed=False)
 
 
-def test_frequency_weighting_filter_caching():
+@pytest.mark.parametrize("precomputed", [True, False])
+def test_frequency_weighting_filter_caching(precomputed):
     """
     The caching function should give a new copy of the cached value
     after each call, rather than returning multiple references to the
@@ -180,8 +215,10 @@ def test_frequency_weighting_filter_caching():
     fs = 48000
     # mutating coefficients of one filter should not affect other filters built
     # from the same cached coefficients
-    a = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
-    b = pffilt.frequency_weighting_filter(None, "A", sampling_rate=fs)
+    a = pffilt.frequency_weighting_filter(
+        None, "A", sampling_rate=fs, precomputed=precomputed)
+    b = pffilt.frequency_weighting_filter(
+        None, "A", sampling_rate=fs, precomputed=precomputed)
     assert np.all(a.coefficients == b.coefficients)
     # if both share a reference to the same coefficients object,
     # this would mutate both
