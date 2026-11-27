@@ -372,7 +372,7 @@ class TimeData(_Audio):
 
     @complex.setter
     def complex(self, value):
-        # truthiness checks below would accept e.g. the string "False"
+        # checks below would accept e.g. the string "False"
         if not isinstance(value, bool):
             raise TypeError(f"complex flag is {type(value).__name__} "
                             "but must be a boolean")
